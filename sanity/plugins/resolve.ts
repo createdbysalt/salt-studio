@@ -20,20 +20,8 @@ export const mainDocuments = defineDocuments([
     filter: `_type == "workCategory" && slug.current == $slug`,
   },
   {
-    route: '/capabilities',
-    filter: `_type == "capabilitiesPage"`,
-  },
-  {
-    route: '/studio',
-    filter: `_type == "studioPage"`,
-  },
-  {
     route: '/contact',
     filter: `_type == "contactPage"`,
-  },
-  {
-    route: '/rentals/:slug',
-    filter: `_type == "rentalPage" && slug.current == $slug`,
   },
   {
     route: '/projects/:slug',
@@ -91,29 +79,10 @@ export const locations = {
     tone: 'positive',
     locations: [{title: 'Work', href: resolveHref('workPage')!}],
   }),
-  capabilitiesPage: defineLocations({
-    message: 'Capabilities page',
-    tone: 'positive',
-    locations: [{title: 'Capabilities', href: resolveHref('capabilitiesPage')!}],
-  }),
-  studioPage: defineLocations({
-    message: 'Studio page',
-    tone: 'positive',
-    locations: [{title: 'Studio', href: resolveHref('studioPage')!}],
-  }),
   contactPage: defineLocations({
     message: 'Contact page',
     tone: 'positive',
     locations: [{title: 'Contact', href: resolveHref('contactPage')!}],
-  }),
-  rentalPage: defineLocations({
-    select: {title: 'title', slug: 'slug.current', headline: 'headline'},
-    resolve: (doc) => {
-      const href = resolveHref('rentalPage', doc?.slug)
-      return {
-        locations: href ? [{title: doc?.headline || doc?.title || 'Rental', href}] : [],
-      }
-    },
   }),
   workCategory: defineLocations({
     select: {title: 'filterLabel', slug: 'slug.current'},
@@ -121,9 +90,5 @@ export const locations = {
       const href = resolveHref('workCategory', doc?.slug)
       return {locations: href ? [{title: doc?.title || 'Work category', href}] : []}
     },
-  }),
-  teamMember: defineLocations({
-    message: 'Team members appear on the Studio page crew section',
-    tone: 'caution',
   }),
 }

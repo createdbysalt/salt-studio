@@ -1,16 +1,13 @@
 import '../globals.css'
 import '@/styles/index.css'
+import {LenisProvider} from '@/components/motion/LenisProvider'
+import {PageTransition} from '@/components/motion/PageTransition'
 import {Navbar} from '@/components/Navbar'
 import {SiteFooter} from '@/components/SiteFooter'
 import {SiteShell} from '@/components/SiteShell'
 import {ogImageUrl, SiteStructuredData} from '@/lib/seo'
 import {sanityFetch, SanityLive} from '@/sanity/lib/live'
-import {
-  footerLegalPagesQuery,
-  homePageQuery,
-  locationsQuery,
-  settingsQuery,
-} from '@/sanity/lib/queries'
+import {footerLegalPagesQuery, homePageQuery, settingsQuery} from '@/sanity/lib/queries'
 import {urlForOpenGraphImage} from '@/sanity/lib/utils'
 import {SpeedInsights} from '@vercel/speed-insights/next'
 import type {Metadata, Viewport} from 'next'
@@ -54,24 +51,26 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#000',
+  themeColor: '#eaeaea',
 }
 
 export default async function IndexRoute({children}: {children: React.ReactNode}) {
-  const [{data}, {data: locations}, {data: legalPages}] = await Promise.all([
+  const [{data}, {data: legalPages}] = await Promise.all([
     sanityFetch({query: settingsQuery}),
-    sanityFetch({query: locationsQuery}),
     sanityFetch({query: footerLegalPagesQuery}),
   ])
   return (
     <>
       <SiteStructuredData />
-      <SiteShell
-        navbar={<Navbar data={data} locations={locations} />}
-        footer={<SiteFooter settings={data} locations={locations} legalPages={legalPages} />}
-      >
-        {children}
-      </SiteShell>
+      <LenisProvider>
+        <SiteShell
+          navbar={<Navbar data={data} />}
+          footer={<SiteFooter settings={data} legalPages={legalPages} />}
+        >
+          {children}
+        </SiteShell>
+      </LenisProvider>
+      <PageTransition />
       <Toaster />
       <SanityLive onError={handleError} />
       {(await draftMode()).isEnabled && (

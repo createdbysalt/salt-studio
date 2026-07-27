@@ -36,14 +36,8 @@ export function resolveHref(documentType?: string, slug?: string | null): string
       return '/'
     case 'workPage':
       return '/work'
-    case 'capabilitiesPage':
-      return '/capabilities'
-    case 'studioPage':
-      return '/studio'
     case 'contactPage':
       return '/contact'
-    case 'rentalPage':
-      return slug ? `/rentals/${slug}` : undefined
     case 'workCategory':
       return slug ? `/work/${slug}` : undefined
     case 'page':

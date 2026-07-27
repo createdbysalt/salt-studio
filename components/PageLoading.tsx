@@ -66,7 +66,7 @@ function LoadingShell({
     <div
       role="status"
       aria-label={`Loading ${label}`}
-      className={`${theme === 'dark' ? 'bg-[#1a1a1a] text-white' : 'bg-background-light text-foreground-light'} ${className ?? ''}`}
+      className={`${theme === 'dark' ? 'bg-[#1a1a1a] text-white' : 'bg-background text-foreground'} ${className ?? ''}`}
     >
       <LoadingScan theme={theme} />
       {children}
@@ -74,17 +74,13 @@ function LoadingShell({
   )
 }
 
-/** Home — full-bleed dark stage, no chrome flash under the hero. */
+/** Home — light paper stage matching the hero. */
 export function HomeLoading() {
   return (
-    <LoadingShell
-      theme="dark"
-      label="home"
-      className="fixed inset-0 z-40 flex min-h-screen flex-col"
-    >
+    <LoadingShell theme="light" label="home" className="flex min-h-screen flex-col">
       <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
-        <Block theme="dark" className="h-4 w-28" />
-        <LoadingStatus label="Loading" theme="dark" />
+        <Block theme="light" className="h-4 w-28" />
+        <LoadingStatus label="Loading" theme="light" />
       </div>
     </LoadingShell>
   )
@@ -202,30 +198,6 @@ export function EditorialLoading({width = 'wide'}: {width?: 'narrow' | 'wide'}) 
             </div>
           ))}
         </section>
-      </div>
-    </LoadingShell>
-  )
-}
-
-/** Rentals hub — hero + three-up card grid. */
-export function RentalsLoading() {
-  return (
-    <LoadingShell theme="light" label="rentals" className="pb-24">
-      <div className="mx-auto max-w-4xl px-6 py-16">
-        <header className="mb-16 space-y-4">
-          <Block theme="light" className="h-12 w-3/5 md:h-16" />
-          <Block theme="light" className="h-4 w-full max-w-lg" />
-        </header>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {Array.from({length: 3}, (_, i) => (
-            <div key={i} className="space-y-3 border border-black/15 p-5">
-              <Block theme="light" className="h-6 w-2/3" />
-              <Block theme="light" className="h-3 w-full" />
-              <Block theme="light" className="h-3 w-4/5" />
-            </div>
-          ))}
-        </div>
       </div>
     </LoadingShell>
   )

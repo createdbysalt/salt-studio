@@ -19,13 +19,9 @@ export default function Loading() {
   if (pathname === '/') return <HomeLoading />
   if (pathname === '/work' || pathname.startsWith('/work/')) return <WorkLoading />
   if (pathname.startsWith('/projects/')) return <ProjectLoading />
-  if (pathname.startsWith('/rentals/')) return <EditorialLoading width="wide" />
   if (pathname === '/legal') return <LegalLoading />
   if (pathname.startsWith('/legal/')) return <LegalLoading article />
   if (pathname === '/contact') return <EditorialLoading width="narrow" />
-  if (pathname === '/studio' || pathname === '/capabilities') {
-    return <EditorialLoading width="wide" />
-  }
 
   return <EditorialLoading width="wide" />
 }

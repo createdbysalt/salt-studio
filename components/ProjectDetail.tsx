@@ -26,27 +26,6 @@ function SectionTitle({children}: {children: string}) {
   return <p className={`${LABEL} mb-4`}>{children}</p>
 }
 
-function CraftCallout({rows}: {rows: Array<{label: string; value: string}>}) {
-  if (!rows.length) return null
-
-  return (
-    <section>
-      <SectionTitle>Craft</SectionTitle>
-      <dl className="font-mono text-[11px] uppercase tracking-[0.14em]">
-        {rows.map((row) => (
-          <div
-            key={row.label}
-            className="grid grid-cols-[5.5rem_1fr] gap-4 border-t border-white/10 py-3 first:border-t-0"
-          >
-            <dt className="text-white/45">{row.label}</dt>
-            <dd className="text-white/85">{row.value}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
-  )
-}
-
 async function resolveHeroPoster(project: Project): Promise<string | null> {
   if (project.coverImage?.asset?._ref) {
     return urlForImage(project.coverImage)?.width(1920).height(1080).fit('crop').url() ?? null
@@ -75,18 +54,6 @@ export async function ProjectDetail({data}: {data: Project | null}) {
   const categoryLinks = categories.map((cat) => stegaClean(cat?.filterLabel)).filter(Boolean)
   const categoryItems = categoryLinks as string[]
 
-  const services = (project.services ?? [])
-    .map((s) => (s?.name ? stegaClean(s.name).trim() : ''))
-    .filter(Boolean)
-  const cameras = (project.cameras ?? [])
-    .map((name) => (name ? stegaClean(name).trim() : ''))
-    .filter(Boolean)
-  const lenses = (project.lenses ?? [])
-    .map((name) => (name ? stegaClean(name).trim() : ''))
-    .filter(Boolean)
-  const lighting = (project.lighting ?? [])
-    .map((name) => (name ? stegaClean(name).trim() : ''))
-    .filter(Boolean)
   const testimonials =
     project.showTestimonials !== false
       ? (project.testimonials ?? []).filter((t) => {
@@ -131,7 +98,6 @@ export async function ProjectDetail({data}: {data: Project | null}) {
   const briefText = project.brief ? stegaClean(project.brief).trim() : ''
   const approachText = project.approach ? stegaClean(project.approach).trim() : ''
   const resultText = project.result ? stegaClean(project.result).trim() : ''
-  const frameRateText = project.frameRate ? stegaClean(project.frameRate).trim() : ''
 
   const galleryRows = project.gallery ?? []
   const btsRows = project.btsImages ?? []
@@ -146,19 +112,9 @@ export async function ProjectDetail({data}: {data: Project | null}) {
       })
     : {data: null}
 
-  const craftRows = [
-    cameras.length ? {label: 'Camera', value: cameras.join(', ')} : null,
-    lenses.length ? {label: 'Lens', value: lenses.join(', ')} : null,
-    lighting.length ? {label: 'Light', value: lighting.join(', ')} : null,
-    frameRateText ? {label: 'Frame rate', value: frameRateText} : null,
-  ].filter(Boolean) as Array<{label: string; value: string}>
-
   const showMeta = Boolean(clientName || yearMark || categoryItems.length)
   const showTestimonials = isCaseStudy && testimonials.length > 0
-  const showSidebar = services.length > 0 || craftRows.length > 0
-  const showContextBody = Boolean(
-    contextText || btsNoteText || cleanVideo || cleanSite || showSidebar,
-  )
+  const showContextBody = Boolean(contextText || btsNoteText || cleanVideo || cleanSite)
   const showContextSection = showMeta || showContextBody
   const showRelated = related.length > 0
 
@@ -273,20 +229,6 @@ export async function ProjectDetail({data}: {data: Project | null}) {
                 ) : null}
               </div>
 
-              {showSidebar ? (
-                <aside className="min-w-0 space-y-12 border-t border-white/10 pt-12 lg:border-t-0 lg:pt-0">
-                  {services.length > 0 ? (
-                    <section>
-                      <SectionTitle>Services</SectionTitle>
-                      <p className="font-mono text-[12px] uppercase leading-[1.9] tracking-[0.12em] text-white/85">
-                        {services.join(' · ')}
-                      </p>
-                    </section>
-                  ) : null}
-
-                  <CraftCallout rows={craftRows} />
-                </aside>
-              ) : null}
             </div>
           ) : null}
         </section>

@@ -16,31 +16,9 @@ export const SECTION_LABELS: Record<string, string> = {
   philosophyLine: 'Philosophy line',
   clientRoster: 'Client roster strip',
   relationshipProof: 'Relationship proof line',
-  // capabilities
-  whyModular: 'Why modular',
-  howWeWork: 'How we work',
-  whereWeWork: 'Where we work',
-  moduleTiles: 'Module tiles',
-  creative: 'Creative',
-  production: 'Production',
-  post: 'Post',
-  agencyBrands: 'Agencies & brands',
-  // studio
-  specs: 'Studio specs',
-  lisbon: 'Lisbon satellite',
-  crew: 'Crew grid',
   // contact
   directContact: 'Direct email line',
   contactForm: 'Contact form',
-  // rentals hub
-  hubCards: 'Hub cards',
-  goodToKnow: 'Good to know',
-  // rental page
-  whatsIncluded: "What's included",
-  whatsExtra: "What's extra",
-  whoItsFor: "Who it's for",
-  gearDownloads: 'Gear downloads',
-  rentalCta: 'Section CTA',
 }
 
 export const HOME_SECTION_KEYS: PageSectionKeyOption[] = [
@@ -49,41 +27,9 @@ export const HOME_SECTION_KEYS: PageSectionKeyOption[] = [
   {value: 'relationshipProof', title: SECTION_LABELS.relationshipProof},
 ]
 
-export const CAPABILITIES_SECTION_KEYS: PageSectionKeyOption[] = [
-  {value: 'whyModular', title: SECTION_LABELS.whyModular},
-  {value: 'howWeWork', title: SECTION_LABELS.howWeWork},
-  {value: 'whereWeWork', title: SECTION_LABELS.whereWeWork},
-  {value: 'moduleTiles', title: SECTION_LABELS.moduleTiles},
-  {value: 'creative', title: SECTION_LABELS.creative},
-  {value: 'production', title: SECTION_LABELS.production},
-  {value: 'post', title: SECTION_LABELS.post},
-  {value: 'agencyBrands', title: SECTION_LABELS.agencyBrands},
-]
-
-export const STUDIO_SECTION_KEYS: PageSectionKeyOption[] = [
-  {value: 'specs', title: SECTION_LABELS.specs},
-  {value: 'lisbon', title: SECTION_LABELS.lisbon},
-  {value: 'crew', title: SECTION_LABELS.crew},
-]
-
 export const CONTACT_SECTION_KEYS: PageSectionKeyOption[] = [
   {value: 'directContact', title: SECTION_LABELS.directContact},
   {value: 'contactForm', title: SECTION_LABELS.contactForm},
-]
-
-export const RENTALS_HUB_SECTION_KEYS: PageSectionKeyOption[] = [
-  {value: 'hubCards', title: SECTION_LABELS.hubCards},
-  {value: 'goodToKnow', title: SECTION_LABELS.goodToKnow},
-]
-
-export const RENTAL_PAGE_SECTION_KEYS: PageSectionKeyOption[] = [
-  {value: 'specs', title: SECTION_LABELS.specs},
-  {value: 'whatsIncluded', title: SECTION_LABELS.whatsIncluded},
-  {value: 'whatsExtra', title: SECTION_LABELS.whatsExtra},
-  {value: 'whoItsFor', title: SECTION_LABELS.whoItsFor},
-  {value: 'gearDownloads', title: SECTION_LABELS.gearDownloads},
-  {value: 'goodToKnow', title: SECTION_LABELS.goodToKnow},
-  {value: 'rentalCta', title: SECTION_LABELS.rentalCta},
 ]
 
 interface CreatePageSectionTypeArgs {
@@ -171,32 +117,8 @@ export const homeSection = createPageSectionType({
   options: HOME_SECTION_KEYS,
 })
 
-export const capabilitiesSection = createPageSectionType({
-  name: 'capabilitiesSection',
-  title: 'Capabilities Page Section',
-  options: CAPABILITIES_SECTION_KEYS,
-})
-
-export const studioSection = createPageSectionType({
-  name: 'studioSection',
-  title: 'Studio Page Section',
-  options: STUDIO_SECTION_KEYS,
-})
-
 export const contactSection = createPageSectionType({
   name: 'contactSection',
   title: 'Contact Page Section',
   options: CONTACT_SECTION_KEYS,
-})
-
-export const rentalsHubSection = createPageSectionType({
-  name: 'rentalsHubSection',
-  title: 'Rentals Hub Section',
-  options: RENTALS_HUB_SECTION_KEYS,
-})
-
-export const rentalPageSection = createPageSectionType({
-  name: 'rentalPageSection',
-  title: 'Rental Page Section',
-  options: RENTAL_PAGE_SECTION_KEYS,
 })

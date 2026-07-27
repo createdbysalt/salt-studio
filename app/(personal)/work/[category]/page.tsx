@@ -68,7 +68,7 @@ export default async function WorkCategoryRoute({params}: Props) {
   const headline = categoryDoc.headline ?? categoryDoc.filterLabel ?? 'Work'
   const subhead = categoryDoc.subhead ?? undefined
   const description =
-    categoryDoc.seoDescription ?? `${categoryDoc.filterLabel ?? 'Commercial'} production by Salt Studio.`
+    categoryDoc.seoDescription ?? `${categoryDoc.filterLabel ?? 'Selected'} work by Salt Studio.`
 
   const pills = resolveWorkPills(page?.pillSource, page?.categoryPills, categories ?? [])
 
@@ -85,11 +85,11 @@ export default async function WorkCategoryRoute({params}: Props) {
         url={`/work/${categoryDoc.slug}`}
         speakableSelectors={subhead ? ['h1', '.speakable-summary'] : ['h1']}
         primarySchema={generateServiceSchema({
-          name: `${categoryDoc.filterLabel ?? headline} production`,
+          name: categoryDoc.filterLabel ?? headline,
           description,
           url: `/work/${categoryDoc.slug}`,
-          serviceType: `${categoryDoc.filterLabel ?? 'Commercial'} video and photography production`,
-          areaServed: ['Portland, OR', 'Worldwide'],
+          serviceType: `${categoryDoc.filterLabel ?? 'Web'} design and development`,
+          areaServed: 'Worldwide',
         })}
       />
 

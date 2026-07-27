@@ -1,5 +1,5 @@
 /**
- * Viewfinder corner brackets — matches photon-lovable ReticleFrame on ProjectTile.
+ * Viewfinder corner brackets on project tiles.
  * Hidden at rest; fades in on hover/focus. Pinned to corners, 16px arms.
  */
 export function ProjectCardCorners() {

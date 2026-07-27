@@ -2,7 +2,7 @@
 
 import {useEffect, useRef} from 'react'
 
-type CapabilitiesAmbientVideoProps = {
+type AmbientVideoProps = {
   src: string
   className?: string
   /** blend mode for dark vs light grounds */
@@ -10,13 +10,8 @@ type CapabilitiesAmbientVideoProps = {
   opacity?: number
 }
 
-/** Muted looping motion graphic — deck particle language. */
-export function CapabilitiesAmbientVideo({
-  src,
-  className = '',
-  blend = 'normal',
-  opacity = 0.55,
-}: CapabilitiesAmbientVideoProps) {
+/** Muted looping ambient background video. Honors prefers-reduced-motion. */
+export function AmbientVideo({src, className = '', blend = 'normal', opacity = 0.55}: AmbientVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {

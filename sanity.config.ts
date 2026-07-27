@@ -17,15 +17,9 @@ import {StudioLogo} from '@/sanity/plugins/studioComponents'
 import {saltStudioTheme} from '@/sanity/plugins/studioTheme'
 import callToAction from '@/sanity/schemas/documents/callToAction'
 import client from '@/sanity/schemas/documents/client'
-import {artDepartment, camera, lens, light, rigging} from '@/sanity/schemas/documents/equipment'
 import legalPage from '@/sanity/schemas/documents/legalPage'
-import location from '@/sanity/schemas/documents/location'
 import page from '@/sanity/schemas/documents/page'
-import partnerStudio from '@/sanity/schemas/documents/partnerStudio'
 import project from '@/sanity/schemas/documents/project'
-import rentalPage from '@/sanity/schemas/documents/rentalPage'
-import service from '@/sanity/schemas/documents/service'
-import teamMember from '@/sanity/schemas/documents/teamMember'
 import testimonial from '@/sanity/schemas/documents/testimonial'
 import workCategory from '@/sanity/schemas/documents/workCategory'
 import contactForm from '@/sanity/schemas/objects/contactForm'
@@ -34,7 +28,6 @@ import faq from '@/sanity/schemas/objects/faq'
 import hero from '@/sanity/schemas/objects/hero'
 import logoCarousel from '@/sanity/schemas/objects/logoCarousel'
 import milestone from '@/sanity/schemas/objects/milestone'
-import moduleTile from '@/sanity/schemas/objects/moduleTile'
 import {navChild, navItem} from '@/sanity/schemas/objects/navItem'
 import {homeSection} from '@/sanity/schemas/objects/pageSection'
 import {
@@ -43,40 +36,19 @@ import {
   projectGalleryRowTwo,
   projectGalleryVideo,
 } from '@/sanity/schemas/objects/projectGallery'
-import specRow from '@/sanity/schemas/objects/specRow'
 import testimonials from '@/sanity/schemas/objects/testimonials'
 import timeline from '@/sanity/schemas/objects/timeline'
-import {
-  capAgencyBrandsSection,
-  capCreativeSection,
-  capHeroSection,
-  capHowWeWorkSection,
-  capModuleTilesSection,
-  capPostSection,
-  capProductionSection,
-  capWhereWeWorkSection,
-  capWhyModularSection,
-  ctaSection,
-} from '@/sanity/schemas/sections/capabilitiesSections'
 import {
   contactDirectSection,
   contactFormSection,
   contactHeroSection,
 } from '@/sanity/schemas/sections/contactSections'
-import {
-  studioCrewSection,
-  studioHeroSection,
-  studioLisbonSection,
-  studioSpecsSection,
-} from '@/sanity/schemas/sections/studioSections'
-import capabilitiesPage from '@/sanity/schemas/singletons/capabilitiesPage'
 import contactPage from '@/sanity/schemas/singletons/contactPage'
 import developerSettings from '@/sanity/schemas/singletons/developerSettings'
 import errorPage from '@/sanity/schemas/singletons/errorPage'
 import home from '@/sanity/schemas/singletons/home'
 import notFoundPage from '@/sanity/schemas/singletons/notFoundPage'
 import settings from '@/sanity/schemas/singletons/settings'
-import studioPage from '@/sanity/schemas/singletons/studioPage'
 import workPage from '@/sanity/schemas/singletons/workPage'
 import {defineConfig} from 'sanity'
 import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
@@ -112,39 +84,6 @@ export default defineConfig({
   tools: [helpTool(), viewSiteTool()],
 
   schema: {
-    // Quick-create templates for Dynamic Content → Rental (like Project types).
-    templates: (prev) => [
-      ...prev,
-      {
-        id: 'rentalPage-studio',
-        title: 'Studio space rental',
-        schemaType: 'rentalPage',
-        value: {kind: 'studio', title: 'Studio rental'},
-      },
-      {
-        id: 'rentalPage-podcast',
-        title: 'Podcast room rental',
-        schemaType: 'rentalPage',
-        value: {kind: 'podcast', title: 'Podcast rental'},
-      },
-      {
-        id: 'rentalPage-gear',
-        title: 'Gear list rental',
-        schemaType: 'rentalPage',
-        value: {
-          kind: 'gear',
-          title: 'Gear rental',
-          gearHeading: 'Studio curated gear.',
-          gearIntro: 'Take your shoot even further with the same gear our creative team relies on.',
-        },
-      },
-      {
-        id: 'rentalPage-custom',
-        title: 'Custom rental page',
-        schemaType: 'rentalPage',
-        value: {kind: 'custom', title: 'New rental'},
-      },
-    ],
     // If you want more content types, you can add them to this array
     types: [
       // Singletons
@@ -154,26 +93,14 @@ export default defineConfig({
       notFoundPage,
       errorPage,
       workPage,
-      capabilitiesPage,
-      studioPage,
       contactPage,
       // Documents
       callToAction,
       legalPage,
       page,
       project,
-      rentalPage,
-      location,
-      teamMember,
-      partnerStudio,
       workCategory,
       client,
-      service,
-      camera,
-      lens,
-      light,
-      rigging,
-      artDepartment,
       testimonial,
       // Objects
       contactForm,
@@ -182,33 +109,15 @@ export default defineConfig({
       hero,
       logoCarousel,
       milestone,
-      moduleTile,
       navItem,
       navChild,
       projectGalleryPhoto,
       projectGalleryVideo,
       projectGalleryRowOne,
       projectGalleryRowTwo,
-      specRow,
       testimonials,
       timeline,
       homeSection,
-      // Capabilities page sections (MFI-style sections array)
-      capHeroSection,
-      capWhyModularSection,
-      capHowWeWorkSection,
-      capWhereWeWorkSection,
-      capModuleTilesSection,
-      capCreativeSection,
-      capProductionSection,
-      capPostSection,
-      capAgencyBrandsSection,
-      ctaSection,
-      // Studio page sections
-      studioHeroSection,
-      studioSpecsSection,
-      studioLisbonSection,
-      studioCrewSection,
       // Contact page sections
       contactHeroSection,
       contactDirectSection,

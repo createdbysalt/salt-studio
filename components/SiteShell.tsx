@@ -11,34 +11,26 @@ interface SiteShellProps {
 }
 
 /**
- * Shared public-site chrome. Home, Work, and project detail stay on the dark
- * stage; other interiors use paper. Footer is omitted on home so it doesn't
- * sit under the fixed hero.
+ * Shared public-site chrome. Work and project detail stay on the dark
+ * stage; other interiors (including home) use paper.
  */
 export function SiteShell({navbar, footer, children}: SiteShellProps) {
   const pathname = usePathname()
-  const isHome = pathname === '/'
   const onDark = isDarkSurface(pathname)
 
   // Absolute (non-sticky) nav overlays need a positioned parent so the nav
   // anchors to the page top and scrolls away with the hero.
-  const isHeroOverlayPage =
-    pathname === '/capabilities' ||
-    pathname === '/studio' ||
-    pathname === '/contact' ||
-    pathname.startsWith('/contact/') ||
-    pathname === '/rentals' ||
-    pathname.startsWith('/rentals/')
+  const isHeroOverlayPage = pathname === '/contact' || pathname.startsWith('/contact/')
 
   return (
     <div
       className={`flex min-h-screen flex-col ${isHeroOverlayPage ? 'relative' : ''} ${
-        onDark ? 'bg-[#1a1a1a] text-white' : 'bg-background-light text-foreground-light'
+        onDark ? 'bg-[#1a1a1a] text-white' : 'bg-background text-foreground'
       }`}
     >
       {navbar}
       <div className="flex-grow">{children}</div>
-      {isHome ? null : footer}
+      {footer}
     </div>
   )
 }

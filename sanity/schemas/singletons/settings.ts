@@ -152,7 +152,7 @@ export default defineType({
       name: 'menuItems',
       title: 'Main Navigation',
       description:
-        'Links displayed in the site header (and the homepage hero). Drag to reorder. Give an item “Dropdown links” to turn it into a menu — e.g. Rentals → Studio, Podcast, Gear.',
+        'Links displayed in the site header. Drag to reorder. Give an item “Dropdown links” to turn it into a menu.',
       type: 'array',
       group: 'navigation',
       of: [defineArrayMember({type: 'navItem'})],
@@ -160,10 +160,9 @@ export default defineType({
 
     // ==========================================================================
     // FOOTER GROUP — centered layout on the site:
-    //   logo (Site Logo) → Location addresses → social icons (incl. email)
+    //   logo (Site Logo) → social icons (incl. email)
     //   bottom strip: © Site Name YEAR · credit · legal links
-    // Addresses come from Location documents. Legal links auto-list every
-    // Legal Page document (Dynamic Content → Legal Pages).
+    // Legal links auto-list every Legal Page document (Dynamic Content → Legal Pages).
     // ==========================================================================
     defineField({
       name: 'footerSocial',
@@ -171,7 +170,7 @@ export default defineType({
       type: 'array',
       group: 'footer',
       description:
-        'Icons under the addresses. Pick a platform for a built-in icon, or choose Custom and upload an SVG/PNG. For email, set URL to mailto:hello@createdbysalt.com. Drag to reorder.',
+        'Icons under the logo. Pick a platform for a built-in icon, or choose Custom and upload an SVG/PNG. For email, set URL to mailto:hello@createdbysalt.com. Drag to reorder.',
       of: [
         defineArrayMember({
           type: 'object',
@@ -279,15 +278,6 @@ export default defineType({
       group: 'footer',
       hidden: true,
       description: 'Deprecated — add an Email item under Footer social links instead.',
-    }),
-    defineField({
-      name: 'showFooterLocations',
-      title: 'Show location addresses',
-      type: 'boolean',
-      group: 'footer',
-      description:
-        'When on, each Location’s Address appears under the logo. Edit copy in Dynamic Content → Locations.',
-      initialValue: true,
     }),
     defineField({
       name: 'showFooterLegal',

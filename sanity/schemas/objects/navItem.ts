@@ -8,9 +8,6 @@ import {defineArrayMember, defineField, defineType} from 'sanity'
 const NAV_LINK_TARGETS = [
   {type: 'home'},
   {type: 'workPage'},
-  {type: 'capabilitiesPage'},
-  {type: 'studioPage'},
-  {type: 'rentalPage'},
   {type: 'contactPage'},
   {type: 'workCategory'},
   {type: 'page'},
@@ -34,7 +31,7 @@ const linkField = defineField({
   validation: (rule) => rule.required().error('Every nav item needs a destination page.'),
 })
 
-/** A single link inside a dropdown (e.g. Rentals → Studio). No further nesting. */
+/** A single link inside a dropdown. No further nesting. */
 export const navChild = defineType({
   name: 'navChild',
   title: 'Dropdown link',
@@ -53,8 +50,7 @@ export const navChild = defineType({
 
 /**
  * A top-level nav item. Always links somewhere itself; add `children` to turn
- * it into a dropdown (e.g. Rentals links to /rentals/studio and hover-opens
- * Studio/Podcast/Gear — there is no /rentals hub page).
+ * it into a hover dropdown.
  */
 export const navItem = defineType({
   name: 'navItem',
@@ -68,7 +64,7 @@ export const navItem = defineType({
       title: 'Dropdown links',
       type: 'array',
       description:
-        'Optional. Add links here to turn this item into a hover dropdown — for example Rentals → Studio, Podcast, Gear. The parent link above still navigates on click (usually the first child page).',
+        'Optional. Add links here to turn this item into a hover dropdown. The parent link above still navigates on click (usually the first child page).',
       of: [defineArrayMember({type: 'navChild'})],
     }),
   ],

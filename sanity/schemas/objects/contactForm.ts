@@ -171,7 +171,7 @@ export default defineType({
       title: 'Footer Note',
       type: 'text',
       rows: 2,
-      description: 'Small text below the form (e.g. rental and agency hints).',
+      description: 'Small text below the form (e.g. response-time note).',
     }),
     defineField({
       name: 'style',

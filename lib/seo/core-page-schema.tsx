@@ -21,7 +21,7 @@ import {
  *   description={seoDescription}
  *   url="/capabilities"
  *   speakableSelectors={['h1', '.speakable-summary']}
- *   primarySchema={generateServiceSchema({ name, description, url: '/capabilities', serviceType: 'Modular Video Production' })}
+ *   primarySchema={generateServiceSchema({ name, description, url: '/services', serviceType: 'Web design and AI development' })}
  * />
  */
 export function CorePageSchema({

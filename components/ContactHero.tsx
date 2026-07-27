@@ -1,6 +1,6 @@
 'use client'
 
-import {CapReveal} from '@/components/CapabilitiesMotion'
+import {Reveal} from '@/components/Reveal'
 import type {ReactNode} from 'react'
 
 type ContactHeroProps = {
@@ -52,22 +52,22 @@ export function ContactHero({headline, lead, directLine}: ContactHeroProps) {
     <div className="flex min-w-0 flex-col gap-6 sm:gap-8 md:gap-10 lg:sticky lg:top-[calc(var(--project-nav-height-md)+1.5rem)] lg:self-start">
       <div className="min-w-0">
         {headline?.trim() ? (
-          <CapReveal immediate y={14}>
+          <Reveal immediate y={14}>
             <h1 className="max-w-[11ch] font-mono text-[clamp(2.125rem,8.5vw,4.75rem)] font-medium leading-[0.95] tracking-tight text-black sm:text-[clamp(2.35rem,7vw,4.75rem)]">
               {headline}
             </h1>
-          </CapReveal>
+          </Reveal>
         ) : null}
         {lead?.trim() ? (
-          <CapReveal immediate delay={0.1} y={12}>
+          <Reveal immediate delay={0.1} y={12}>
             <p className="mt-4 max-w-md text-[0.9375rem] leading-relaxed text-black/55 sm:mt-5 sm:text-base md:mt-6 md:leading-relaxed">
               {lead}
             </p>
-          </CapReveal>
+          </Reveal>
         ) : null}
       </div>
 
-      <CapReveal immediate delay={0.18} y={12}>
+      <Reveal immediate delay={0.18} y={12}>
         <div className="max-w-md">
           <p className="text-[0.9375rem] leading-relaxed text-black/60 sm:text-base md:text-[0.9375rem] md:leading-relaxed">
             {linkifyEmails(direct)}
@@ -76,7 +76,7 @@ export function ContactHero({headline, lead, directLine}: ContactHeroProps) {
             {WHO_YOU_REACH}
           </p>
         </div>
-      </CapReveal>
+      </Reveal>
     </div>
   )
 }

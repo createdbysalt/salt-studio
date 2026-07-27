@@ -9,7 +9,6 @@ export default defineType({
   icon: DocumentIcon,
   groups: [
     {name: 'details', title: 'Details', default: true},
-    {name: 'production', title: 'Production'},
     {name: 'caseStudy', title: 'Case Study'},
     {name: 'gallery', title: 'Gallery'},
     coreSearchGroup,
@@ -170,12 +169,11 @@ export default defineType({
     }),
     defineField({
       name: 'role',
-      title: 'Your Role',
+      title: 'Salt’s Role',
       type: 'string',
-      group: 'production',
+      group: 'details',
       description:
-        'The label shown above the Director Statement on the homepage (e.g. "Director"). Leave as "Director" unless your role was different on this project.',
-      initialValue: 'Director',
+        'What Salt Studio did on this project (e.g. "Design & build", "AI assistant"). Shown alongside the project meta.',
     }),
     defineField({
       name: 'year',
@@ -206,67 +204,6 @@ export default defineType({
           .warning(
             'Pick at least one category so this project appears on the Work page filter views',
           ),
-    }),
-    defineField({
-      name: 'services',
-      title: 'Services',
-      type: 'array',
-      group: 'production',
-      description:
-        'The disciplines Salt Studio handled on this project (e.g. Production, Cinematography, Color). Pick from the Services list.',
-      of: [{type: 'reference', to: [{type: 'service'}]}],
-    }),
-    defineField({
-      name: 'cameras',
-      title: 'Cameras',
-      type: 'array',
-      group: 'production',
-      description:
-        'Camera(s) used on this project. Pick from the Equipment → Cameras list. Shown in the technical info block on the homepage hero.',
-      of: [{type: 'reference', to: [{type: 'camera'}]}],
-    }),
-    defineField({
-      name: 'lenses',
-      title: 'Lenses',
-      type: 'array',
-      group: 'production',
-      description:
-        'Lens(es) used on this project. Pick from the Equipment → Lenses list. Shown in the technical info block on the homepage hero.',
-      of: [{type: 'reference', to: [{type: 'lens'}]}],
-    }),
-    defineField({
-      name: 'lighting',
-      title: 'Lighting',
-      type: 'array',
-      group: 'production',
-      description:
-        'Lighting used on this project. Pick from the Equipment → Lights list. Shown in the technical info block on the homepage hero.',
-      of: [{type: 'reference', to: [{type: 'light'}]}],
-    }),
-    defineField({
-      name: 'rigging',
-      title: 'Rigging',
-      type: 'array',
-      group: 'production',
-      description: 'Rigging used on this project. Pick from the Equipment → Rigging list.',
-      of: [{type: 'reference', to: [{type: 'rigging'}]}],
-    }),
-    defineField({
-      name: 'artDepartment',
-      title: 'Art Department',
-      type: 'array',
-      group: 'production',
-      description:
-        'Art department capabilities used on this project. Pick from the Equipment → Art Department list.',
-      of: [{type: 'reference', to: [{type: 'artDepartment'}]}],
-    }),
-    defineField({
-      name: 'frameRate',
-      title: 'Frame rate',
-      type: 'string',
-      group: 'production',
-      description:
-        'Optional. The frame-rate line in the craft callout (e.g. "Up to 200 fps", "1,000+ fps"). Leave blank if not relevant.',
     }),
     defineField({
       name: 'site',

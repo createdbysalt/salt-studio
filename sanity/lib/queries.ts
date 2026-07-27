@@ -12,10 +12,7 @@ const showcaseProjectFields = `
   title,
   videoUrl,
   role,
-  year,
-  "camera": array::join(cameras[]->name, ", "),
-  "lens": array::join(lenses[]->name, ", "),
-  "lighting": array::join(lighting[]->name, ", ")
+  year
 `
 
 export const homePageQuery = defineQuery(`
@@ -137,13 +134,6 @@ export const projectBySlugQuery = defineQuery(`
     siteButtonLabel,
     client->{ _id, name, website },
     categories[]->{ _id, filterLabel, "slug": slug.current },
-    services[]->{ _id, name, department },
-    "cameras": cameras[]->name,
-    "lenses": lenses[]->name,
-    "lighting": lighting[]->name,
-    "rigging": rigging[]->name,
-    "artDepartment": artDepartment[]->name,
-    frameRate,
     relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },
   }
 `)
@@ -245,7 +235,6 @@ export const settingsQuery = defineQuery(`
       href,
       customIcon,
     },
-    showFooterLocations,
     showFooterLegal,
     showBuiltWithCredit,
     logo,
@@ -276,21 +265,6 @@ export const settingsQuery = defineQuery(`
 /** Ambient loop for the project detail two-column body (Settings only — no cross-project CDN fallback). */
 export const projectBodyBackgroundVideoQuery = defineQuery(`
   *[_type == "settings"][0].projectBodyBackgroundVideo.asset->url
-`)
-
-/** Locations for the mobile menu, footer addresses, and studio specs. */
-export const locationsQuery = defineQuery(`
-  *[_type == "location"] | order(kind asc, orderRank asc) {
-    _id,
-    name,
-    shortName,
-    caption,
-    role,
-    kind,
-    address,
-    image,
-    "slug": slug.current
-  }
 `)
 
 export const slugsByTypeQuery = defineQuery(`
@@ -420,94 +394,6 @@ export const workPageQuery = defineQuery(`
   }
 `)
 
-export const capabilitiesPageQuery = defineQuery(`
-  *[_type == "capabilitiesPage"][0]{
-    _id,
-    _type,
-    seoTitle,
-    seoDescription,
-    ogImage,
-    speakableSummary,
-    sections[]{
-      _key,
-      _type,
-      enabled,
-      internalName,
-      _type == "capHeroSection" => {
-        headline, lead, founderAnchor, secondaryLine,
-        "ambientVideoUrl": ambientVideo.asset->url
-      },
-      _type == "capWhyModularSection" => { subhead, body, sideImage },
-      _type == "capHowWeWorkSection" => { subhead, body },
-      _type == "capWhereWeWorkSection" => {
-        subhead,
-        sideTagline,
-        leftLocation->{
-          _id, name, shortName, caption, role, kind,
-          image
-        },
-        rightLocation->{
-          _id, name, shortName, caption, role, kind,
-          image
-        }
-      },
-      _type == "capModuleTilesSection" => {
-        subhead, moduleTiles[]{ _key, label, inHouse }
-      },
-      _type == "capCreativeSection" => {
-        subhead, introLine, body, sideImage
-      },
-      _type == "capProductionSection" => {
-        subhead, introLine, body, sideImage
-      },
-      _type == "capPostSection" => {
-        subhead, introLine, body, sideImage
-      },
-      _type == "capAgencyBrandsSection" => {
-        subhead, body, pullQuote,
-        "ambientVideoUrl": ambientVideo.asset->url,
-        sideImage
-      },
-      _type == "ctaSection" => { "cta": cta->{subhead, buttonLabel, link, contactSubject} },
-    },
-  }
-`)
-
-export const studioPageQuery = defineQuery(`
-  *[_id == "studioPage"][0]{
-    _id,
-    _type,
-    seoTitle,
-    seoDescription,
-    ogImage,
-    speakableSummary,
-    sections[]{
-      _key,
-      _type,
-      enabled,
-      internalName,
-      _type == "studioHeroSection" => { headline, lead, label, heroImage },
-      _type == "studioSpecsSection" => {
-        subhead,
-        gallery,
-        location->{ _id, name, address, specRows[]{ _key, label, value } }
-      },
-      _type == "studioLisbonSection" => {
-        headline,
-        body,
-        sideImage,
-        location->{ _id, name, summary, image }
-      },
-      _type == "studioCrewSection" => {
-        subhead,
-        intro,
-        crew[]->{ _id, name, title, tier, portrait, email, affiliation->{ _id, name, website, location } }
-      },
-      _type == "ctaSection" => { "cta": cta->{subhead, buttonLabel, link, contactSubject} },
-    },
-  }
-`)
-
 export const contactPageQuery = defineQuery(`
   *[_id == "contactPage"][0]{
     _id,
@@ -528,40 +414,3 @@ export const contactPageQuery = defineQuery(`
   }
 `)
 
-export const rentalPageBySlugQuery = defineQuery(`
-  *[_type == "rentalPage" && slug.current == $slug][0]{
-    _id,
-    _type,
-    kind,
-    title,
-    "slug": slug.current,
-    eyebrow,
-    headline,
-    lead,
-    heroImage,
-    "heroVideoUrl": heroVideo.asset->url,
-    gallery,
-    gallerySubhead,
-    useGallery,
-    specsSubhead,
-    specsLocation->{ _id, name, address, specRows[]{ _key, label, value } },
-    specRows[]{ _key, label, value },
-    whoForSubhead,
-    whoForBody,
-    includedSubhead,
-    includedBody,
-    extraSubhead,
-    extraBody,
-    gearHeading,
-    gearIntro,
-    gearListPdfUrl,
-    gearListPdfLabel,
-    studioSpecPdfUrl,
-    studioSpecPdfLabel,
-    cta->{ subhead, buttonLabel, link, contactSubject },
-    seoTitle,
-    seoDescription,
-    ogImage,
-    speakableSummary,
-  }
-`)

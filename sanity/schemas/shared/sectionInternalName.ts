@@ -51,7 +51,7 @@ function truncate(value: string, max = 60): string {
 /**
  * Sections list preview:
  * - Title → live page content (headline, excerpt, CTA text)
- * - Subtitle → section type ("Hero", "Why Modular", …)
+ * - Subtitle → section type ("Hero", "Contact form", …)
  * - "Hidden" appended when the section is toggled off.
  */
 export function prepareSectionPreview({

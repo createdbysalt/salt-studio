@@ -41,7 +41,7 @@ export default defineType({
       title: 'Button link',
       type: 'string',
       description:
-        'Where the button goes. Use an internal path like "/contact" or "/rentals/studio", or a full URL like "https://…".',
+        'Where the button goes. Use an internal path like "/contact" or "/work", or a full URL like "https://…".',
       initialValue: '/contact',
       validation: (rule) => rule.required().error('The button needs a destination'),
     }),

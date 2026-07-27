@@ -1,6 +1,6 @@
 import './globals.css'
 import {STATUS_AMBIENT_VIDEO} from '@/app/status-ambient'
-import {CapabilitiesAmbientVideo} from '@/components/CapabilitiesAmbientVideo'
+import {AmbientVideo} from '@/components/AmbientVideo'
 import {sanityFetch} from '@/sanity/lib/live'
 import {notFoundPageQuery} from '@/sanity/lib/queries'
 import {resolveHref} from '@/sanity/lib/utils'
@@ -38,7 +38,7 @@ export default async function NotFound() {
 
   return (
     <main className="fixed inset-0 z-[60] flex min-h-svh flex-col items-center justify-center overflow-hidden bg-[#0A0A0A] px-5 py-16 text-white md:px-8">
-      <CapabilitiesAmbientVideo src={STATUS_AMBIENT_VIDEO} blend="normal" opacity={1} />
+      <AmbientVideo src={STATUS_AMBIENT_VIDEO} blend="normal" opacity={1} />
 
       <div className="relative flex w-full max-w-lg flex-col items-center px-4 text-center">
         <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-white/45">404</p>

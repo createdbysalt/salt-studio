@@ -4,44 +4,27 @@ import {DEFAULT_NAV, type NavChild, type NavItem} from '@/components/homeHero'
 import {ScrambleText} from '@/components/ScrambleText'
 import {SiteLogo} from '@/components/SiteLogo'
 import {isDarkSurface} from '@/lib/site-surface'
-import type {LocationsQueryResult, SettingsQueryResult} from '@/sanity.types'
+import type {SettingsQueryResult} from '@/sanity.types'
 import {studioUrl} from '@/sanity/lib/api'
 import {resolveMenu} from '@/sanity/lib/utils'
 import {ChevronDown} from 'lucide-react'
 import {AnimatePresence, motion} from 'motion/react'
-import {createDataAttribute, stegaClean} from 'next-sanity'
+import {createDataAttribute} from 'next-sanity'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 import {useEffect, useState} from 'react'
 
 interface NavbarProps {
   data: SettingsQueryResult
-  locations?: LocationsQueryResult | null
 }
 
-const DEFAULT_LOCATIONS = ['Portland', 'Lisbon']
-
-/** Short city label for the menu footer — "Portland HQ" → "Portland". */
-function locationMenuLabel(name: string): string {
-  return stegaClean(name)
-    .replace(/\s+HQ$/i, '')
-    .trim()
-}
-
-export function Navbar({data, locations}: NavbarProps) {
+export function Navbar({data}: NavbarProps) {
   const pathname = usePathname()
   const onDark = isDarkSurface(pathname)
-  const isStudio = pathname === '/studio'
   const [menuOpen, setMenuOpen] = useState(false)
 
   const resolved = resolveMenu(data?.menuItems)
   const items: NavItem[] = resolved.length ? resolved : DEFAULT_NAV
-
-  const locationLabels =
-    locations
-      ?.map((loc) => (loc?.name ? locationMenuLabel(loc.name) : null))
-      .filter((name): name is string => Boolean(name)) ?? []
-  const menuLocations = locationLabels.length ? locationLabels : DEFAULT_LOCATIONS
 
   const dataAttribute =
     data?._id && data?._type
@@ -64,23 +47,17 @@ export function Navbar({data, locations}: NavbarProps) {
     ? 'pointer-events-auto inline-flex items-center gap-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-white/80 transition-colors duration-200 hover:text-white lg:hidden'
     : 'pointer-events-auto inline-flex items-center gap-2.5 font-mono text-[12px] font-bold uppercase tracking-[0.18em] text-black/70 transition-colors duration-200 hover:text-black lg:hidden'
 
-  // Home: fixed overlay (stays while scrolling). Capabilities / Studio / Contact /
-  // Rentals: absolute overlay (sits on the hero, then scrolls away) — light chrome
-  // (black logo/links) on rentals. Project detail: transparent relative nav.
-  const isHome = pathname === '/'
+  // Contact: absolute overlay (sits on the hero, then scrolls away).
+  // Project detail: transparent relative nav. Everything else: solid chrome.
   const isContact = pathname === '/contact' || pathname.startsWith('/contact/')
-  const isRentals = pathname === '/rentals' || pathname.startsWith('/rentals/')
-  const isHeroOverlay = pathname === '/capabilities' || isStudio || isContact || isRentals
   const isProjectDetail = pathname.startsWith('/projects/')
-  const headerClass = isHome
-    ? 'pointer-events-none fixed inset-x-0 top-0 z-50 flex items-start justify-between px-5 py-5 md:px-6 md:py-6'
-    : isHeroOverlay
-      ? 'pointer-events-none absolute inset-x-0 top-0 z-50 flex items-start justify-between px-5 py-5 md:px-6 md:py-6'
-      : isProjectDetail
-        ? 'pointer-events-none relative z-50 flex items-start justify-between bg-transparent px-5 py-5 md:px-6 md:py-6'
-        : onDark
-          ? 'relative z-50 flex items-start justify-between bg-[#1a1a1a] px-5 py-5 md:px-6 md:py-6'
-          : 'relative z-50 flex items-start justify-between bg-background-light px-5 py-5 md:px-6 md:py-6'
+  const headerClass = isContact
+    ? 'pointer-events-none absolute inset-x-0 top-0 z-50 flex items-start justify-between px-5 py-5 md:px-6 md:py-6'
+    : isProjectDetail
+      ? 'pointer-events-none relative z-50 flex items-start justify-between bg-transparent px-5 py-5 md:px-6 md:py-6'
+      : onDark
+        ? 'relative z-50 flex items-start justify-between bg-[#1a1a1a] px-5 py-5 md:px-6 md:py-6'
+        : 'relative z-50 flex items-start justify-between bg-background px-5 py-5 md:px-6 md:py-6'
 
   return (
     <>
@@ -128,7 +105,6 @@ export function Navbar({data, locations}: NavbarProps) {
         {menuOpen && (
           <MenuOverlay
             items={items}
-            locations={menuLocations}
             logo={data?.logo}
             siteName={data?.siteName}
             onClose={() => setMenuOpen(false)}
@@ -232,13 +208,11 @@ function NavDropdown({
 
 function MenuOverlay({
   items,
-  locations,
   logo,
   siteName,
   onClose,
 }: {
   items: NavItem[]
-  locations: string[]
   logo?: {asset?: {_ref: string} | null; alt?: string | null} | null
   siteName?: string | null
   onClose: () => void
@@ -260,7 +234,7 @@ function MenuOverlay({
       animate={{opacity: 1}}
       exit={{opacity: 0}}
       transition={{duration: 0.25}}
-      className="pointer-events-auto fixed inset-0 z-[60] flex h-[100dvh] flex-col overflow-hidden bg-background-light text-foreground-light lg:hidden"
+      className="pointer-events-auto fixed inset-0 z-[60] flex h-[100dvh] flex-col overflow-hidden bg-background text-foreground lg:hidden"
     >
       {/* Match the site header chrome exactly so Close sits where Menu was. */}
       <div className="flex shrink-0 items-start justify-between px-5 py-5 md:px-6 md:py-6">
@@ -341,16 +315,6 @@ function MenuOverlay({
         </div>
       </div>
 
-      <ul className="shrink-0 space-y-[4px] px-[20px] pb-[32px] md:px-[32px] md:pb-[40px]">
-        {locations.map((loc) => (
-          <li
-            key={loc}
-            className="font-mono text-[11px] uppercase tracking-[0.18em] text-black md:text-[12px]"
-          >
-            {loc}
-          </li>
-        ))}
-      </ul>
     </motion.div>
   )
 }

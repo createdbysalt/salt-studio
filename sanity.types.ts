@@ -48,28 +48,6 @@ export type Avatar = {
   _type: 'image'
 }
 
-export type SideImage = {
-  asset?: SanityImageAssetReference
-  media?: unknown
-  hotspot?: SanityImageHotspot
-  crop?: SanityImageCrop
-  alt?: string
-  _type: 'image'
-}
-
-export type SanityFileAssetReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
-}
-
-export type AmbientVideo = {
-  asset?: SanityFileAssetReference
-  media?: unknown
-  _type: 'file'
-}
-
 export type ContactFormSection = {
   _type: 'contactFormSection'
   enabled?: boolean
@@ -90,189 +68,6 @@ export type ContactHeroSection = {
   internalName?: string
   headline?: string
   lead?: string
-}
-
-export type TeamMemberReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'teamMember'
-}
-
-export type StudioCrewSection = {
-  _type: 'studioCrewSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  intro?: string
-  crew?: Array<
-    {
-      _key: string
-    } & TeamMemberReference
-  >
-}
-
-export type LocationReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'location'
-}
-
-export type StudioLisbonSection = {
-  _type: 'studioLisbonSection'
-  enabled?: boolean
-  internalName?: string
-  headline?: string
-  location?: LocationReference
-  body?: string
-  sideImage?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-}
-
-export type StudioSpecsSection = {
-  _type: 'studioSpecsSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  location?: LocationReference
-  gallery?: Array<{
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-    _key: string
-  }>
-}
-
-export type StudioHeroSection = {
-  _type: 'studioHeroSection'
-  enabled?: boolean
-  internalName?: string
-  headline?: string
-  lead?: string
-  heroImage?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  label?: string
-}
-
-export type CallToActionReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'callToAction'
-}
-
-export type CtaSection = {
-  _type: 'ctaSection'
-  enabled?: boolean
-  internalName?: string
-  cta?: CallToActionReference
-}
-
-export type CapAgencyBrandsSection = {
-  _type: 'capAgencyBrandsSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  body?: string
-  pullQuote?: string
-  ambientVideo?: AmbientVideo
-  sideImage?: SideImage
-}
-
-export type CapPostSection = {
-  _type: 'capPostSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  introLine?: string
-  body?: string
-  sideImage?: SideImage
-}
-
-export type CapProductionSection = {
-  _type: 'capProductionSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  introLine?: string
-  body?: string
-  sideImage?: SideImage
-}
-
-export type CapCreativeSection = {
-  _type: 'capCreativeSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  introLine?: string
-  body?: string
-  sideImage?: SideImage
-}
-
-export type CapModuleTilesSection = {
-  _type: 'capModuleTilesSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  moduleTiles?: Array<
-    {
-      _key: string
-    } & ModuleTile
-  >
-}
-
-export type CapWhereWeWorkSection = {
-  _type: 'capWhereWeWorkSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  sideTagline?: string
-  leftLocation?: LocationReference
-  rightLocation?: LocationReference
-}
-
-export type CapHowWeWorkSection = {
-  _type: 'capHowWeWorkSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  body?: string
-}
-
-export type CapWhyModularSection = {
-  _type: 'capWhyModularSection'
-  enabled?: boolean
-  internalName?: string
-  subhead?: string
-  body?: string
-  sideImage?: SideImage
-}
-
-export type CapHeroSection = {
-  _type: 'capHeroSection'
-  enabled?: boolean
-  internalName?: string
-  headline?: string
-  lead?: string
-  founderAnchor?: string
-  secondaryLine?: string
-  ambientVideo?: AmbientVideo
 }
 
 export type HomeSection = {
@@ -310,12 +105,6 @@ export type Testimonials = {
   }>
   style?: 'cards' | 'carousel' | 'featured'
   showRatings?: boolean
-}
-
-export type SpecRow = {
-  _type: 'specRow'
-  label?: string
-  value?: string
 }
 
 export type ProjectGalleryRowTwo = {
@@ -383,27 +172,6 @@ export type WorkPageReference = {
   [internalGroqTypeReferenceTo]?: 'workPage'
 }
 
-export type CapabilitiesPageReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'capabilitiesPage'
-}
-
-export type StudioPageReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'studioPage'
-}
-
-export type RentalPageReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'rentalPage'
-}
-
 export type ContactPageReference = {
   _ref: string
   _type: 'reference'
@@ -445,9 +213,6 @@ export type NavChild = {
   link?:
     | HomeReference
     | WorkPageReference
-    | CapabilitiesPageReference
-    | StudioPageReference
-    | RentalPageReference
     | ContactPageReference
     | WorkCategoryReference
     | PageReference
@@ -461,9 +226,6 @@ export type NavItem = {
   link?:
     | HomeReference
     | WorkPageReference
-    | CapabilitiesPageReference
-    | StudioPageReference
-    | RentalPageReference
     | ContactPageReference
     | WorkCategoryReference
     | PageReference
@@ -474,12 +236,6 @@ export type NavItem = {
       _key: string
     } & NavChild
   >
-}
-
-export type ModuleTile = {
-  _type: 'moduleTile'
-  label?: string
-  inHouse?: boolean
 }
 
 export type Milestone = {
@@ -598,80 +354,6 @@ export type Testimonial = {
   project?: ProjectReference
 }
 
-export type ArtDepartment = {
-  _id: string
-  _type: 'artDepartment'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  manufacturer?: string
-  slug?: Slug
-}
-
-export type Slug = {
-  _type: 'slug'
-  current?: string
-  source?: string
-}
-
-export type Rigging = {
-  _id: string
-  _type: 'rigging'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  manufacturer?: string
-  slug?: Slug
-}
-
-export type Light = {
-  _id: string
-  _type: 'light'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  manufacturer?: string
-  slug?: Slug
-}
-
-export type Lens = {
-  _id: string
-  _type: 'lens'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  manufacturer?: string
-  slug?: Slug
-}
-
-export type Camera = {
-  _id: string
-  _type: 'camera'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  manufacturer?: string
-  slug?: Slug
-}
-
-export type Service = {
-  _id: string
-  _type: 'service'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  department?: 'pre-production' | 'production' | 'post'
-  slug?: Slug
-  sortOrder?: number
-  description?: string
-}
-
 export type WorkCategory = {
   _id: string
   _type: 'workCategory'
@@ -686,222 +368,10 @@ export type WorkCategory = {
   seoDescription?: string
 }
 
-export type PartnerStudioReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'partnerStudio'
-}
-
-export type TeamMember = {
-  _id: string
-  _type: 'teamMember'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  title?: string
-  affiliation?: PartnerStudioReference
-  email?: string
-  bio?: string
-  portrait?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  tier?: 'lead' | 'support'
-  orderRank?: string
-}
-
-export type SanityImageCrop = {
-  _type: 'sanity.imageCrop'
-  top?: number
-  bottom?: number
-  left?: number
-  right?: number
-}
-
-export type SanityImageHotspot = {
-  _type: 'sanity.imageHotspot'
-  x?: number
-  y?: number
-  height?: number
-  width?: number
-}
-
-export type PartnerStudio = {
-  _id: string
-  _type: 'partnerStudio'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  slug?: Slug
-  website?: string
-  location?: string
-  specialty?: string
-  blurb?: string
-  logo?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  orderRank?: string
-}
-
-export type RentalPage = {
-  _id: string
-  _type: 'rentalPage'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  kind?: 'studio' | 'podcast' | 'gear' | 'custom'
-  title?: string
-  slug?: Slug
-  eyebrow?: string
-  headline?: string
-  lead?: string
-  heroVideo?: {
-    asset?: SanityFileAssetReference
-    media?: unknown
-    _type: 'file'
-  }
-  heroImage?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  gallery?: Array<{
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-    _key: string
-  }>
-  useGallery?: Array<{
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-    _key: string
-  }>
-  gallerySubhead?: string
-  specsSubhead?: string
-  specsLocation?: LocationReference
-  specRows?: Array<
-    {
-      _key: string
-    } & SpecRow
-  >
-  whoForSubhead?: string
-  whoForBody?: string
-  includedSubhead?: string
-  includedBody?: string
-  extraSubhead?: string
-  extraBody?: string
-  gearHeading?: string
-  gearIntro?: string
-  gearListPdfUrl?: string
-  gearListPdfLabel?: string
-  studioSpecPdfUrl?: string
-  studioSpecPdfLabel?: string
-  cta?: CallToActionReference
-  seoTitle?: string
-  seoDescription?: string
-  ogImage?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  speakableSummary?: string
-}
-
-export type Location = {
-  _id: string
-  _type: 'location'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  kind?: 'hq' | 'satellite'
-  slug?: Slug
-  shortName?: string
-  caption?: string
-  role?: string
-  summary?: string
-  address?: string
-  image?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  specRows?: Array<
-    {
-      _key: string
-    } & SpecRow
-  >
-  orderRank?: string
-}
-
-export type ServiceReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'service'
-}
-
-export type CameraReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'camera'
-}
-
-export type LensReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'lens'
-}
-
-export type LightReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'light'
-}
-
-export type RiggingReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'rigging'
-}
-
-export type ArtDepartmentReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'artDepartment'
+export type Slug = {
+  _type: 'slug'
+  current?: string
+  source?: string
 }
 
 export type Project = {
@@ -963,37 +433,6 @@ export type Project = {
       _key: string
     } & WorkCategoryReference
   >
-  services?: Array<
-    {
-      _key: string
-    } & ServiceReference
-  >
-  cameras?: Array<
-    {
-      _key: string
-    } & CameraReference
-  >
-  lenses?: Array<
-    {
-      _key: string
-    } & LensReference
-  >
-  lighting?: Array<
-    {
-      _key: string
-    } & LightReference
-  >
-  rigging?: Array<
-    {
-      _key: string
-    } & RiggingReference
-  >
-  artDepartment?: Array<
-    {
-      _key: string
-    } & ArtDepartmentReference
-  >
-  frameRate?: string
   site?: string
   siteButtonLabel?: string
   brief?: string
@@ -1018,6 +457,22 @@ export type Project = {
   speakableSummary?: string
 }
 
+export type SanityImageCrop = {
+  _type: 'sanity.imageCrop'
+  top?: number
+  bottom?: number
+  left?: number
+  right?: number
+}
+
+export type SanityImageHotspot = {
+  _type: 'sanity.imageHotspot'
+  x?: number
+  y?: number
+  height?: number
+  width?: number
+}
+
 export type Client = {
   _id: string
   _type: 'client'
@@ -1038,6 +493,13 @@ export type Client = {
   tier?: 'known' | 'less-known'
   featured?: boolean
   sortOrder?: number
+}
+
+export type CallToActionReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'callToAction'
 }
 
 export type Page = {
@@ -1198,93 +660,6 @@ export type ContactPage = {
   speakableSummary?: string
 }
 
-export type StudioPage = {
-  _id: string
-  _type: 'studioPage'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  sections?: Array<
-    | ({
-        _key: string
-      } & StudioHeroSection)
-    | ({
-        _key: string
-      } & StudioSpecsSection)
-    | ({
-        _key: string
-      } & StudioLisbonSection)
-    | ({
-        _key: string
-      } & StudioCrewSection)
-    | ({
-        _key: string
-      } & CtaSection)
-  >
-  seoTitle?: string
-  seoDescription?: string
-  ogImage?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  speakableSummary?: string
-}
-
-export type CapabilitiesPage = {
-  _id: string
-  _type: 'capabilitiesPage'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  sections?: Array<
-    | ({
-        _key: string
-      } & CapHeroSection)
-    | ({
-        _key: string
-      } & CapWhyModularSection)
-    | ({
-        _key: string
-      } & CapHowWeWorkSection)
-    | ({
-        _key: string
-      } & CapWhereWeWorkSection)
-    | ({
-        _key: string
-      } & CapModuleTilesSection)
-    | ({
-        _key: string
-      } & CapCreativeSection)
-    | ({
-        _key: string
-      } & CapProductionSection)
-    | ({
-        _key: string
-      } & CapPostSection)
-    | ({
-        _key: string
-      } & CapAgencyBrandsSection)
-    | ({
-        _key: string
-      } & CtaSection)
-  >
-  seoTitle?: string
-  seoDescription?: string
-  ogImage?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  speakableSummary?: string
-}
-
 export type WorkPage = {
   _id: string
   _type: 'workPage'
@@ -1397,6 +772,13 @@ export type DeveloperSettings = {
   bodyScripts?: string
 }
 
+export type SanityFileAssetReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'sanity.fileAsset'
+}
+
 export type Settings = {
   _id: string
   _type: 'settings'
@@ -1455,7 +837,6 @@ export type Settings = {
     _key: string
   }>
   footerEmail?: string
-  showFooterLocations?: boolean
   showFooterLegal?: boolean
   showBuiltWithCredit?: boolean
   legalLinks?: Array<
@@ -1641,42 +1022,18 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | LogoImage
   | Avatar
-  | SideImage
-  | SanityFileAssetReference
-  | AmbientVideo
   | ContactFormSection
   | ContactDirectSection
   | ContactHeroSection
-  | TeamMemberReference
-  | StudioCrewSection
-  | LocationReference
-  | StudioLisbonSection
-  | StudioSpecsSection
-  | StudioHeroSection
-  | CallToActionReference
-  | CtaSection
-  | CapAgencyBrandsSection
-  | CapPostSection
-  | CapProductionSection
-  | CapCreativeSection
-  | CapModuleTilesSection
-  | CapWhereWeWorkSection
-  | CapHowWeWorkSection
-  | CapWhyModularSection
-  | CapHeroSection
   | HomeSection
   | Timeline
   | Testimonials
-  | SpecRow
   | ProjectGalleryRowTwo
   | ProjectGalleryRowOne
   | ProjectGalleryVideo
   | ProjectGalleryPhoto
   | HomeReference
   | WorkPageReference
-  | CapabilitiesPageReference
-  | StudioPageReference
-  | RentalPageReference
   | ContactPageReference
   | WorkCategoryReference
   | PageReference
@@ -1684,7 +1041,6 @@ export type AllSanitySchemaTypes =
   | LegalPageReference
   | NavChild
   | NavItem
-  | ModuleTile
   | Milestone
   | LogoCarousel
   | Hero
@@ -1693,38 +1049,21 @@ export type AllSanitySchemaTypes =
   | ContactForm
   | ClientReference
   | Testimonial
-  | ArtDepartment
-  | Slug
-  | Rigging
-  | Light
-  | Lens
-  | Camera
-  | Service
   | WorkCategory
-  | PartnerStudioReference
-  | TeamMember
+  | Slug
+  | Project
   | SanityImageCrop
   | SanityImageHotspot
-  | PartnerStudio
-  | RentalPage
-  | Location
-  | ServiceReference
-  | CameraReference
-  | LensReference
-  | LightReference
-  | RiggingReference
-  | ArtDepartmentReference
-  | Project
   | Client
+  | CallToActionReference
   | Page
   | LegalPage
   | ContactPage
-  | StudioPage
-  | CapabilitiesPage
   | WorkPage
   | ErrorPage
   | NotFoundPage
   | DeveloperSettings
+  | SanityFileAssetReference
   | Settings
   | Home
   | CallToAction
@@ -1740,27 +1079,8 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: homePageQuery
-// Query: *[_id == "home"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    hiddenH1,    heroCtaLabel,    clientSource,    cta->{ _id, subhead, buttonLabel, link, contactSubject },    "showcaseProjects": select(      showcaseSource == "all" =>        *[_type == "project" && defined(slug.current) && defined(videoUrl)]          | order(year desc, title asc){ "_key": _id,   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year,  "camera": array::join(cameras[]->name, ", "),  "lens": array::join(lenses[]->name, ", "),  "lighting": array::join(lighting[]->name, ", ") },      showcaseSource == "featured" =>        *[_type == "project" && featured == true && defined(slug.current) && defined(videoUrl)]          | order(year desc, title asc){ "_key": _id,   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year,  "camera": array::join(cameras[]->name, ", "),  "lens": array::join(lenses[]->name, ", "),  "lighting": array::join(lighting[]->name, ", ") },      showcaseSource == "type" =>        *[_type == "project" && projectType == ^.showcaseType && defined(slug.current) && defined(videoUrl)]          | order(year desc, title asc){ "_key": _id,   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year,  "camera": array::join(cameras[]->name, ", "),  "lens": array::join(lenses[]->name, ", "),  "lighting": array::join(lighting[]->name, ", ") },      showcaseProjects[]{ _key, ...@->{   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year,  "camera": array::join(cameras[]->name, ", "),  "lens": array::join(lenses[]->name, ", "),  "lighting": array::join(lighting[]->name, ", ") } }[defined(videoUrl)]    ),    "marqueeClients": select(      clientSource == "manual" =>        clientList[]{ "_key": _key, ...@->{ _id, name, website } },      clientSource == "all" =>        *[_type == "client" && defined(name)]          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },      clientSource == "known" =>        *[_type == "client" && tier == "known" && defined(name)]          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },      clientSource == "less-known" =>        *[_type == "client" && tier == "less-known" && defined(name)]          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },      *[_type == "client" && tier == "known" && defined(name)]        | order(sortOrder asc, name asc){ "_key": _id, _id, name, website }    ),  }
+// Query: *[_id == "home"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    hiddenH1,    heroCtaLabel,    clientSource,    cta->{ _id, subhead, buttonLabel, link, contactSubject },    "showcaseProjects": select(      showcaseSource == "all" =>        *[_type == "project" && defined(slug.current) && defined(videoUrl)]          | order(year desc, title asc){ "_key": _id,   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year },      showcaseSource == "featured" =>        *[_type == "project" && featured == true && defined(slug.current) && defined(videoUrl)]          | order(year desc, title asc){ "_key": _id,   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year },      showcaseSource == "type" =>        *[_type == "project" && projectType == ^.showcaseType && defined(slug.current) && defined(videoUrl)]          | order(year desc, title asc){ "_key": _id,   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year },      showcaseProjects[]{ _key, ...@->{   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year } }[defined(videoUrl)]    ),    "marqueeClients": select(      clientSource == "manual" =>        clientList[]{ "_key": _key, ...@->{ _id, name, website } },      clientSource == "all" =>        *[_type == "client" && defined(name)]          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },      clientSource == "known" =>        *[_type == "client" && tier == "known" && defined(name)]          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },      clientSource == "less-known" =>        *[_type == "client" && tier == "less-known" && defined(name)]          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },      *[_type == "client" && tier == "known" && defined(name)]        | order(sortOrder asc, name asc){ "_key": _id, _id, name, website }    ),  }
 export type HomePageQueryResult =
-  | {
-      _id: 'home'
-      _type: 'artDepartment'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
   | {
       _id: 'home'
       _type: 'callToAction'
@@ -1768,51 +1088,6 @@ export type HomePageQueryResult =
       seoDescription: null
       ogImage: null
       speakableSummary: null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
-      _type: 'camera'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
-      _type: 'capabilitiesPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
       hiddenH1: null
       heroCtaLabel: null
       clientSource: null
@@ -1964,9 +1239,6 @@ export type HomePageQueryResult =
             videoUrl: string | null
             role: string | null
             year: string | null
-            camera: string | null
-            lens: string | null
-            lighting: string | null
           }>
         | Array<{
             _key: string
@@ -1999,9 +1271,6 @@ export type HomePageQueryResult =
             videoUrl: string
             role: string | null
             year: string | null
-            camera: string | null
-            lens: string | null
-            lighting: string | null
           }>
         | null
       marqueeClients:
@@ -2022,63 +1291,6 @@ export type HomePageQueryResult =
   | {
       _id: 'home'
       _type: 'legalPage'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
-      _type: 'lens'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
-      _type: 'light'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
-      _type: 'location'
       seoTitle: null
       seoDescription: null
       ogImage: null
@@ -2154,25 +1366,6 @@ export type HomePageQueryResult =
     }
   | {
       _id: 'home'
-      _type: 'partnerStudio'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
       _type: 'project'
       seoTitle: string | null
       seoDescription: string | null
@@ -2185,57 +1378,6 @@ export type HomePageQueryResult =
         _type: 'image'
       } | null
       speakableSummary: string | null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
-      _type: 'rentalPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: {
-        _id: string
-        subhead: string | null
-        buttonLabel: string | null
-        link: string | null
-        contactSubject: string | null
-      } | null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
-      _type: 'rigging'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
       hiddenH1: null
       heroCtaLabel: null
       clientSource: null
@@ -2288,25 +1430,6 @@ export type HomePageQueryResult =
     }
   | {
       _id: 'home'
-      _type: 'service'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
       _type: 'settings'
       seoTitle: null
       seoDescription: null
@@ -2317,51 +1440,6 @@ export type HomePageQueryResult =
         crop?: SanityImageCrop
         _type: 'image'
       } | null
-      speakableSummary: null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
-      _type: 'studioPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
-    }
-  | {
-      _id: 'home'
-      _type: 'teamMember'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
       speakableSummary: null
       hiddenH1: null
       heroCtaLabel: null
@@ -2608,7 +1686,7 @@ export type PagesBySlugQueryResult = {
 
 // Source: sanity/lib/queries.ts
 // Variable: projectBySlugQuery
-// Query: *[_type == "project" && slug.current == $slug][0] {    _id,    _type,    projectType,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    overview,    context,    btsNote,    brief,    approach,    result,    showTestimonials,    "testimonials": *[_type == "testimonial" && project._ref == ^._id] | order(_createdAt asc){      _id, quote, author, role    },    coverImage,    videoUrl,    gallery[]{      _key,      _type,      items[]{        _key,        _type,        _type == "projectGalleryPhoto" => {          image{ asset, alt, caption, hotspot, crop },        },        _type == "projectGalleryVideo" => {          videoUrl,          caption,          poster{ asset, alt, hotspot, crop },        },      },    },    btsImages[]{      _key,      _type,      items[]{        _key,        _type,        _type == "projectGalleryPhoto" => {          image{ asset, alt, caption, hotspot, crop },        },        _type == "projectGalleryVideo" => {          videoUrl,          caption,          poster{ asset, alt, hotspot, crop },        },      },    },    role,    year,    site,    siteButtonLabel,    client->{ _id, name, website },    categories[]->{ _id, filterLabel, "slug": slug.current },    services[]->{ _id, name, department },    "cameras": cameras[]->name,    "lenses": lenses[]->name,    "lighting": lighting[]->name,    "rigging": rigging[]->name,    "artDepartment": artDepartment[]->name,    frameRate,    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },  }
+// Query: *[_type == "project" && slug.current == $slug][0] {    _id,    _type,    projectType,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    overview,    context,    btsNote,    brief,    approach,    result,    showTestimonials,    "testimonials": *[_type == "testimonial" && project._ref == ^._id] | order(_createdAt asc){      _id, quote, author, role    },    coverImage,    videoUrl,    gallery[]{      _key,      _type,      items[]{        _key,        _type,        _type == "projectGalleryPhoto" => {          image{ asset, alt, caption, hotspot, crop },        },        _type == "projectGalleryVideo" => {          videoUrl,          caption,          poster{ asset, alt, hotspot, crop },        },      },    },    btsImages[]{      _key,      _type,      items[]{        _key,        _type,        _type == "projectGalleryPhoto" => {          image{ asset, alt, caption, hotspot, crop },        },        _type == "projectGalleryVideo" => {          videoUrl,          caption,          poster{ asset, alt, hotspot, crop },        },      },    },    role,    year,    site,    siteButtonLabel,    client->{ _id, name, website },    categories[]->{ _id, filterLabel, "slug": slug.current },    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },  }
 export type ProjectBySlugQueryResult = {
   _id: string
   _type: 'project'
@@ -2795,17 +1873,6 @@ export type ProjectBySlugQueryResult = {
     filterLabel: string | null
     slug: string | null
   }> | null
-  services: Array<{
-    _id: string
-    name: string | null
-    department: 'post' | 'pre-production' | 'production' | null
-  }> | null
-  cameras: Array<string | null> | null
-  lenses: Array<string | null> | null
-  lighting: Array<string | null> | null
-  rigging: Array<string | null> | null
-  artDepartment: Array<string | null> | null
-  frameRate: string | null
   relatedProjects: Array<{
     _id: string
     title: string | null
@@ -2989,7 +2056,7 @@ export type ClientRosterQueryResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: settingsQuery
-// Query: *[_type == "settings"][0]{    _id,    _type,    siteName,    siteDescription,    footerSocial[]{      _key,      platform,      label,      href,      customIcon,    },    showFooterLocations,    showFooterLegal,    showBuiltWithCredit,    logo,    menuItems[]{      _key,      label,      "link": link->{        _type,        "slug": slug.current,        title      },      children[]{        _key,        label,        "link": link->{          _type,          "slug": slug.current,          title        }      }    },    ogImage,    socialLinks,    projectBodyBackgroundVideo,  }
+// Query: *[_type == "settings"][0]{    _id,    _type,    siteName,    siteDescription,    footerSocial[]{      _key,      platform,      label,      href,      customIcon,    },    showFooterLegal,    showBuiltWithCredit,    logo,    menuItems[]{      _key,      label,      "link": link->{        _type,        "slug": slug.current,        title      },      children[]{        _key,        label,        "link": link->{          _type,          "slug": slug.current,          title        }      }    },    ogImage,    socialLinks,    projectBodyBackgroundVideo,  }
 export type SettingsQueryResult = {
   _id: string
   _type: 'settings'
@@ -3018,7 +2085,6 @@ export type SettingsQueryResult = {
       _type: 'image'
     } | null
   }> | null
-  showFooterLocations: boolean | null
   showFooterLegal: boolean | null
   showBuiltWithCredit: boolean | null
   logo: {
@@ -3033,11 +2099,6 @@ export type SettingsQueryResult = {
     _key: string
     label: string | null
     link:
-      | {
-          _type: 'capabilitiesPage'
-          slug: null
-          title: null
-        }
       | {
           _type: 'contactPage'
           slug: null
@@ -3064,16 +2125,6 @@ export type SettingsQueryResult = {
           title: string | null
         }
       | {
-          _type: 'rentalPage'
-          slug: string | null
-          title: string | null
-        }
-      | {
-          _type: 'studioPage'
-          slug: null
-          title: null
-        }
-      | {
           _type: 'workCategory'
           slug: string | null
           title: null
@@ -3088,11 +2139,6 @@ export type SettingsQueryResult = {
       _key: string
       label: string | null
       link:
-        | {
-            _type: 'capabilitiesPage'
-            slug: null
-            title: null
-          }
         | {
             _type: 'contactPage'
             slug: null
@@ -3117,16 +2163,6 @@ export type SettingsQueryResult = {
             _type: 'project'
             slug: string | null
             title: string | null
-          }
-        | {
-            _type: 'rentalPage'
-            slug: string | null
-            title: string | null
-          }
-        | {
-            _type: 'studioPage'
-            slug: null
-            title: null
           }
         | {
             _type: 'workCategory'
@@ -3168,28 +2204,6 @@ export type SettingsQueryResult = {
 // Variable: projectBodyBackgroundVideoQuery
 // Query: *[_type == "settings"][0].projectBodyBackgroundVideo.asset->url
 export type ProjectBodyBackgroundVideoQueryResult = string | null
-
-// Source: sanity/lib/queries.ts
-// Variable: locationsQuery
-// Query: *[_type == "location"] | order(kind asc, orderRank asc) {    _id,    name,    shortName,    caption,    role,    kind,    address,    image,    "slug": slug.current  }
-export type LocationsQueryResult = Array<{
-  _id: string
-  name: string | null
-  shortName: string | null
-  caption: string | null
-  role: string | null
-  kind: 'hq' | 'satellite' | null
-  address: string | null
-  image: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  } | null
-  slug: string | null
-}>
 
 // Source: sanity/lib/queries.ts
 // Variable: slugsByTypeQuery
@@ -3349,788 +2363,17 @@ export type ErrorPageQueryResult = {
 } | null
 
 // Source: sanity/lib/queries.ts
-// Variable: capabilitiesPageQuery
-// Query: *[_type == "capabilitiesPage"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "capHeroSection" => {        headline, lead, founderAnchor, secondaryLine,        "ambientVideoUrl": ambientVideo.asset->url      },      _type == "capWhyModularSection" => { subhead, body, sideImage },      _type == "capHowWeWorkSection" => { subhead, body },      _type == "capWhereWeWorkSection" => {        subhead,        sideTagline,        leftLocation->{          _id, name, shortName, caption, role, kind,          image        },        rightLocation->{          _id, name, shortName, caption, role, kind,          image        }      },      _type == "capModuleTilesSection" => {        subhead, moduleTiles[]{ _key, label, inHouse }      },      _type == "capCreativeSection" => {        subhead, introLine, body, sideImage      },      _type == "capProductionSection" => {        subhead, introLine, body, sideImage      },      _type == "capPostSection" => {        subhead, introLine, body, sideImage      },      _type == "capAgencyBrandsSection" => {        subhead, body, pullQuote,        "ambientVideoUrl": ambientVideo.asset->url,        sideImage      },      _type == "ctaSection" => { "cta": cta->{subhead, buttonLabel, link, contactSubject} },    },  }
-export type CapabilitiesPageQueryResult = {
-  _id: string
-  _type: 'capabilitiesPage'
-  seoTitle: string | null
-  seoDescription: string | null
-  ogImage: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  } | null
-  speakableSummary: string | null
-  sections: Array<
-    | {
-        _key: string
-        _type: 'capAgencyBrandsSection'
-        enabled: boolean | null
-        internalName: string | null
-        subhead: string | null
-        body: string | null
-        pullQuote: string | null
-        ambientVideoUrl: string | null
-        sideImage: SideImage | null
-      }
-    | {
-        _key: string
-        _type: 'capCreativeSection'
-        enabled: boolean | null
-        internalName: string | null
-        subhead: string | null
-        introLine: string | null
-        body: string | null
-        sideImage: SideImage | null
-      }
-    | {
-        _key: string
-        _type: 'capHeroSection'
-        enabled: boolean | null
-        internalName: string | null
-        headline: string | null
-        lead: string | null
-        founderAnchor: string | null
-        secondaryLine: string | null
-        ambientVideoUrl: string | null
-      }
-    | {
-        _key: string
-        _type: 'capHowWeWorkSection'
-        enabled: boolean | null
-        internalName: string | null
-        subhead: string | null
-        body: string | null
-      }
-    | {
-        _key: string
-        _type: 'capModuleTilesSection'
-        enabled: boolean | null
-        internalName: string | null
-        subhead: string | null
-        moduleTiles: Array<{
-          _key: string
-          label: string | null
-          inHouse: boolean | null
-        }> | null
-      }
-    | {
-        _key: string
-        _type: 'capPostSection'
-        enabled: boolean | null
-        internalName: string | null
-        subhead: string | null
-        introLine: string | null
-        body: string | null
-        sideImage: SideImage | null
-      }
-    | {
-        _key: string
-        _type: 'capProductionSection'
-        enabled: boolean | null
-        internalName: string | null
-        subhead: string | null
-        introLine: string | null
-        body: string | null
-        sideImage: SideImage | null
-      }
-    | {
-        _key: string
-        _type: 'capWhereWeWorkSection'
-        enabled: boolean | null
-        internalName: string | null
-        subhead: string | null
-        sideTagline: string | null
-        leftLocation: {
-          _id: string
-          name: string | null
-          shortName: string | null
-          caption: string | null
-          role: string | null
-          kind: 'hq' | 'satellite' | null
-          image: {
-            asset?: SanityImageAssetReference
-            media?: unknown
-            hotspot?: SanityImageHotspot
-            crop?: SanityImageCrop
-            alt?: string
-            _type: 'image'
-          } | null
-        } | null
-        rightLocation: {
-          _id: string
-          name: string | null
-          shortName: string | null
-          caption: string | null
-          role: string | null
-          kind: 'hq' | 'satellite' | null
-          image: {
-            asset?: SanityImageAssetReference
-            media?: unknown
-            hotspot?: SanityImageHotspot
-            crop?: SanityImageCrop
-            alt?: string
-            _type: 'image'
-          } | null
-        } | null
-      }
-    | {
-        _key: string
-        _type: 'capWhyModularSection'
-        enabled: boolean | null
-        internalName: string | null
-        subhead: string | null
-        body: string | null
-        sideImage: SideImage | null
-      }
-    | {
-        _key: string
-        _type: 'ctaSection'
-        enabled: boolean | null
-        internalName: string | null
-        cta: {
-          subhead: string | null
-          buttonLabel: string | null
-          link: string | null
-          contactSubject: string | null
-        } | null
-      }
-  > | null
-} | null
-
-// Source: sanity/lib/queries.ts
-// Variable: studioPageQuery
-// Query: *[_id == "studioPage"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "studioHeroSection" => { headline, lead, label, heroImage },      _type == "studioSpecsSection" => {        subhead,        gallery,        location->{ _id, name, address, specRows[]{ _key, label, value } }      },      _type == "studioLisbonSection" => {        headline,        body,        sideImage,        location->{ _id, name, summary, image }      },      _type == "studioCrewSection" => {        subhead,        intro,        crew[]->{ _id, name, title, tier, portrait, email, affiliation->{ _id, name, website, location } }      },      _type == "ctaSection" => { "cta": cta->{subhead, buttonLabel, link, contactSubject} },    },  }
-export type StudioPageQueryResult =
-  | {
-      _id: 'studioPage'
-      _type: 'artDepartment'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'callToAction'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'camera'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'capabilitiesPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: Array<
-        | {
-            _key: string
-            _type: 'capAgencyBrandsSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capCreativeSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capHeroSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capHowWeWorkSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capModuleTilesSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capPostSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capProductionSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capWhereWeWorkSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capWhyModularSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'ctaSection'
-            enabled: boolean | null
-            internalName: string | null
-            cta: {
-              subhead: string | null
-              buttonLabel: string | null
-              link: string | null
-              contactSubject: string | null
-            } | null
-          }
-      > | null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'client'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'contactPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: Array<
-        | {
-            _key: string
-            _type: 'contactDirectSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'contactFormSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'contactHeroSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-      > | null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'developerSettings'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'errorPage'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'home'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'legalPage'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'lens'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'light'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'location'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'media.tag'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'notFoundPage'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'page'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'partnerStudio'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'project'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'rentalPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'rigging'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'sanity.fileAsset'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'sanity.imageAsset'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'service'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'settings'
-      seoTitle: null
-      seoDescription: null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        _type: 'image'
-      } | null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'studioPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: Array<
-        | {
-            _key: string
-            _type: 'ctaSection'
-            enabled: boolean | null
-            internalName: string | null
-            cta: {
-              subhead: string | null
-              buttonLabel: string | null
-              link: string | null
-              contactSubject: string | null
-            } | null
-          }
-        | {
-            _key: string
-            _type: 'studioCrewSection'
-            enabled: boolean | null
-            internalName: string | null
-            subhead: string | null
-            intro: string | null
-            crew: Array<{
-              _id: string
-              name: string | null
-              title: string | null
-              tier: 'lead' | 'support' | null
-              portrait: {
-                asset?: SanityImageAssetReference
-                media?: unknown
-                hotspot?: SanityImageHotspot
-                crop?: SanityImageCrop
-                alt?: string
-                _type: 'image'
-              } | null
-              email: string | null
-              affiliation: {
-                _id: string
-                name: string | null
-                website: string | null
-                location: string | null
-              } | null
-            }> | null
-          }
-        | {
-            _key: string
-            _type: 'studioHeroSection'
-            enabled: boolean | null
-            internalName: string | null
-            headline: string | null
-            lead: string | null
-            label: string | null
-            heroImage: {
-              asset?: SanityImageAssetReference
-              media?: unknown
-              hotspot?: SanityImageHotspot
-              crop?: SanityImageCrop
-              alt?: string
-              _type: 'image'
-            } | null
-          }
-        | {
-            _key: string
-            _type: 'studioLisbonSection'
-            enabled: boolean | null
-            internalName: string | null
-            headline: string | null
-            body: string | null
-            sideImage: {
-              asset?: SanityImageAssetReference
-              media?: unknown
-              hotspot?: SanityImageHotspot
-              crop?: SanityImageCrop
-              alt?: string
-              _type: 'image'
-            } | null
-            location: {
-              _id: string
-              name: string | null
-              summary: string | null
-              image: {
-                asset?: SanityImageAssetReference
-                media?: unknown
-                hotspot?: SanityImageHotspot
-                crop?: SanityImageCrop
-                alt?: string
-                _type: 'image'
-              } | null
-            } | null
-          }
-        | {
-            _key: string
-            _type: 'studioSpecsSection'
-            enabled: boolean | null
-            internalName: string | null
-            subhead: string | null
-            gallery: Array<{
-              asset?: SanityImageAssetReference
-              media?: unknown
-              hotspot?: SanityImageHotspot
-              crop?: SanityImageCrop
-              alt?: string
-              _type: 'image'
-              _key: string
-            }> | null
-            location: {
-              _id: string
-              name: string | null
-              address: string | null
-              specRows: Array<{
-                _key: string
-                label: string | null
-                value: string | null
-              }> | null
-            } | null
-          }
-      > | null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'teamMember'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'testimonial'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'workCategory'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'studioPage'
-      _type: 'workPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: null
-    }
-  | null
-
-// Source: sanity/lib/queries.ts
 // Variable: contactPageQuery
 // Query: *[_id == "contactPage"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "contactHeroSection" => { headline, lead },      _type == "contactDirectSection" => { directContactLine },      _type == "contactFormSection" => { formConfig },    },  }
 export type ContactPageQueryResult =
   | {
       _id: 'contactPage'
-      _type: 'artDepartment'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
       _type: 'callToAction'
       seoTitle: null
       seoDescription: null
       ogImage: null
       speakableSummary: null
       sections: null
-    }
-  | {
-      _id: 'contactPage'
-      _type: 'camera'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
-      _type: 'capabilitiesPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: Array<
-        | {
-            _key: string
-            _type: 'capAgencyBrandsSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capCreativeSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capHeroSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capHowWeWorkSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capModuleTilesSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capPostSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capProductionSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capWhereWeWorkSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'capWhyModularSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'ctaSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-      > | null
     }
   | {
       _id: 'contactPage'
@@ -4225,33 +2468,6 @@ export type ContactPageQueryResult =
     }
   | {
       _id: 'contactPage'
-      _type: 'lens'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
-      _type: 'light'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
-      _type: 'location'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
       _type: 'media.tag'
       seoTitle: null
       seoDescription: null
@@ -4279,15 +2495,6 @@ export type ContactPageQueryResult =
     }
   | {
       _id: 'contactPage'
-      _type: 'partnerStudio'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
       _type: 'project'
       seoTitle: string | null
       seoDescription: string | null
@@ -4300,31 +2507,6 @@ export type ContactPageQueryResult =
         _type: 'image'
       } | null
       speakableSummary: string | null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
-      _type: 'rentalPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
-      _type: 'rigging'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
       sections: null
     }
   | {
@@ -4347,15 +2529,6 @@ export type ContactPageQueryResult =
     }
   | {
       _id: 'contactPage'
-      _type: 'service'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
       _type: 'settings'
       seoTitle: null
       seoDescription: null
@@ -4366,62 +2539,6 @@ export type ContactPageQueryResult =
         crop?: SanityImageCrop
         _type: 'image'
       } | null
-      speakableSummary: null
-      sections: null
-    }
-  | {
-      _id: 'contactPage'
-      _type: 'studioPage'
-      seoTitle: string | null
-      seoDescription: string | null
-      ogImage: {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        alt?: string
-        _type: 'image'
-      } | null
-      speakableSummary: string | null
-      sections: Array<
-        | {
-            _key: string
-            _type: 'ctaSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'studioCrewSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'studioHeroSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'studioLisbonSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-        | {
-            _key: string
-            _type: 'studioSpecsSection'
-            enabled: boolean | null
-            internalName: string | null
-          }
-      > | null
-    }
-  | {
-      _id: 'contactPage'
-      _type: 'teamMember'
-      seoTitle: null
-      seoDescription: null
-      ogImage: null
       speakableSummary: null
       sections: null
     }
@@ -4461,107 +2578,19 @@ export type ContactPageQueryResult =
     }
   | null
 
-// Source: sanity/lib/queries.ts
-// Variable: rentalPageBySlugQuery
-// Query: *[_type == "rentalPage" && slug.current == $slug][0]{    _id,    _type,    kind,    title,    "slug": slug.current,    eyebrow,    headline,    lead,    heroImage,    "heroVideoUrl": heroVideo.asset->url,    gallery,    gallerySubhead,    useGallery,    specsSubhead,    specsLocation->{ _id, name, address, specRows[]{ _key, label, value } },    specRows[]{ _key, label, value },    whoForSubhead,    whoForBody,    includedSubhead,    includedBody,    extraSubhead,    extraBody,    gearHeading,    gearIntro,    gearListPdfUrl,    gearListPdfLabel,    studioSpecPdfUrl,    studioSpecPdfLabel,    cta->{ subhead, buttonLabel, link, contactSubject },    seoTitle,    seoDescription,    ogImage,    speakableSummary,  }
-export type RentalPageBySlugQueryResult = {
-  _id: string
-  _type: 'rentalPage'
-  kind: 'custom' | 'gear' | 'podcast' | 'studio' | null
-  title: string | null
-  slug: string | null
-  eyebrow: string | null
-  headline: string | null
-  lead: string | null
-  heroImage: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  } | null
-  heroVideoUrl: string | null
-  gallery: Array<{
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-    _key: string
-  }> | null
-  gallerySubhead: string | null
-  useGallery: Array<{
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-    _key: string
-  }> | null
-  specsSubhead: string | null
-  specsLocation: {
-    _id: string
-    name: string | null
-    address: string | null
-    specRows: Array<{
-      _key: string
-      label: string | null
-      value: string | null
-    }> | null
-  } | null
-  specRows: Array<{
-    _key: string
-    label: string | null
-    value: string | null
-  }> | null
-  whoForSubhead: string | null
-  whoForBody: string | null
-  includedSubhead: string | null
-  includedBody: string | null
-  extraSubhead: string | null
-  extraBody: string | null
-  gearHeading: string | null
-  gearIntro: string | null
-  gearListPdfUrl: string | null
-  gearListPdfLabel: string | null
-  studioSpecPdfUrl: string | null
-  studioSpecPdfLabel: string | null
-  cta: {
-    subhead: string | null
-    buttonLabel: string | null
-    link: string | null
-    contactSubject: string | null
-  } | null
-  seoTitle: string | null
-  seoDescription: string | null
-  ogImage: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  } | null
-  speakableSummary: string | null
-} | null
-
 declare module '@sanity/client' {
   interface SanityQueries {
-    '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    heroCtaLabel,\n    clientSource,\n    cta->{ _id, subhead, buttonLabel, link, contactSubject },\n    "showcaseProjects": select(\n      showcaseSource == "all" =>\n        *[_type == "project" && defined(slug.current) && defined(videoUrl)]\n          | order(year desc, title asc){ "_key": _id, \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year,\n  "camera": array::join(cameras[]->name, ", "),\n  "lens": array::join(lenses[]->name, ", "),\n  "lighting": array::join(lighting[]->name, ", ")\n },\n      showcaseSource == "featured" =>\n        *[_type == "project" && featured == true && defined(slug.current) && defined(videoUrl)]\n          | order(year desc, title asc){ "_key": _id, \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year,\n  "camera": array::join(cameras[]->name, ", "),\n  "lens": array::join(lenses[]->name, ", "),\n  "lighting": array::join(lighting[]->name, ", ")\n },\n      showcaseSource == "type" =>\n        *[_type == "project" && projectType == ^.showcaseType && defined(slug.current) && defined(videoUrl)]\n          | order(year desc, title asc){ "_key": _id, \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year,\n  "camera": array::join(cameras[]->name, ", "),\n  "lens": array::join(lenses[]->name, ", "),\n  "lighting": array::join(lighting[]->name, ", ")\n },\n      showcaseProjects[]{ _key, ...@->{ \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year,\n  "camera": array::join(cameras[]->name, ", "),\n  "lens": array::join(lenses[]->name, ", "),\n  "lighting": array::join(lighting[]->name, ", ")\n } }[defined(videoUrl)]\n    ),\n    "marqueeClients": select(\n      clientSource == "manual" =>\n        clientList[]{ "_key": _key, ...@->{ _id, name, website } },\n      clientSource == "all" =>\n        *[_type == "client" && defined(name)]\n          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },\n      clientSource == "known" =>\n        *[_type == "client" && tier == "known" && defined(name)]\n          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },\n      clientSource == "less-known" =>\n        *[_type == "client" && tier == "less-known" && defined(name)]\n          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },\n      *[_type == "client" && tier == "known" && defined(name)]\n        | order(sortOrder asc, name asc){ "_key": _id, _id, name, website }\n    ),\n  }\n': HomePageQueryResult
+    '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    heroCtaLabel,\n    clientSource,\n    cta->{ _id, subhead, buttonLabel, link, contactSubject },\n    "showcaseProjects": select(\n      showcaseSource == "all" =>\n        *[_type == "project" && defined(slug.current) && defined(videoUrl)]\n          | order(year desc, title asc){ "_key": _id, \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year\n },\n      showcaseSource == "featured" =>\n        *[_type == "project" && featured == true && defined(slug.current) && defined(videoUrl)]\n          | order(year desc, title asc){ "_key": _id, \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year\n },\n      showcaseSource == "type" =>\n        *[_type == "project" && projectType == ^.showcaseType && defined(slug.current) && defined(videoUrl)]\n          | order(year desc, title asc){ "_key": _id, \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year\n },\n      showcaseProjects[]{ _key, ...@->{ \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year\n } }[defined(videoUrl)]\n    ),\n    "marqueeClients": select(\n      clientSource == "manual" =>\n        clientList[]{ "_key": _key, ...@->{ _id, name, website } },\n      clientSource == "all" =>\n        *[_type == "client" && defined(name)]\n          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },\n      clientSource == "known" =>\n        *[_type == "client" && tier == "known" && defined(name)]\n          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },\n      clientSource == "less-known" =>\n        *[_type == "client" && tier == "less-known" && defined(name)]\n          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },\n      *[_type == "client" && tier == "known" && defined(name)]\n        | order(sortOrder asc, name asc){ "_key": _id, _id, name, website }\n    ),\n  }\n': HomePageQueryResult
     '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    body[]{\n      ...,\n      _type == "ctaRef" => {\n        "cta": @->{subhead, buttonLabel, link, contactSubject}\n      }\n    },\n    overview,\n    title,\n    "slug": slug.current,\n  }\n': PagesBySlugQueryResult
-    '\n  *[_type == "project" && slug.current == $slug][0] {\n    _id,\n    _type,\n    projectType,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    overview,\n    context,\n    btsNote,\n    brief,\n    approach,\n    result,\n    showTestimonials,\n    "testimonials": *[_type == "testimonial" && project._ref == ^._id] | order(_createdAt asc){\n      _id, quote, author, role\n    },\n    coverImage,\n    videoUrl,\n    gallery[]{\n      _key,\n      _type,\n      items[]{\n        _key,\n        _type,\n        _type == "projectGalleryPhoto" => {\n          image{ asset, alt, caption, hotspot, crop },\n        },\n        _type == "projectGalleryVideo" => {\n          videoUrl,\n          caption,\n          poster{ asset, alt, hotspot, crop },\n        },\n      },\n    },\n    btsImages[]{\n      _key,\n      _type,\n      items[]{\n        _key,\n        _type,\n        _type == "projectGalleryPhoto" => {\n          image{ asset, alt, caption, hotspot, crop },\n        },\n        _type == "projectGalleryVideo" => {\n          videoUrl,\n          caption,\n          poster{ asset, alt, hotspot, crop },\n        },\n      },\n    },\n    role,\n    year,\n    site,\n    siteButtonLabel,\n    client->{ _id, name, website },\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n    services[]->{ _id, name, department },\n    "cameras": cameras[]->name,\n    "lenses": lenses[]->name,\n    "lighting": lighting[]->name,\n    "rigging": rigging[]->name,\n    "artDepartment": artDepartment[]->name,\n    frameRate,\n    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },\n  }\n': ProjectBySlugQueryResult
+    '\n  *[_type == "project" && slug.current == $slug][0] {\n    _id,\n    _type,\n    projectType,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    overview,\n    context,\n    btsNote,\n    brief,\n    approach,\n    result,\n    showTestimonials,\n    "testimonials": *[_type == "testimonial" && project._ref == ^._id] | order(_createdAt asc){\n      _id, quote, author, role\n    },\n    coverImage,\n    videoUrl,\n    gallery[]{\n      _key,\n      _type,\n      items[]{\n        _key,\n        _type,\n        _type == "projectGalleryPhoto" => {\n          image{ asset, alt, caption, hotspot, crop },\n        },\n        _type == "projectGalleryVideo" => {\n          videoUrl,\n          caption,\n          poster{ asset, alt, hotspot, crop },\n        },\n      },\n    },\n    btsImages[]{\n      _key,\n      _type,\n      items[]{\n        _key,\n        _type,\n        _type == "projectGalleryPhoto" => {\n          image{ asset, alt, caption, hotspot, crop },\n        },\n        _type == "projectGalleryVideo" => {\n          videoUrl,\n          caption,\n          poster{ asset, alt, hotspot, crop },\n        },\n      },\n    },\n    role,\n    year,\n    site,\n    siteButtonLabel,\n    client->{ _id, name, website },\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },\n  }\n': ProjectBySlugQueryResult
     '\n  *[_type == "project" && defined(slug.current) && defined(videoUrl)]|order(year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': AllProjectsQueryResult
     '\n  *[_type == "project" && defined(slug.current) && defined(videoUrl) && $slug in categories[]->slug.current]|order(year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': ProjectsByCategoryQueryResult
     '\n  *[_type == "workCategory" && defined(slug.current)]|order(filterLabel asc){\n    _id,\n    filterLabel,\n    "slug": slug.current,\n  }\n': WorkCategoriesQueryResult
     '\n  *[_type == "workCategory" && slug.current == $slug][0]{\n    _id,\n    _type,\n    filterLabel,\n    "slug": slug.current,\n    headline,\n    subhead,\n    seoTitle,\n    seoDescription,\n  }\n': WorkCategoryBySlugQueryResult
     '\n  *[_type == "project" && featured == true && defined(slug.current)]|order(year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': FeaturedProjectsQueryResult
     '\n  *[_type == "client" && featured == true]|order(sortOrder asc, name asc){\n    _id,\n    name,\n    website,\n    logo,\n  }\n': ClientRosterQueryResult
-    '\n  *[_type == "settings"][0]{\n    _id,\n    _type,\n    siteName,\n    siteDescription,\n    footerSocial[]{\n      _key,\n      platform,\n      label,\n      href,\n      customIcon,\n    },\n    showFooterLocations,\n    showFooterLegal,\n    showBuiltWithCredit,\n    logo,\n    menuItems[]{\n      _key,\n      label,\n      "link": link->{\n        _type,\n        "slug": slug.current,\n        title\n      },\n      children[]{\n        _key,\n        label,\n        "link": link->{\n          _type,\n          "slug": slug.current,\n          title\n        }\n      }\n    },\n    ogImage,\n    socialLinks,\n    projectBodyBackgroundVideo,\n  }\n': SettingsQueryResult
+    '\n  *[_type == "settings"][0]{\n    _id,\n    _type,\n    siteName,\n    siteDescription,\n    footerSocial[]{\n      _key,\n      platform,\n      label,\n      href,\n      customIcon,\n    },\n    showFooterLegal,\n    showBuiltWithCredit,\n    logo,\n    menuItems[]{\n      _key,\n      label,\n      "link": link->{\n        _type,\n        "slug": slug.current,\n        title\n      },\n      children[]{\n        _key,\n        label,\n        "link": link->{\n          _type,\n          "slug": slug.current,\n          title\n        }\n      }\n    },\n    ogImage,\n    socialLinks,\n    projectBodyBackgroundVideo,\n  }\n': SettingsQueryResult
     '\n  *[_type == "settings"][0].projectBodyBackgroundVideo.asset->url\n': ProjectBodyBackgroundVideoQueryResult
-    '\n  *[_type == "location"] | order(kind asc, orderRank asc) {\n    _id,\n    name,\n    shortName,\n    caption,\n    role,\n    kind,\n    address,\n    image,\n    "slug": slug.current\n  }\n': LocationsQueryResult
     '\n  *[_type == $type && defined(slug.current)]{"slug": slug.current}\n': SlugsByTypeQueryResult
     '\n  *[_type == "developerSettings"][0]{\n    clientGoogleAnalyticsId\n  }\n': DeveloperSettingsQueryResult
     '\n  *[_type == "legalPage" && slug.current == $slug][0] {\n    _id,\n    _type,\n    pageType,\n    title,\n    "slug": slug.current,\n    overview,\n    contentSource,\n    policyUrl,\n    introText,\n    content,\n    effectiveDate,\n    version,\n    lastUpdated,\n  }\n': LegalPageBySlugQueryResult
@@ -4569,9 +2598,6 @@ declare module '@sanity/client' {
     '\n  *[_type == "legalPage" && defined(slug.current)] | order(\n    select(\n      pageType == "privacy" => 0,\n      pageType == "terms" => 1,\n      pageType == "cookies" => 2,\n      pageType == "accessibility" => 3,\n      4\n    ) asc,\n    title asc\n  ) {\n    _type,\n    title,\n    pageType,\n    "slug": slug.current,\n  }\n': FooterLegalPagesQueryResult
     '\n  *[_type == "notFoundPage"][0] {\n    _id,\n    _type,\n    headline,\n    message,\n    ctaText,\n    ctaLink,\n    secondaryCtaText,\n    secondaryCtaLink,\n    footerTagline,\n    suggestedLinks[]-> {\n      _id,\n      _type,\n      title,\n      "slug": slug.current,\n    },\n  }\n': NotFoundPageQueryResult
     '\n  *[_type == "errorPage"][0]{\n    _id,\n    _type,\n    eyebrow,\n    headline,\n    message,\n    retryButtonText,\n    homeButtonText,\n    homeButtonLink,\n  }\n': ErrorPageQueryResult
-    '\n  *[_type == "capabilitiesPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "capHeroSection" => {\n        headline, lead, founderAnchor, secondaryLine,\n        "ambientVideoUrl": ambientVideo.asset->url\n      },\n      _type == "capWhyModularSection" => { subhead, body, sideImage },\n      _type == "capHowWeWorkSection" => { subhead, body },\n      _type == "capWhereWeWorkSection" => {\n        subhead,\n        sideTagline,\n        leftLocation->{\n          _id, name, shortName, caption, role, kind,\n          image\n        },\n        rightLocation->{\n          _id, name, shortName, caption, role, kind,\n          image\n        }\n      },\n      _type == "capModuleTilesSection" => {\n        subhead, moduleTiles[]{ _key, label, inHouse }\n      },\n      _type == "capCreativeSection" => {\n        subhead, introLine, body, sideImage\n      },\n      _type == "capProductionSection" => {\n        subhead, introLine, body, sideImage\n      },\n      _type == "capPostSection" => {\n        subhead, introLine, body, sideImage\n      },\n      _type == "capAgencyBrandsSection" => {\n        subhead, body, pullQuote,\n        "ambientVideoUrl": ambientVideo.asset->url,\n        sideImage\n      },\n      _type == "ctaSection" => { "cta": cta->{subhead, buttonLabel, link, contactSubject} },\n    },\n  }\n': CapabilitiesPageQueryResult
-    '\n  *[_id == "studioPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "studioHeroSection" => { headline, lead, label, heroImage },\n      _type == "studioSpecsSection" => {\n        subhead,\n        gallery,\n        location->{ _id, name, address, specRows[]{ _key, label, value } }\n      },\n      _type == "studioLisbonSection" => {\n        headline,\n        body,\n        sideImage,\n        location->{ _id, name, summary, image }\n      },\n      _type == "studioCrewSection" => {\n        subhead,\n        intro,\n        crew[]->{ _id, name, title, tier, portrait, email, affiliation->{ _id, name, website, location } }\n      },\n      _type == "ctaSection" => { "cta": cta->{subhead, buttonLabel, link, contactSubject} },\n    },\n  }\n': StudioPageQueryResult
     '\n  *[_id == "contactPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "contactHeroSection" => { headline, lead },\n      _type == "contactDirectSection" => { directContactLine },\n      _type == "contactFormSection" => { formConfig },\n    },\n  }\n': ContactPageQueryResult
-    '\n  *[_type == "rentalPage" && slug.current == $slug][0]{\n    _id,\n    _type,\n    kind,\n    title,\n    "slug": slug.current,\n    eyebrow,\n    headline,\n    lead,\n    heroImage,\n    "heroVideoUrl": heroVideo.asset->url,\n    gallery,\n    gallerySubhead,\n    useGallery,\n    specsSubhead,\n    specsLocation->{ _id, name, address, specRows[]{ _key, label, value } },\n    specRows[]{ _key, label, value },\n    whoForSubhead,\n    whoForBody,\n    includedSubhead,\n    includedBody,\n    extraSubhead,\n    extraBody,\n    gearHeading,\n    gearIntro,\n    gearListPdfUrl,\n    gearListPdfLabel,\n    studioSpecPdfUrl,\n    studioSpecPdfLabel,\n    cta->{ subhead, buttonLabel, link, contactSubject },\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n  }\n': RentalPageBySlugQueryResult
   }
 }

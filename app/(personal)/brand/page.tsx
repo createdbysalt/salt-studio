@@ -196,8 +196,8 @@ export default function BrandPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-border bg-background-light p-6 text-foreground-light">
-            <p className="mb-4 text-sm font-medium text-muted-foreground-light">On paper (light)</p>
+          <div className="rounded-lg border border-border bg-background p-6 text-foreground">
+            <p className="mb-4 text-sm font-medium text-muted-foreground">On paper (light)</p>
             <button type="button" className="btn-ghost-light group">
               <span className="inline-flex items-center gap-2">
                 Contact

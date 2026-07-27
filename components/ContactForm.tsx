@@ -1,7 +1,7 @@
 'use client'
 
 import {submitContactForm} from '@/app/actions/contact'
-import {CapReveal} from '@/components/CapabilitiesMotion'
+import {Reveal} from '@/components/Reveal'
 import {ContactSelect} from '@/components/ContactSelect'
 import {trackFormError, trackFormStart, trackFormSubmit} from '@/lib/analytics'
 import {useActionState, useEffect, useMemo, useRef, useState} from 'react'
@@ -44,9 +44,7 @@ type FormState = {
   errors?: Record<string, string>
 }
 
-type AskPath = 'unset' | 'rental' | 'production'
-
-const RENTAL_ASKS = new Set(['Studio rental', 'Podcast session'])
+type AskPath = 'unset' | 'project'
 
 const initialState: FormState = {
   success: false,
@@ -54,8 +52,8 @@ const initialState: FormState = {
 }
 
 /**
- * Contact form — planned intake with one smart fork:
- * rental/podcast vs production. Page uses underline fields.
+ * Contact form — planned intake. Detail fields appear once the visitor
+ * picks what they're asking about. Page uses underline fields.
  */
 export function ContactForm({
   title,
@@ -122,14 +120,14 @@ export function ContactForm({
   if (state.success) {
     return (
       <div id="briefing" className={isPage ? 'w-full' : 'mx-auto max-w-3xl px-5 py-14 sm:px-6'}>
-        <CapReveal immediate y={10}>
+        <Reveal immediate y={10}>
           <h2 className="font-mono text-[clamp(1.5rem,3.5vw,2.25rem)] font-medium leading-tight tracking-tight text-black">
             {successHeadline}
           </h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-black/55 md:text-base">
             {successMessage}
           </p>
-        </CapReveal>
+        </Reveal>
       </div>
     )
   }
@@ -159,7 +157,7 @@ export function ContactForm({
         }
       >
         {visibleFields.map((field) => {
-          const display = displayField(field, askPath)
+          const display = displayField(field)
           return (
             <FormFieldInput
               key={field._key}
@@ -197,7 +195,7 @@ export function ContactForm({
   }
 
   return (
-    <section id="briefing" className="bg-background-light text-foreground-light">
+    <section id="briefing" className="bg-background text-foreground">
       <div className="mx-auto max-w-3xl px-5 py-10 sm:px-6 sm:py-12">
         {title?.trim() || description?.trim() ? (
           <div className="mb-8 md:mb-10">
@@ -236,23 +234,17 @@ function ErrorBody({text}: {text: string}) {
 }
 
 function resolveAskPath(ask: string): AskPath {
-  if (!ask) return 'unset'
-  return RENTAL_ASKS.has(ask) ? 'rental' : 'production'
+  return ask ? 'project' : 'unset'
 }
 
-/** Always → ask → message → path-specific → referral. */
+/** Always → ask → message → detail fields → referral. */
 function fieldsForAskPath(fields: FormField[], path: AskPath): FormField[] {
   const byName = new Map(fields.map((f) => [f.name, f]))
   const pick = (...names: string[]) =>
     names.map((n) => byName.get(n)).filter((f): f is FormField => Boolean(f))
 
   const head = pick('name', 'email', 'company', 'projectType', 'message')
-  const branch =
-    path === 'rental'
-      ? pick('dates')
-      : path === 'production'
-        ? pick('deliverables', 'budget', 'dates')
-        : []
+  const branch = path === 'project' ? pick('deliverables', 'budget', 'dates') : []
   const tail = pick('referral')
 
   // Keep any unknown CMS fields after known ones (won't break unknown schemas).
@@ -262,23 +254,9 @@ function fieldsForAskPath(fields: FormField[], path: AskPath): FormField[] {
   return [...head, ...branch, ...tail, ...rest]
 }
 
-function displayField(field: FormField, path: AskPath): FormField {
+function displayField(field: FormField): FormField {
   if (field.name === 'projectType') {
     return {...field, label: 'How can we help?'}
-  }
-  if (field.name === 'message' && path === 'rental') {
-    return {
-      ...field,
-      label: 'What do you need the space for?',
-      placeholder: field.placeholder || 'Day rate, podcast, multi-day shoot…',
-    }
-  }
-  if (field.name === 'dates' && path === 'rental') {
-    return {
-      ...field,
-      label: 'When do you need it?',
-      placeholder: field.placeholder || 'Preferred date(s) or range',
-    }
   }
   return field
 }

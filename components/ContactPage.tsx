@@ -45,7 +45,7 @@ export function ContactPage({sections}: ContactPageProps) {
     }))
 
   return (
-    <div className="overflow-x-clip bg-background-light text-foreground-light">
+    <div className="overflow-x-clip bg-background text-foreground">
       {/* Horizontal inset matches Navbar (px-5 md:px-6) so columns align with logo / nav right */}
       <div className="w-full px-5 pb-14 pt-[calc(var(--project-nav-height)+2.5rem)] sm:pb-16 sm:pt-[calc(var(--project-nav-height)+3.5rem)] md:px-6 md:pb-20 md:pt-[calc(var(--project-nav-height-md)+4rem)] lg:pt-[calc(var(--project-nav-height-md)+5.5rem)]">
         <div className="grid grid-cols-1 items-start gap-10 sm:gap-12 md:gap-14 lg:grid-cols-2 lg:gap-16 xl:gap-24">

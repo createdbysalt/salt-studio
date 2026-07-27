@@ -2,11 +2,7 @@
 
 import {SiteLogo} from '@/components/SiteLogo'
 import {isDarkSurface} from '@/lib/site-surface'
-import type {
-  FooterLegalPagesQueryResult,
-  LocationsQueryResult,
-  SettingsQueryResult,
-} from '@/sanity.types'
+import type {FooterLegalPagesQueryResult, SettingsQueryResult} from '@/sanity.types'
 import {resolveHref, urlForImage} from '@/sanity/lib/utils'
 import {Mail} from 'lucide-react'
 import {stegaClean} from 'next-sanity'
@@ -114,30 +110,22 @@ function isFooterSocialPlatform(value: string): value is FooterSocialPlatform {
 
 type SiteFooterProps = {
   settings: SettingsQueryResult | null
-  locations?: LocationsQueryResult | null
   /** Auto-populated from Dynamic Content → Legal Pages. */
   legalPages?: FooterLegalPagesQueryResult | null
 }
 
 /**
  * Site-wide footer. Light on paper pages; dark on work/project surfaces
- * (matches SiteShell). Centered: studio + addresses + social.
+ * (matches SiteShell). Centered: logo + social.
  * Bottom strip: © year · credit · legal links (every Legal Page document).
  */
-export function SiteFooter({settings, locations, legalPages}: SiteFooterProps) {
+export function SiteFooter({settings, legalPages}: SiteFooterProps) {
   const pathname = usePathname()
   const onDark = isDarkSurface(pathname)
 
   const siteName = stegaClean(settings?.siteName ?? '') || 'Salt Studio'
-  const showLocations = settings?.showFooterLocations !== false
   const showLegal = settings?.showFooterLegal !== false
   const showBuiltWith = settings?.showBuiltWithCredit !== false
-
-  const addressLines = showLocations
-    ? (locations ?? [])
-        .map((loc) => (loc?.address ? stegaClean(loc.address).trim() : ''))
-        .filter(Boolean)
-    : []
 
   const social = (settings?.footerSocial ?? []).filter((item): item is NonNullable<typeof item> =>
     Boolean(item?.platform && item?.href),
@@ -171,7 +159,7 @@ export function SiteFooter({settings, locations, legalPages}: SiteFooterProps) {
       className={`w-full border-t ${
         onDark
           ? 'border-white/10 bg-[#1a1a1a] text-white'
-          : 'border-black/10 bg-background-light text-foreground-light'
+          : 'border-black/10 bg-background text-foreground'
       }`}
     >
       <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-5 px-5 pb-6 pt-20 text-center md:gap-6 md:px-6 md:pb-7 md:pt-24">
@@ -182,11 +170,6 @@ export function SiteFooter({settings, locations, legalPages}: SiteFooterProps) {
             siteName={siteName}
             className="mb-4 justify-center"
           />
-          {addressLines.map((line) => (
-            <p key={line} className={`!m-0 ${mutedClass}`}>
-              {line}
-            </p>
-          ))}
         </div>
 
         {social.length > 0 ? (

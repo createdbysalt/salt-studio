@@ -37,7 +37,7 @@ export default async function ContactRoute() {
 
   if (!data) {
     return (
-      <div className="bg-background-light px-6 py-16 text-center text-foreground-light">
+      <div className="bg-background px-6 py-16 text-center text-foreground">
         No Contact content yet,{' '}
         <Link href={`${studioUrl}/structure/contactPage`} className="underline">
           add it now
