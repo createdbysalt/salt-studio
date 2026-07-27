@@ -237,7 +237,7 @@ function DebugOverlayInner({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        className={`relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white shadow-lg transition-colors hover:bg-gray-50 ${
+        className={`relative flex h-11 w-11 items-center justify-center rounded-full border border-zinc-600 bg-zinc-900 shadow-lg transition-colors hover:bg-zinc-800 ${
           isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
         title="Analytics Debug — drag to move, click to open"
@@ -246,7 +246,7 @@ function DebugOverlayInner({
       >
         <span className="h-2.5 w-2.5 rounded-full bg-green-500" />
         {eventCount > 0 && (
-          <span className="pointer-events-none absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gray-900 px-1 text-[9px] font-medium text-white">
+          <span className="pointer-events-none absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-green-500 px-1 text-[9px] font-medium text-black">
             {eventCount > 99 ? '99+' : eventCount}
           </span>
         )}
@@ -255,20 +255,20 @@ function DebugOverlayInner({
       {isOpen && !isDragging && (
         <div
           style={panelStyle}
-          className={`w-96 overflow-hidden rounded-md border border-gray-200 bg-white text-gray-900 shadow-lg`}
+          className={`w-96 overflow-hidden rounded-md border border-zinc-700 bg-zinc-900 text-zinc-100 shadow-lg`}
         >
-          <div className="flex items-center justify-between border-b border-gray-100 px-3 py-2">
+          <div className="flex items-center justify-between border-b border-zinc-700 px-3 py-2">
             <span className="font-medium">dataLayer Events</span>
             <div className="flex gap-2">
               <button
                 onClick={clearEvents}
-                className="rounded bg-gray-100 px-2 py-1 text-[10px] text-gray-600 hover:bg-gray-200"
+                className="rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-300 hover:bg-zinc-700"
               >
                 Clear
               </button>
               <button
                 onClick={() => setIsOpen(false)}
-                className="rounded bg-gray-100 px-2 py-1 text-[10px] text-gray-600 hover:bg-gray-200"
+                className="rounded bg-zinc-800 px-2 py-1 text-[10px] text-zinc-300 hover:bg-zinc-700"
               >
                 Close
               </button>
@@ -277,19 +277,19 @@ function DebugOverlayInner({
 
           <div className="max-h-[50vh] overflow-y-auto">
             {events.length === 0 ? (
-              <div className="p-4 text-center text-gray-400">
+              <div className="p-4 text-center text-zinc-500">
                 No events yet. Interact with the page.
               </div>
             ) : (
               events.map((event) => (
-                <div key={event.id} className="border-b border-gray-50 p-2 hover:bg-gray-50">
+                <div key={event.id} className="border-b border-zinc-800 p-2 hover:bg-zinc-800/60">
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-900">{event.event}</span>
-                    <span className="text-[10px] text-gray-400">
+                    <span className="font-medium text-green-400">{event.event}</span>
+                    <span className="text-[10px] text-zinc-500">
                       {event.timestamp.toLocaleTimeString()}
                     </span>
                   </div>
-                  <pre className="mt-1 overflow-x-auto text-[10px] text-gray-500">
+                  <pre className="mt-1 overflow-x-auto text-[10px] text-zinc-400">
                     {JSON.stringify(
                       Object.fromEntries(Object.entries(event.data).filter(([k]) => k !== 'event')),
                       null,

@@ -1,6 +1,5 @@
 'use client'
 
-import {isDarkSurface} from '@/lib/site-surface'
 import {usePathname} from 'next/navigation'
 import type {ReactNode} from 'react'
 
@@ -10,26 +9,33 @@ interface SiteShellProps {
   children: ReactNode
 }
 
+/** Routes whose page stage is dark — content cover + inverse footer. */
+function pageIsDark(pathname: string): boolean {
+  return (
+    pathname.startsWith('/projects/') ||
+    pathname === '/work' ||
+    pathname.startsWith('/work/')
+  )
+}
+
 /**
- * Shared public-site chrome. Work and project detail stay on the dark
- * stage; other interiors (including home) use paper.
+ * Shared public-site chrome. Content sits above a sticky reveal footer
+ * (TinyWins pattern): the stage is z-10 with an opaque background so it
+ * covers the footer while scrolling; the footer sticks underneath at z-0.
  */
 export function SiteShell({navbar, footer, children}: SiteShellProps) {
   const pathname = usePathname()
-  const onDark = isDarkSurface(pathname)
-
-  // Absolute (non-sticky) nav overlays need a positioned parent so the nav
-  // anchors to the page top and scrolls away with the hero.
-  const isHeroOverlayPage = pathname === '/contact' || pathname.startsWith('/contact/')
+  const dark = pageIsDark(pathname)
 
   return (
-    <div
-      className={`flex min-h-screen flex-col ${isHeroOverlayPage ? 'relative' : ''} ${
-        onDark ? 'bg-[#1a1a1a] text-white' : 'bg-background text-foreground'
-      }`}
-    >
+    <div className="min-h-screen bg-background text-foreground">
       {navbar}
-      <div className="flex-grow">{children}</div>
+      <div
+        data-theme={dark ? 'dark' : undefined}
+        className="relative z-10 bg-background text-foreground"
+      >
+        {children}
+      </div>
       {footer}
     </div>
   )

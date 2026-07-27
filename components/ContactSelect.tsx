@@ -108,20 +108,20 @@ export function ContactSelect({
           underline
             ? `flex min-h-12 w-full items-center justify-between gap-3 border-0 border-b bg-transparent px-0 py-3 text-left font-sans text-base transition-colors duration-200 focus:outline-none focus:ring-0 sm:min-h-0 sm:py-2.5 sm:text-[0.9375rem] ${
                 error
-                  ? 'border-[#e85050]'
+                  ? 'border-error'
                   : open
-                    ? 'border-black'
-                    : 'border-black/20 hover:border-black/40'
-              } ${value ? 'text-black' : 'text-black/35'}`
-            : `flex min-h-12 w-full items-center justify-between gap-3 border bg-white px-3.5 py-3 text-left font-sans text-base transition-colors duration-200 focus:outline-none focus:ring-0 sm:min-h-0 sm:py-2.5 sm:text-[0.9375rem] ${
-                error ? 'border-[#e85050]' : open ? 'border-black' : 'border-black/20'
-              } ${value ? 'text-black' : 'text-black/35'}`
+                    ? 'border-accent'
+                    : 'border-foreground/15 hover:border-foreground/40'
+              } ${value ? 'text-foreground' : 'text-foreground/40'}`
+            : `flex min-h-12 w-full items-center justify-between gap-3 rounded-lg border bg-surface px-3.5 py-3 text-left font-sans text-base transition-colors duration-200 focus:outline-none focus:ring-0 sm:min-h-0 sm:py-2.5 sm:text-[0.9375rem] ${
+                error ? 'border-error' : open ? 'border-accent' : 'border-foreground/15'
+              } ${value ? 'text-foreground' : 'text-foreground/40'}`
         }
       >
         <span className="min-w-0 truncate">{selectedLabel}</span>
         <span
           aria-hidden="true"
-          className={`shrink-0 text-black/45 transition-transform duration-200 ${
+          className={`shrink-0 text-foreground/40 transition-transform duration-200 ${
             open ? 'rotate-180' : ''
           }`}
         >
@@ -138,7 +138,7 @@ export function ContactSelect({
           aria-labelledby={triggerId}
           tabIndex={-1}
           onKeyDown={onListKeyDown}
-          className="absolute left-0 right-0 z-40 mt-1 max-h-[min(16rem,50dvh)] overflow-auto border border-black/15 bg-[#f4f4f4] py-1 shadow-[0_12px_40px_rgba(0,0,0,0.08)] focus:outline-none"
+          className="absolute left-0 right-0 z-40 mt-1 max-h-[min(16rem,50dvh)] overflow-auto rounded-lg border border-foreground/15 bg-surface py-1 shadow-[0_12px_40px_rgba(0,0,0,0.08)] focus:outline-none"
         >
           {options.map((option, index) => {
             const selected = option === value
@@ -151,10 +151,10 @@ export function ContactSelect({
                   onClick={() => pick(option)}
                   className={`flex min-h-11 w-full items-center px-3 py-3 text-left font-sans text-[0.9375rem] transition-colors duration-150 sm:min-h-0 sm:py-2.5 sm:text-[0.875rem] ${
                     selected
-                      ? 'bg-black text-white'
+                      ? 'bg-foreground text-background'
                       : active
-                        ? 'bg-black/[0.06] text-black'
-                        : 'text-black/75 hover:bg-black/[0.06] hover:text-black'
+                        ? 'bg-foreground/[0.06] text-foreground'
+                        : 'text-foreground/70 hover:bg-foreground/[0.06] hover:text-foreground'
                   }`}
                 >
                   {option}

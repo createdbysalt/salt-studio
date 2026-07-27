@@ -53,7 +53,8 @@ export default async function ProjectSlugRoute({params}: Props) {
   const {slug} = await params
   const {data} = await sanityFetch({query: projectBySlugQuery, params: {slug}})
 
-  if (!data?._id && !(await draftMode()).isEnabled) {
+  // Coming-soon projects tease on the Work grid but have no detail page yet.
+  if ((!data?._id || data?.comingSoon) && !(await draftMode()).isEnabled) {
     notFound()
   }
 

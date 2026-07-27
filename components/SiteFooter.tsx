@@ -1,61 +1,45 @@
 'use client'
 
-import {SiteLogo} from '@/components/SiteLogo'
-import {isDarkSurface} from '@/lib/site-surface'
+import {DEFAULT_NAV} from '@/components/homeHero'
+import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {SaltWordmark} from '@/components/SaltWordmark'
 import type {FooterLegalPagesQueryResult, SettingsQueryResult} from '@/sanity.types'
-import {resolveHref, urlForImage} from '@/sanity/lib/utils'
-import {Mail} from 'lucide-react'
+import {resolveMenu} from '@/sanity/lib/utils'
+import {useGSAP} from '@gsap/react'
 import {stegaClean} from 'next-sanity'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
+import {useRef} from 'react'
 
-/** Short bottom-strip label from legal page type (or title fallback). */
-function legalStripLabel(pageType: string | null | undefined, title: string | null | undefined) {
-  switch (stegaClean(pageType ?? '')) {
-    case 'privacy':
-      return 'Privacy'
-    case 'terms':
-      return 'Terms'
-    case 'cookies':
-      return 'Cookies'
-    case 'accessibility':
-      return 'Accessibility'
-    default:
-      return stegaClean(title ?? '') || 'Legal'
-  }
+/** Routes whose page stage is dark — footer flips to paper (inverse). */
+function pageIsDark(pathname: string): boolean {
+  return (
+    pathname.startsWith('/projects/') ||
+    pathname === '/work' ||
+    pathname.startsWith('/work/')
+  )
 }
 
-type FooterSocialPlatform =
-  | 'instagram'
-  | 'vimeo'
-  | 'email'
-  | 'youtube'
-  | 'x'
-  | 'linkedin'
-  | 'tiktok'
-  | 'custom'
+type FooterSocialPlatform = 'linkedin' | 'instagram' | 'x'
 
-const PLATFORM_TITLES: Record<FooterSocialPlatform, string> = {
-  instagram: 'Instagram',
-  vimeo: 'Vimeo',
-  email: 'Email',
-  youtube: 'YouTube',
-  x: 'X',
+const SOCIAL_ORDER: FooterSocialPlatform[] = ['linkedin', 'instagram', 'x']
+
+const SOCIAL_LABELS: Record<FooterSocialPlatform, string> = {
   linkedin: 'LinkedIn',
-  tiktok: 'TikTok',
-  custom: 'Link',
+  instagram: 'Instagram',
+  x: 'X',
 }
 
-const BUILT_WITH_LABEL = 'Built with SALT Studio'
-const BUILT_WITH_HREF = 'https://createdbysalt.com'
+/** Fallbacks when Settings → Footer social links omit a platform. */
+const SOCIAL_FALLBACKS: Record<FooterSocialPlatform, string> = {
+  linkedin: 'https://www.linkedin.com/company/createdbysalt/',
+  instagram: 'https://www.instagram.com/createdbysalt/',
+  x: 'https://x.com/saltstudio',
+}
 
-const iconClass = 'h-[15px] w-[15px] fill-current'
+const iconClass = 'h-[14px] w-[14px] fill-current'
 
-function BuiltInSocialIcon({platform}: {platform: Exclude<FooterSocialPlatform, 'custom'>}) {
-  if (platform === 'email') {
-    return <Mail aria-hidden className="h-[15px] w-[15px]" strokeWidth={1.75} />
-  }
-
+function SocialIcon({platform}: {platform: FooterSocialPlatform}) {
   if (platform === 'instagram') {
     return (
       <svg viewBox="0 0 24 24" aria-hidden className={iconClass} focusable="false">
@@ -72,176 +56,202 @@ function BuiltInSocialIcon({platform}: {platform: Exclude<FooterSocialPlatform, 
     )
   }
 
-  if (platform === 'youtube') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden className={iconClass} focusable="false">
-        <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-      </svg>
-    )
-  }
-
-  if (platform === 'linkedin') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden className={iconClass} focusable="false">
-        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-      </svg>
-    )
-  }
-
-  if (platform === 'tiktok') {
-    return (
-      <svg viewBox="0 0 24 24" aria-hidden className={iconClass} focusable="false">
-        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-      </svg>
-    )
-  }
-
-  // Official Vimeo icon mark — the stylized lowercase "v" (not the wordmark).
   return (
     <svg viewBox="0 0 24 24" aria-hidden className={iconClass} focusable="false">
-      <path d="M23.9765 6.4168c-.105 2.338-1.739 5.5429-4.894 9.6088-3.2679 4.247-6.0258 6.3699-8.2898 6.3699-1.409 0-2.578-1.294-3.553-3.881l-1.9179-7.1138c-.719-2.584-1.488-3.878-2.312-3.878-.179 0-.806.378-1.8809 1.132l-1.129-1.457a315.06 315.06 0 003.501-3.1279c1.579-1.368 2.765-2.085 3.5539-2.159 1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.5069.5389 2.45 1.1309 3.674 1.7759 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.8679 3.434-5.7568 6.7619-5.6368 2.4729.06 3.6279 1.664 3.4929 4.7969z" />
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
     </svg>
   )
 }
 
 function isFooterSocialPlatform(value: string): value is FooterSocialPlatform {
-  return value in PLATFORM_TITLES
+  return value === 'linkedin' || value === 'instagram' || value === 'x'
 }
 
 type SiteFooterProps = {
   settings: SettingsQueryResult | null
-  /** Auto-populated from Dynamic Content → Legal Pages. */
   legalPages?: FooterLegalPagesQueryResult | null
 }
 
+const LEGAL_FALLBACKS = [
+  {title: 'Privacy Policy', slug: 'privacy-policy', pageType: 'privacy'},
+  {title: 'Terms of Service', slug: 'terms-of-service', pageType: 'terms'},
+] as const
+
 /**
- * Site-wide footer. Light on paper pages; dark on work/project surfaces
- * (matches SiteShell). Centered: logo + social.
- * Bottom strip: © year · credit · legal links (every Legal Page document).
+ * Sticky reveal footer — top nav (appears when fully revealed) + mark +
+ * social + legal. Inverse of the page: dark on light routes, paper on
+ * dark project pages.
  */
 export function SiteFooter({settings, legalPages}: SiteFooterProps) {
   const pathname = usePathname()
-  const onDark = isDarkSurface(pathname)
-
+  const inverseLight = pageIsDark(pathname)
   const siteName = stegaClean(settings?.siteName ?? '') || 'Salt Studio'
-  const showLegal = settings?.showFooterLegal !== false
-  const showBuiltWith = settings?.showBuiltWithCredit !== false
+  const year = new Date().getFullYear()
+  const footerRef = useRef<HTMLElement>(null)
+  const navRef = useRef<HTMLElement>(null)
+  const markRef = useRef<HTMLDivElement>(null)
 
-  const social = (settings?.footerSocial ?? []).filter((item): item is NonNullable<typeof item> =>
-    Boolean(item?.platform && item?.href),
+  useGSAP(
+    () => {
+      const footer = footerRef.current
+      const mark = markRef.current
+      const nav = navRef.current
+      if (!footer) return
+
+      const paths = mark?.querySelectorAll('path') ?? []
+      const navLinks = nav?.querySelectorAll('a') ?? []
+
+      if (prefersReducedMotion()) {
+        if (paths.length) gsap.set(paths, {autoAlpha: 1, x: 0})
+        if (nav) gsap.set(nav, {autoAlpha: 1, y: 0})
+        if (navLinks.length) gsap.set(navLinks, {autoAlpha: 1, y: 0})
+        return
+      }
+
+      if (paths.length) {
+        gsap.fromTo(
+          paths,
+          {autoAlpha: 0, x: -48},
+          {
+            autoAlpha: 1,
+            x: 0,
+            stagger: 0.12,
+            ease: EASE.outQuint,
+            scrollTrigger: {
+              trigger: footer,
+              start: 'top bottom',
+              end: 'bottom bottom',
+              scrub: 0.7,
+              invalidateOnRefresh: true,
+            },
+          },
+        )
+      }
+
+      // Top nav fades in only once the sticky footer is fully uncovered.
+      if (nav && navLinks.length) {
+        gsap.set(nav, {autoAlpha: 1})
+        gsap.set(navLinks, {autoAlpha: 0, y: -14})
+        gsap.to(navLinks, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.65,
+          stagger: 0.06,
+          ease: EASE.outQuint,
+          scrollTrigger: {
+            trigger: footer,
+            start: 'bottom bottom',
+            toggleActions: 'play none none reverse',
+            invalidateOnRefresh: true,
+          },
+        })
+      }
+    },
+    {scope: footerRef, dependencies: [pathname]},
   )
 
-  const legal = showLegal
-    ? (legalPages ?? [])
-        .map((item) => {
-          if (!item?.slug) return null
-          const href = resolveHref(item._type, item.slug)
-          if (!href) return null
-          return {
-            href,
-            label: legalStripLabel(item.pageType, item.title),
-          }
-        })
-        .filter((item): item is {href: string; label: string} => Boolean(item))
-    : []
+  const resolvedNav = resolveMenu(settings?.menuItems)
+  const menuItems = resolvedNav.length
+    ? resolvedNav
+    : DEFAULT_NAV.map((item) => ({label: item.label, href: item.href}))
+  const navItems = [
+    {label: 'Home', href: '/'},
+    ...menuItems.filter((item) => item.href !== '/'),
+  ]
 
-  const year = new Date().getFullYear()
-  const linkClass = onDark
-    ? 'text-white/70 transition-colors hover:text-white'
-    : 'text-black/70 transition-colors hover:text-black'
-  const mutedClass = onDark ? 'text-white/45' : 'text-black/45'
-  const customIconClass = onDark
-    ? 'h-[15px] w-[15px] object-contain brightness-0 invert'
-    : 'h-[15px] w-[15px] object-contain brightness-0'
+  const fromCms = new Map<FooterSocialPlatform, string>()
+  for (const item of settings?.footerSocial ?? []) {
+    if (!item?.platform || !item?.href) continue
+    const platform = stegaClean(item.platform)
+    if (!isFooterSocialPlatform(platform)) continue
+    fromCms.set(platform, stegaClean(item.href))
+  }
+
+  const socialLinks = SOCIAL_ORDER.map((platform) => ({
+    platform,
+    href: fromCms.get(platform) || SOCIAL_FALLBACKS[platform],
+    label: SOCIAL_LABELS[platform],
+  }))
+
+  const fromLegal = (legalPages ?? []).filter(
+    (page): page is NonNullable<typeof page> =>
+      Boolean(page?.slug) && (page.pageType === 'privacy' || page.pageType === 'terms'),
+  )
+  const legalLinks =
+    fromLegal.length > 0
+      ? fromLegal.map((page) => ({
+          title:
+            stegaClean(page.title ?? '') ||
+            (page.pageType === 'privacy' ? 'Privacy Policy' : 'Terms of Service'),
+          href: `/legal/${stegaClean(page.slug ?? '')}`,
+        }))
+      : LEGAL_FALLBACKS.map((page) => ({
+          title: page.title,
+          href: `/legal/${page.slug}`,
+        }))
 
   return (
     <footer
-      className={`w-full border-t ${
-        onDark
-          ? 'border-white/10 bg-[#1a1a1a] text-white'
-          : 'border-black/10 bg-background text-foreground'
-      }`}
+      ref={footerRef}
+      data-theme={inverseLight ? undefined : 'dark'}
+      className="sticky bottom-0 z-0 flex min-h-[58svh] w-full flex-col overflow-hidden bg-background text-foreground"
     >
-      <div className="mx-auto flex max-w-[1440px] flex-col items-center gap-5 px-5 pb-6 pt-20 text-center md:gap-6 md:px-6 md:pb-7 md:pt-24">
-        <div className="space-y-1 font-mono text-[12px] uppercase leading-[1.7] tracking-[0.12em]">
-          <SiteLogo
-            variant={onDark ? 'light' : 'dark'}
-            logo={settings?.logo}
-            siteName={siteName}
-            className="mb-4 justify-center"
+      <nav
+        ref={navRef}
+        aria-label="Footer"
+        className="flex w-full items-center justify-between px-6 pt-3 md:px-10 md:pt-3.5"
+      >
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="font-sans text-[12px] font-semibold tracking-[-0.02em] text-foreground/45 transition-opacity hover:opacity-70 md:text-[13px]"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+
+      <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 pb-16 pt-24">
+        <div ref={markRef} className="flex items-center justify-center">
+          <SaltWordmark
+            title={siteName}
+            className="h-[clamp(3.25rem,9vw,6rem)] w-auto text-foreground"
           />
         </div>
 
-        {social.length > 0 ? (
-          <ul className="flex items-center justify-center gap-4">
-            {social.map((item) => {
-              const platformRaw = stegaClean(item.platform ?? '')
-              const platform = isFooterSocialPlatform(platformRaw) ? platformRaw : null
-              const label = stegaClean(item.label ?? '')
-              const href = stegaClean(item.href ?? '')
-              const displayName = label || (platform ? PLATFORM_TITLES[platform] : '') || 'Link'
-              const isMailto = href.startsWith('mailto:')
-              const customSrc =
-                platform === 'custom' && item.customIcon?.asset?._ref
-                  ? urlForImage({asset: {_ref: item.customIcon.asset._ref}})?.url()
-                  : undefined
-
-              return (
-                <li key={item._key ?? href}>
-                  <a
-                    href={href}
-                    {...(isMailto ? {} : {target: '_blank', rel: 'noopener noreferrer'})}
-                    aria-label={displayName}
-                    className={`${linkClass} inline-flex`}
-                  >
-                    {platform && platform !== 'custom' ? (
-                      <BuiltInSocialIcon platform={platform} />
-                    ) : customSrc ? (
-                      <img src={customSrc} alt="" aria-hidden className={customIconClass} />
-                    ) : (
-                      <span className="font-mono text-[12px] uppercase tracking-[0.14em]">
-                        {displayName}
-                      </span>
-                    )}
-                  </a>
-                </li>
-              )
-            })}
-          </ul>
-        ) : null}
+        <ul className="flex items-center gap-3.5">
+          {socialLinks.map((item) => (
+            <li key={item.platform}>
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={item.label}
+                className="block text-foreground transition-opacity hover:opacity-55"
+              >
+                <SocialIcon platform={item.platform} />
+              </a>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <div
-        className={`mx-auto flex max-w-[1440px] flex-col items-center justify-center gap-3 px-5 pb-7 pt-2 text-center font-mono text-[10px] uppercase tracking-[0.16em] md:flex-row md:flex-wrap md:gap-x-2 md:px-6 md:pb-8 md:pt-3 ${mutedClass}`}
-      >
-        <span>
-          © {siteName} {year}
+      <div className="flex w-full flex-nowrap items-baseline justify-center gap-x-4 overflow-x-auto px-6 pb-5 pt-2 text-center font-sans text-[12px] font-medium leading-none text-foreground/45 whitespace-nowrap md:text-[13px]">
+        <span className="shrink-0">
+          © {year} {siteName}. All rights reserved.
         </span>
-        {showBuiltWith ? (
-          <>
-            <span className="hidden md:inline" aria-hidden>
-              ·
-            </span>
-            <a
-              href={BUILT_WITH_HREF}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={linkClass}
+        <nav aria-label="Legal" className="contents">
+          {legalLinks.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="shrink-0 text-inherit transition-opacity hover:opacity-70"
             >
-              {BUILT_WITH_LABEL}
-            </a>
-          </>
-        ) : null}
-        {legal.map((item) => (
-          <span key={item.href} className="contents">
-            <span className="hidden md:inline" aria-hidden>
-              ·
-            </span>
-            <Link href={item.href} className={linkClass}>
-              {item.label}
+              {item.title}
             </Link>
-          </span>
-        ))}
+          ))}
+        </nav>
       </div>
     </footer>
   )

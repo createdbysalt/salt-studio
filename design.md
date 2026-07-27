@@ -20,7 +20,7 @@ Ink on paper. The site reads like a beautifully set document that *moves* — li
 
 ## Principles
 
-1. **Light is default, dark is earned.** Paper stage everywhere; near-black bands for punch (footer, feature moments, the occasional case interlude). Never a dark page by default.
+1. **Light is default, dark is earned.** True-white stage everywhere (user-confirmed 2026-07-26 — brand-sheet paper `#EAEAEA` demoted to washes/wells); near-black bands for punch (footer, feature moments, the occasional case interlude). Never a dark page by default.
 2. **One accent, surgically.** Red `#E42927` appears as: the Salt product band, a live/status dot, focus rings, rare emphasis. Never decoration, never large text color, never competing with client work.
 3. **Type does the design.** Display Geist at clamp scale with −3% tracking and sub-1.0 leading *is* the visual identity. If a section feels empty, make the type better — don't add ornament.
 4. **Media bleeds; chrome insets.** Unchanged from the previous system: photography/video touch the viewport edge; UI chrome (nav, titles, filters, forms) gets the gutter.
@@ -36,8 +36,9 @@ Ink on paper. The site reads like a beautifully set document that *moves* — li
 | Token | Value | Role |
 | --- | --- | --- |
 | `ink` | `#08090A` | Primary type, dark bands, logo |
-| `paper` | `#EAEAEA` | Page stage (light default) |
-| `surface` | `#FFFFFF` | Elevated cards/surfaces on paper |
+| `white` | `#FFFFFF` | Page stage (light default) — `--color-background` |
+| `paper` | `#EAEAEA` | Brand light (sheet value) — muted wells/washes (`--color-muted`), dark-band type |
+| `surface` | `#FFFFFF` | Elevated cards — distinguish with `border-border`, not tone |
 | `accent` | `#E42927` | THE red — Salt band, status, focus |
 | `gray` | `#B7B7B7` | Muted UI, disabled, secondary marks |
 | `logo-light` | `#E3E3E3` | Light fills inside logo badges only — do not "normalize" to paper |
@@ -49,7 +50,7 @@ On dark bands (white at opacity): mirror ladder — `/90` type · `/50` muted ·
 
 ### Theme switching
 
-`:root` = light (paper stage). `[data-theme='dark']` on a section/main flips the semantic tokens (`--color-background`, `--color-foreground`, `--color-border`, …) to the dark-band set. Components use semantic tokens (`bg-background`, `text-foreground`, `border-border`) and inherit the flip for free.
+`:root` = light (white stage). `[data-theme='dark']` on a section/main flips the semantic tokens (`--color-background`, `--color-foreground`, `--color-border`, …) to the dark-band set. Components use semantic tokens (`bg-background`, `text-foreground`, `border-border`) and inherit the flip for free.
 
 ### Semantic (forms only)
 
@@ -69,7 +70,8 @@ On dark bands (white at opacity): mirror ladder — `/90` type · `/50` muted ·
 | **H1** | Geist 600 · `clamp(2rem, 4vw, 4rem)` · tracking `-0.02em` · leading `0.95` · uppercase | Page titles |
 | **H2** | Geist 600 · `clamp(1.5rem, 3vw, 3rem)` · tracking `-0.02em` · leading `1.05` | Section heads — sentence case allowed on editorial pages |
 | **Body** | Geist 400/500 · 16–18px · leading `1.6` · normal case | Max ~65ch. Weight 500 for standfirst/lede paragraphs |
-| **Label** | Geist Mono 500 · 11–12px · tracking `0.08em` · uppercase | Nav, buttons, card metadata. NOTE: tracking is tighter than the legacy 0.18em — Geist Mono needs less |
+| **Nav** | Geist 500 · 13–14px · tracking `-0.01em` · title case | Glass pill links (`black/6` + `backdrop-blur(42px)`, radius 4px, h 40/48) — sans, NOT mono |
+| **Label** | Geist Mono 500 · 11–12px · tracking `0.08em` · uppercase | Buttons, card metadata, form labels. NOTE: tracking is tighter than the legacy 0.18em — Geist Mono needs less |
 | **Telemetry** | Geist Mono 400 · 10px · tracking `0.08em` · uppercase | Fine print, counters, tags |
 
 ### Rules

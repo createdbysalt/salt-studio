@@ -3,7 +3,9 @@ import {
   withWorkPosters,
   type WorkProjectCard,
 } from '@/components/ProjectGrid'
+import {Reveal} from '@/components/Reveal'
 import {WorkCatalog} from '@/components/WorkCatalog'
+import {WorkFilterHeadline} from '@/components/WorkFilterHeadline'
 import {CorePageSchema, ogImageUrl} from '@/lib/seo'
 import {resolveWorkPills} from '@/lib/work-pills'
 import {sanityFetch} from '@/sanity/lib/live'
@@ -67,8 +69,7 @@ export default async function WorkIndexRoute() {
     sanityFetch({query: workCategoriesQuery}),
   ])
 
-  const headline = page?.headline ?? 'All Projects'
-  const subhead = page?.subhead ?? 'Filter by specialty — or scroll the whole thing.'
+  const headline = page?.headline ?? 'All Work'
   const description = page?.seoDescription ?? 'Selected commercial video and photography work.'
   const speakable = page?.speakableSummary ?? undefined
   const speakableSelectors = speakable ? ['h1', '.speakable-summary'] : ['h1']
@@ -79,7 +80,7 @@ export default async function WorkIndexRoute() {
   const pills = resolveWorkPills(page?.pillSource, page?.categoryPills, categories ?? [])
 
   return (
-    <main data-theme="dark" className="bg-background text-foreground pb-24">
+    <main className="bg-background text-foreground pb-24">
       <CorePageSchema
         breadcrumbs={[
           {name: 'Home', url: '/'},
@@ -91,22 +92,23 @@ export default async function WorkIndexRoute() {
         speakableSelectors={speakableSelectors}
       />
 
-      <header className="px-5 pt-10 md:px-6 md:pt-14">
-        <h1 className="font-sans text-4xl font-bold uppercase leading-[0.95] tracking-tight text-white lg:text-5xl">
-          {headline}
-        </h1>
-        {subhead ? (
-          <p className="mt-4 max-w-xl font-mono text-[11px] uppercase leading-[1.7] tracking-[0.08em] text-white/70 md:text-[12px]">
-            {subhead}
-          </p>
-        ) : null}
+      <header className="page-chrome pt-28 text-center md:pt-36">
+        <h1 className="sr-only">{headline}</h1>
         {speakable ? <p className="sr-only speakable-summary">{speakable}</p> : null}
+
+        <Reveal immediate>
+          {pills.length > 0 ? (
+            <p className="mb-[14px] font-sans text-[13px] tracking-[-0.01em] text-foreground/45 md:mb-[18px] md:text-[14px]">
+              Filter by
+            </p>
+          ) : null}
+          <WorkFilterHeadline allLabel={headline} categories={pills} activeSlug={null} />
+        </Reveal>
       </header>
 
       <WorkCatalog
         projects={projects}
         emptyState={page?.emptyState}
-        categories={pills}
         videoPlayback={page?.videoPlayback}
       />
     </main>

@@ -175,7 +175,8 @@ export function ConsentProvider({children}: ConsentProviderProps) {
 }
 
 /**
- * Consent Banner — Salt Studio brand: monochrome, hard edges, mono type.
+ * Consent Banner — semantic tokens so it renders correctly on the light stage
+ * and inside dark bands alike. Buttons via .btn-solid / .btn-ghost (globals.css).
  */
 function ConsentBanner() {
   const {acceptAll, acceptNecessary} = useConsent()
@@ -186,27 +187,21 @@ function ConsentBanner() {
       aria-label="Cookie consent"
       className="fixed inset-x-4 bottom-4 z-50 md:inset-x-6 md:bottom-6"
     >
-      <div className="mx-auto flex max-w-4xl flex-col gap-4 border border-white/25 bg-black/85 p-4 backdrop-blur-md md:flex-row md:items-center md:justify-between md:gap-6 md:p-5">
-        <p className="font-mono text-[11px] uppercase leading-[1.7] tracking-[0.18em] text-white/80 md:flex-1">
+      <div className="mx-auto flex max-w-4xl flex-col gap-4 rounded-lg border border-border bg-background/90 p-4 backdrop-blur-md md:flex-row md:items-center md:justify-between md:gap-6 md:p-5">
+        <p className="font-mono text-[11px] uppercase leading-[1.7] tracking-[0.08em] text-foreground/70 md:flex-1">
           We use cookies to analyze site usage and improve your experience.{' '}
           <a
             href="/legal/privacy-policy"
-            className="underline decoration-white/40 underline-offset-4 transition-colors hover:text-white hover:decoration-white"
+            className="underline decoration-foreground/40 underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
           >
             Learn more
           </a>
         </p>
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-          <button
-            onClick={acceptNecessary}
-            className="border border-white/35 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-white/80 transition-colors hover:border-white hover:text-white"
-          >
+          <button onClick={acceptNecessary} className="btn-ghost justify-center">
             Necessary only
           </button>
-          <button
-            onClick={acceptAll}
-            className="border border-white bg-white px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-black transition-colors hover:bg-white/90"
-          >
+          <button onClick={acceptAll} className="btn-solid justify-center">
             Accept all
           </button>
         </div>

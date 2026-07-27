@@ -29,7 +29,7 @@ function linkifyEmails(text: string): ReactNode[] {
       <a
         key={`${email}-${match.index}`}
         href={`mailto:${email}`}
-        className="break-words text-black underline decoration-black/25 underline-offset-[0.18em] transition-colors duration-300 hover:decoration-black"
+        className="break-words text-foreground underline decoration-foreground/40 underline-offset-[0.18em] transition-colors duration-300 hover:decoration-foreground"
       >
         {email}
       </a>,
@@ -53,14 +53,14 @@ export function ContactHero({headline, lead, directLine}: ContactHeroProps) {
       <div className="min-w-0">
         {headline?.trim() ? (
           <Reveal immediate y={14}>
-            <h1 className="max-w-[11ch] font-mono text-[clamp(2.125rem,8.5vw,4.75rem)] font-medium leading-[0.95] tracking-tight text-black sm:text-[clamp(2.35rem,7vw,4.75rem)]">
+            <h1 className="max-w-[11ch] text-[clamp(2.125rem,8.5vw,4.75rem)] font-semibold uppercase leading-[0.95] tracking-[-0.02em] text-foreground sm:text-[clamp(2.35rem,7vw,4.75rem)]">
               {headline}
             </h1>
           </Reveal>
         ) : null}
         {lead?.trim() ? (
           <Reveal immediate delay={0.1} y={12}>
-            <p className="mt-4 max-w-md text-[0.9375rem] leading-relaxed text-black/55 sm:mt-5 sm:text-base md:mt-6 md:leading-relaxed">
+            <p className="mt-4 max-w-md text-[0.9375rem] leading-relaxed text-foreground/70 sm:mt-5 sm:text-base md:mt-6 md:leading-relaxed">
               {lead}
             </p>
           </Reveal>
@@ -69,10 +69,10 @@ export function ContactHero({headline, lead, directLine}: ContactHeroProps) {
 
       <Reveal immediate delay={0.18} y={12}>
         <div className="max-w-md">
-          <p className="text-[0.9375rem] leading-relaxed text-black/60 sm:text-base md:text-[0.9375rem] md:leading-relaxed">
+          <p className="text-[0.9375rem] leading-relaxed text-foreground/70 sm:text-base md:text-[0.9375rem] md:leading-relaxed">
             {linkifyEmails(direct)}
           </p>
-          <p className="mt-4 text-[0.9375rem] leading-relaxed text-black/45 sm:text-base md:text-[0.9375rem] md:leading-relaxed">
+          <p className="mt-4 text-[0.9375rem] leading-relaxed text-foreground/40 sm:text-base md:text-[0.9375rem] md:leading-relaxed">
             {WHO_YOU_REACH}
           </p>
         </div>

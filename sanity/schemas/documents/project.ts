@@ -1,4 +1,8 @@
-import {coreSearchFields, coreSearchGroup} from '@/sanity/schemas/shared/corePageFields'
+import {
+  coreSearchFields,
+  coreSearchGroup,
+  pageSectionsField,
+} from '@/sanity/schemas/shared/corePageFields'
 import {DocumentIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
@@ -9,8 +13,7 @@ export default defineType({
   icon: DocumentIcon,
   groups: [
     {name: 'details', title: 'Details', default: true},
-    {name: 'caseStudy', title: 'Case Study'},
-    {name: 'gallery', title: 'Gallery'},
+    {name: 'sections', title: 'Case Study'},
     coreSearchGroup,
   ],
   fields: [
@@ -41,6 +44,15 @@ export default defineType({
         'Turn on to highlight this project (home showcase and featured Work views). Works for both Standard and Case Study.',
     }),
     defineField({
+      name: 'comingSoon',
+      title: 'Coming soon',
+      type: 'boolean',
+      group: 'details',
+      initialValue: false,
+      description:
+        'Turn on to show this project on the Work grid as a “Coming soon” card — not clickable, and its project page stays unpublished to visitors. Turn off when the case study is ready to open.',
+    }),
+    defineField({
       name: 'title',
       title: 'Project Title',
       type: 'string',
@@ -64,11 +76,11 @@ export default defineType({
     }),
     defineField({
       name: 'overview',
-      title: 'Director Statement',
+      title: 'Outcome summary',
       type: 'array',
       group: 'details',
       description:
-        'The short paragraph that appears next to "Director" on the homepage video. Also used in search results. Keep it to 2-3 sentences.',
+        'The one-sentence outcome that sells the project — shown on work cards and in search results. Lead with what changed for the client, not what was made.',
       of: [
         defineArrayMember({
           lists: [],
@@ -92,21 +104,21 @@ export default defineType({
     }),
     defineField({
       name: 'context',
-      title: 'Context',
+      title: 'Context (legacy)',
       type: 'text',
       rows: 4,
       group: 'details',
-      description:
-        'The main project paragraph shown on the project page — what the project was and what Salt Studio did. Longer than the short summary above.',
+      hidden: true,
+      description: 'Legacy — replaced by Statement sections in the Case Study tab.',
     }),
     defineField({
       name: 'btsNote',
-      title: 'BTS note',
+      title: 'BTS note (legacy)',
       type: 'text',
       rows: 3,
       group: 'details',
-      description:
-        'Optional behind-the-scenes note for the BTS section on the project page (1–2 sentences).',
+      hidden: true,
+      description: 'Legacy — replaced by Media sections in the Case Study tab.',
     }),
     defineField({
       name: 'coverImage',
@@ -135,11 +147,11 @@ export default defineType({
     }),
     defineField({
       name: 'gallery',
-      title: 'Gallery',
+      title: 'Gallery (legacy)',
       type: 'array',
-      group: 'gallery',
-      description:
-        'Build the project gallery as rows. Add a 1-column or 2-column row, then put a photo or video in each cell. Drag to reorder.',
+      group: 'details',
+      hidden: true,
+      description: 'Legacy — replaced by Media sections in the Case Study tab.',
       of: [
         defineArrayMember({type: 'projectGalleryRowOne', title: '1 column'}),
         defineArrayMember({type: 'projectGalleryRowTwo', title: '2 columns'}),
@@ -147,11 +159,11 @@ export default defineType({
     }),
     defineField({
       name: 'btsImages',
-      title: 'BTS',
+      title: 'BTS (legacy)',
       type: 'array',
-      group: 'gallery',
-      description:
-        'Behind-the-scenes gallery — same as above: 1- or 2-column rows of photos or videos. Pair with the BTS note in Details.',
+      group: 'details',
+      hidden: true,
+      description: 'Legacy — replaced by Media sections in the Case Study tab.',
       of: [
         defineArrayMember({type: 'projectGalleryRowOne', title: '1 column'}),
         defineArrayMember({type: 'projectGalleryRowTwo', title: '2 columns'}),
@@ -163,17 +175,28 @@ export default defineType({
       type: 'url',
       group: 'details',
       description:
-        'Homepage hero video. Paste a Vimeo page URL (e.g. https://vimeo.com/123) or a direct HTTPS MP4 link. Projects without a video never appear in the hero.',
+        'Optional. A short video for the hero and card hover — a Vimeo page URL (e.g. https://vimeo.com/123) or a direct HTTPS MP4 link. Projects without one show the cover image instead.',
       validation: (rule) =>
         rule.uri({allowRelative: false, scheme: ['https']}).warning('Use an HTTPS video URL'),
     }),
     defineField({
       name: 'role',
-      title: 'Salt’s Role',
+      title: 'Salt’s Role (legacy)',
       type: 'string',
       group: 'details',
+      hidden: true,
+      description: 'Legacy — replaced by the Deliverables list below.',
+    }),
+    defineField({
+      name: 'deliverables',
+      title: 'Deliverables',
+      type: 'array',
+      group: 'details',
       description:
-        'What Salt Studio did on this project (e.g. "Design & build", "AI assistant"). Shown alongside the project meta.',
+        'Exactly what Salt delivered, as short items for the project meta panel — e.g. “Brand Identity”, “Web Design & Build”, “Copywriting”. Specific beats vague.',
+      of: [defineArrayMember({type: 'string'})],
+      validation: (rule) =>
+        rule.min(1).warning('List what was delivered — it’s the strongest proof on the page'),
     }),
     defineField({
       name: 'year',
@@ -206,6 +229,15 @@ export default defineType({
           ),
     }),
     defineField({
+      name: 'stack',
+      title: 'Stack',
+      type: 'array',
+      group: 'details',
+      description:
+        'The languages, frameworks, and platforms this project was built with — shown as “Built with …” on the project page. Pick from Dynamic Content → Capabilities. Headline items only, not every dev tool.',
+      of: [{type: 'reference', to: [{type: 'capability'}]}],
+    }),
+    defineField({
       name: 'site',
       title: 'Live Site URL',
       type: 'url',
@@ -223,42 +255,56 @@ export default defineType({
       hidden: ({document}) => !document?.site,
       validation: (rule) => rule.max(40).warning('Keep button labels short — under 40 characters'),
     }),
+    pageSectionsField(
+      [
+        {type: 'projectStatementSection', title: 'Statement'},
+        {type: 'projectScopeSection', title: 'Scope'},
+        {type: 'projectMediaSection', title: 'Media'},
+        {type: 'projectQuoteSection', title: 'Quote'},
+        {type: 'projectStatsSection', title: 'Stats'},
+        {type: 'projectCreditsSection', title: 'Credits'},
+      ],
+      {
+        uniqueTypes: false,
+        description:
+          'The case-study body, top to bottom. Mix and repeat freely — the conversion shape is: a few labeled Statements telling the story, Scope listing exactly what was delivered, Media doing the showing, real Quotes and Stats only when they exist. Drag to reorder; toggle to hide. The closing “book a call” CTA renders automatically on every project.',
+      },
+    ),
     defineField({
       name: 'brief',
-      title: 'The brief',
+      title: 'The brief (legacy)',
       type: 'text',
       rows: 3,
-      group: 'caseStudy',
-      hidden: ({document}) => document?.projectType !== 'case-study',
-      description: 'Case study only. One paragraph on what the client came in with.',
+      group: 'details',
+      hidden: true,
+      description: 'Legacy — replaced by Statement sections in the Case Study tab.',
     }),
     defineField({
       name: 'approach',
-      title: 'The approach',
+      title: 'The approach (legacy)',
       type: 'text',
       rows: 3,
-      group: 'caseStudy',
-      hidden: ({document}) => document?.projectType !== 'case-study',
-      description: 'Case study only. One paragraph on how Salt Studio solved it.',
+      group: 'details',
+      hidden: true,
+      description: 'Legacy — replaced by Statement sections in the Case Study tab.',
     }),
     defineField({
       name: 'result',
-      title: 'The result',
+      title: 'The result (legacy)',
       type: 'text',
       rows: 3,
-      group: 'caseStudy',
-      hidden: ({document}) => document?.projectType !== 'case-study',
-      description: 'Case study only. A short paragraph on the outcome, plus an optional metric.',
+      group: 'details',
+      hidden: true,
+      description: 'Legacy — replaced by Statement sections in the Case Study tab.',
     }),
     defineField({
       name: 'showTestimonials',
       title: 'Show testimonials',
       type: 'boolean',
-      group: 'caseStudy',
-      hidden: ({document}) => document?.projectType !== 'case-study',
+      group: 'sections',
       initialValue: true,
       description:
-        'Case study only. When on, shows any Testimonials linked to this project — set the Project field on a Testimonial document to connect it. Turn off to hide them.',
+        'When on, shows any Testimonial documents linked to this project (set the Project field on a Testimonial to connect it). For an inline quote, use a Quote section instead.',
     }),
     defineField({
       name: 'relatedProjects',

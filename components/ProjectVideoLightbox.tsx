@@ -73,18 +73,18 @@ export function ProjectVideoLightbox({
         role="dialog"
         aria-modal="true"
         aria-label={title ? `Watch ${title}` : 'Watch project video'}
-        className="relative w-full max-w-5xl border border-white/20 bg-[#1a1a1a] shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
+        className="relative w-full max-w-5xl overflow-hidden rounded-lg border border-white/20 bg-ink shadow-[0_0_0_1px_rgba(255,255,255,0.06)]"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="relative flex min-h-[3rem] items-center justify-end border-b border-white/10 px-4 py-3 md:min-h-[3.25rem] md:px-5">
-          <p className="absolute left-4 top-1/2 max-w-[calc(100%-6rem)] -translate-y-1/2 font-mono text-[10px] uppercase leading-none tracking-[0.18em] text-white/55 md:left-5">
+          <p className="absolute left-4 top-1/2 max-w-[calc(100%-6rem)] -translate-y-1/2 font-mono text-[10px] uppercase leading-none tracking-[0.08em] text-white/55 md:left-5">
             {title}
           </p>
           <button
             type="button"
             onClick={closePlayer}
             aria-label="Close"
-            className="inline-flex items-center gap-2 p-1 font-mono text-[10px] uppercase tracking-[0.18em] text-white/70 transition-colors hover:text-white"
+            className="inline-flex items-center gap-2 p-1 font-mono text-[10px] uppercase tracking-[0.08em] text-white/70 transition-colors hover:text-white"
           >
             Close
             <X className="h-3 w-3 shrink-0" strokeWidth={1.25} aria-hidden="true" />

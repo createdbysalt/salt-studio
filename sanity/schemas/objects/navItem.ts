@@ -8,6 +8,8 @@ import {defineArrayMember, defineField, defineType} from 'sanity'
 const NAV_LINK_TARGETS = [
   {type: 'home'},
   {type: 'workPage'},
+  {type: 'servicesPage'},
+  {type: 'aboutPage'},
   {type: 'contactPage'},
   {type: 'workCategory'},
   {type: 'page'},

@@ -21,12 +21,12 @@
   --color-gray-brand: #b7b7b7;
   --color-logo-light: #e3e3e3; /* light fills inside logo badges — distinct from paper */
 
-  /* ---- Semantic (LIGHT default — paper stage, ink type) ---- */
-  --color-background: #eaeaea;
+  /* ---- Semantic (LIGHT default — white stage, ink type) ---- */
+  --color-background: #ffffff;
   --color-foreground: #08090a;
   --color-surface: #ffffff;
   --color-surface-hover: #f5f5f5;
-  --color-muted: #dedede;
+  --color-muted: #eaeaea; /* brand paper — wells, washes, media placeholders */
   --color-muted-foreground: rgba(8, 9, 10, 0.4);
   --color-border: rgba(8, 9, 10, 0.15);
   --color-border-subtle: rgba(8, 9, 10, 0.08);
@@ -129,6 +129,23 @@
  * ANIMATIONS (CSS-level; GSAP patterns live in components/motion/)
  * =============================================================================
  */
+
+/* Salt Score quiz — question enters by rising into place (system slide-up signature).
+   Collapses to near-instant under the global prefers-reduced-motion override. */
+@keyframes quiz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-quiz-rise {
+  animation: quiz-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 
 @keyframes logo-scroll {
   0% {

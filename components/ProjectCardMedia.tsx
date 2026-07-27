@@ -22,6 +22,8 @@ type ProjectCardMediaProps = {
   posterUrl?: string | null
   /** From workPage.videoPlayback — defaults to autoplay. */
   playback?: WorkVideoPlayback | null
+  /** Force-pause (e.g. scroll-gallery neighbor frames). */
+  paused?: boolean
 }
 
 /**
@@ -35,6 +37,7 @@ export function ProjectCardMedia({
   videoUrl,
   posterUrl,
   playback = 'autoplay',
+  paused = false,
 }: ProjectCardMediaProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -135,7 +138,10 @@ export function ProjectCardMedia({
   }, [mode])
 
   const mountPlayer = Boolean(cleanUrl) && (playerMountedRef.current || nearViewport)
-  const revealVideo = mountPlayer && (mode === 'hover' ? hovered : inViewport || readyRef.current)
+  const revealVideo =
+    mountPlayer &&
+    !paused &&
+    (mode === 'hover' ? hovered : inViewport || readyRef.current)
 
   // Once a player has booted, never flash the poster again on scroll.
   // After mount starts, only show poster while actively in view and still loading.
@@ -161,7 +167,7 @@ export function ProjectCardMedia({
   }, [revealVideo, mp4Src])
 
   return (
-    <div ref={rootRef} className="absolute inset-0 overflow-hidden bg-[#1a1a1a]">
+    <div ref={rootRef} className="absolute inset-0 overflow-hidden bg-foreground/6">
       <div className="work-card-media-zoom absolute inset-0">
         {coverSrc ? (
           <img

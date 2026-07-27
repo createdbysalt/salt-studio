@@ -18,7 +18,8 @@ type ProjectHeroProps = {
   meta?: ReactNode
 }
 
-const LABEL = 'font-mono text-[11px] uppercase tracking-[0.14em] text-white/45'
+/* On-media label — stays white on purpose: this text sits on photo/video, not the page stage. */
+const LABEL = 'font-mono text-[11px] uppercase tracking-[0.08em] text-white/50'
 
 export function ProjectHero({
   title,
@@ -55,7 +56,7 @@ export function ProjectHero({
 
   const typeMarker = (
     <p className={LABEL}>
-      <span className={isCaseStudy ? 'text-white/70' : 'text-white/45'}>
+      <span className={isCaseStudy ? 'text-white/70' : 'text-white/50'}>
         {isCaseStudy ? '// Case study' : '// Project'}
       </span>
     </p>
@@ -77,7 +78,7 @@ export function ProjectHero({
           data-sanity={coverDataSanity}
           image={coverImage as never}
           alt={stegaClean(coverImage?.alt) || `${title} — cover`}
-          classesWrapper="absolute inset-0 rounded-none bg-[#141414]"
+          classesWrapper="absolute inset-0 rounded-none bg-ink"
           priority
         />
       ) : posterUrl ? (
@@ -129,12 +130,12 @@ export function ProjectHero({
         <div className="absolute inset-0 overflow-hidden">{mediaLayer}</div>
         <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/35" />
       </button>
-      {/* Soft fade into page black at the bottom edge. */}
+      {/* Legibility scrim over media — the page below is paper, so this ends on solid ink for a clean band edge. */}
       <div
         className="pointer-events-none absolute inset-0 z-[4]"
         style={{
           background:
-            'linear-gradient(to bottom, transparent 55%, rgba(26,26,26,0.35) 78%, rgba(26,26,26,0.75) 92%, #1a1a1a 100%)',
+            'linear-gradient(to bottom, transparent 55%, rgba(8,9,10,0.35) 78%, rgba(8,9,10,0.75) 92%, #08090a 100%)',
         }}
         aria-hidden="true"
       />
@@ -155,7 +156,7 @@ export function ProjectHero({
         className="pointer-events-none absolute inset-0 z-[2]"
         style={{
           background:
-            'linear-gradient(to bottom, transparent 55%, rgba(26,26,26,0.35) 78%, rgba(26,26,26,0.75) 92%, #1a1a1a 100%)',
+            'linear-gradient(to bottom, transparent 55%, rgba(8,9,10,0.35) 78%, rgba(8,9,10,0.75) 92%, #08090a 100%)',
         }}
         aria-hidden="true"
       />

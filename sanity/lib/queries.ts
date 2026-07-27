@@ -1,20 +1,5 @@
 import {defineQuery} from 'next-sanity'
 
-// Fields the homepage video hero needs from each project. Shared across the
-// three showcase-source branches (manual / featured / by-type) so they always
-// return the same shape.
-const showcaseProjectFields = `
-  _id,
-  _type,
-  coverImage,
-  overview,
-  "slug": slug.current,
-  title,
-  videoUrl,
-  role,
-  year
-`
-
 export const homePageQuery = defineQuery(`
   *[_id == "home"][0]{
     _id,
@@ -24,36 +9,100 @@ export const homePageQuery = defineQuery(`
     ogImage,
     speakableSummary,
     hiddenH1,
-    heroCtaLabel,
-    clientSource,
-    cta->{ _id, subhead, buttonLabel, link, contactSubject },
-    "showcaseProjects": select(
-      showcaseSource == "all" =>
-        *[_type == "project" && defined(slug.current) && defined(videoUrl)]
-          | order(year desc, title asc){ "_key": _id, ${showcaseProjectFields} },
-      showcaseSource == "featured" =>
-        *[_type == "project" && featured == true && defined(slug.current) && defined(videoUrl)]
-          | order(year desc, title asc){ "_key": _id, ${showcaseProjectFields} },
-      showcaseSource == "type" =>
-        *[_type == "project" && projectType == ^.showcaseType && defined(slug.current) && defined(videoUrl)]
-          | order(year desc, title asc){ "_key": _id, ${showcaseProjectFields} },
-      showcaseProjects[]{ _key, ...@->{ ${showcaseProjectFields} } }[defined(videoUrl)]
-    ),
-    "marqueeClients": select(
-      clientSource == "manual" =>
-        clientList[]{ "_key": _key, ...@->{ _id, name, website } },
-      clientSource == "all" =>
-        *[_type == "client" && defined(name)]
-          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },
-      clientSource == "known" =>
-        *[_type == "client" && tier == "known" && defined(name)]
-          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },
-      clientSource == "less-known" =>
-        *[_type == "client" && tier == "less-known" && defined(name)]
-          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },
-      *[_type == "client" && tier == "known" && defined(name)]
-        | order(sortOrder asc, name asc){ "_key": _id, _id, name, website }
-    ),
+    sections[]{
+      _key,
+      _type,
+      enabled,
+      internalName,
+      _type == "homeHeroSection" => {
+        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter
+      },
+      _type == "homeProofSection" => {
+        label,
+        clients[]{ _key, ...@->{ _id, name, website } }
+      },
+      _type == "homeServicesSection" => {
+        label,
+        cards[]{ _key, title, body, priceLine, linkLabel }
+      },
+      _type == "homeWorkSection" => {
+        label,
+        projects[]{
+          _key,
+          ...@->{
+            _id,
+            title,
+            "slug": slug.current,
+            overview,
+            coverImage,
+            videoUrl,
+            year,
+            "client": client->name
+          }
+        },
+        linkLabel
+      },
+      _type == "homeProductSection" => { headline, body, ctaLabel },
+      _type == "homePhilosophySection" => { line1, line2 },
+      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },
+    },
+  }
+`)
+
+// Services page singleton — the /services route ships with the frontend
+// rebuild; the query is ready so typegen has the shape.
+export const servicesPageQuery = defineQuery(`
+  *[_id == "servicesPage"][0]{
+    _id,
+    _type,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    speakableSummary,
+    sections[]{
+      _key,
+      _type,
+      enabled,
+      internalName,
+      _type == "servicesHeroSection" => { headline, subheadline },
+      _type == "servicesListSection" => { serviceAi, serviceSite, serviceCare },
+      _type == "servicesFitSection" => {
+        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints
+      },
+      _type == "servicesProcessSection" => {
+        headline,
+        steps[]{ _key, lead, text },
+        recommendationDays,
+        ctaLabel
+      },
+      _type == "servicesFaqSection" => { faq },
+      _type == "servicesFinalCtaSection" => { headline, ctaLabel, microcopy },
+    },
+  }
+`)
+
+// About page singleton — the /about route ships with the frontend rebuild;
+// the query is ready so typegen has the shape.
+export const aboutPageQuery = defineQuery(`
+  *[_id == "aboutPage"][0]{
+    _id,
+    _type,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    speakableSummary,
+    sections[]{
+      _key,
+      _type,
+      enabled,
+      internalName,
+      _type == "aboutOpeningSection" => { line1, line2, body },
+      _type == "aboutStorySection" => { body, offHoursLine, photo },
+      _type == "aboutSmallnessSection" => { headline, body },
+      _type == "aboutConvictionsSection" => { headline, lines, closingLine },
+      _type == "aboutProductSection" => { body, linkLabel },
+      _type == "aboutClosingSection" => { body, ctaLabel, microcopy },
+    },
   }
 `)
 
@@ -78,6 +127,7 @@ export const projectBySlugQuery = defineQuery(`
     _id,
     _type,
     projectType,
+    comingSoon,
     title,
     "slug": slug.current,
     seoTitle,
@@ -85,6 +135,36 @@ export const projectBySlugQuery = defineQuery(`
     ogImage,
     speakableSummary,
     overview,
+    deliverables,
+    sections[]{
+      _key,
+      _type,
+      enabled,
+      internalName,
+      _type == "projectStatementSection" => { label, body },
+      _type == "projectScopeSection" => { label, items[]{ _key, title, detail } },
+      _type == "projectMediaSection" => {
+        rows[]{
+          _key,
+          _type,
+          items[]{
+            _key,
+            _type,
+            _type == "projectGalleryPhoto" => {
+              image{ asset, alt, caption, hotspot, crop },
+            },
+            _type == "projectGalleryVideo" => {
+              videoUrl,
+              caption,
+              poster{ asset, alt, hotspot, crop },
+            },
+          },
+        },
+      },
+      _type == "projectQuoteSection" => { quote, attribution, attributionRole },
+      _type == "projectStatsSection" => { items[]{ _key, value, label } },
+      _type == "projectCreditsSection" => { items[]{ _key, role, name } },
+    },
     context,
     btsNote,
     brief,
@@ -134,16 +214,33 @@ export const projectBySlugQuery = defineQuery(`
     siteButtonLabel,
     client->{ _id, name, website },
     categories[]->{ _id, filterLabel, "slug": slug.current },
+    stack[]->{ _id, name, kind, url },
     relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },
   }
 `)
 
-// Card shape shared by the Work grid and category pages.
+/** Other projects for the project-page “Next project” rail when related is empty/short. */
+export const nextProjectsQuery = defineQuery(`
+  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && comingSoon != true && slug.current != $slug]
+    | order(featured desc, year desc, title asc)[0...3]{
+    _id,
+    title,
+    "slug": slug.current,
+    coverImage,
+    videoUrl,
+    year,
+    "client": client->name,
+  }
+`)
+
+// Card shape shared by the Work grid and category pages. A project appears
+// once it has a cover image OR a video; video is optional hover flair.
 export const allProjectsQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && defined(videoUrl)]|order(year desc, title asc){
+  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl))]|order(year desc, title asc){
     _id,
     projectType,
     featured,
+    comingSoon,
     title,
     "slug": slug.current,
     overview,
@@ -157,10 +254,11 @@ export const allProjectsQuery = defineQuery(`
 
 // Projects in one category, by the category's slug (for /work/[slug]).
 export const projectsByCategoryQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && defined(videoUrl) && $slug in categories[]->slug.current]|order(year desc, title asc){
+  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(year desc, title asc){
     _id,
     projectType,
     featured,
+    comingSoon,
     title,
     "slug": slug.current,
     overview,
@@ -192,6 +290,21 @@ export const workCategoryBySlugQuery = defineQuery(`
     subhead,
     seoTitle,
     seoDescription,
+    "capabilities": *[_type == "capability" && ^._id in categories[]._ref]
+      | order(kind asc, sortOrder asc, name asc){ _id, name, kind, url, iconSlug, logo },
+  }
+`)
+
+// All capabilities grouped for "what we work with" displays and the marquee.
+export const capabilitiesQuery = defineQuery(`
+  *[_type == "capability"] | order(kind asc, sortOrder asc, name asc){
+    _id,
+    name,
+    kind,
+    url,
+    iconSlug,
+    logo,
+    categories[]->{ _id, filterLabel, "slug": slug.current },
   }
 `)
 
@@ -374,6 +487,7 @@ export const workPageQuery = defineQuery(`
       _id,
       projectType,
       featured,
+      comingSoon,
       title,
       "slug": slug.current,
       overview,
@@ -382,7 +496,7 @@ export const workPageQuery = defineQuery(`
       year,
       "client": client->name,
       categories[]->{ _id, filterLabel, "slug": slug.current },
-    }[defined(_id) && defined(videoUrl)],
+    }[defined(_id) && (defined(coverImage.asset) || defined(videoUrl))],
     pillSource,
     categoryPills[]->{ _id, filterLabel, "slug": slug.current },
     videoPlayback,
@@ -408,8 +522,11 @@ export const contactPageQuery = defineQuery(`
       enabled,
       internalName,
       _type == "contactHeroSection" => { headline, lead },
+      _type == "contactBookingSection" => { calLink, fallbackNote },
+      _type == "contactCallDetailsSection" => { label, bullets[]{ _key, lead, text }, recommendationDays },
       _type == "contactDirectSection" => { directContactLine },
       _type == "contactFormSection" => { formConfig },
+      _type == "contactFooterSection" => { email, cityTimezone, responseLine },
     },
   }
 `)

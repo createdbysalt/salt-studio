@@ -20,8 +20,11 @@ export default defineType({
   fields: [
     pageSectionsField([
       {type: 'contactHeroSection', title: 'Hero'},
+      {type: 'contactBookingSection', title: 'Calendar Booking'},
+      {type: 'contactCallDetailsSection', title: 'What Happens on the Call'},
       {type: 'contactDirectSection', title: 'Direct Contact'},
       {type: 'contactFormSection', title: 'Contact Form'},
+      {type: 'contactFooterSection', title: 'Practical Footer'},
     ]),
     ...coreSearchFields(),
   ],

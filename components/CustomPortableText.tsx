@@ -20,7 +20,7 @@ export function CustomPortableText({
   type,
   path,
   paragraphClasses,
-  imageCaptionClasses = 'font-sans text-sm text-gray-600',
+  imageCaptionClasses = 'font-sans text-sm text-foreground/40',
   value,
 }: {
   id: string | null
@@ -40,7 +40,7 @@ export function CustomPortableText({
       link: ({children, value}) => {
         return (
           <a
-            className="underline transition hover:opacity-50"
+            className="underline opacity-70 transition hover:opacity-100"
             href={value?.href}
             rel="noreferrer noopener"
           >
@@ -56,7 +56,7 @@ export function CustomPortableText({
             <ImageBox
               image={value}
               alt={value.alt}
-              classesWrapper="relative aspect-[16/9] overflow-hidden bg-white/[0.04]"
+              classesWrapper="relative aspect-[16/9] overflow-hidden rounded-lg bg-foreground/6"
             />
             {value?.caption && <div className={imageCaptionClasses}>{value.caption}</div>}
           </div>
@@ -120,12 +120,9 @@ export function CustomPortableText({
         if (!cta?.buttonLabel) return null
         const href = stegaClean(cta.link) || '/contact'
         return (
-          <section className="mt-16 border-t border-black/15 pt-10">
-            {cta.subhead ? <p className="text-xl font-medium">{cta.subhead}</p> : null}
-            <Link
-              href={href}
-              className="mt-6 inline-block border border-black bg-black px-5 py-2.5 font-mono text-[13px] uppercase tracking-[0.15em] text-white"
-            >
+          <section className="mt-16 border-t border-foreground/15 pt-10">
+            {cta.subhead ? <p className="text-xl font-medium text-foreground">{cta.subhead}</p> : null}
+            <Link href={href} className="btn-solid mt-6">
               {cta.buttonLabel}
             </Link>
           </section>

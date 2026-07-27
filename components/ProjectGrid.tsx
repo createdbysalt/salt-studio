@@ -1,4 +1,3 @@
-import {ProjectCardCorners} from '@/components/ProjectCardCorners'
 import {
   ProjectCardMedia,
   resolveWorkVideoPlayback,
@@ -6,6 +5,7 @@ import {
 } from '@/components/ProjectCardMedia'
 import {fetchVimeoPoster, isVimeoUrl} from '@/lib/vimeo'
 import {urlForImage} from '@/sanity/lib/utils'
+import {ArrowUpRight} from 'lucide-react'
 import {stegaClean} from 'next-sanity'
 import Link from 'next/link'
 
@@ -26,11 +26,15 @@ export type WorkProjectCard = {
     slug: string | null
   } | null> | null
   featured?: boolean | null
+  /** Teaser card — shown on the grid but not clickable, no detail page yet. */
+  comingSoon?: boolean | null
   /** Resolved on the server for cards that need a still before video boots. */
   posterUrl?: string | null
+  /** Catalog position ("01"), attached before client-side search filtering. */
+  indexMark?: string
 }
 
-/** True when a project has a non-empty video URL (Work grid requires video). */
+/** True when a project has a non-empty video URL (optional hover flair). */
 export function projectHasVideo(
   project: Pick<WorkProjectCard, 'videoUrl'> | null | undefined,
 ): boolean {
@@ -38,12 +42,15 @@ export function projectHasVideo(
   return Boolean(stegaClean(project.videoUrl).trim())
 }
 
-/** Drop projects without video — used after manual curation or client-side filters. */
+/**
+ * Drop projects with nothing to show — a card needs a cover image or a video.
+ * Used after manual curation or client-side filters.
+ */
 export function filterProjectsWithVideo(
   projects: Array<WorkProjectCard | null>,
 ): WorkProjectCard[] {
   return projects.filter((project): project is WorkProjectCard =>
-    Boolean(project && projectHasVideo(project)),
+    Boolean(project && (project.coverImage?.asset?._ref || projectHasVideo(project))),
   )
 }
 
@@ -54,38 +61,9 @@ export type WorkEmptyState = {
   ctaHref?: string | null
 } | null
 
-/** Format CMS year ("2026", "2021–22") as the short card mark ("/26"). */
-function formatYearMark(year: string | null | undefined): string | null {
-  if (!year) return null
-  const clean = stegaClean(year).trim()
-  if (!clean) return null
-  const match = clean.match(/(\d{4})/)
-  if (match) return `/${match[1].slice(-2)}`
-  return clean.startsWith('/') ? clean : `/${clean}`
-}
-
-/** Meta line: `Client × Salt Studio · /26` */
-function formatClientLine(client: string | null | undefined, year: string | null | undefined) {
-  const name = client ? stegaClean(client).trim() : ''
-  const yearMark = formatYearMark(year)
-  const left = name ? `${name} × Salt Studio` : 'Salt Studio'
-  if (yearMark) return `${left} · ${yearMark}`
-  return left
-}
-
-/** Category labels for the work card meta line. */
-function formatTagLine(project: WorkProjectCard): string | null {
-  const categories = (project.categories ?? [])
-    .map((cat) => (cat?.filterLabel ? stegaClean(cat.filterLabel).trim() : ''))
-    .filter(Boolean)
-  if (categories.length) return categories.join(' · ')
-
-  return null
-}
-
 /**
  * Attach poster stills for work cards — Sanity cover when present, otherwise
- * a cached Vimeo oEmbed thumbnail so the grid isn't black while video boots.
+ * a cached Vimeo oEmbed thumbnail so the grid isn't blank while video boots.
  */
 export async function withWorkPosters(
   projects: Array<WorkProjectCard | null>,
@@ -116,9 +94,9 @@ export async function withWorkPosters(
 }
 
 /**
- * The Work grid — full-bleed project cards linking to /projects/[slug].
- * Filters out dangling references and renders the editor-configured empty
- * state (or a sensible default) when nothing remains.
+ * The Work grid — a contact sheet on paper. Full-bleed media tiles separated
+ * by hairlines, captions set BELOW each frame like a print index: catalog
+ * number, title, and the route out. No text on the media.
  */
 export function ProjectGrid({
   projects,
@@ -137,11 +115,11 @@ export function ProjectGrid({
     const ctaLabel = emptyState?.ctaLabel || 'Start a conversation →'
     const ctaHref = emptyState?.ctaHref || '/contact'
     return (
-      <div className="mt-12 px-5 font-mono text-[11px] uppercase tracking-[0.18em] text-white/40 md:px-6">
-        <p>{text}</p>
+      <div className="page-chrome mt-14 text-center font-sans text-[15px] leading-[1.6] text-foreground/60">
+        <p className="!m-0">{text}</p>
         <Link
           href={ctaHref}
-          className="mt-3 inline-block text-white/70 underline decoration-white/30 underline-offset-4 transition-colors hover:text-white"
+          className="mt-3 inline-block text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors duration-300 hover:decoration-foreground"
         >
           {ctaLabel}
         </Link>
@@ -150,16 +128,13 @@ export function ProjectGrid({
   }
 
   return (
-    <ul className="mt-12 grid grid-cols-1 gap-hairline sm:grid-cols-2">
-      {items.map((project) => {
-        const clientLine = formatClientLine(project.client, project.year)
-        const tagLine = formatTagLine(project)
-        return (
-          <li key={project._id} className="bg-[#1a1a1a]">
-            <Link
-              href={`/projects/${project.slug}`}
-              className="group relative block aspect-[6/5] overflow-hidden sm:aspect-[16/9]"
-            >
+    <ul className="media-bleed mt-12 grid grid-cols-1 gap-x-hairline gap-y-10 sm:grid-cols-2 md:mt-16 lg:grid-cols-3">
+      {items.map((project, position) => {
+        const indexMark = project.indexMark ?? String(position + 1).padStart(2, '0')
+        const comingSoon = Boolean(project.comingSoon)
+        const card = (
+          <>
+            <div className="relative aspect-[16/9] overflow-hidden bg-foreground/6">
               <ProjectCardMedia
                 title={project.title}
                 coverImage={project.coverImage}
@@ -167,25 +142,42 @@ export function ProjectGrid({
                 posterUrl={project.posterUrl}
                 playback={playbackMode}
               />
-              <ProjectCardCorners />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
-              />
-              <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1.5 p-4 md:p-5">
-                <h3 className="font-sans text-lg font-bold uppercase leading-[0.95] tracking-tight text-white md:text-xl">
-                  {project.title}
-                </h3>
-                <p className="!m-0 font-mono text-[11px] uppercase leading-none tracking-[0.12em] text-white/70">
-                  {clientLine}
-                </p>
-                {tagLine ? (
-                  <p className="!m-0 font-mono text-[10px] uppercase leading-none tracking-[0.14em] text-white/45">
-                    {tagLine}
-                  </p>
-                ) : null}
-              </div>
-            </Link>
+            </div>
+            {/* Glitch&Grit caption: bold sans index + title left, FULL PROJECT right. */}
+            <div className="mt-2 flex items-baseline gap-2.5 px-[16px] md:mt-2.5 md:gap-3 md:px-[20px]">
+              <span className="shrink-0 font-sans text-[16px] font-bold tabular-nums tracking-[-0.02em] text-foreground md:text-[17px]">
+                {indexMark}
+              </span>
+              <h3 className="min-w-0 truncate font-sans text-[16px] font-bold uppercase tracking-[-0.02em] text-foreground md:text-[17px]">
+                {project.title}
+              </h3>
+              {comingSoon ? (
+                <span className="ml-auto inline-flex shrink-0 items-center font-sans text-[13px] font-bold uppercase tracking-[-0.01em] text-foreground/40 md:text-[14px]">
+                  Coming soon
+                </span>
+              ) : (
+                <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-sans text-[13px] font-bold uppercase tracking-[-0.01em] text-foreground/55 transition-colors duration-300 group-hover:text-foreground md:text-[14px]">
+                  Full project
+                  <ArrowUpRight
+                    aria-hidden
+                    strokeWidth={2.75}
+                    absoluteStrokeWidth
+                    className="h-[16px] w-[16px] transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 md:h-[17px] md:w-[17px]"
+                  />
+                </span>
+              )}
+            </div>
+          </>
+        )
+        return (
+          <li key={project._id}>
+            {comingSoon ? (
+              <div className="block cursor-default">{card}</div>
+            ) : (
+              <Link href={`/projects/${project.slug}`} className="group block">
+                {card}
+              </Link>
+            )}
           </li>
         )
       })}

@@ -20,6 +20,14 @@ export const mainDocuments = defineDocuments([
     filter: `_type == "workCategory" && slug.current == $slug`,
   },
   {
+    route: '/capabilities',
+    filter: `_type == "servicesPage"`,
+  },
+  {
+    route: '/about',
+    filter: `_type == "aboutPage"`,
+  },
+  {
     route: '/contact',
     filter: `_type == "contactPage"`,
   },
@@ -73,6 +81,16 @@ export const locations = {
   notFoundPage: defineLocations({
     message: 'This document defines the 404 page content',
     tone: 'caution',
+  }),
+  servicesPage: defineLocations({
+    message: 'Capabilities page',
+    tone: 'positive',
+    locations: [{title: 'Capabilities', href: resolveHref('servicesPage')!}],
+  }),
+  aboutPage: defineLocations({
+    message: 'About page — hidden on the live site until published',
+    tone: 'positive',
+    locations: [{title: 'About', href: resolveHref('aboutPage')!}],
   }),
   workPage: defineLocations({
     message: 'Work index page',

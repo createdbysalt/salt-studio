@@ -47,6 +47,10 @@ export {
   trackVideoProgress,
   trackSearch,
   trackError,
+  trackQuizStart,
+  trackQuizStep,
+  trackQuizGate,
+  trackQuizComplete,
   trackCustomEvent,
 } from './events'
 

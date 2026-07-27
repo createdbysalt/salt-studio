@@ -1,5 +1,7 @@
 import {filterProjectsWithVideo, withWorkPosters} from '@/components/ProjectGrid'
+import {Reveal} from '@/components/Reveal'
 import {WorkCatalog} from '@/components/WorkCatalog'
+import {WorkFilterHeadline} from '@/components/WorkFilterHeadline'
 import {CorePageSchema, generateServiceSchema, ogImageUrl} from '@/lib/seo'
 import {resolveWorkPills} from '@/lib/work-pills'
 import {sanityFetch} from '@/sanity/lib/live'
@@ -73,7 +75,7 @@ export default async function WorkCategoryRoute({params}: Props) {
   const pills = resolveWorkPills(page?.pillSource, page?.categoryPills, categories ?? [])
 
   return (
-    <main data-theme="dark" className="bg-background text-foreground pb-24">
+    <main className="bg-background text-foreground pb-24">
       <CorePageSchema
         breadcrumbs={[
           {name: 'Home', url: '/'},
@@ -93,22 +95,25 @@ export default async function WorkCategoryRoute({params}: Props) {
         })}
       />
 
-      <header className="px-5 pt-10 md:px-6 md:pt-14">
-        <h1 className="font-sans text-4xl font-bold uppercase leading-[0.95] tracking-tight text-white lg:text-5xl">
-          {headline}
-        </h1>
-        {subhead ? (
-          <p className="speakable-summary mt-4 max-w-xl font-mono text-[11px] uppercase leading-[1.7] tracking-[0.08em] text-white/70 md:text-[12px]">
-            {subhead}
+      <header className="page-chrome pt-28 text-center md:pt-36">
+        <h1 className="sr-only">{headline}</h1>
+
+        <Reveal immediate>
+          <p className="mb-[14px] font-sans text-[13px] tracking-[-0.01em] text-foreground/45 md:mb-[18px] md:text-[14px]">
+            Filter by
           </p>
-        ) : null}
+          <WorkFilterHeadline
+            allLabel={page?.headline ?? 'All Work'}
+            categories={pills}
+            activeSlug={categoryDoc.slug}
+          />
+        </Reveal>
+        {subhead ? <p className="sr-only speakable-summary">{subhead}</p> : null}
       </header>
 
       <WorkCatalog
         projects={await withWorkPosters(filterProjectsWithVideo(projects ?? []))}
         emptyState={page?.emptyState}
-        categories={pills}
-        activeSlug={categoryDoc.slug}
         videoPlayback={page?.videoPlayback}
       />
     </main>

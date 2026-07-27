@@ -177,6 +177,45 @@ export function trackError(
 }
 
 /**
+ * Track quiz start (visitor begins the Salt Score quiz).
+ */
+export function trackQuizStart(data: {quiz_name: string}): void {
+  trackEvent({event: 'quiz_start', ...data})
+}
+
+/**
+ * Track a quiz step answer — powers funnel drop-off analysis.
+ */
+export function trackQuizStep(data: {
+  quiz_name: string
+  step: number
+  question_key: string
+  track?: string
+}): void {
+  trackEvent({event: 'quiz_step', ...data})
+}
+
+/**
+ * Track the email gate being shown (all questions answered).
+ */
+export function trackQuizGate(data: {quiz_name: string; track: string}): void {
+  trackEvent({event: 'quiz_gate', ...data})
+}
+
+/**
+ * Track successful quiz completion (gate submitted, results shown).
+ */
+export function trackQuizComplete(data: {
+  quiz_name: string
+  track: string
+  score?: number
+  score_band?: string
+  waitlist_opt_in: boolean
+}): void {
+  trackEvent({event: 'quiz_complete', ...data})
+}
+
+/**
  * Track custom event.
  * Use this for one-off events that don't fit the standard types.
  *

@@ -16,10 +16,12 @@ import {singletonPlugin} from '@/sanity/plugins/settings'
 import {StudioLogo} from '@/sanity/plugins/studioComponents'
 import {saltStudioTheme} from '@/sanity/plugins/studioTheme'
 import callToAction from '@/sanity/schemas/documents/callToAction'
+import capability from '@/sanity/schemas/documents/capability'
 import client from '@/sanity/schemas/documents/client'
 import legalPage from '@/sanity/schemas/documents/legalPage'
 import page from '@/sanity/schemas/documents/page'
 import project from '@/sanity/schemas/documents/project'
+import quizSubmission from '@/sanity/schemas/documents/quizSubmission'
 import testimonial from '@/sanity/schemas/documents/testimonial'
 import workCategory from '@/sanity/schemas/documents/workCategory'
 import contactForm from '@/sanity/schemas/objects/contactForm'
@@ -38,12 +40,51 @@ import {
 } from '@/sanity/schemas/objects/projectGallery'
 import testimonials from '@/sanity/schemas/objects/testimonials'
 import timeline from '@/sanity/schemas/objects/timeline'
+import serviceBlock from '@/sanity/schemas/objects/serviceBlock'
 import {
+  aboutClosingSection,
+  aboutConvictionsSection,
+  aboutOpeningSection,
+  aboutProductSection,
+  aboutSmallnessSection,
+  aboutStorySection,
+} from '@/sanity/schemas/sections/aboutSections'
+import {
+  contactBookingSection,
+  contactCallDetailsSection,
   contactDirectSection,
+  contactFooterSection,
   contactFormSection,
   contactHeroSection,
 } from '@/sanity/schemas/sections/contactSections'
+import {
+  projectCreditsSection,
+  projectMediaSection,
+  projectQuoteSection,
+  projectScopeSection,
+  projectStatementSection,
+  projectStatsSection,
+} from '@/sanity/schemas/sections/projectSections'
+import {
+  homeFinalCtaSection,
+  homeHeroSection,
+  homePhilosophySection,
+  homeProductSection,
+  homeProofSection,
+  homeServicesSection,
+  homeWorkSection,
+} from '@/sanity/schemas/sections/homeSections'
+import {
+  servicesFaqSection,
+  servicesFinalCtaSection,
+  servicesFitSection,
+  servicesHeroSection,
+  servicesListSection,
+  servicesProcessSection,
+} from '@/sanity/schemas/sections/servicesSections'
+import aboutPage from '@/sanity/schemas/singletons/aboutPage'
 import contactPage from '@/sanity/schemas/singletons/contactPage'
+import servicesPage from '@/sanity/schemas/singletons/servicesPage'
 import developerSettings from '@/sanity/schemas/singletons/developerSettings'
 import errorPage from '@/sanity/schemas/singletons/errorPage'
 import home from '@/sanity/schemas/singletons/home'
@@ -94,16 +135,21 @@ export default defineConfig({
       errorPage,
       workPage,
       contactPage,
+      servicesPage,
+      aboutPage,
       // Documents
       callToAction,
       legalPage,
       page,
       project,
+      quizSubmission,
       workCategory,
+      capability,
       client,
       testimonial,
       // Objects
       contactForm,
+      serviceBlock,
       duration,
       faq,
       hero,
@@ -118,10 +164,42 @@ export default defineConfig({
       testimonials,
       timeline,
       homeSection,
+      // Home page sections
+      homeHeroSection,
+      homeProofSection,
+      homeServicesSection,
+      homeWorkSection,
+      homeProductSection,
+      homePhilosophySection,
+      homeFinalCtaSection,
+      // About page sections
+      aboutOpeningSection,
+      aboutStorySection,
+      aboutSmallnessSection,
+      aboutConvictionsSection,
+      aboutProductSection,
+      aboutClosingSection,
+      // Services page sections
+      servicesHeroSection,
+      servicesListSection,
+      servicesFitSection,
+      servicesProcessSection,
+      servicesFaqSection,
+      servicesFinalCtaSection,
       // Contact page sections
       contactHeroSection,
+      contactBookingSection,
+      contactCallDetailsSection,
       contactDirectSection,
       contactFormSection,
+      contactFooterSection,
+      // Project case-study sections
+      projectStatementSection,
+      projectScopeSection,
+      projectMediaSection,
+      projectQuoteSection,
+      projectStatsSection,
+      projectCreditsSection,
     ],
   },
   plugins: [

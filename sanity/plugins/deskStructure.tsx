@@ -1,5 +1,7 @@
 import {
   CaseIcon,
+  ClipboardIcon,
+  CodeBlockIcon,
   CogIcon,
   DocumentsIcon,
   FolderIcon,
@@ -16,6 +18,8 @@ import type {StructureBuilder, StructureResolver} from 'sanity/structure'
 /** Fixed document IDs for singleton page editors */
 export const SINGLETON_DOCUMENT_IDS = {
   home: 'home',
+  servicesPage: 'servicesPage',
+  aboutPage: 'aboutPage',
   workPage: 'workPage',
   contactPage: 'contactPage',
   settings: 'settings',
@@ -73,6 +77,18 @@ export const saltDeskStructure: StructureResolver = (S) => {
             icon: HomeIcon,
           }),
           singletonEditor(S, {
+            title: 'Services',
+            schemaType: 'servicesPage',
+            documentId: SINGLETON_DOCUMENT_IDS.servicesPage,
+            icon: DocumentsIcon,
+          }),
+          singletonEditor(S, {
+            title: 'About',
+            schemaType: 'aboutPage',
+            documentId: SINGLETON_DOCUMENT_IDS.aboutPage,
+            icon: DocumentsIcon,
+          }),
+          singletonEditor(S, {
             title: 'Work',
             schemaType: 'workPage',
             documentId: SINGLETON_DOCUMENT_IDS.workPage,
@@ -120,13 +136,20 @@ export const saltDeskStructure: StructureResolver = (S) => {
           S.divider().title('Work'),
           S.documentTypeListItem('project').title('Projects'),
           S.documentTypeListItem('workCategory').title('Work Categories').icon(TagIcon),
+          S.documentTypeListItem('capability').title('Capabilities').icon(CodeBlockIcon),
           // ─── People ───
           S.divider().title('People'),
           S.documentTypeListItem('client').title('Clients').icon(CaseIcon),
           S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon),
+          // ─── Leads ───
+          S.divider().title('Leads'),
+          S.documentTypeListItem('quizSubmission').title('Quiz Submissions').icon(ClipboardIcon),
           // ─── Global ───
           S.divider().title('Global'),
           S.documentTypeListItem('callToAction').title('CTAs').icon(RocketIcon),
+          // ─── Pages ───
+          S.divider().title('Pages'),
+          S.documentTypeListItem('page').title('Pages'),
           // ─── Utilities ───
           S.divider().title('Utilities'),
           S.documentTypeListItem('legalPage').title('Legal Pages'),
@@ -160,6 +183,8 @@ export const saltDeskStructure: StructureResolver = (S) => {
 
 export const saltSingletonTypes = [
   'home',
+  'servicesPage',
+  'aboutPage',
   'workPage',
   'contactPage',
   'notFoundPage',

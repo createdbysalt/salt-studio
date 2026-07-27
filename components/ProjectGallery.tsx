@@ -43,14 +43,15 @@ function GalleryCell({
     const alt = image.alt ? stegaClean(image.alt) : ''
     const caption = image.caption ? stegaClean(image.caption) : null
     return (
-      <div className={`relative overflow-hidden bg-white/[0.04] ${aspectClass}`}>
+      <div className={`relative overflow-hidden bg-foreground/[0.06] ${aspectClass}`}>
         <ImageBox
           image={image as never}
           alt={alt || 'Project still'}
-          classesWrapper="absolute inset-0 !rounded-none bg-[#1a1a1a]"
+          classesWrapper="absolute inset-0 !rounded-none bg-muted"
         />
         {caption ? (
-          <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 font-mono text-[10px] uppercase tracking-[0.14em] text-white/60">
+          /* Caption ON media — white over a scrim, deliberately not themed. */
+          <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 font-mono text-[10px] uppercase tracking-[0.08em] text-white/70">
             {caption}
           </p>
         ) : null}

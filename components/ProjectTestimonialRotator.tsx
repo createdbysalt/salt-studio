@@ -10,7 +10,7 @@ export type ProjectTestimonial = {
   role: string | null
 }
 
-const LABEL = 'font-mono text-[11px] uppercase tracking-[0.14em] text-white/45'
+const LABEL = 'font-mono text-[11px] uppercase tracking-[0.08em] text-foreground/40'
 const INTERVAL_MS = 6000
 
 type ProjectTestimonialRotatorProps = {
@@ -67,7 +67,7 @@ export function ProjectTestimonialRotator({items}: ProjectTestimonialRotatorProp
         aria-live="polite"
         className={`transition-opacity duration-300 ${visible ? 'opacity-100' : 'opacity-0'}`}
       >
-        <blockquote className="font-sans text-2xl font-light uppercase leading-snug tracking-tight text-white md:text-3xl">
+        <blockquote className="font-sans text-2xl font-light uppercase leading-snug tracking-tight text-foreground md:text-3xl">
           “{quote}”
         </blockquote>
         {attribution ? <figcaption className={`${LABEL} mt-4`}>{attribution}</figcaption> : null}
@@ -87,7 +87,7 @@ export function ProjectTestimonialRotator({items}: ProjectTestimonialRotatorProp
                 setIndex(i)
               }}
               className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                i === index ? 'bg-white' : 'bg-white/25 hover:bg-white/50'
+                i === index ? 'bg-foreground' : 'bg-foreground/25 hover:bg-foreground/50'
               }`}
             />
           ))}

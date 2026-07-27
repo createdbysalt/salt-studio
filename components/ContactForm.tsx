@@ -121,10 +121,10 @@ export function ContactForm({
     return (
       <div id="briefing" className={isPage ? 'w-full' : 'mx-auto max-w-3xl px-5 py-14 sm:px-6'}>
         <Reveal immediate y={10}>
-          <h2 className="font-mono text-[clamp(1.5rem,3.5vw,2.25rem)] font-medium leading-tight tracking-tight text-black">
+          <h2 className="text-[clamp(1.5rem,3.5vw,2.25rem)] font-semibold leading-tight tracking-[-0.02em] text-foreground">
             {successHeadline}
           </h2>
-          <p className="mt-4 max-w-md text-sm leading-relaxed text-black/55 md:text-base">
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-foreground/70 md:text-base">
             {successMessage}
           </p>
         </Reveal>
@@ -136,10 +136,10 @@ export function ContactForm({
     <form action={formAction} onFocus={handleFormStart} className="w-full">
       {state.message && !state.success ? (
         <div className="mb-8" role="alert">
-          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[#c03939]">
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-error">
             {errorHeadline}
           </p>
-          <p className="mt-2 text-sm leading-relaxed text-black/70">
+          <p className="mt-2 text-sm leading-relaxed text-foreground/70">
             {state.errors ? state.message : <ErrorBody text={errorMessage} />}
           </p>
         </div>
@@ -176,15 +176,15 @@ export function ContactForm({
         <button
           type="submit"
           disabled={isPending}
-          className={`inline-flex min-h-12 w-full items-center justify-center border border-black bg-black px-7 py-3.5 font-mono text-[11px] uppercase tracking-[0.18em] text-white transition-colors duration-300 sm:min-h-0 sm:w-auto sm:py-3 ${
-            isPending ? 'cursor-not-allowed opacity-50' : 'hover:bg-transparent hover:text-black'
+          className={`btn-solid min-h-12 w-full justify-center sm:min-h-0 sm:w-auto ${
+            isPending ? 'cursor-not-allowed opacity-50' : ''
           }`}
         >
           {isPending ? 'Sending…' : submitLabel}
         </button>
 
         {!isPage && footerNote?.trim() ? (
-          <p className="mt-4 text-xs leading-relaxed text-black/40">{footerNote}</p>
+          <p className="mt-4 text-xs leading-relaxed text-foreground/40">{footerNote}</p>
         ) : null}
       </div>
     </form>
@@ -200,12 +200,14 @@ export function ContactForm({
         {title?.trim() || description?.trim() ? (
           <div className="mb-8 md:mb-10">
             {title?.trim() ? (
-              <h2 className="font-mono text-[clamp(1.35rem,3vw,1.85rem)] font-medium tracking-tight text-black">
+              <h2 className="text-[clamp(1.35rem,3vw,1.85rem)] font-semibold tracking-[-0.02em] text-foreground">
                 {title}
               </h2>
             ) : null}
             {description?.trim() ? (
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-black/55">{description}</p>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-foreground/70">
+                {description}
+              </p>
             ) : null}
           </div>
         ) : null}
@@ -224,7 +226,7 @@ function ErrorBody({text}: {text: string}) {
       {parts[0]}
       <a
         href={`mailto:${email}`}
-        className="text-black underline decoration-black/25 underline-offset-[0.15em] transition-colors hover:decoration-black"
+        className="text-foreground underline decoration-foreground/40 underline-offset-[0.15em] transition-colors hover:decoration-foreground"
       >
         {email}
       </a>
@@ -277,22 +279,23 @@ function FormFieldInput({
   onSelectChange?: (value: string) => void
 }) {
   const labelClass =
-    'mb-1.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-black/50 sm:text-[11px]'
+    'mb-1.5 block font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-foreground/40 sm:text-[11px]'
 
   // text-base (16px) on small screens avoids iOS input zoom; slightly denser from sm up.
+  // Focus indicator is the accent border (the system focus ring for form fields).
   const inputClass = page
-    ? `w-full border-0 border-b bg-transparent px-0 py-3 font-sans text-base text-black placeholder:text-black/30 transition-colors duration-200 focus:outline-none focus:ring-0 sm:py-2.5 sm:text-[0.9375rem] ${
-        error ? 'border-[#e85050] focus:border-[#e85050]' : 'border-black/20 focus:border-black'
+    ? `w-full border-0 border-b bg-transparent px-0 py-3 font-sans text-base text-foreground placeholder:text-foreground/40 transition-colors duration-200 focus:outline-none focus:ring-0 sm:py-2.5 sm:text-[0.9375rem] ${
+        error ? 'border-error focus:border-error' : 'border-foreground/15 focus:border-accent'
       }`
-    : `w-full border bg-white px-3.5 py-3 font-sans text-base text-black placeholder:text-black/35 transition-colors duration-200 focus:outline-none focus:ring-0 sm:py-2.5 sm:text-[0.9375rem] ${
-        error ? 'border-[#e85050] focus:border-[#e85050]' : 'border-black/20 focus:border-black'
+    : `w-full rounded-lg border bg-surface px-3.5 py-3 font-sans text-base text-foreground placeholder:text-foreground/40 transition-colors duration-200 focus:outline-none focus:ring-0 sm:py-2.5 sm:text-[0.9375rem] ${
+        error ? 'border-error focus:border-error' : 'border-foreground/15 focus:border-accent'
       }`
 
   return (
     <div className={wide ? 'md:col-span-2' : ''}>
       <label htmlFor={field.name} className={labelClass}>
         {field.label}
-        {field.required ? <span className="text-black/30"> *</span> : null}
+        {field.required ? <span className="text-foreground/40"> *</span> : null}
       </label>
 
       {field.type === 'textarea' ? (
@@ -330,7 +333,7 @@ function FormFieldInput({
         />
       )}
 
-      {error ? <p className="mt-1.5 text-sm text-[#c03939]">{error}</p> : null}
+      {error ? <p className="mt-1.5 text-sm text-error">{error}</p> : null}
     </div>
   )
 }

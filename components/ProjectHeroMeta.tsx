@@ -1,12 +1,12 @@
 import {stegaClean} from 'next-sanity'
 
-const META_PREFIX = 'text-white/45 tracking-[0.18em]'
+const META_PREFIX = 'text-foreground/40 tracking-[0.08em]'
 const META_VALUE =
-  'font-mono text-[10px] font-bold uppercase leading-[1.55] tracking-[0.12em] text-white/85 md:text-[11px]'
+  'font-mono text-[10px] font-bold uppercase leading-[1.55] tracking-[0.08em] text-foreground md:text-[11px]'
 const META_CATEGORY =
-  'font-mono text-[10px] uppercase leading-[1.55] tracking-[0.18em] text-white/45 md:text-[11px]'
+  'font-mono text-[10px] uppercase leading-[1.55] tracking-[0.08em] text-foreground/40 md:text-[11px]'
 const META_YEAR =
-  'font-mono text-[12px] font-bold uppercase leading-none tracking-[0.08em] text-white/85 md:text-[14px]'
+  'font-mono text-[12px] font-bold uppercase leading-none tracking-[0.08em] text-foreground md:text-[14px]'
 
 export function formatProjectYearMark(year: string | null | undefined): string | null {
   if (!year) return null
@@ -46,7 +46,7 @@ export function ProjectHeroMeta({
                   href={clientWebsite}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-bold hover:text-white"
+                  className="font-bold transition-opacity hover:opacity-70"
                 >
                   {clientName}
                 </a>
@@ -54,14 +54,14 @@ export function ProjectHeroMeta({
                 <span className="font-bold">{clientName}</span>
               )
             ) : (
-              <span className="font-bold text-white/25">—</span>
+              <span className="font-bold text-foreground/25">—</span>
             )}
           </p>
 
           {yearMark ? (
             <p className={META_YEAR}>{yearMark}</p>
           ) : (
-            <p className={`${META_YEAR} text-white/25`}>—</p>
+            <p className={`${META_YEAR} text-foreground/25`}>—</p>
           )}
         </div>
 
@@ -75,7 +75,7 @@ export function ProjectHeroMeta({
               ))}
             </ul>
           ) : (
-            <p className={`${META_VALUE} text-white/25`}>—</p>
+            <p className={`${META_VALUE} text-foreground/25`}>—</p>
           )}
         </div>
       </div>

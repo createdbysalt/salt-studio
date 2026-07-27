@@ -48,6 +48,96 @@ export type Avatar = {
   _type: 'image'
 }
 
+export type ProjectCreditsSection = {
+  _type: 'projectCreditsSection'
+  enabled?: boolean
+  internalName?: string
+  items?: Array<{
+    role?: string
+    name?: string
+    _type: 'creditItem'
+    _key: string
+  }>
+}
+
+export type ProjectStatsSection = {
+  _type: 'projectStatsSection'
+  enabled?: boolean
+  internalName?: string
+  items?: Array<{
+    value?: string
+    label?: string
+    _type: 'statItem'
+    _key: string
+  }>
+}
+
+export type ProjectQuoteSection = {
+  _type: 'projectQuoteSection'
+  enabled?: boolean
+  internalName?: string
+  quote?: string
+  attribution?: string
+  attributionRole?: string
+}
+
+export type ProjectMediaSection = {
+  _type: 'projectMediaSection'
+  enabled?: boolean
+  internalName?: string
+  rows?: Array<
+    | ({
+        _key: string
+      } & ProjectGalleryRowOne)
+    | ({
+        _key: string
+      } & ProjectGalleryRowTwo)
+  >
+}
+
+export type ProjectScopeSection = {
+  _type: 'projectScopeSection'
+  enabled?: boolean
+  internalName?: string
+  label?: string
+  items?: Array<{
+    title?: string
+    detail?: string
+    _type: 'scopeItem'
+    _key: string
+  }>
+}
+
+export type ProjectStatementSection = {
+  _type: 'projectStatementSection'
+  enabled?: boolean
+  internalName?: string
+  label?: string
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal'
+    listItem?: never
+    markDefs?: null
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
+}
+
+export type ContactFooterSection = {
+  _type: 'contactFooterSection'
+  enabled?: boolean
+  internalName?: string
+  email?: string
+  cityTimezone?: string
+  responseLine?: string
+}
+
 export type ContactFormSection = {
   _type: 'contactFormSection'
   enabled?: boolean
@@ -62,12 +152,258 @@ export type ContactDirectSection = {
   directContactLine?: string
 }
 
+export type ContactCallDetailsSection = {
+  _type: 'contactCallDetailsSection'
+  enabled?: boolean
+  internalName?: string
+  label?: string
+  bullets?: Array<{
+    lead?: string
+    text?: string
+    _type: 'callDetailBullet'
+    _key: string
+  }>
+  recommendationDays?: string
+}
+
+export type ContactBookingSection = {
+  _type: 'contactBookingSection'
+  enabled?: boolean
+  internalName?: string
+  calLink?: string
+  fallbackNote?: string
+}
+
 export type ContactHeroSection = {
   _type: 'contactHeroSection'
   enabled?: boolean
   internalName?: string
   headline?: string
   lead?: string
+}
+
+export type ServicesFinalCtaSection = {
+  _type: 'servicesFinalCtaSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  ctaLabel?: string
+  microcopy?: string
+}
+
+export type ServicesFaqSection = {
+  _type: 'servicesFaqSection'
+  enabled?: boolean
+  internalName?: string
+  faq?: Faq
+}
+
+export type ServicesProcessSection = {
+  _type: 'servicesProcessSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  steps?: Array<{
+    lead?: string
+    text?: string
+    _type: 'processStep'
+    _key: string
+  }>
+  recommendationDays?: string
+  ctaLabel?: string
+}
+
+export type ServicesFitSection = {
+  _type: 'servicesFitSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  goodFitLabel?: string
+  goodFitPoints?: Array<string>
+  notFitLabel?: string
+  notFitPoints?: Array<string>
+}
+
+export type ServicesListSection = {
+  _type: 'servicesListSection'
+  enabled?: boolean
+  internalName?: string
+  serviceAi?: ServiceBlock
+  serviceSite?: ServiceBlock
+  serviceCare?: ServiceBlock
+}
+
+export type ServicesHeroSection = {
+  _type: 'servicesHeroSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  subheadline?: string
+}
+
+export type AboutClosingSection = {
+  _type: 'aboutClosingSection'
+  enabled?: boolean
+  internalName?: string
+  body?: string
+  ctaLabel?: string
+  microcopy?: string
+}
+
+export type AboutProductSection = {
+  _type: 'aboutProductSection'
+  enabled?: boolean
+  internalName?: string
+  body?: string
+  linkLabel?: string
+}
+
+export type AboutConvictionsSection = {
+  _type: 'aboutConvictionsSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  lines?: Array<string>
+  closingLine?: string
+}
+
+export type AboutSmallnessSection = {
+  _type: 'aboutSmallnessSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  body?: string
+}
+
+export type AboutStorySection = {
+  _type: 'aboutStorySection'
+  enabled?: boolean
+  internalName?: string
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal'
+    listItem?: never
+    markDefs?: null
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
+  offHoursLine?: string
+  photo?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+}
+
+export type AboutOpeningSection = {
+  _type: 'aboutOpeningSection'
+  enabled?: boolean
+  internalName?: string
+  line1?: string
+  line2?: string
+  body?: string
+}
+
+export type HomeFinalCtaSection = {
+  _type: 'homeFinalCtaSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  body?: string
+  ctaLabel?: string
+  emailLine?: string
+}
+
+export type HomePhilosophySection = {
+  _type: 'homePhilosophySection'
+  enabled?: boolean
+  internalName?: string
+  line1?: string
+  line2?: string
+}
+
+export type HomeProductSection = {
+  _type: 'homeProductSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  body?: string
+  ctaLabel?: string
+}
+
+export type ProjectReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'project'
+}
+
+export type HomeWorkSection = {
+  _type: 'homeWorkSection'
+  enabled?: boolean
+  internalName?: string
+  label?: string
+  projects?: Array<
+    {
+      _key: string
+    } & ProjectReference
+  >
+  linkLabel?: string
+}
+
+export type HomeServicesSection = {
+  _type: 'homeServicesSection'
+  enabled?: boolean
+  internalName?: string
+  label?: string
+  cards?: Array<{
+    title?: string
+    body?: string
+    priceLine?: string
+    linkLabel?: string
+    _type: 'homeServiceCard'
+    _key: string
+  }>
+}
+
+export type ClientReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'client'
+}
+
+export type HomeProofSection = {
+  _type: 'homeProofSection'
+  enabled?: boolean
+  internalName?: string
+  label?: string
+  clients?: Array<
+    {
+      _key: string
+    } & ClientReference
+  >
+}
+
+export type HomeHeroSection = {
+  _type: 'homeHeroSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  swapLine?: string
+  subheadline?: string
+  ctaLabel?: string
+  ctaMicrocopy?: string
+  bookingQuarter?: string
 }
 
 export type HomeSection = {
@@ -172,6 +508,20 @@ export type WorkPageReference = {
   [internalGroqTypeReferenceTo]?: 'workPage'
 }
 
+export type ServicesPageReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'servicesPage'
+}
+
+export type AboutPageReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'aboutPage'
+}
+
 export type ContactPageReference = {
   _ref: string
   _type: 'reference'
@@ -193,13 +543,6 @@ export type PageReference = {
   [internalGroqTypeReferenceTo]?: 'page'
 }
 
-export type ProjectReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'project'
-}
-
 export type LegalPageReference = {
   _ref: string
   _type: 'reference'
@@ -213,6 +556,8 @@ export type NavChild = {
   link?:
     | HomeReference
     | WorkPageReference
+    | ServicesPageReference
+    | AboutPageReference
     | ContactPageReference
     | WorkCategoryReference
     | PageReference
@@ -226,6 +571,8 @@ export type NavItem = {
   link?:
     | HomeReference
     | WorkPageReference
+    | ServicesPageReference
+    | AboutPageReference
     | ContactPageReference
     | WorkCategoryReference
     | PageReference
@@ -311,6 +658,24 @@ export type Duration = {
   end?: string
 }
 
+export type ServiceBlock = {
+  _type: 'serviceBlock'
+  headline?: string
+  body?: string
+  stepsLabel?: string
+  steps?: Array<{
+    lead?: string
+    text?: string
+    _type: 'serviceStep'
+    _key: string
+  }>
+  investmentLine?: string
+  sceneLine?: string
+  proofAnchor?: string
+  ctaLabel?: string
+  routingLine?: string
+}
+
 export type ContactForm = {
   _type: 'contactForm'
   title?: string
@@ -334,13 +699,6 @@ export type ContactForm = {
   style?: 'stacked' | 'columns' | 'compact'
 }
 
-export type ClientReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'client'
-}
-
 export type Testimonial = {
   _id: string
   _type: 'testimonial'
@@ -352,6 +710,48 @@ export type Testimonial = {
   role?: string
   client?: ClientReference
   project?: ProjectReference
+}
+
+export type Capability = {
+  _id: string
+  _type: 'capability'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  kind?: 'language' | 'framework' | 'platform' | 'tool' | 'discipline'
+  categories?: Array<
+    {
+      _key: string
+    } & WorkCategoryReference
+  >
+  url?: string
+  iconSlug?: string
+  logo?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  sortOrder?: number
+}
+
+export type SanityImageCrop = {
+  _type: 'sanity.imageCrop'
+  top?: number
+  bottom?: number
+  left?: number
+  right?: number
+}
+
+export type SanityImageHotspot = {
+  _type: 'sanity.imageHotspot'
+  x?: number
+  y?: number
+  height?: number
+  width?: number
 }
 
 export type WorkCategory = {
@@ -374,6 +774,46 @@ export type Slug = {
   source?: string
 }
 
+export type QuizSubmission = {
+  _id: string
+  _type: 'quizSubmission'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  email?: string
+  submittedAt?: string
+  track?: 'solo' | 'org'
+  businessType?: string
+  teamSize?: string
+  neverAgain?: string
+  workflowAnswers?: Array<{
+    key?: string
+    label?: string
+    answer?: string
+    _type: 'workflowAnswer'
+    _key: string
+  }>
+  websiteFlag?: string
+  score?: number
+  scoreBand?: string
+  topWorkflows?: Array<string>
+  waitlistOptIn?: boolean
+  source?: {
+    utmSource?: string
+    utmMedium?: string
+    utmCampaign?: string
+    referrer?: string
+    landingPath?: string
+  }
+}
+
+export type CapabilityReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'capability'
+}
+
 export type Project = {
   _id: string
   _type: 'project'
@@ -382,6 +822,7 @@ export type Project = {
   _rev: string
   projectType?: 'standard' | 'case-study'
   featured?: boolean
+  comingSoon?: boolean
   title?: string
   slug?: Slug
   overview?: Array<{
@@ -426,6 +867,7 @@ export type Project = {
   >
   videoUrl?: string
   role?: string
+  deliverables?: Array<string>
   year?: string
   client?: ClientReference
   categories?: Array<
@@ -433,8 +875,33 @@ export type Project = {
       _key: string
     } & WorkCategoryReference
   >
+  stack?: Array<
+    {
+      _key: string
+    } & CapabilityReference
+  >
   site?: string
   siteButtonLabel?: string
+  sections?: Array<
+    | ({
+        _key: string
+      } & ProjectStatementSection)
+    | ({
+        _key: string
+      } & ProjectScopeSection)
+    | ({
+        _key: string
+      } & ProjectMediaSection)
+    | ({
+        _key: string
+      } & ProjectQuoteSection)
+    | ({
+        _key: string
+      } & ProjectStatsSection)
+    | ({
+        _key: string
+      } & ProjectCreditsSection)
+  >
   brief?: string
   approach?: string
   result?: string
@@ -455,22 +922,6 @@ export type Project = {
     _type: 'image'
   }
   speakableSummary?: string
-}
-
-export type SanityImageCrop = {
-  _type: 'sanity.imageCrop'
-  top?: number
-  bottom?: number
-  left?: number
-  right?: number
-}
-
-export type SanityImageHotspot = {
-  _type: 'sanity.imageHotspot'
-  x?: number
-  y?: number
-  height?: number
-  width?: number
 }
 
 export type Client = {
@@ -532,7 +983,7 @@ export type Page = {
           _type: 'span'
           _key: string
         }>
-        style?: 'normal'
+        style?: 'normal' | 'h2' | 'h3'
         listItem?: 'bullet' | 'number'
         markDefs?: Array<{
           href?: string
@@ -630,6 +1081,97 @@ export type LegalPage = {
   lastUpdated?: string
 }
 
+export type CallToAction = {
+  _id: string
+  _type: 'callToAction'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  subhead?: string
+  buttonLabel?: string
+  link?: string
+  contactSubject?: string
+}
+
+export type AboutPage = {
+  _id: string
+  _type: 'aboutPage'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  sections?: Array<
+    | ({
+        _key: string
+      } & AboutOpeningSection)
+    | ({
+        _key: string
+      } & AboutStorySection)
+    | ({
+        _key: string
+      } & AboutSmallnessSection)
+    | ({
+        _key: string
+      } & AboutConvictionsSection)
+    | ({
+        _key: string
+      } & AboutProductSection)
+    | ({
+        _key: string
+      } & AboutClosingSection)
+  >
+  seoTitle?: string
+  seoDescription?: string
+  ogImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  speakableSummary?: string
+}
+
+export type ServicesPage = {
+  _id: string
+  _type: 'servicesPage'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  sections?: Array<
+    | ({
+        _key: string
+      } & ServicesHeroSection)
+    | ({
+        _key: string
+      } & ServicesListSection)
+    | ({
+        _key: string
+      } & ServicesFitSection)
+    | ({
+        _key: string
+      } & ServicesProcessSection)
+    | ({
+        _key: string
+      } & ServicesFaqSection)
+    | ({
+        _key: string
+      } & ServicesFinalCtaSection)
+  >
+  seoTitle?: string
+  seoDescription?: string
+  ogImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  speakableSummary?: string
+}
+
 export type ContactPage = {
   _id: string
   _type: 'contactPage'
@@ -642,10 +1184,19 @@ export type ContactPage = {
       } & ContactHeroSection)
     | ({
         _key: string
+      } & ContactBookingSection)
+    | ({
+        _key: string
+      } & ContactCallDetailsSection)
+    | ({
+        _key: string
       } & ContactDirectSection)
     | ({
         _key: string
       } & ContactFormSection)
+    | ({
+        _key: string
+      } & ContactFooterSection)
   >
   seoTitle?: string
   seoDescription?: string
@@ -870,21 +1421,29 @@ export type Home = {
   _createdAt: string
   _updatedAt: string
   _rev: string
-  showcaseSource?: 'custom' | 'all' | 'featured' | 'type'
-  showcaseProjects?: Array<
-    {
-      _key: string
-    } & ProjectReference
+  sections?: Array<
+    | ({
+        _key: string
+      } & HomeHeroSection)
+    | ({
+        _key: string
+      } & HomeProofSection)
+    | ({
+        _key: string
+      } & HomeServicesSection)
+    | ({
+        _key: string
+      } & HomeWorkSection)
+    | ({
+        _key: string
+      } & HomeProductSection)
+    | ({
+        _key: string
+      } & HomePhilosophySection)
+    | ({
+        _key: string
+      } & HomeFinalCtaSection)
   >
-  showcaseType?: 'standard' | 'case-study'
-  heroCtaLabel?: string
-  clientSource?: 'manual' | 'all' | 'known' | 'less-known'
-  clientList?: Array<
-    {
-      _key: string
-    } & ClientReference
-  >
-  cta?: CallToActionReference
   seoTitle?: string
   seoDescription?: string
   ogImage?: {
@@ -897,19 +1456,6 @@ export type Home = {
   }
   speakableSummary?: string
   hiddenH1?: string
-}
-
-export type CallToAction = {
-  _id: string
-  _type: 'callToAction'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
-  subhead?: string
-  buttonLabel?: string
-  link?: string
-  contactSubject?: string
 }
 
 export type MediaTag = {
@@ -1022,9 +1568,39 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | LogoImage
   | Avatar
+  | ProjectCreditsSection
+  | ProjectStatsSection
+  | ProjectQuoteSection
+  | ProjectMediaSection
+  | ProjectScopeSection
+  | ProjectStatementSection
+  | ContactFooterSection
   | ContactFormSection
   | ContactDirectSection
+  | ContactCallDetailsSection
+  | ContactBookingSection
   | ContactHeroSection
+  | ServicesFinalCtaSection
+  | ServicesFaqSection
+  | ServicesProcessSection
+  | ServicesFitSection
+  | ServicesListSection
+  | ServicesHeroSection
+  | AboutClosingSection
+  | AboutProductSection
+  | AboutConvictionsSection
+  | AboutSmallnessSection
+  | AboutStorySection
+  | AboutOpeningSection
+  | HomeFinalCtaSection
+  | HomePhilosophySection
+  | HomeProductSection
+  | ProjectReference
+  | HomeWorkSection
+  | HomeServicesSection
+  | ClientReference
+  | HomeProofSection
+  | HomeHeroSection
   | HomeSection
   | Timeline
   | Testimonials
@@ -1034,10 +1610,11 @@ export type AllSanitySchemaTypes =
   | ProjectGalleryPhoto
   | HomeReference
   | WorkPageReference
+  | ServicesPageReference
+  | AboutPageReference
   | ContactPageReference
   | WorkCategoryReference
   | PageReference
-  | ProjectReference
   | LegalPageReference
   | NavChild
   | NavItem
@@ -1046,18 +1623,24 @@ export type AllSanitySchemaTypes =
   | Hero
   | Faq
   | Duration
+  | ServiceBlock
   | ContactForm
-  | ClientReference
   | Testimonial
-  | WorkCategory
-  | Slug
-  | Project
+  | Capability
   | SanityImageCrop
   | SanityImageHotspot
+  | WorkCategory
+  | Slug
+  | QuizSubmission
+  | CapabilityReference
+  | Project
   | Client
   | CallToActionReference
   | Page
   | LegalPage
+  | CallToAction
+  | AboutPage
+  | ServicesPage
   | ContactPage
   | WorkPage
   | ErrorPage
@@ -1066,7 +1649,6 @@ export type AllSanitySchemaTypes =
   | SanityFileAssetReference
   | Settings
   | Home
-  | CallToAction
   | MediaTag
   | SanityImagePaletteSwatch
   | SanityImagePalette
@@ -1079,8 +1661,62 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: homePageQuery
-// Query: *[_id == "home"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    hiddenH1,    heroCtaLabel,    clientSource,    cta->{ _id, subhead, buttonLabel, link, contactSubject },    "showcaseProjects": select(      showcaseSource == "all" =>        *[_type == "project" && defined(slug.current) && defined(videoUrl)]          | order(year desc, title asc){ "_key": _id,   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year },      showcaseSource == "featured" =>        *[_type == "project" && featured == true && defined(slug.current) && defined(videoUrl)]          | order(year desc, title asc){ "_key": _id,   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year },      showcaseSource == "type" =>        *[_type == "project" && projectType == ^.showcaseType && defined(slug.current) && defined(videoUrl)]          | order(year desc, title asc){ "_key": _id,   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year },      showcaseProjects[]{ _key, ...@->{   _id,  _type,  coverImage,  overview,  "slug": slug.current,  title,  videoUrl,  role,  year } }[defined(videoUrl)]    ),    "marqueeClients": select(      clientSource == "manual" =>        clientList[]{ "_key": _key, ...@->{ _id, name, website } },      clientSource == "all" =>        *[_type == "client" && defined(name)]          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },      clientSource == "known" =>        *[_type == "client" && tier == "known" && defined(name)]          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },      clientSource == "less-known" =>        *[_type == "client" && tier == "less-known" && defined(name)]          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },      *[_type == "client" && tier == "known" && defined(name)]        | order(sortOrder asc, name asc){ "_key": _id, _id, name, website }    ),  }
+// Query: *[_id == "home"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    hiddenH1,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "homeHeroSection" => {        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter      },      _type == "homeProofSection" => {        label,        clients[]{ _key, ...@->{ _id, name, website } }      },      _type == "homeServicesSection" => {        label,        cards[]{ _key, title, body, priceLine, linkLabel }      },      _type == "homeWorkSection" => {        label,        projects[]{          _key,          ...@->{            _id,            title,            "slug": slug.current,            overview,            coverImage,            videoUrl,            year,            "client": client->name          }        },        linkLabel      },      _type == "homeProductSection" => { headline, body, ctaLabel },      _type == "homePhilosophySection" => { line1, line2 },      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },    },  }
 export type HomePageQueryResult =
+  | {
+      _id: 'home'
+      _type: 'aboutPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      hiddenH1: null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'aboutClosingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutConvictionsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutOpeningSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutProductSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutSmallnessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutStorySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
   | {
       _id: 'home'
       _type: 'callToAction'
@@ -1089,16 +1725,17 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
+    }
+  | {
+      _id: 'home'
+      _type: 'capability'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
     }
   | {
       _id: 'home'
@@ -1108,16 +1745,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1134,16 +1762,44 @@ export type HomePageQueryResult =
       } | null
       speakableSummary: string | null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: Array<
+        | {
+            _key: string
+            _type: 'contactBookingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactCallDetailsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactDirectSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactFooterSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactFormSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
     }
   | {
       _id: 'home'
@@ -1153,16 +1809,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1172,16 +1819,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1198,95 +1836,113 @@ export type HomePageQueryResult =
       } | null
       speakableSummary: string | null
       hiddenH1: string | null
-      heroCtaLabel: string | null
-      clientSource: 'all' | 'known' | 'less-known' | 'manual' | null
-      cta: {
-        _id: string
-        subhead: string | null
-        buttonLabel: string | null
-        link: string | null
-        contactSubject: string | null
-      } | null
-      showcaseProjects:
-        | Array<{
+      sections: Array<
+        | {
             _key: string
-            _id: string
-            _type: 'project'
-            coverImage: {
-              asset?: SanityImageAssetReference
-              media?: unknown
-              hotspot?: SanityImageHotspot
-              crop?: SanityImageCrop
-              alt?: string
-              _type: 'image'
-            } | null
-            overview: Array<{
-              children?: Array<{
-                marks?: Array<string>
-                text?: string
-                _type: 'span'
-                _key: string
-              }>
-              style?: 'normal'
-              listItem?: never
-              markDefs?: null
-              level?: number
-              _type: 'block'
+            _type: 'homeFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+            headline: string | null
+            body: string | null
+            ctaLabel: string | null
+            emailLine: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+            headline: string | null
+            swapLine: string | null
+            subheadline: string | null
+            ctaLabel: string | null
+            ctaMicrocopy: string | null
+            bookingQuarter: string | null
+          }
+        | {
+            _key: string
+            _type: 'homePhilosophySection'
+            enabled: boolean | null
+            internalName: string | null
+            line1: string | null
+            line2: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeProductSection'
+            enabled: boolean | null
+            internalName: string | null
+            headline: string | null
+            body: string | null
+            ctaLabel: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeProofSection'
+            enabled: boolean | null
+            internalName: string | null
+            label: string | null
+            clients: Array<{
               _key: string
+              _id: string
+              name: string | null
+              website: string | null
             }> | null
-            slug: string | null
-            title: string | null
-            videoUrl: string | null
-            role: string | null
-            year: string | null
-          }>
-        | Array<{
+          }
+        | {
             _key: string
-            _id: string
-            _type: 'project'
-            coverImage: {
-              asset?: SanityImageAssetReference
-              media?: unknown
-              hotspot?: SanityImageHotspot
-              crop?: SanityImageCrop
-              alt?: string
-              _type: 'image'
-            } | null
-            overview: Array<{
-              children?: Array<{
-                marks?: Array<string>
-                text?: string
-                _type: 'span'
-                _key: string
-              }>
-              style?: 'normal'
-              listItem?: never
-              markDefs?: null
-              level?: number
-              _type: 'block'
+            _type: 'homeServicesSection'
+            enabled: boolean | null
+            internalName: string | null
+            label: string | null
+            cards: Array<{
               _key: string
+              title: string | null
+              body: string | null
+              priceLine: string | null
+              linkLabel: string | null
             }> | null
-            slug: string | null
-            title: string | null
-            videoUrl: string
-            role: string | null
-            year: string | null
-          }>
-        | null
-      marqueeClients:
-        | Array<{
+          }
+        | {
             _key: string
-            _id: string
-            name: string
-            website: string | null
-          }>
-        | Array<{
-            _key: string
-            _id: string
-            name: string | null
-            website: string | null
-          }>
-        | null
+            _type: 'homeWorkSection'
+            enabled: boolean | null
+            internalName: string | null
+            label: string | null
+            projects: Array<{
+              _key: string
+              _id: string
+              title: string | null
+              slug: string | null
+              overview: Array<{
+                children?: Array<{
+                  marks?: Array<string>
+                  text?: string
+                  _type: 'span'
+                  _key: string
+                }>
+                style?: 'normal'
+                listItem?: never
+                markDefs?: null
+                level?: number
+                _type: 'block'
+                _key: string
+              }> | null
+              coverImage: {
+                asset?: SanityImageAssetReference
+                media?: unknown
+                hotspot?: SanityImageHotspot
+                crop?: SanityImageCrop
+                alt?: string
+                _type: 'image'
+              } | null
+              videoUrl: string | null
+              year: string | null
+              client: string | null
+            }> | null
+            linkLabel: string | null
+          }
+      > | null
     }
   | {
       _id: 'home'
@@ -1296,16 +1952,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1315,16 +1962,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1334,16 +1972,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1353,16 +1982,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1379,16 +1999,54 @@ export type HomePageQueryResult =
       } | null
       speakableSummary: string | null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: Array<
+        | {
+            _key: string
+            _type: 'projectCreditsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectMediaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectQuoteSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectScopeSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectStatementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectStatsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'home'
+      _type: 'quizSubmission'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
     }
   | {
       _id: 'home'
@@ -1398,16 +2056,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1417,16 +2066,61 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
+    }
+  | {
+      _id: 'home'
+      _type: 'servicesPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      hiddenH1: null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'servicesFaqSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesFitSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesListSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesProcessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
     }
   | {
       _id: 'home'
@@ -1442,16 +2136,7 @@ export type HomePageQueryResult =
       } | null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1461,16 +2146,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1480,16 +2156,7 @@ export type HomePageQueryResult =
       ogImage: null
       speakableSummary: null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
     }
   | {
       _id: 'home'
@@ -1506,16 +2173,933 @@ export type HomePageQueryResult =
       } | null
       speakableSummary: string | null
       hiddenH1: null
-      heroCtaLabel: null
-      clientSource: null
-      cta: null
-      showcaseProjects: null
-      marqueeClients: Array<{
-        _key: string
-        _id: string
-        name: string
-        website: string | null
-      }>
+      sections: null
+    }
+  | null
+
+// Source: sanity/lib/queries.ts
+// Variable: servicesPageQuery
+// Query: *[_id == "servicesPage"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "servicesHeroSection" => { headline, subheadline },      _type == "servicesListSection" => { serviceAi, serviceSite, serviceCare },      _type == "servicesFitSection" => {        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints      },      _type == "servicesProcessSection" => {        headline,        steps[]{ _key, lead, text },        recommendationDays,        ctaLabel      },      _type == "servicesFaqSection" => { faq },      _type == "servicesFinalCtaSection" => { headline, ctaLabel, microcopy },    },  }
+export type ServicesPageQueryResult =
+  | {
+      _id: 'servicesPage'
+      _type: 'aboutPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'aboutClosingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutConvictionsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutOpeningSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutProductSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutSmallnessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutStorySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'callToAction'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'capability'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'client'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'contactPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'contactBookingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactCallDetailsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactDirectSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactFooterSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactFormSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'developerSettings'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'errorPage'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'home'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'homeFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homePhilosophySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeProductSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeProofSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeServicesSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeWorkSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'legalPage'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'media.tag'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'notFoundPage'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'page'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'project'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'projectCreditsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectMediaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectQuoteSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectScopeSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectStatementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectStatsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'quizSubmission'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'sanity.fileAsset'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'sanity.imageAsset'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'servicesPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'servicesFaqSection'
+            enabled: boolean | null
+            internalName: string | null
+            faq: Faq | null
+          }
+        | {
+            _key: string
+            _type: 'servicesFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+            headline: string | null
+            ctaLabel: string | null
+            microcopy: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesFitSection'
+            enabled: boolean | null
+            internalName: string | null
+            headline: string | null
+            goodFitLabel: string | null
+            goodFitPoints: Array<string> | null
+            notFitLabel: string | null
+            notFitPoints: Array<string> | null
+          }
+        | {
+            _key: string
+            _type: 'servicesHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+            headline: string | null
+            subheadline: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesListSection'
+            enabled: boolean | null
+            internalName: string | null
+            serviceAi: ServiceBlock | null
+            serviceSite: ServiceBlock | null
+            serviceCare: ServiceBlock | null
+          }
+        | {
+            _key: string
+            _type: 'servicesProcessSection'
+            enabled: boolean | null
+            internalName: string | null
+            headline: string | null
+            steps: Array<{
+              _key: string
+              lead: string | null
+              text: string | null
+            }> | null
+            recommendationDays: string | null
+            ctaLabel: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'settings'
+      seoTitle: null
+      seoDescription: null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        _type: 'image'
+      } | null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'testimonial'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'workCategory'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'workPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: null
+    }
+  | null
+
+// Source: sanity/lib/queries.ts
+// Variable: aboutPageQuery
+// Query: *[_id == "aboutPage"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "aboutOpeningSection" => { line1, line2, body },      _type == "aboutStorySection" => { body, offHoursLine, photo },      _type == "aboutSmallnessSection" => { headline, body },      _type == "aboutConvictionsSection" => { headline, lines, closingLine },      _type == "aboutProductSection" => { body, linkLabel },      _type == "aboutClosingSection" => { body, ctaLabel, microcopy },    },  }
+export type AboutPageQueryResult =
+  | {
+      _id: 'aboutPage'
+      _type: 'aboutPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'aboutClosingSection'
+            enabled: boolean | null
+            internalName: string | null
+            body: string | null
+            ctaLabel: string | null
+            microcopy: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutConvictionsSection'
+            enabled: boolean | null
+            internalName: string | null
+            headline: string | null
+            lines: Array<string> | null
+            closingLine: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutOpeningSection'
+            enabled: boolean | null
+            internalName: string | null
+            line1: string | null
+            line2: string | null
+            body: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutProductSection'
+            enabled: boolean | null
+            internalName: string | null
+            body: string | null
+            linkLabel: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutSmallnessSection'
+            enabled: boolean | null
+            internalName: string | null
+            headline: string | null
+            body: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutStorySection'
+            enabled: boolean | null
+            internalName: string | null
+            body: Array<{
+              children?: Array<{
+                marks?: Array<string>
+                text?: string
+                _type: 'span'
+                _key: string
+              }>
+              style?: 'normal'
+              listItem?: never
+              markDefs?: null
+              level?: number
+              _type: 'block'
+              _key: string
+            }> | null
+            offHoursLine: string | null
+            photo: {
+              asset?: SanityImageAssetReference
+              media?: unknown
+              hotspot?: SanityImageHotspot
+              crop?: SanityImageCrop
+              alt?: string
+              _type: 'image'
+            } | null
+          }
+      > | null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'callToAction'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'capability'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'client'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'contactPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'contactBookingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactCallDetailsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactDirectSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactFooterSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactFormSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'developerSettings'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'errorPage'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'home'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'homeFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homePhilosophySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeProductSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeProofSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeServicesSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeWorkSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'legalPage'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'media.tag'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'notFoundPage'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'page'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'project'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'projectCreditsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectMediaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectQuoteSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectScopeSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectStatementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectStatsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'quizSubmission'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'sanity.fileAsset'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'sanity.imageAsset'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'servicesPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'servicesFaqSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesFitSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesListSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesProcessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'settings'
+      seoTitle: null
+      seoDescription: null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        _type: 'image'
+      } | null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'testimonial'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'workCategory'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'workPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: null
     }
   | null
 
@@ -1539,7 +3123,7 @@ export type PagesBySlugQueryResult = {
           _type: 'span'
           _key: string
         }>
-        style?: 'normal'
+        style?: 'h2' | 'h3' | 'normal'
         listItem?: 'bullet' | 'number'
         markDefs?: Array<{
           href?: string
@@ -1686,11 +3270,12 @@ export type PagesBySlugQueryResult = {
 
 // Source: sanity/lib/queries.ts
 // Variable: projectBySlugQuery
-// Query: *[_type == "project" && slug.current == $slug][0] {    _id,    _type,    projectType,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    overview,    context,    btsNote,    brief,    approach,    result,    showTestimonials,    "testimonials": *[_type == "testimonial" && project._ref == ^._id] | order(_createdAt asc){      _id, quote, author, role    },    coverImage,    videoUrl,    gallery[]{      _key,      _type,      items[]{        _key,        _type,        _type == "projectGalleryPhoto" => {          image{ asset, alt, caption, hotspot, crop },        },        _type == "projectGalleryVideo" => {          videoUrl,          caption,          poster{ asset, alt, hotspot, crop },        },      },    },    btsImages[]{      _key,      _type,      items[]{        _key,        _type,        _type == "projectGalleryPhoto" => {          image{ asset, alt, caption, hotspot, crop },        },        _type == "projectGalleryVideo" => {          videoUrl,          caption,          poster{ asset, alt, hotspot, crop },        },      },    },    role,    year,    site,    siteButtonLabel,    client->{ _id, name, website },    categories[]->{ _id, filterLabel, "slug": slug.current },    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },  }
+// Query: *[_type == "project" && slug.current == $slug][0] {    _id,    _type,    projectType,    comingSoon,    title,    "slug": slug.current,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    overview,    deliverables,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "projectStatementSection" => { label, body },      _type == "projectScopeSection" => { label, items[]{ _key, title, detail } },      _type == "projectMediaSection" => {        rows[]{          _key,          _type,          items[]{            _key,            _type,            _type == "projectGalleryPhoto" => {              image{ asset, alt, caption, hotspot, crop },            },            _type == "projectGalleryVideo" => {              videoUrl,              caption,              poster{ asset, alt, hotspot, crop },            },          },        },      },      _type == "projectQuoteSection" => { quote, attribution, attributionRole },      _type == "projectStatsSection" => { items[]{ _key, value, label } },      _type == "projectCreditsSection" => { items[]{ _key, role, name } },    },    context,    btsNote,    brief,    approach,    result,    showTestimonials,    "testimonials": *[_type == "testimonial" && project._ref == ^._id] | order(_createdAt asc){      _id, quote, author, role    },    coverImage,    videoUrl,    gallery[]{      _key,      _type,      items[]{        _key,        _type,        _type == "projectGalleryPhoto" => {          image{ asset, alt, caption, hotspot, crop },        },        _type == "projectGalleryVideo" => {          videoUrl,          caption,          poster{ asset, alt, hotspot, crop },        },      },    },    btsImages[]{      _key,      _type,      items[]{        _key,        _type,        _type == "projectGalleryPhoto" => {          image{ asset, alt, caption, hotspot, crop },        },        _type == "projectGalleryVideo" => {          videoUrl,          caption,          poster{ asset, alt, hotspot, crop },        },      },    },    role,    year,    site,    siteButtonLabel,    client->{ _id, name, website },    categories[]->{ _id, filterLabel, "slug": slug.current },    stack[]->{ _id, name, kind, url },    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },  }
 export type ProjectBySlugQueryResult = {
   _id: string
   _type: 'project'
   projectType: 'case-study' | 'standard' | null
+  comingSoon: boolean | null
   title: string | null
   slug: string | null
   seoTitle: string | null
@@ -1718,6 +3303,139 @@ export type ProjectBySlugQueryResult = {
     _type: 'block'
     _key: string
   }> | null
+  deliverables: Array<string> | null
+  sections: Array<
+    | {
+        _key: string
+        _type: 'projectCreditsSection'
+        enabled: boolean | null
+        internalName: string | null
+        items: Array<{
+          _key: string
+          role: string | null
+          name: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'projectMediaSection'
+        enabled: boolean | null
+        internalName: string | null
+        rows: Array<
+          | {
+              _key: string
+              _type: 'projectGalleryRowOne'
+              items: Array<
+                | {
+                    _key: string
+                    _type: 'projectGalleryPhoto'
+                    image: {
+                      asset: SanityImageAssetReference | null
+                      alt: string | null
+                      caption: string | null
+                      hotspot: SanityImageHotspot | null
+                      crop: SanityImageCrop | null
+                    } | null
+                  }
+                | {
+                    _key: string
+                    _type: 'projectGalleryVideo'
+                    videoUrl: string | null
+                    caption: string | null
+                    poster: {
+                      asset: SanityImageAssetReference | null
+                      alt: string | null
+                      hotspot: SanityImageHotspot | null
+                      crop: SanityImageCrop | null
+                    } | null
+                  }
+              > | null
+            }
+          | {
+              _key: string
+              _type: 'projectGalleryRowTwo'
+              items: Array<
+                | {
+                    _key: string
+                    _type: 'projectGalleryPhoto'
+                    image: {
+                      asset: SanityImageAssetReference | null
+                      alt: string | null
+                      caption: string | null
+                      hotspot: SanityImageHotspot | null
+                      crop: SanityImageCrop | null
+                    } | null
+                  }
+                | {
+                    _key: string
+                    _type: 'projectGalleryVideo'
+                    videoUrl: string | null
+                    caption: string | null
+                    poster: {
+                      asset: SanityImageAssetReference | null
+                      alt: string | null
+                      hotspot: SanityImageHotspot | null
+                      crop: SanityImageCrop | null
+                    } | null
+                  }
+              > | null
+            }
+        > | null
+      }
+    | {
+        _key: string
+        _type: 'projectQuoteSection'
+        enabled: boolean | null
+        internalName: string | null
+        quote: string | null
+        attribution: string | null
+        attributionRole: string | null
+      }
+    | {
+        _key: string
+        _type: 'projectScopeSection'
+        enabled: boolean | null
+        internalName: string | null
+        label: string | null
+        items: Array<{
+          _key: string
+          title: string | null
+          detail: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'projectStatementSection'
+        enabled: boolean | null
+        internalName: string | null
+        label: string | null
+        body: Array<{
+          children?: Array<{
+            marks?: Array<string>
+            text?: string
+            _type: 'span'
+            _key: string
+          }>
+          style?: 'normal'
+          listItem?: never
+          markDefs?: null
+          level?: number
+          _type: 'block'
+          _key: string
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'projectStatsSection'
+        enabled: boolean | null
+        internalName: string | null
+        items: Array<{
+          _key: string
+          value: string | null
+          label: string | null
+        }> | null
+      }
+  > | null
   context: string | null
   btsNote: string | null
   brief: string | null
@@ -1873,6 +3591,12 @@ export type ProjectBySlugQueryResult = {
     filterLabel: string | null
     slug: string | null
   }> | null
+  stack: Array<{
+    _id: string
+    name: string | null
+    kind: 'discipline' | 'framework' | 'language' | 'platform' | 'tool' | null
+    url: string | null
+  }> | null
   relatedProjects: Array<{
     _id: string
     title: string | null
@@ -1892,12 +3616,33 @@ export type ProjectBySlugQueryResult = {
 } | null
 
 // Source: sanity/lib/queries.ts
+// Variable: nextProjectsQuery
+// Query: *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && comingSoon != true && slug.current != $slug]    | order(featured desc, year desc, title asc)[0...3]{    _id,    title,    "slug": slug.current,    coverImage,    videoUrl,    year,    "client": client->name,  }
+export type NextProjectsQueryResult = Array<{
+  _id: string
+  title: string | null
+  slug: string | null
+  coverImage: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  } | null
+  videoUrl: string | null
+  year: string | null
+  client: string | null
+}>
+
+// Source: sanity/lib/queries.ts
 // Variable: allProjectsQuery
-// Query: *[_type == "project" && defined(slug.current) && defined(videoUrl)]|order(year desc, title asc){    _id,    projectType,    featured,    title,    "slug": slug.current,    overview,    coverImage,    videoUrl,    year,    "client": client->name,    categories[]->{ _id, filterLabel, "slug": slug.current },  }
+// Query: *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl))]|order(year desc, title asc){    _id,    projectType,    featured,    comingSoon,    title,    "slug": slug.current,    overview,    coverImage,    videoUrl,    year,    "client": client->name,    categories[]->{ _id, filterLabel, "slug": slug.current },  }
 export type AllProjectsQueryResult = Array<{
   _id: string
   projectType: 'case-study' | 'standard' | null
   featured: boolean | null
+  comingSoon: boolean | null
   title: string | null
   slug: string | null
   overview: Array<{
@@ -1934,11 +3679,12 @@ export type AllProjectsQueryResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: projectsByCategoryQuery
-// Query: *[_type == "project" && defined(slug.current) && defined(videoUrl) && $slug in categories[]->slug.current]|order(year desc, title asc){    _id,    projectType,    featured,    title,    "slug": slug.current,    overview,    coverImage,    videoUrl,    year,    "client": client->name,    categories[]->{ _id, filterLabel, "slug": slug.current },  }
+// Query: *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(year desc, title asc){    _id,    projectType,    featured,    comingSoon,    title,    "slug": slug.current,    overview,    coverImage,    videoUrl,    year,    "client": client->name,    categories[]->{ _id, filterLabel, "slug": slug.current },  }
 export type ProjectsByCategoryQueryResult = Array<{
   _id: string
   projectType: 'case-study' | 'standard' | null
   featured: boolean | null
+  comingSoon: boolean | null
   title: string | null
   slug: string | null
   overview: Array<{
@@ -1984,7 +3730,7 @@ export type WorkCategoriesQueryResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: workCategoryBySlugQuery
-// Query: *[_type == "workCategory" && slug.current == $slug][0]{    _id,    _type,    filterLabel,    "slug": slug.current,    headline,    subhead,    seoTitle,    seoDescription,  }
+// Query: *[_type == "workCategory" && slug.current == $slug][0]{    _id,    _type,    filterLabel,    "slug": slug.current,    headline,    subhead,    seoTitle,    seoDescription,    "capabilities": *[_type == "capability" && ^._id in categories[]._ref]      | order(kind asc, sortOrder asc, name asc){ _id, name, kind, url, iconSlug, logo },  }
 export type WorkCategoryBySlugQueryResult = {
   _id: string
   _type: 'workCategory'
@@ -1994,7 +3740,46 @@ export type WorkCategoryBySlugQueryResult = {
   subhead: string | null
   seoTitle: string | null
   seoDescription: string | null
+  capabilities: Array<{
+    _id: string
+    name: string | null
+    kind: 'discipline' | 'framework' | 'language' | 'platform' | 'tool' | null
+    url: string | null
+    iconSlug: string | null
+    logo: {
+      asset?: SanityImageAssetReference
+      media?: unknown
+      hotspot?: SanityImageHotspot
+      crop?: SanityImageCrop
+      alt?: string
+      _type: 'image'
+    } | null
+  }>
 } | null
+
+// Source: sanity/lib/queries.ts
+// Variable: capabilitiesQuery
+// Query: *[_type == "capability"] | order(kind asc, sortOrder asc, name asc){    _id,    name,    kind,    url,    iconSlug,    logo,    categories[]->{ _id, filterLabel, "slug": slug.current },  }
+export type CapabilitiesQueryResult = Array<{
+  _id: string
+  name: string | null
+  kind: 'discipline' | 'framework' | 'language' | 'platform' | 'tool' | null
+  url: string | null
+  iconSlug: string | null
+  logo: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  } | null
+  categories: Array<{
+    _id: string
+    filterLabel: string | null
+    slug: string | null
+  }> | null
+}>
 
 // Source: sanity/lib/queries.ts
 // Variable: featuredProjectsQuery
@@ -2100,6 +3885,11 @@ export type SettingsQueryResult = {
     label: string | null
     link:
       | {
+          _type: 'aboutPage'
+          slug: null
+          title: null
+        }
+      | {
           _type: 'contactPage'
           slug: null
           title: null
@@ -2125,6 +3915,11 @@ export type SettingsQueryResult = {
           title: string | null
         }
       | {
+          _type: 'servicesPage'
+          slug: null
+          title: null
+        }
+      | {
           _type: 'workCategory'
           slug: string | null
           title: null
@@ -2139,6 +3934,11 @@ export type SettingsQueryResult = {
       _key: string
       label: string | null
       link:
+        | {
+            _type: 'aboutPage'
+            slug: null
+            title: null
+          }
         | {
             _type: 'contactPage'
             slug: null
@@ -2163,6 +3963,11 @@ export type SettingsQueryResult = {
             _type: 'project'
             slug: string | null
             title: string | null
+          }
+        | {
+            _type: 'servicesPage'
+            slug: null
+            title: null
           }
         | {
             _type: 'workCategory'
@@ -2364,11 +4169,73 @@ export type ErrorPageQueryResult = {
 
 // Source: sanity/lib/queries.ts
 // Variable: contactPageQuery
-// Query: *[_id == "contactPage"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "contactHeroSection" => { headline, lead },      _type == "contactDirectSection" => { directContactLine },      _type == "contactFormSection" => { formConfig },    },  }
+// Query: *[_id == "contactPage"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "contactHeroSection" => { headline, lead },      _type == "contactBookingSection" => { calLink, fallbackNote },      _type == "contactCallDetailsSection" => { label, bullets[]{ _key, lead, text }, recommendationDays },      _type == "contactDirectSection" => { directContactLine },      _type == "contactFormSection" => { formConfig },      _type == "contactFooterSection" => { email, cityTimezone, responseLine },    },  }
 export type ContactPageQueryResult =
   | {
       _id: 'contactPage'
+      _type: 'aboutPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'aboutClosingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutConvictionsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutOpeningSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutProductSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutSmallnessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'aboutStorySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'contactPage'
       _type: 'callToAction'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
+      _type: 'capability'
       seoTitle: null
       seoDescription: null
       ogImage: null
@@ -2401,10 +4268,40 @@ export type ContactPageQueryResult =
       sections: Array<
         | {
             _key: string
+            _type: 'contactBookingSection'
+            enabled: boolean | null
+            internalName: string | null
+            calLink: string | null
+            fallbackNote: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactCallDetailsSection'
+            enabled: boolean | null
+            internalName: string | null
+            label: string | null
+            bullets: Array<{
+              _key: string
+              lead: string | null
+              text: string | null
+            }> | null
+            recommendationDays: string | null
+          }
+        | {
+            _key: string
             _type: 'contactDirectSection'
             enabled: boolean | null
             internalName: string | null
             directContactLine: string | null
+          }
+        | {
+            _key: string
+            _type: 'contactFooterSection'
+            enabled: boolean | null
+            internalName: string | null
+            email: string | null
+            cityTimezone: string | null
+            responseLine: string | null
           }
         | {
             _key: string
@@ -2455,7 +4352,50 @@ export type ContactPageQueryResult =
         _type: 'image'
       } | null
       speakableSummary: string | null
-      sections: null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'homeFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homePhilosophySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeProductSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeProofSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeServicesSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'homeWorkSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
     }
   | {
       _id: 'contactPage'
@@ -2507,6 +4447,52 @@ export type ContactPageQueryResult =
         _type: 'image'
       } | null
       speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'projectCreditsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectMediaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectQuoteSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectScopeSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectStatementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'projectStatsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'contactPage'
+      _type: 'quizSubmission'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
       sections: null
     }
   | {
@@ -2526,6 +4512,59 @@ export type ContactPageQueryResult =
       ogImage: null
       speakableSummary: null
       sections: null
+    }
+  | {
+      _id: 'contactPage'
+      _type: 'servicesPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'servicesFaqSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesFitSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesListSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'servicesProcessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
     }
   | {
       _id: 'contactPage'
@@ -2580,13 +4619,17 @@ export type ContactPageQueryResult =
 
 declare module '@sanity/client' {
   interface SanityQueries {
-    '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    heroCtaLabel,\n    clientSource,\n    cta->{ _id, subhead, buttonLabel, link, contactSubject },\n    "showcaseProjects": select(\n      showcaseSource == "all" =>\n        *[_type == "project" && defined(slug.current) && defined(videoUrl)]\n          | order(year desc, title asc){ "_key": _id, \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year\n },\n      showcaseSource == "featured" =>\n        *[_type == "project" && featured == true && defined(slug.current) && defined(videoUrl)]\n          | order(year desc, title asc){ "_key": _id, \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year\n },\n      showcaseSource == "type" =>\n        *[_type == "project" && projectType == ^.showcaseType && defined(slug.current) && defined(videoUrl)]\n          | order(year desc, title asc){ "_key": _id, \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year\n },\n      showcaseProjects[]{ _key, ...@->{ \n  _id,\n  _type,\n  coverImage,\n  overview,\n  "slug": slug.current,\n  title,\n  videoUrl,\n  role,\n  year\n } }[defined(videoUrl)]\n    ),\n    "marqueeClients": select(\n      clientSource == "manual" =>\n        clientList[]{ "_key": _key, ...@->{ _id, name, website } },\n      clientSource == "all" =>\n        *[_type == "client" && defined(name)]\n          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },\n      clientSource == "known" =>\n        *[_type == "client" && tier == "known" && defined(name)]\n          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },\n      clientSource == "less-known" =>\n        *[_type == "client" && tier == "less-known" && defined(name)]\n          | order(sortOrder asc, name asc){ "_key": _id, _id, name, website },\n      *[_type == "client" && tier == "known" && defined(name)]\n        | order(sortOrder asc, name asc){ "_key": _id, _id, name, website }\n    ),\n  }\n': HomePageQueryResult
+    '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "homeHeroSection" => {\n        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter\n      },\n      _type == "homeProofSection" => {\n        label,\n        clients[]{ _key, ...@->{ _id, name, website } }\n      },\n      _type == "homeServicesSection" => {\n        label,\n        cards[]{ _key, title, body, priceLine, linkLabel }\n      },\n      _type == "homeWorkSection" => {\n        label,\n        projects[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            overview,\n            coverImage,\n            videoUrl,\n            year,\n            "client": client->name\n          }\n        },\n        linkLabel\n      },\n      _type == "homeProductSection" => { headline, body, ctaLabel },\n      _type == "homePhilosophySection" => { line1, line2 },\n      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },\n    },\n  }\n': HomePageQueryResult
+    '\n  *[_id == "servicesPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "servicesHeroSection" => { headline, subheadline },\n      _type == "servicesListSection" => { serviceAi, serviceSite, serviceCare },\n      _type == "servicesFitSection" => {\n        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints\n      },\n      _type == "servicesProcessSection" => {\n        headline,\n        steps[]{ _key, lead, text },\n        recommendationDays,\n        ctaLabel\n      },\n      _type == "servicesFaqSection" => { faq },\n      _type == "servicesFinalCtaSection" => { headline, ctaLabel, microcopy },\n    },\n  }\n': ServicesPageQueryResult
+    '\n  *[_id == "aboutPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "aboutOpeningSection" => { line1, line2, body },\n      _type == "aboutStorySection" => { body, offHoursLine, photo },\n      _type == "aboutSmallnessSection" => { headline, body },\n      _type == "aboutConvictionsSection" => { headline, lines, closingLine },\n      _type == "aboutProductSection" => { body, linkLabel },\n      _type == "aboutClosingSection" => { body, ctaLabel, microcopy },\n    },\n  }\n': AboutPageQueryResult
     '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    body[]{\n      ...,\n      _type == "ctaRef" => {\n        "cta": @->{subhead, buttonLabel, link, contactSubject}\n      }\n    },\n    overview,\n    title,\n    "slug": slug.current,\n  }\n': PagesBySlugQueryResult
-    '\n  *[_type == "project" && slug.current == $slug][0] {\n    _id,\n    _type,\n    projectType,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    overview,\n    context,\n    btsNote,\n    brief,\n    approach,\n    result,\n    showTestimonials,\n    "testimonials": *[_type == "testimonial" && project._ref == ^._id] | order(_createdAt asc){\n      _id, quote, author, role\n    },\n    coverImage,\n    videoUrl,\n    gallery[]{\n      _key,\n      _type,\n      items[]{\n        _key,\n        _type,\n        _type == "projectGalleryPhoto" => {\n          image{ asset, alt, caption, hotspot, crop },\n        },\n        _type == "projectGalleryVideo" => {\n          videoUrl,\n          caption,\n          poster{ asset, alt, hotspot, crop },\n        },\n      },\n    },\n    btsImages[]{\n      _key,\n      _type,\n      items[]{\n        _key,\n        _type,\n        _type == "projectGalleryPhoto" => {\n          image{ asset, alt, caption, hotspot, crop },\n        },\n        _type == "projectGalleryVideo" => {\n          videoUrl,\n          caption,\n          poster{ asset, alt, hotspot, crop },\n        },\n      },\n    },\n    role,\n    year,\n    site,\n    siteButtonLabel,\n    client->{ _id, name, website },\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },\n  }\n': ProjectBySlugQueryResult
-    '\n  *[_type == "project" && defined(slug.current) && defined(videoUrl)]|order(year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': AllProjectsQueryResult
-    '\n  *[_type == "project" && defined(slug.current) && defined(videoUrl) && $slug in categories[]->slug.current]|order(year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': ProjectsByCategoryQueryResult
+    '\n  *[_type == "project" && slug.current == $slug][0] {\n    _id,\n    _type,\n    projectType,\n    comingSoon,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    overview,\n    deliverables,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "projectStatementSection" => { label, body },\n      _type == "projectScopeSection" => { label, items[]{ _key, title, detail } },\n      _type == "projectMediaSection" => {\n        rows[]{\n          _key,\n          _type,\n          items[]{\n            _key,\n            _type,\n            _type == "projectGalleryPhoto" => {\n              image{ asset, alt, caption, hotspot, crop },\n            },\n            _type == "projectGalleryVideo" => {\n              videoUrl,\n              caption,\n              poster{ asset, alt, hotspot, crop },\n            },\n          },\n        },\n      },\n      _type == "projectQuoteSection" => { quote, attribution, attributionRole },\n      _type == "projectStatsSection" => { items[]{ _key, value, label } },\n      _type == "projectCreditsSection" => { items[]{ _key, role, name } },\n    },\n    context,\n    btsNote,\n    brief,\n    approach,\n    result,\n    showTestimonials,\n    "testimonials": *[_type == "testimonial" && project._ref == ^._id] | order(_createdAt asc){\n      _id, quote, author, role\n    },\n    coverImage,\n    videoUrl,\n    gallery[]{\n      _key,\n      _type,\n      items[]{\n        _key,\n        _type,\n        _type == "projectGalleryPhoto" => {\n          image{ asset, alt, caption, hotspot, crop },\n        },\n        _type == "projectGalleryVideo" => {\n          videoUrl,\n          caption,\n          poster{ asset, alt, hotspot, crop },\n        },\n      },\n    },\n    btsImages[]{\n      _key,\n      _type,\n      items[]{\n        _key,\n        _type,\n        _type == "projectGalleryPhoto" => {\n          image{ asset, alt, caption, hotspot, crop },\n        },\n        _type == "projectGalleryVideo" => {\n          videoUrl,\n          caption,\n          poster{ asset, alt, hotspot, crop },\n        },\n      },\n    },\n    role,\n    year,\n    site,\n    siteButtonLabel,\n    client->{ _id, name, website },\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n    stack[]->{ _id, name, kind, url },\n    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },\n  }\n': ProjectBySlugQueryResult
+    '\n  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && comingSoon != true && slug.current != $slug]\n    | order(featured desc, year desc, title asc)[0...3]{\n    _id,\n    title,\n    "slug": slug.current,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n  }\n': NextProjectsQueryResult
+    '\n  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl))]|order(year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    comingSoon,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': AllProjectsQueryResult
+    '\n  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    comingSoon,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': ProjectsByCategoryQueryResult
     '\n  *[_type == "workCategory" && defined(slug.current)]|order(filterLabel asc){\n    _id,\n    filterLabel,\n    "slug": slug.current,\n  }\n': WorkCategoriesQueryResult
-    '\n  *[_type == "workCategory" && slug.current == $slug][0]{\n    _id,\n    _type,\n    filterLabel,\n    "slug": slug.current,\n    headline,\n    subhead,\n    seoTitle,\n    seoDescription,\n  }\n': WorkCategoryBySlugQueryResult
+    '\n  *[_type == "workCategory" && slug.current == $slug][0]{\n    _id,\n    _type,\n    filterLabel,\n    "slug": slug.current,\n    headline,\n    subhead,\n    seoTitle,\n    seoDescription,\n    "capabilities": *[_type == "capability" && ^._id in categories[]._ref]\n      | order(kind asc, sortOrder asc, name asc){ _id, name, kind, url, iconSlug, logo },\n  }\n': WorkCategoryBySlugQueryResult
+    '\n  *[_type == "capability"] | order(kind asc, sortOrder asc, name asc){\n    _id,\n    name,\n    kind,\n    url,\n    iconSlug,\n    logo,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': CapabilitiesQueryResult
     '\n  *[_type == "project" && featured == true && defined(slug.current)]|order(year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': FeaturedProjectsQueryResult
     '\n  *[_type == "client" && featured == true]|order(sortOrder asc, name asc){\n    _id,\n    name,\n    website,\n    logo,\n  }\n': ClientRosterQueryResult
     '\n  *[_type == "settings"][0]{\n    _id,\n    _type,\n    siteName,\n    siteDescription,\n    footerSocial[]{\n      _key,\n      platform,\n      label,\n      href,\n      customIcon,\n    },\n    showFooterLegal,\n    showBuiltWithCredit,\n    logo,\n    menuItems[]{\n      _key,\n      label,\n      "link": link->{\n        _type,\n        "slug": slug.current,\n        title\n      },\n      children[]{\n        _key,\n        label,\n        "link": link->{\n          _type,\n          "slug": slug.current,\n          title\n        }\n      }\n    },\n    ogImage,\n    socialLinks,\n    projectBodyBackgroundVideo,\n  }\n': SettingsQueryResult
@@ -2598,6 +4641,6 @@ declare module '@sanity/client' {
     '\n  *[_type == "legalPage" && defined(slug.current)] | order(\n    select(\n      pageType == "privacy" => 0,\n      pageType == "terms" => 1,\n      pageType == "cookies" => 2,\n      pageType == "accessibility" => 3,\n      4\n    ) asc,\n    title asc\n  ) {\n    _type,\n    title,\n    pageType,\n    "slug": slug.current,\n  }\n': FooterLegalPagesQueryResult
     '\n  *[_type == "notFoundPage"][0] {\n    _id,\n    _type,\n    headline,\n    message,\n    ctaText,\n    ctaLink,\n    secondaryCtaText,\n    secondaryCtaLink,\n    footerTagline,\n    suggestedLinks[]-> {\n      _id,\n      _type,\n      title,\n      "slug": slug.current,\n    },\n  }\n': NotFoundPageQueryResult
     '\n  *[_type == "errorPage"][0]{\n    _id,\n    _type,\n    eyebrow,\n    headline,\n    message,\n    retryButtonText,\n    homeButtonText,\n    homeButtonLink,\n  }\n': ErrorPageQueryResult
-    '\n  *[_id == "contactPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "contactHeroSection" => { headline, lead },\n      _type == "contactDirectSection" => { directContactLine },\n      _type == "contactFormSection" => { formConfig },\n    },\n  }\n': ContactPageQueryResult
+    '\n  *[_id == "contactPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "contactHeroSection" => { headline, lead },\n      _type == "contactBookingSection" => { calLink, fallbackNote },\n      _type == "contactCallDetailsSection" => { label, bullets[]{ _key, lead, text }, recommendationDays },\n      _type == "contactDirectSection" => { directContactLine },\n      _type == "contactFormSection" => { formConfig },\n      _type == "contactFooterSection" => { email, cityTimezone, responseLine },\n    },\n  }\n': ContactPageQueryResult
   }
 }

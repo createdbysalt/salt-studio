@@ -56,18 +56,17 @@ export function HeroSection({
     split: 'text-left items-start lg:items-center',
   }
 
-  // Text colors based on background
-  const textColor = hasBackground ? 'text-white' : ''
-  const subtextColor = hasBackground ? 'text-white/90' : 'text-gray-600'
+  // On-media type stays white over the scrim; paper stage uses ink tokens.
+  const textColor = hasBackground ? 'text-white' : 'text-foreground'
+  const subtextColor = hasBackground ? 'text-white/90' : 'text-foreground/70'
 
   return (
     <section
-      className={`relative flex flex-col justify-center overflow-hidden rounded-lg ${sizeClasses[size]} ${alignmentClasses[style]}`}
-      style={{
-        backgroundColor: hasBackground ? undefined : 'var(--color-muted)',
-      }}
+      className={`relative flex flex-col justify-center overflow-hidden rounded-lg ${
+        hasBackground ? '' : 'bg-muted'
+      } ${sizeClasses[size]} ${alignmentClasses[style]}`}
     >
-      {/* Background image with overlay */}
+      {/* Background image with scrim */}
       {backgroundUrl && (
         <>
           <div
@@ -76,7 +75,7 @@ export function HeroSection({
             role="img"
             aria-label={backgroundImage?.alt || 'Hero background'}
           />
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-ink/50" />
         </>
       )}
 
@@ -87,20 +86,12 @@ export function HeroSection({
         }`}
       >
         <div className={`flex flex-col ${alignmentClasses[style]}`}>
-          {/* Eyebrow */}
+          {/* Eyebrow — mono label */}
           {eyebrow && (
             <span
-              className={`mb-4 inline-block rounded-full px-4 py-1.5 text-sm font-medium ${
-                hasBackground ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'
+              className={`mb-4 inline-block font-mono text-[12px] font-medium uppercase tracking-[0.08em] ${
+                hasBackground ? 'text-white/70' : 'text-foreground/40'
               }`}
-              style={
-                hasBackground
-                  ? undefined
-                  : {
-                      backgroundColor: 'var(--color-primary-light)',
-                      color: 'var(--color-primary)',
-                    }
-              }
             >
               {eyebrow}
             </span>
@@ -108,18 +99,14 @@ export function HeroSection({
 
           {/* Headline */}
           <h1
-            className={`text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl ${textColor}`}
-            style={hasBackground ? undefined : {color: 'var(--color-foreground)'}}
+            className={`text-4xl font-semibold uppercase leading-[0.95] tracking-[-0.02em] md:text-5xl lg:text-6xl ${textColor}`}
           >
             {headline}
           </h1>
 
           {/* Subheadline */}
           {subheadline && (
-            <p
-              className={`mt-6 max-w-2xl text-lg md:text-xl ${subtextColor}`}
-              style={hasBackground ? undefined : {color: 'var(--color-muted-foreground)'}}
-            >
+            <p className={`mt-6 max-w-2xl text-lg leading-relaxed md:text-xl ${subtextColor}`}>
               {subheadline}
             </p>
           )}
@@ -147,7 +134,7 @@ export function HeroSection({
         {style === 'split' && backgroundUrl && (
           <div className="mt-10 lg:mt-0">
             <div
-              className="aspect-square rounded-lg bg-cover bg-center shadow-xl lg:aspect-[4/3]"
+              className="aspect-square rounded-md bg-cover bg-center lg:aspect-[4/3]"
               style={{backgroundImage: `url(${backgroundUrl})`}}
               role="img"
               aria-label={backgroundImage?.alt || 'Hero image'}
@@ -177,43 +164,25 @@ function HeroButton({
   const cleanLink = stegaClean(link)
   const isExternal = cleanLink.startsWith('http://') || cleanLink.startsWith('https://')
 
-  const baseClasses =
-    'inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium transition-colors'
-
-  // Style based on button type and background
-  const getStyles = () => {
+  // Paper stage: design-system button utilities. On media: white variants over the scrim.
+  const getClassName = () => {
     if (style === 'primary') {
       if (hasBackground) {
-        // White button on dark background
-        return {
-          backgroundColor: 'var(--color-background)',
-          color: 'var(--color-foreground)',
-        }
+        // White solid button on media
+        return 'inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-ink transition-colors duration-300 hover:bg-white/85'
       }
-      return {
-        backgroundColor: 'var(--color-primary)',
-        color: 'var(--color-primary-foreground)',
-      }
+      return 'btn-solid'
     }
 
-    // Secondary style
+    // Secondary / ghost
     if (hasBackground) {
-      return {
-        backgroundColor: 'transparent',
-        border: '2px solid white',
-        color: 'white',
-      }
+      return 'inline-flex items-center gap-2 rounded-lg border border-white/40 px-4 py-2.5 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-white transition-colors duration-300 hover:border-white'
     }
-    return {
-      backgroundColor: 'transparent',
-      border: '2px solid var(--color-border)',
-      color: 'var(--color-foreground)',
-    }
+    return 'btn-ghost'
   }
 
   const buttonProps = {
-    className: baseClasses,
-    style: getStyles(),
+    className: getClassName(),
   }
 
   if (isExternal) {
