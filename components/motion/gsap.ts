@@ -9,13 +9,14 @@
  *   power4.out === cubic-bezier(0.22, 1, 0.36, 1)  (--ease-out-quint)
  */
 import gsap from 'gsap'
+import {Draggable} from 'gsap/Draggable'
 import {Flip} from 'gsap/Flip'
 import {ScrollTrigger} from 'gsap/ScrollTrigger'
 import {SplitText} from 'gsap/SplitText'
 import {TextPlugin} from 'gsap/TextPlugin'
 
 if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger, SplitText, Flip, TextPlugin)
+  gsap.registerPlugin(ScrollTrigger, SplitText, Flip, TextPlugin, Draggable)
 }
 
 export const EASE = {
@@ -36,4 +37,4 @@ export function prefersReducedMotion(): boolean {
   )
 }
 
-export {Flip, gsap, ScrollTrigger, SplitText, TextPlugin}
+export {Draggable, Flip, gsap, ScrollTrigger, SplitText, TextPlugin}

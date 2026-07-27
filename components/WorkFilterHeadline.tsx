@@ -4,7 +4,7 @@ import Link from 'next/link'
 /**
  * The Work masthead — Glitch&Grit filter-as-headline on a light stage.
  * Full chrome width, flex-wrap centered so items sit on one line and wrap
- * as a sentence (not a stacked list). Title case as authored.
+ * as a sentence (not a stacked list). Displayed uppercase.
  */
 export function WorkFilterHeadline({
   allLabel,
@@ -29,10 +29,10 @@ export function WorkFilterHeadline({
   ]
 
   return (
-    <nav aria-label="Filter work by specialty" className="mx-auto w-full max-w-7xl">
+    <nav aria-label="Filter work by specialty" className="mx-auto w-full max-w-[90rem]">
       <ul
         role="list"
-        className="flex flex-wrap justify-center gap-x-0 gap-y-[0.08em] text-center font-sans text-[clamp(2rem,3.5vw,3.25rem)] font-bold leading-[1.15] tracking-[-0.035em]"
+        className="flex flex-wrap justify-center gap-x-0 gap-y-[0.08em] text-center font-sans text-[clamp(1.5rem,2.75vw,2.5rem)] font-bold uppercase leading-[1.15] tracking-[-0.035em]"
       >
         {items.map((item, index) => {
           const active = item.slug === activeSlug

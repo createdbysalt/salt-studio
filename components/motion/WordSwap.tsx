@@ -4,83 +4,146 @@ import {useGSAP} from '@gsap/react'
 import {useRef} from 'react'
 import {DURATION, EASE, gsap, prefersReducedMotion} from './gsap'
 
+export type SwapFace = {
+  left: string
+  right: string
+}
+
 interface WordSwapProps {
-  /** The clear headline — the default face; what reduced motion and crawlers get */
-  primary: string
-  /** The poetic alternate that swaps in */
-  secondary: string
-  /** Seconds each face holds before swapping */
+  /** Clear / DECIDE face — default + reduced-motion + accessible text */
+  primary: SwapFace
+  /** Poetic / LINGER face that visits, then leaves */
+  secondary: SwapFace
+  /** Seconds the primary face holds before swapping out */
   hold?: number
+  /** Seconds the secondary (poetic) face lingers — defaults longer than `hold` */
+  secondaryHold?: number
   className?: string
 }
 
+function Face({
+  face,
+  side,
+}: {
+  face: SwapFace
+  side: 'left' | 'right'
+}) {
+  const text = side === 'left' ? face.left : face.right
+  const lines = text.split('\n').filter(Boolean)
+
+  return (
+    <div
+      data-side={side}
+      className={
+        side === 'left'
+          ? 'flex flex-col items-end text-right md:items-start md:text-left'
+          : 'flex flex-col items-start text-left md:items-end md:text-right'
+      }
+    >
+      {lines.map((line) => (
+        <span key={line} className="block whitespace-nowrap">
+          {line}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function SplitRow({face}: {face: SwapFace}) {
+  return (
+    <div className="flex w-full flex-col justify-between gap-2 md:flex-row md:items-end md:gap-6">
+      <Face face={face} side="left" />
+      <Face face={face} side="right" />
+    </div>
+  )
+}
+
 /**
- * Motion pattern #3: TinyWins hero word-swap. Two copies of a line stacked in
- * the same grid cell; words of the visible copy translate up out of
- * overflow-hidden masks while the other copy's words rise in. The primary
- * (clear) line is the default face — the poetic line visits, then leaves.
- * Under reduced motion only the primary renders visibly.
+ * Motion pattern #2 — TinyWins-style split hero swap.
+ * Two full-width faces (left block + right block, edge-anchored). Primary is
+ * the default; secondary slides through the overflow mask. Reduced motion
+ * keeps the primary face only.
  */
-export function WordSwap({primary, secondary, hold = 4, className}: WordSwapProps) {
+export function WordSwap({
+  primary,
+  secondary,
+  hold = 5,
+  secondaryHold = 8,
+  className,
+}: WordSwapProps) {
   const scope = useRef<HTMLSpanElement>(null)
+  const srText = `${primary.left.replace(/\n/g, ' ')} ${primary.right.replace(/\n/g, ' ')}`
 
   useGSAP(
     () => {
       if (prefersReducedMotion() || !scope.current) return
 
-      const aWords = scope.current.querySelectorAll('[data-swap-a] [data-word]')
-      const bWords = scope.current.querySelectorAll('[data-swap-b] [data-word]')
-      gsap.set(bWords, {yPercent: 105})
+      const a = scope.current.querySelector<HTMLElement>('[data-swap-a]')
+      const b = scope.current.querySelector<HTMLElement>('[data-swap-b]')
+      if (!a || !b) return
 
+      gsap.set(a, {yPercent: 0, autoAlpha: 1})
+      gsap.set(b, {yPercent: 110, autoAlpha: 0})
+
+      // Primary holds → poetic enters and lingers longer → primary returns and
+      // holds again before the loop. (`delay` only covers the first cycle.)
       const tl = gsap.timeline({repeat: -1, delay: hold})
-      tl.to(aWords, {
-        yPercent: -105,
+      tl.to(a, {
+        yPercent: -110,
+        autoAlpha: 0,
         duration: DURATION.slow,
         ease: EASE.outCubic,
-        stagger: 0.05,
       })
         .fromTo(
-          bWords,
-          {yPercent: 105},
-          {yPercent: 0, duration: DURATION.slow, ease: EASE.outCubic, stagger: 0.05},
-          '<0.1',
+          b,
+          {yPercent: 110, autoAlpha: 0},
+          {
+            yPercent: 0,
+            autoAlpha: 1,
+            duration: DURATION.slow,
+            ease: EASE.outCubic,
+            immediateRender: false,
+          },
+          '<0.08',
         )
         .to(
-          bWords,
-          {yPercent: -105, duration: DURATION.slow, ease: EASE.outCubic, stagger: 0.05},
-          `+=${hold}`,
+          b,
+          {yPercent: -110, autoAlpha: 0, duration: DURATION.slow, ease: EASE.outCubic},
+          `+=${secondaryHold}`,
         )
         .fromTo(
-          aWords,
-          {yPercent: 105},
-          {yPercent: 0, duration: DURATION.slow, ease: EASE.outCubic, stagger: 0.05},
-          '<0.1',
+          a,
+          {yPercent: 110, autoAlpha: 0},
+          {
+            yPercent: 0,
+            autoAlpha: 1,
+            duration: DURATION.slow,
+            ease: EASE.outCubic,
+            immediateRender: false,
+          },
+          '<0.08',
         )
-        .to({}, {duration: 0.001}) // hold ends the cycle on the primary face
+        .to({}, {duration: hold})
     },
-    {scope},
+    {scope, dependencies: [hold, secondaryHold]},
   )
 
-  const renderWords = (text: string) =>
-    text.split(' ').map((word, i) => (
-      <span key={i} className="inline-block overflow-hidden align-bottom">
-        <span data-word className="inline-block will-change-transform">
-          {word}
-        </span>{' '}
-      </span>
-    ))
-
   return (
-    <span ref={scope} className={`inline-grid ${className ?? ''}`}>
-      <span data-swap-a className="col-start-1 row-start-1">
-        {renderWords(primary)}
+    <span
+      ref={scope}
+      className={`relative block w-full overflow-hidden ${className ?? ''}`}
+    >
+      <span className="sr-only">{srText}</span>
+
+      <span data-swap-a className="relative block w-full will-change-transform" aria-hidden>
+        <SplitRow face={primary} />
       </span>
       <span
         data-swap-b
         aria-hidden
-        className="col-start-1 row-start-1 motion-reduce:invisible"
+        className="absolute inset-x-0 top-0 block w-full will-change-transform motion-reduce:hidden"
       >
-        {renderWords(secondary)}
+        <SplitRow face={secondary} />
       </span>
     </span>
   )

@@ -3,9 +3,9 @@
 
 export const ERROR_PAGE_CONTENT = {
   eyebrow: 'Error',
-  headline: 'Something went wrong',
-  message: "We're working on it. Please try again in a moment.",
+  headline: 'Something went wrong.',
+  message: "Give it another try — or head home and we'll meet you there.",
   retryButtonText: 'Try again',
-  homeButtonText: 'Go back home',
+  homeButtonText: 'Back home',
   homeButtonLink: '/',
 } as const

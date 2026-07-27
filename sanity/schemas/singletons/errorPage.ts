@@ -28,7 +28,7 @@ export default defineType({
       title: 'Headline',
       type: 'string',
       description: 'Main headline shown when something goes wrong.',
-      initialValue: 'Something went wrong',
+      initialValue: 'Something went wrong.',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -37,7 +37,7 @@ export default defineType({
       type: 'text',
       rows: 3,
       description: 'Reassuring line explaining what happened and what to do next.',
-      initialValue: "We're working on it. Please try again in a moment.",
+      initialValue: "Give it another try — or head home and we'll meet you there.",
     }),
     defineField({
       name: 'retryButtonText',
@@ -51,7 +51,7 @@ export default defineType({
       title: 'Home button text',
       type: 'string',
       description: 'Label for the button that returns to the home page.',
-      initialValue: 'Go back home',
+      initialValue: 'Back home',
     }),
     defineField({
       name: 'homeButtonLink',
