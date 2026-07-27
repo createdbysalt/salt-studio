@@ -1,0 +1,31 @@
+---
+description: SEO, JSON-LD structured data, AEO
+globs: lib/seo/**/*
+alwaysApply: false
+---
+
+# SEO / AEO conventions
+
+**Canonical doc:** `lib/seo/CLAUDE.md`
+
+## Architecture
+
+- Barrel: `lib/seo/index.ts`
+- Generators + components: `lib/seo/structured-data.tsx`
+- Config: `lib/seo/config.ts` (env-driven)
+- Related: `app/sitemap.ts`, `app/robots.ts`, `<SiteStructuredData />` in `(personal)` layout
+
+## Adding structured data to pages
+
+1. Breadcrumbs on interior pages: `<BreadcrumbStructuredData />`
+2. Primary schema (`Article`, `Service`, `CreativeWork`, `FAQ`, etc.)
+3. Key pages: `<SpeakableWebPage />` or `addSpeakable()` for AEO
+4. Test: [Google Rich Results Test](https://search.google.com/test/rich-results)
+
+## Env (client onboarding)
+
+`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SITE_NAME`, `NEXT_PUBLIC_SITE_DESCRIPTION`, social URLs for `sameAs`.
+
+## Sitemap
+
+Includes Sanity `page`, `project`, `legalPage` types — extend `app/sitemap.ts` when adding new document types with URLs.

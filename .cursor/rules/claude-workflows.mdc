@@ -1,0 +1,26 @@
+---
+description: Claude Code workflows — commands, agents, skills
+globs: .claude/**/*
+alwaysApply: false
+---
+
+# Claude Code workspace (`.claude/`)
+
+**Index:** `.claude/README.md` and `.claude/tool-registry.md`
+
+## Layer separation
+
+- **Codebase docs** → `CLAUDE.md` files (not here)
+- **Workflows** → `.claude/commands/` (slash commands), `.claude/agents/`, `.claude/skills/`
+
+## Useful for any frontend work
+
+Commands: `pragmatic-code-review`, `design-review`, `security-review`, `code-quality`  
+Skills: `frontend-design`, `systematic-debugging`, `testing-patterns`
+
+## Hooks (`.claude/settings.json`)
+
+- `protect-main.sh` — blocks commits to main
+- `format-on-save.sh` — formats on Write/Edit
+
+Cursor does not run Claude hooks automatically; follow the same conventions manually.

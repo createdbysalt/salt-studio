@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photon x SALT Studio — Discovery Briefing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0A0A0A;
+      --surface: #111111;
+      --border: #1E1E1E;
+      --text: #F5F4F0;
+      --text-muted: #8A8A8A;
+      --text-dim: #5A5A5A;
+      --accent: #FFFFFF;
+      --accent-dim: rgba(255, 255, 255, 0.08);
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --max-w: 960px;
+      --space-section: clamp(80px, 12vh, 140px);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.7;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    /* --- NAV --- */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: transform 0.3s ease;
+    }
+
+    .nav-brand {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .nav-brand span { color: var(--accent); }
+
+    .nav-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* --- HERO --- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 40px 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at 30% 80%, rgba(232, 213, 163, 0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      font-family: var(--mono);
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 300;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      max-width: 800px;
+      color: var(--text);
+    }
+
+    .hero-meta {
+      margin-top: 48px;
+      display: flex;
+      gap: 48px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    .hero-meta dt {
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .hero-meta dd { color: var(--text-muted); }
+
+    /* --- CONTENT --- */
+    .content {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .section {
+      padding: var(--space-section) 0;
+      border-top: 1px solid var(--border);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section-number {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-family: var(--mono);
+      font-size: clamp(24px, 3.5vw, 36px);
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      margin-bottom: 40px;
+      color: var(--text);
+    }
+
+    h3 {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-top: 56px;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    h4 {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: var(--text-muted);
+      max-width: 680px;
+    }
+
+    p strong, li strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    em { color: var(--text); font-style: italic; }
+
+    blockquote {
+      border-left: 2px solid var(--accent);
+      padding: 20px 0 20px 28px;
+      margin: 32px 0;
+      font-family: var(--mono);
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      font-weight: 300;
+      font-style: italic;
+      max-width: 680px;
+    }
+
+    ul, ol {
+      margin-bottom: 20px;
+      padding-left: 0;
+      list-style: none;
+      max-width: 680px;
+    }
+
+    li {
+      padding: 8px 0;
+      padding-left: 20px;
+      position: relative;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 17px;
+      width: 6px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    /* --- TABLES --- */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 28px 0 36px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    thead th {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-align: left;
+      padding: 12px 16px 12px 0;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 14px 16px 14px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+
+    tbody td:first-child {
+      color: var(--text);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    tbody td strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* --- CALLOUT --- */
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--accent);
+      padding: 28px 32px;
+      margin: 36px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .callout p { margin-bottom: 0; }
+
+    .callout p strong {
+      color: var(--accent);
+    }
+
+    /* --- NUMBERED LIST --- */
+    .numbered-item {
+      padding: 32px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .numbered-item:last-child { border-bottom: none; }
+
+    .numbered-item .num {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .numbered-item h3 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+
+    .numbered-item p {
+      margin-bottom: 0;
+      font-size: 15px;
+    }
+
+    /* --- DIVIDER --- */
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: var(--accent);
+      margin: var(--space-section) 0;
+      opacity: 0.4;
+    }
+
+    /* --- FOOTER --- */
+    .footer {
+      padding: 80px 40px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer p {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      max-width: none;
+      margin: 0 auto;
+    }
+
+    .footer span { color: var(--accent); }
+
+    /* --- ROSTER --- */
+    .roster {
+      color: var(--text-muted);
+      line-height: 1.8;
+      font-size: 15px;
+      max-width: 680px;
+      margin-bottom: 20px;
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 768px) {
+      .nav { padding: 16px 24px; }
+      .hero { padding: 0 24px 60px; }
+      .content { padding: 0 24px; }
+      .hero-meta { flex-direction: column; gap: 20px; }
+      .footer { padding: 60px 24px; }
+
+      table { font-size: 13px; }
+      tbody td:first-child { white-space: normal; }
+
+      .callout { padding: 20px 24px; }
+    }
+
+    /* --- PROGRESS --- */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: var(--accent);
+      z-index: 200;
+      width: 0%;
+      transition: width 0.15s ease-out;
+    }
+
+    .progress-tracker {
+      position: fixed;
+      right: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--text-dim);
+      background: transparent;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .progress-dot.active {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .progress-dot.visited {
+      border-color: var(--text-muted);
+      background: var(--text-muted);
+    }
+
+    .progress-counter {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-top: 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .progress-counter .current {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .progress-tracker { right: 12px; }
+      .progress-dot { width: 6px; height: 6px; }
+    }
+
+    @media (max-width: 480px) {
+      .nav-label { display: none; }
+      .progress-tracker { display: none; }
+    }
+
+    /* --- LANGUAGE TOGGLE --- */
+    .lang-toggle { display: flex; align-items: center; gap: 12px; }
+    .lang-btn {
+      background: none; border: 1px solid var(--border); border-radius: 4px;
+      padding: 6px 10px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 10px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+      transition: all 0.3s ease;
+    }
+    .lang-btn:hover { border-color: var(--text-muted); color: var(--text-muted); }
+    .lang-btn .flag { font-size: 14px; line-height: 1; }
+    .lang-btn .lang-label { display: none; }
+    @media (min-width: 480px) { .lang-btn .lang-label { display: inline; } }
+
+    .lang-tooltip {
+      position: fixed; bottom: 24px; right: 24px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px;
+      max-width: 300px; z-index: 300; opacity: 0; transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease; pointer-events: none;
+    }
+    .lang-tooltip.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .lang-tooltip p { font-size: 13px; line-height: 1.5; color: var(--text-muted); margin-bottom: 12px; max-width: none; }
+    .lang-tooltip-actions { display: flex; gap: 8px; }
+    .lang-tooltip-btn {
+      background: none; border: 1px solid var(--border); border-radius: 4px;
+      padding: 6px 14px; cursor: pointer; font-family: var(--mono); font-size: 10px;
+      font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-dim); transition: all 0.2s ease;
+    }
+    .lang-tooltip-btn:hover { border-color: var(--text-muted); color: var(--text-muted); }
+    .lang-tooltip-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+    .lang-tooltip-btn.primary:hover { opacity: 0.85; }
+
+    .content-pt, .hero-pt { display: none; }
+    html[lang="pt"] .content-en { display: none; }
+    html[lang="pt"] .content-pt { display: block; }
+    html[lang="pt"] .hero-en { display: none; }
+    html[lang="pt"] .hero-pt { display: flex; }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="progress-tracker" id="progressTracker"></div>
+
+<nav class="nav">
+  <div class="nav-brand"><span>SALT</span> &times; Photon</div>
+  <div class="lang-toggle">
+    <div class="nav-label">Discovery Briefing</div>
+    <button class="lang-btn" id="langToggle" aria-label="Mudar para Português">
+      <span class="flag">🇵🇹</span>
+      <span class="lang-label">PT</span>
+    </button>
+  </div>
+</nav>
+
+<header class="hero hero-en">
+  <div class="hero-label">Discovery Briefing</div>
+  <h1>Photon x SALT Studio</h1>
+  <dl class="hero-meta">
+    <div>
+      <dt>Prepared by</dt>
+      <dd>SALT Studio</dd>
+    </div>
+    <div>
+      <dt>For</dt>
+      <dd>Chris &amp; Liam, Photon</dd>
+    </div>
+  </dl>
+</header>
+
+<header class="hero hero-pt">
+  <div class="hero-label">Briefing de Descoberta</div>
+  <h1>Photon x SALT Studio</h1>
+  <dl class="hero-meta">
+    <div>
+      <dt>Preparado por</dt>
+      <dd>SALT Studio</dd>
+    </div>
+    <div>
+      <dt>Para</dt>
+      <dd>Chris &amp; Liam, Photon</dd>
+    </div>
+  </dl>
+</header>
+
+<main class="content content-en">
+
+  <!-- 01 HOW WE GOT HERE -->
+  <section class="section" id="intro">
+    <div class="section-number">01</div>
+    <h2>How we got here</h2>
+    <p>We went deep. Your site, your deck, your references, the competitive landscape in Portland and nationally, the patterns in your client roster. We studied how brands find production partners, who's visiting your site, and what they need to see when they get there.</p>
+    <p>What follows is our read on Photon — who you are, who you're talking to, and how the new site should position all of it. We want to know if we're on the right track.</p>
+  </section>
+
+  <!-- 02 PHOTON AT A GLANCE -->
+  <section class="section" id="glance">
+    <div class="section-number">02</div>
+    <h2>Photon at a glance</h2>
+    <p>Photon is a creative production studio — photo, video, and everything in between — built for enterprise brands. Two locations:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th></th><th>Portland, OR</th><th>Lisbon, Portugal</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Role</strong></td><td>Main studio + production hub</td><td>Post-production + EU launchpad</td></tr>
+          <tr><td><strong>Size</strong></td><td>600 sqm / ~5,000 sq ft</td><td>130 sqm</td></tr>
+          <tr><td><strong>Highlights</strong></td><td>350 sqm cyclorama, 5m walls, 400 AMP power, audio room, green room</td><td>Edit suite, concepting space, client accommodation</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>The crew</h4>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Title</th><th>Base</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Chris Crary</td><td>Mission Control</td><td>Portland</td></tr>
+          <tr><td>Liam Gillies</td><td>Chief Photometrics</td><td>Portland / Portugal</td></tr>
+          <tr><td>Garrett Baker</td><td>Mission Specialist</td><td>Portland</td></tr>
+          <tr><td>Toni Crary</td><td>Life Support</td><td>Portland</td></tr>
+          <tr><td>Em Frost</td><td>Environmental Control</td><td>Portland / Portugal</td></tr>
+          <tr><td>Austin Baker</td><td>Orbital Mechanic</td><td>Portland</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>The roster</h4>
+    <p class="roster">Nike (10+ projects), Adidas, Google Pixel, BMW, Oura Ring, Sorel (5+ years running), Under Armour, Capital One, Taylor Farms, Hyperice, JBL, Amazfit, Portland Thorns, Portland Timbers, Seattle Sounders, Vans, Flexfit, GQ, Wildfang, Woolrich — and 50 more.</p>
+
+    <h4>The positioning</h4>
+    <blockquote>"A giant network distilled into specialty teams with the mission to maximize resources and elevate what's possible."</blockquote>
+    <p>This matters. The modular production model — where clients pick exactly the capabilities they need, and you build the right team around each project — is something we haven't seen anyone else do at this level. Concept through delivery, same core team, in-house. That's the story the site needs to tell.</p>
+  </section>
+
+  <!-- 03 MARKET POSITION -->
+  <section class="section" id="market">
+    <div class="section-number">03</div>
+    <h2>Where Photon sits in the market</h2>
+    <p>Photon occupies a rare position: production-led and boutique, but with a client roster that rivals studios ten times your size. Nobody else is combining Nike/Adidas/Google-level work with a six-person core team, owned studios on two continents, and a truly modular production model.</p>
+    <p>The work speaks for itself. The opportunity is visibility — making sure the right people can find you, and that when they do, the site carries the same quality as the projects on it.</p>
+    <p>We see real openings in:</p>
+    <ul>
+      <li><strong>SEO</strong> — terms like "Portland studio rental," "cyclorama studio Portland," and "high speed cinematography Portland" are yours for the taking</li>
+      <li><strong>Trust signals</strong> — case studies and testimonials turn great work into proof</li>
+      <li><strong>Studio rental as a discovery path</strong> — an agency producer who books your space and sees how you operate? That's a future production client</li>
+    </ul>
+  </section>
+
+  <!-- 04 WHO WE'RE DESIGNING FOR -->
+  <section class="section" id="audience">
+    <div class="section-number">04</div>
+    <h2>Who we're designing for</h2>
+    <p>We built two audience profiles based on your client roster and how brands typically find production partners. We want to hear if these feel right — or if we're missing something.</p>
+
+    <h3>The brand-side decision maker</h3>
+    <p>This is the VP of Brand Marketing, Creative Director, or Director of Content at a company like Nike, Oura, or BMW. They've worked with production studios before — probably several. They're not learning what a production studio does. They're figuring out if <em>Photon</em> is the right one for <em>this</em> campaign.</p>
+
+    <h4>What they care about</h4>
+    <ul>
+      <li>Portfolio quality that matches their brand's standard</li>
+      <li>Technical capability — can you actually handle what they need?</li>
+      <li>Team and cultural fit — will this be a good working relationship?</li>
+      <li>Efficiency — will this stay on timeline and on budget?</li>
+    </ul>
+
+    <h4>What keeps them up at night</h4>
+    <ul>
+      <li>Choosing the wrong partner and watching a campaign timeline unravel</li>
+      <li>Overspending on production without the quality to show for it</li>
+      <li>Handing off a creative vision and getting back something flat</li>
+    </ul>
+
+    <h4>What gets them to reach out</h4>
+    <p>A peer recommendation. Seeing work that looks like what they need. Evidence that clients come back — your 5+ year relationship with Sorel is the strongest proof point you have.</p>
+
+    <h3>The agency producer</h3>
+    <p>This is the person at an agency — like SGK, who brought you in for Nike — looking for a production partner they can trust. They care about studio infrastructure, crew quality, turnaround, and whether they can bring their own team into your space.</p>
+    <p>The rental path matters here. An agency producer who books your Portland studio and sees how you operate firsthand? That's a warm lead for a full production engagement down the line. The Rentals pages aren't just a listing — they're a door.</p>
+  </section>
+
+  <!-- 05 WHAT WE'RE BUILDING -->
+  <section class="section" id="building">
+    <div class="section-number">05</div>
+    <h2>What we're building</h2>
+
+    <h3>The site, page by page</h3>
+
+    <h4>Phase 1 — Launch</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Page</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Homepage</strong></td><td>Hero reel, work grid, philosophy, client logos, studio teaser, contact CTA. Work comes first.</td></tr>
+          <tr><td><strong>Work</strong></td><td>The full portfolio. No filters. Most recent at the top.</td></tr>
+          <tr><td><strong>Project pages (standard)</strong></td><td>Immersive project showcase — hero media, production credits, behind-the-scenes section.</td></tr>
+          <tr><td><strong>Project pages (case study)</strong></td><td>Deeper narrative — the brief, the approach, the outcome, plus a client testimonial. Different layout, same feel.</td></tr>
+          <tr><td><strong>About</strong></td><td>The crew with your space-themed titles, the philosophy, the modular network explained.</td></tr>
+          <tr><td><strong>Capabilities</strong></td><td>Your deck, reimagined as a proper web experience — production modules, platforms, process.</td></tr>
+          <tr><td><strong>Rentals</strong></td><td>Hub for studio and podcast rental. Not location-specific.</td></tr>
+          <tr><td><strong>Studio rental</strong></td><td>The Portland studio — cyclorama, specs, amenities, inquiry form.</td></tr>
+          <tr><td><strong>Podcast rental</strong></td><td>The audio room — VO, Foley, podcast recording, inquiry form.</td></tr>
+          <tr><td><strong>Contact</strong></td><td>Name, email, message. Goes to chris@photon.studio. No pricing. No calendar.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Phase 2 — After launch</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Page</th><th>What it does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Archives</td><td>Behind-the-scenes storytelling — personality, process, what it's like on set</td></tr>
+          <tr><td>Press</td><td>Publications, features, partnerships</td></tr>
+          <tr><td>Community</td><td>Newsletter, social integration, creative meetups</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Navigation</h4>
+    <p><strong>Desktop:</strong> Work | Capabilities | Rentals <em>(hover dropdown: Studio, Podcast)</em> | About | Contact</p>
+    <p><strong>Mobile:</strong> Same items, click dropdown for Rentals.</p>
+    <p>Contact gets a visual distinction in the nav — a button treatment that says "this is where the conversation starts."</p>
+  </section>
+
+  <!-- 06 DESIGN DIRECTION -->
+  <section class="section" id="design">
+    <div class="section-number">06</div>
+    <h2>Design direction</h2>
+
+    <h3>Three words: cinematic, precise, immersive.</h3>
+
+    <blockquote>The site should feel like entering mission control at 2:00 AM — dark, precise, purposeful, with the best work in the world running on the screens.</blockquote>
+
+    <p>The UI is the frame, the work is the painting. Every design decision gets measured by how little it draws attention to itself.</p>
+
+    <h4>What we're drawing from your references</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Reference</th><th>What we're borrowing</th><th>How we're adapting it</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>mikkisindhunata.com</strong></td><td>Full-bleed video hero, split typography, production metadata overlays</td><td>Expanding beyond the solo-director format to reflect Photon as a full studio with a team</td></tr>
+          <tr><td><strong>posterco.tv</strong></td><td>Massive brand typography, editorial credit blocks, video cycling</td><td>Adding more routing and discovery — your site needs to guide visitors, not just impress them</td></tr>
+          <tr><td><strong>pantheonmedia.com</strong></td><td>Full-screen nav with floating media, stacked bold type, flanking elements</td><td>Bringing this energy into a dark palette for portfolio sections</td></tr>
+          <tr><td><strong>erichuguenin.com</strong></td><td>Dark theme, split typography around imagery, artistic tension</td><td>Keeping the artistry while making sure enterprise clients feel invited, not intimidated</td></tr>
+          <tr><td><strong>twicetwice.tv</strong></td><td>Vertical side-rail metadata, 4-panel grid, cinematic full-bleed</td><td>Expanding the nav to handle more page types — your site has more to say</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Typography</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Role</th><th>Font</th><th>Why it works</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Headlines, labels, technical text</strong></td><td>Pitch Sans</td><td>Monospaced and geometric — it reads like mission control telemetry. Your space theme, expressed through type.</td></tr>
+          <tr><td><strong>Body copy, UI</strong></td><td>Untitled Sans</td><td>Clean geometric sans-serif. Comfortable to read at length.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Color</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Color</th><th>Feel</th><th>Where it lives</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Near-black</strong></td><td>Deep, cinematic dark — not pure black, just enough warmth to feel human</td><td>Portfolio, project pages, hero sections</td></tr>
+          <tr><td><strong>Warm off-white</strong></td><td>Like photographic paper — clean but not clinical</td><td>Text-heavy pages: About, Capabilities, Rentals, Contact</td></tr>
+          <tr><td><strong>Solar amber</strong></td><td>Warm amber, drawn from 60s NASA console indicator lights — a signal, not a decoration</td><td>Accent moments: active states, CTA hover, focus rings</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>The palette is deliberately neutral. Your client work brings the color — the site just frames it.</p>
+
+    <h3>Something we want to talk through</h3>
+    <p>Every reference site you shared — mikkisindhunata, posterco, erichuguenin, twicetwice — leans dark. Near-black backgrounds, white text, cinematic atmosphere. Your space theme naturally lives in that world too.</p>
+    <p>At the same time, you've mentioned wanting white space and a clean, minimal feel.</p>
+    <p>We don't think these ideas are in conflict. Here's what we're proposing: <strong>dark as the default for portfolio and immersive sections</strong> — the hero, the work grid, the project pages — where the work needs room to breathe in its own light. And <strong>warm off-white for content-heavy pages</strong> like About, Capabilities, Rentals, and Contact, where reading comfort matters and the tone shifts to "let's talk business."</p>
+
+    <div class="callout">
+      <p><strong>Does this feel right to you? Or do you see Photon's site as primarily white with dark accents?</strong> This shapes everything downstream, so we want to land on it together.</p>
+    </div>
+
+    <h4>Motion</h4>
+    <p>Subliminal, not showy. One pattern per interaction:</p>
+    <ul>
+      <li>Smooth parallax on the hero — subtle, barely noticeable</li>
+      <li>Content fades in on scroll — just opacity, no slide-up</li>
+      <li>Video preview on hover across the work grid</li>
+      <li>Full-screen nav overlay that descends from the top, text staggering in</li>
+    </ul>
+  </section>
+
+  <!-- 07 WHAT WE NEED -->
+  <section class="section" id="needs">
+    <div class="section-number">07</div>
+    <h2>What we need from you</h2>
+
+    <h4>Before we start designing</h4>
+    <p>These affect layout, templates, and visual direction — we need them early.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>What we need</th><th>Why it matters</th><th>Where to start</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Client testimonials</strong></td><td>Case study pages don't work without a real voice behind them. This is the single highest-impact content piece for the site.</td><td>Reach out to Sorel (5+ years together), your Nike/SGK contact, and Oura Ring. Even one honest sentence is enough.</td></tr>
+          <tr><td><strong>Studio photographs</strong></td><td>The Rentals pages and the homepage studio teaser need 3-5 beautiful shots of the Portland space.</td><td>Shoot the studio — cyclorama, lighting grid, green room, audio room. Show what it feels like to walk in.</td></tr>
+          <tr><td><strong>Team portraits</strong></td><td>The About page needs all six of you.</td><td>Candid or semi-candid — on set, in the studio. Let the personality match the titles.</td></tr>
+          <tr><td><strong>Top 5 featured projects</strong></td><td>We're building the homepage and portfolio around a curated set — not every project you've ever done. We need your five strongest to populate the template.</td><td>Pick the five that best represent where Photon is headed. We'll load those in and train you on adding the rest.</td></tr>
+
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 08 FIVE THINGS -->
+  <section class="section" id="five">
+    <div class="section-number">08</div>
+    <h2>Five things that will make the biggest difference</h2>
+
+    <div class="numbered-item">
+      <div class="num">01</div>
+      <h3>Get at least one testimonial before we build the case study template.</h3>
+      <p>The portfolio speaks for itself — but even one real client voice transforms the trust equation. Sorel is the strongest candidate. Five years of partnership carries weight that no amount of design can replicate.</p>
+    </div>
+
+    <div class="numbered-item">
+      <div class="num">02</div>
+      <h3>Lead with the modular production story on the Capabilities page.</h3>
+      <p>"A giant network distilled into specialty teams" is a positioning line that actually means something. The web version should make the modular concept tangible and visual — not just a list of services.</p>
+    </div>
+
+    <div class="numbered-item">
+      <div class="num">03</div>
+      <h3>Think of Rentals as a business development tool.</h3>
+      <p>An agency producer who books your Portland studio and experiences how you operate? That's a future production client. The Rentals pages are a door, not just a listing.</p>
+    </div>
+
+    <div class="numbered-item">
+      <div class="num">04</div>
+      <h3>We're building the CMS to grow with you.</h3>
+      <p>No filters at launch, exactly as we discussed. But behind the scenes, we're tagging projects with categories now — Campaign, Stills, Product, Sport — so when the portfolio grows past 20, filtering is a flip-of-a-switch, not a rebuild.</p>
+    </div>
+
+    <div class="numbered-item">
+      <div class="num">05</div>
+      <h3>Give agency visitors a signal on the homepage.</h3>
+      <p>Your primary audience is brand-side, but agencies are a real channel. One line in the Philosophy section — something like "We work direct with brands and alongside agencies when the project calls for it" — gives that visitor a reason to keep scrolling.</p>
+    </div>
+  </section>
+
+  <!-- 09 STACK CHANGE -->
+  <section class="section" id="stack">
+    <div class="section-number">09</div>
+    <h2>A change since we first talked</h2>
+
+    <p>When we kicked this off, the plan was to build on Webflow. Over the last few months I've been migrating all of my clients off Webflow onto a more modern stack — Next.js on Vercel (the same infrastructure powering companies like Notion and Stripe) paired with Sanity as the CMS — and Photon's site will be built on that setup.</p>
+
+    <p>A few reasons this is a big win for you:</p>
+
+    <ul>
+      <li><strong>Creative ceiling is gone.</strong> Any animation, interaction, or design moment we dream up, I can actually build. No more "Webflow can't do that" conversations. For a studio like Photon, that matters — the site should feel as considered as the work inside it.</li>
+      <li><strong>AI-native from day one.</strong> This is the big one. The stack integrates natively with modern AI tooling, so the things I've been learning to do over these past few months can actually live inside your site — not bolted on later.</li>
+      <li><strong>Easier to manage day-to-day.</strong> Sanity's editing experience is cleaner and simpler than Webflow's CMS. Updating projects, swapping images, editing copy — all straightforward, no technical knowledge required.</li>
+      <li><strong>Faster and better for SEO.</strong> Vercel hosting means significantly better performance and load times than Webflow can offer.</li>
+    </ul>
+
+    <p>Net effect: the sky is genuinely the limit on what we can do here, and I want to take full advantage of that for Photon.</p>
+  </section>
+
+  <!-- 10 HOW WE WORK -->
+  <section class="section" id="process">
+    <div class="section-number">10</div>
+    <h2>How we work</h2>
+
+    <h3>Prototype-first</h3>
+    <p>We're skipping the traditional copy-and-wireframe phase. Instead, we go straight to prototyping — you'll see a working draft of the actual site, not a flat mockup. This means you're reacting to real layout, real motion, real flow from the start.</p>
+    <p>The web industry is moving this way, and so are we. It's faster, it's more honest, and it means fewer surprises between "approved design" and "launched site."</p>
+    <p>Along with this briefing, we're already sending a first prototype of the homepage — a working version with the featured project elements, inspired by one of the references you shared. We'd love your feedback on that as well.</p>
+
+    <h3>Two rounds of consolidated revision</h3>
+    <p>To keep momentum, we work in two focused revision rounds per milestone. Here's how that works:</p>
+    <ul>
+      <li>We send you a prototype draft</li>
+      <li>Your team gathers all feedback — notes, reactions, changes — into one consolidated response</li>
+      <li>We implement it. That's round one.</li>
+      <li>You review again, send one more round of consolidated notes</li>
+      <li>We implement. That's round two. Then we move forward.</li>
+    </ul>
+
+    <div class="callout">
+      <p><strong>One point person.</strong> We need one person on your side collecting all feedback and delivering it in a single pass. This keeps the rounds clean and the project moving. Multiple threads of conflicting notes slow everything down — one voice keeps us sharp.</p>
+    </div>
+
+    <h3>What happens when you approve the copy direction</h3>
+    <p>We're sending a separate copy proposal alongside this briefing. Once you give us the green light on the voice, tone, and structure outlined there, we'll deliver the full site copy — every page, ready to drop into the prototype.</p>
+
+    <h3>Timeline</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Milestone</th><th>Target</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Discovery + strategy + prototyping</strong></td><td>April</td></tr>
+          <tr><td><strong>Design prototyping + revision</strong></td><td>May</td></tr>
+          <tr><td><strong>Build, content integration + launch</strong></td><td>June</td></tr>
+          <tr><td><strong>Launch + handoff</strong></td><td>End of June</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>We're aiming to have the full site live by the end of June. That's tight but doable — as long as the content pieces (testimonials, studio photos, team portraits) come in on schedule.</p>
+
+    <h3>After launch</h3>
+    <p>The last step is handoff and training — we'll walk you through how to maintain the site in Sanity so you can update projects, add new work, and manage content on your own. We'll also send you a few options for ongoing support and maintenance, but we'll get into that closer to launch.</p>
+  </section>
+
+</main>
+
+<main class="content content-pt">
+
+  <section class="section" id="intro-pt">
+    <div class="section-number">01</div>
+    <h2>Como chegámos aqui</h2>
+    <p>Fomos a fundo. O vosso site, o vosso deck, as vossas referências, o panorama competitivo em Portland e a nível nacional, os padrões no vosso portefólio de clientes. Estudámos como as marcas encontram parceiros de produção, quem visita o vosso site e o que precisam de ver quando lá chegam.</p>
+    <p>O que se segue é a nossa leitura sobre a Photon — quem são, com quem estão a falar e como o novo site deve posicionar tudo isto. Queremos saber se estamos no caminho certo.</p>
+  </section>
+
+  <section class="section" id="glance-pt">
+    <div class="section-number">02</div>
+    <h2>Photon em resumo</h2>
+    <p>A Photon é um estúdio de produção criativa — fotografia, vídeo e tudo o que está pelo meio — construído para marcas empresariais. Duas localizações:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>Portland, OR</th><th>Lisboa, Portugal</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Função</strong></td><td>Estúdio principal + centro de produção</td><td>Pós-produção + base europeia</td></tr>
+          <tr><td><strong>Área</strong></td><td>600 m² / ~5.000 sq ft</td><td>130 m²</td></tr>
+          <tr><td><strong>Destaques</strong></td><td>Ciclorama de 350 m², paredes de 5 m, 400 AMP, sala de áudio, camarim</td><td>Suite de edição, espaço de conceção, alojamento para clientes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>A equipa</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nome</th><th>Título</th><th>Base</th></tr></thead>
+        <tbody>
+          <tr><td>Chris Crary</td><td>Mission Control</td><td>Portland</td></tr>
+          <tr><td>Liam Gillies</td><td>Chief Photometrics</td><td>Portland / Portugal</td></tr>
+          <tr><td>Garrett Baker</td><td>Mission Specialist</td><td>Portland</td></tr>
+          <tr><td>Toni Crary</td><td>Life Support</td><td>Portland</td></tr>
+          <tr><td>Em Frost</td><td>Environmental Control</td><td>Portland / Portugal</td></tr>
+          <tr><td>Austin Baker</td><td>Orbital Mechanic</td><td>Portland</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>O portefólio</h4>
+    <p class="roster">Nike (10+ projetos), Adidas, Google Pixel, BMW, Oura Ring, Sorel (5+ anos consecutivos), Under Armour, Capital One, Taylor Farms, Hyperice, JBL, Amazfit, Portland Thorns, Portland Timbers, Seattle Sounders, Vans, Flexfit, GQ, Wildfang, Woolrich — e mais 50.</p>
+    <h4>O posicionamento</h4>
+    <blockquote>"Uma grande rede destilada em equipas especializadas com a missão de maximizar recursos e elevar o que é possível."</blockquote>
+    <p>Isto importa. O modelo de produção modular — onde os clientes escolhem exatamente as competências de que precisam, e vocês constroem a equipa certa para cada projeto — é algo que não vimos ninguém mais a fazer a este nível. Do conceito à entrega, mesma equipa central, in-house. É esta a história que o site precisa de contar.</p>
+  </section>
+
+  <section class="section" id="market-pt">
+    <div class="section-number">03</div>
+    <h2>Onde a Photon se posiciona no mercado</h2>
+    <p>A Photon ocupa uma posição rara: liderada pela produção e boutique, mas com um portefólio de clientes que rivaliza com estúdios dez vezes maiores. Ninguém mais está a combinar trabalhos ao nível da Nike/Adidas/Google com uma equipa central de seis pessoas, estúdios próprios em dois continentes e um modelo de produção verdadeiramente modular.</p>
+    <p>O trabalho fala por si. A oportunidade é a visibilidade — garantir que as pessoas certas vos conseguem encontrar e que, quando o fazem, o site transmite a mesma qualidade dos projetos que apresenta.</p>
+    <p>Vemos oportunidades reais em:</p>
+    <ul>
+      <li><strong>SEO</strong> — termos como "Portland studio rental", "cyclorama studio Portland" e "high speed cinematography Portland" estão ao vosso alcance</li>
+      <li><strong>Provas de credibilidade</strong> — estudos de caso e testemunhos transformam excelente trabalho em prova</li>
+      <li><strong>Aluguer de estúdio como caminho de descoberta</strong> — um produtor de agência que reserva o vosso espaço e vê como operam? É um futuro cliente de produção</li>
+    </ul>
+  </section>
+
+  <section class="section" id="audience-pt">
+    <div class="section-number">04</div>
+    <h2>Para quem estamos a desenhar</h2>
+    <p>Construímos dois perfis de público com base no vosso portefólio de clientes e na forma como as marcas tipicamente encontram parceiros de produção. Queremos saber se estes perfis fazem sentido — ou se nos está a escapar algo.</p>
+    <h3>O decisor do lado da marca</h3>
+    <p>Este é o VP de Marketing de Marca, Diretor Criativo, ou Diretor de Conteúdo numa empresa como a Nike, Oura ou BMW. Já trabalharam com estúdios de produção antes — provavelmente vários. Não estão a aprender o que um estúdio de produção faz. Estão a avaliar se a <em>Photon</em> é o parceiro certo para <em>esta</em> campanha.</p>
+    <h4>O que lhes interessa</h4>
+    <ul>
+      <li>Qualidade do portefólio que corresponda ao padrão da sua marca</li>
+      <li>Capacidade técnica — conseguem realmente fazer o que precisam?</li>
+      <li>Fit da equipa e cultura — será uma boa relação de trabalho?</li>
+      <li>Eficiência — vai cumprir prazos e orçamento?</li>
+    </ul>
+    <h4>O que os preocupa</h4>
+    <ul>
+      <li>Escolher o parceiro errado e ver o cronograma de uma campanha desmoronar-se</li>
+      <li>Gastar demasiado em produção sem qualidade que o justifique</li>
+      <li>Entregar uma visão criativa e receber de volta algo sem vida</li>
+    </ul>
+    <h4>O que os leva a contactar</h4>
+    <p>Uma recomendação de um colega. Ver trabalho que se parece com o que precisam. Provas de que os clientes voltam — a vossa relação de 5+ anos com a Sorel é a prova mais forte que têm.</p>
+    <h3>O produtor de agência</h3>
+    <p>Esta é a pessoa numa agência — como a SGK, que vos trouxe para a Nike — à procura de um parceiro de produção em quem possam confiar. Importam-se com a infraestrutura do estúdio, qualidade da equipa, tempos de entrega e se podem trazer a sua própria equipa para o vosso espaço.</p>
+    <p>O caminho do aluguer é importante aqui. Um produtor de agência que reserva o vosso estúdio em Portland e vê em primeira mão como operam? É um lead quente para um projeto de produção completo no futuro. As páginas de Alugueres não são apenas um catálogo — são uma porta de entrada.</p>
+  </section>
+
+  <section class="section" id="building-pt">
+    <div class="section-number">05</div>
+    <h2>O que estamos a construir</h2>
+    <h3>O site, página a página</h3>
+    <h4>Fase 1 — Lançamento</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Página</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Homepage</strong></td><td>Vídeo hero, grelha de trabalhos, filosofia, logótipos de clientes, teaser do estúdio, CTA de contacto. O trabalho vem primeiro.</td></tr>
+          <tr><td><strong>Trabalhos</strong></td><td>O portefólio completo. Sem filtros. Os mais recentes no topo.</td></tr>
+          <tr><td><strong>Páginas de projeto (standard)</strong></td><td>Apresentação imersiva do projeto — media hero, créditos de produção, secção dos bastidores.</td></tr>
+          <tr><td><strong>Páginas de projeto (estudo de caso)</strong></td><td>Narrativa mais profunda — o briefing, a abordagem, o resultado, mais testemunho do cliente. Layout diferente, mesma sensação.</td></tr>
+          <tr><td><strong>Sobre</strong></td><td>A equipa com os vossos títulos espaciais, a filosofia, a rede modular explicada.</td></tr>
+          <tr><td><strong>Competências</strong></td><td>O vosso deck, reimaginado como uma verdadeira experiência web — módulos de produção, plataformas, processo.</td></tr>
+          <tr><td><strong>Alugueres</strong></td><td>Centro para aluguer de estúdio e podcast. Não específico de localização.</td></tr>
+          <tr><td><strong>Aluguer de estúdio</strong></td><td>O estúdio de Portland — ciclorama, especificações, comodidades, formulário de pedido.</td></tr>
+          <tr><td><strong>Aluguer de podcast</strong></td><td>A sala de áudio — locução, Foley, gravação de podcast, formulário de pedido.</td></tr>
+          <tr><td><strong>Contacto</strong></td><td>Nome, email, mensagem. Vai para chris@photon.studio. Sem preços. Sem agenda.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>Fase 2 — Após o lançamento</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Página</th><th>O que faz</th></tr></thead>
+        <tbody>
+          <tr><td>Arquivo</td><td>Storytelling dos bastidores — personalidade, processo, como é estar no set</td></tr>
+          <tr><td>Imprensa</td><td>Publicações, destaques, parcerias</td></tr>
+          <tr><td>Comunidade</td><td>Newsletter, integração com redes sociais, encontros criativos</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>Navegação</h4>
+    <p><strong>Desktop:</strong> Trabalhos | Competências | Alugueres <em>(dropdown ao passar: Estúdio, Podcast)</em> | Sobre | Contacto</p>
+    <p><strong>Mobile:</strong> Os mesmos itens, dropdown por clique para Alugueres.</p>
+    <p>O Contacto tem um destaque visual na navegação — um tratamento de botão que diz "é aqui que a conversa começa."</p>
+  </section>
+
+  <section class="section" id="design-pt">
+    <div class="section-number">06</div>
+    <h2>Direção de design</h2>
+    <h3>Três palavras: cinemático, preciso, imersivo.</h3>
+    <blockquote>O site deve parecer que se está a entrar no controlo de missão às 2 da manhã — escuro, preciso, com propósito, com os melhores trabalhos do mundo a correr nos ecrãs.</blockquote>
+    <p>A interface é a moldura, o trabalho é a pintura. Cada decisão de design é avaliada pelo quão pouco chama a atenção para si mesma.</p>
+    <h4>O que estamos a retirar das vossas referências</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Referência</th><th>O que estamos a usar</th><th>Como estamos a adaptar</th></tr></thead>
+        <tbody>
+          <tr><td><strong>mikkisindhunata.com</strong></td><td>Vídeo hero full-bleed, tipografia dividida, overlays de metadados de produção</td><td>Expandir além do formato de realizador solo para refletir a Photon como um estúdio completo com equipa</td></tr>
+          <tr><td><strong>posterco.tv</strong></td><td>Tipografia de marca massiva, blocos de créditos editoriais, rotação de vídeo</td><td>Adicionar mais navegação e descoberta — o vosso site precisa de guiar visitantes, não apenas impressionar</td></tr>
+          <tr><td><strong>pantheonmedia.com</strong></td><td>Navegação full-screen com media flutuante, tipografia bold empilhada, elementos laterais</td><td>Trazer esta energia para uma paleta escura nas secções de portefólio</td></tr>
+          <tr><td><strong>erichuguenin.com</strong></td><td>Tema escuro, tipografia dividida à volta das imagens, tensão artística</td><td>Manter a artisticidade garantindo que clientes empresariais se sintam convidados, não intimidados</td></tr>
+          <tr><td><strong>twicetwice.tv</strong></td><td>Metadados laterais verticais, grelha de 4 painéis, full-bleed cinemático</td><td>Expandir a navegação para lidar com mais tipos de página — o vosso site tem mais para dizer</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>Tipografia</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Função</th><th>Fonte</th><th>Porquê</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Títulos, labels, texto técnico</strong></td><td>Pitch Sans</td><td>Monoespaçada e geométrica — lê-se como telemetria de controlo de missão. O vosso tema espacial, expresso através da tipografia.</td></tr>
+          <tr><td><strong>Corpo de texto, UI</strong></td><td>Untitled Sans</td><td>Sans-serif geométrica e limpa. Confortável para leitura prolongada.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>Cor</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Cor</th><th>Sensação</th><th>Onde vive</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Quase-preto</strong></td><td>Escuro profundo, cinemático — não preto puro, apenas calor suficiente para parecer humano</td><td>Portefólio, páginas de projeto, secções hero</td></tr>
+          <tr><td><strong>Off-white quente</strong></td><td>Como papel fotográfico — limpo mas não clínico</td><td>Páginas com mais texto: Sobre, Competências, Alugueres, Contacto</td></tr>
+          <tr><td><strong>Âmbar solar</strong></td><td>Âmbar quente, inspirado nos indicadores luminosos das consolas NASA dos anos 60 — um sinal, não uma decoração</td><td>Momentos de destaque: estados ativos, hover de CTA, anéis de foco</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A paleta é deliberadamente neutra. O trabalho dos vossos clientes traz a cor — o site apenas o enquadra.</p>
+    <h3>Algo que queremos discutir convosco</h3>
+    <p>Todos os sites de referência que partilharam — mikkisindhunata, posterco, erichuguenin, twicetwice — são predominantemente escuros. Fundos quase pretos, texto branco, atmosfera cinemática. O vosso tema espacial vive naturalmente nesse mundo também.</p>
+    <p>Ao mesmo tempo, mencionaram querer espaço em branco e um visual limpo e minimalista.</p>
+    <p>Não achamos que estas ideias estejam em conflito. Eis o que propomos: <strong>escuro como padrão para portefólio e secções imersivas</strong> — o hero, a grelha de trabalhos, as páginas de projeto — onde o trabalho precisa de espaço para respirar na sua própria luz. E <strong>off-white quente para páginas com muito conteúdo</strong> como Sobre, Competências, Alugueres e Contacto, onde o conforto de leitura importa e o tom muda para "vamos falar de negócios."</p>
+    <div class="callout">
+      <p><strong>Isto faz sentido para vocês? Ou veem o site da Photon como principalmente branco com acentos escuros?</strong> Isto molda tudo o que vem a seguir, por isso queremos decidir juntos.</p>
+    </div>
+    <h4>Movimento</h4>
+    <p>Subliminar, não vistoso. Um padrão por interação:</p>
+    <ul>
+      <li>Parallax suave no hero — subtil, quase impercetível</li>
+      <li>Conteúdo aparece em fade no scroll — apenas opacidade, sem slide-up</li>
+      <li>Pré-visualização de vídeo ao passar sobre a grelha de trabalhos</li>
+      <li>Overlay de navegação full-screen que desce do topo, texto a aparecer em sequência</li>
+    </ul>
+  </section>
+
+  <section class="section" id="needs-pt">
+    <div class="section-number">07</div>
+    <h2>O que precisamos de vocês</h2>
+    <h4>Antes de começarmos a desenhar</h4>
+    <p>Estes itens afetam o layout, os templates e a direção visual — precisamos deles cedo.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>O que precisamos</th><th>Porquê</th><th>Por onde começar</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Testemunhos de clientes</strong></td><td>As páginas de estudo de caso não funcionam sem uma voz real por trás delas. Este é o conteúdo com maior impacto para o site.</td><td>Contactem a Sorel (5+ anos juntos), o vosso contacto na Nike/SGK e a Oura Ring. Mesmo uma frase honesta é suficiente.</td></tr>
+          <tr><td><strong>Fotografias do estúdio</strong></td><td>As páginas de Alugueres e o teaser do estúdio na homepage precisam de 3-5 fotografias bonitas do espaço de Portland.</td><td>Fotografem o estúdio — ciclorama, grelha de iluminação, camarim, sala de áudio. Mostrem como se sente entrar lá.</td></tr>
+          <tr><td><strong>Retratos da equipa</strong></td><td>A página Sobre precisa dos seis.</td><td>Candid ou semi-candid — no set, no estúdio. Deixem a personalidade combinar com os títulos.</td></tr>
+          <tr><td><strong>Top 5 projetos em destaque</strong></td><td>Estamos a construir a homepage e o portefólio à volta de um conjunto curado — não de todos os projetos que já fizeram. Precisamos dos cinco mais fortes para popular o template.</td><td>Escolham os cinco que melhor representam para onde a Photon está a ir. Nós carregamo-los e ensinamo-vos a adicionar o resto.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="five-pt">
+    <div class="section-number">08</div>
+    <h2>Cinco coisas que farão a maior diferença</h2>
+    <div class="numbered-item">
+      <div class="num">01</div>
+      <h3>Consigam pelo menos um testemunho antes de construirmos o template de estudo de caso.</h3>
+      <p>O portefólio fala por si — mas mesmo uma voz real de cliente transforma a equação de confiança. A Sorel é a candidata mais forte. Cinco anos de parceria carregam um peso que nenhuma quantidade de design consegue replicar.</p>
+    </div>
+    <div class="numbered-item">
+      <div class="num">02</div>
+      <h3>Liderem com a história da produção modular na página de Competências.</h3>
+      <p>"Uma grande rede destilada em equipas especializadas" é uma frase de posicionamento que realmente significa algo. A versão web deve tornar o conceito modular tangível e visual — não apenas uma lista de serviços.</p>
+    </div>
+    <div class="numbered-item">
+      <div class="num">03</div>
+      <h3>Pensem nos Alugueres como uma ferramenta de desenvolvimento de negócio.</h3>
+      <p>Um produtor de agência que reserva o vosso estúdio em Portland e vive a experiência de como operam? É um futuro cliente de produção. As páginas de Alugueres são uma porta, não apenas um catálogo.</p>
+    </div>
+    <div class="numbered-item">
+      <div class="num">04</div>
+      <h3>Estamos a construir o CMS para crescer convosco.</h3>
+      <p>Sem filtros no lançamento, exatamente como discutimos. Mas nos bastidores, estamos a etiquetar projetos com categorias agora — Campanha, Stills, Produto, Desporto — para que quando o portefólio ultrapassar os 20, a filtragem seja ligar um interruptor, não uma reconstrução.</p>
+    </div>
+    <div class="numbered-item">
+      <div class="num">05</div>
+      <h3>Deem aos visitantes de agências um sinal na homepage.</h3>
+      <p>O vosso público principal é brand-side, mas as agências são um canal real. Uma linha na secção de Filosofia — algo como "Trabalhamos diretamente com marcas e ao lado de agências quando o projeto o pede" — dá a esse visitante uma razão para continuar a fazer scroll.</p>
+    </div>
+  </section>
+
+  <section class="section" id="stack-pt">
+    <div class="section-number">09</div>
+    <h2>Uma mudança desde a nossa primeira conversa</h2>
+    <p>Quando arrancámos com isto, o plano era construir em Webflow. Nos últimos meses tenho migrado todos os meus clientes do Webflow para uma stack mais moderna — Next.js no Vercel (a mesma infraestrutura que suporta empresas como a Notion e a Stripe) com o Sanity como CMS — e o site da Photon será construído nessa base.</p>
+    <p>Algumas razões pelas quais isto é uma grande vitória para vocês:</p>
+    <ul>
+      <li><strong>O teto criativo desapareceu.</strong> Qualquer animação, interação ou momento de design que sonhemos, eu consigo construir. Acabaram-se as conversas de "o Webflow não consegue fazer isso". Para um estúdio como a Photon, isso importa — o site deve ser tão cuidado quanto o trabalho que está lá dentro.</li>
+      <li><strong>Nativo de IA desde o primeiro dia.</strong> Esta é a grande razão. A stack integra-se nativamente com ferramentas modernas de IA, por isso as coisas que tenho aprendido a fazer ao longo destes meses podem realmente viver dentro do vosso site — não coladas à posteriori.</li>
+      <li><strong>Mais fácil de gerir no dia-a-dia.</strong> A experiência de edição do Sanity é mais limpa e simples que o CMS do Webflow. Atualizar projetos, trocar imagens, editar texto — tudo direto, sem necessidade de conhecimentos técnicos.</li>
+      <li><strong>Mais rápido e melhor para SEO.</strong> O alojamento no Vercel significa um desempenho e tempos de carregamento significativamente melhores do que o Webflow pode oferecer.</li>
+    </ul>
+    <p>Resultado: o céu é genuinamente o limite do que podemos fazer aqui, e quero aproveitar isso ao máximo para a Photon.</p>
+  </section>
+
+  <section class="section" id="process-pt">
+    <div class="section-number">10</div>
+    <h2>Como trabalhamos</h2>
+    <h3>Protótipo primeiro</h3>
+    <p>Estamos a saltar a fase tradicional de copy e wireframes. Em vez disso, vamos diretamente para prototipagem — vão ver um rascunho funcional do site real, não um mockup estático. Isto significa que estão a reagir a layout real, movimento real, fluxo real desde o início.</p>
+    <p>A indústria web está a mover-se nesta direção, e nós também. É mais rápido, mais honesto, e significa menos surpresas entre "design aprovado" e "site lançado."</p>
+    <p>Juntamente com este briefing, já estamos a enviar um primeiro protótipo da homepage — uma versão funcional com os elementos de projeto em destaque, inspirada numa das referências que partilharam. Adoraríamos o vosso feedback sobre isso também.</p>
+    <h3>Duas rondas de revisão consolidada</h3>
+    <p>Para manter o ritmo, trabalhamos em duas rondas de revisão focadas por milestone. Funciona assim:</p>
+    <ul>
+      <li>Enviamos-vos um rascunho do protótipo</li>
+      <li>A vossa equipa reúne todo o feedback — notas, reações, alterações — numa resposta consolidada</li>
+      <li>Nós implementamos. Essa é a primeira ronda.</li>
+      <li>Vocês reveem novamente, enviam mais uma ronda de notas consolidadas</li>
+      <li>Nós implementamos. Essa é a segunda ronda. Depois avançamos.</li>
+    </ul>
+    <div class="callout">
+      <p><strong>Uma pessoa de contacto.</strong> Precisamos de uma pessoa do vosso lado a recolher todo o feedback e a entregá-lo de uma vez. Isto mantém as rondas limpas e o projeto em movimento. Múltiplos canais de notas contraditórias atrasam tudo — uma voz mantém-nos afiados.</p>
+    </div>
+    <h3>O que acontece quando aprovam a direção de copy</h3>
+    <p>Estamos a enviar uma proposta de copy separada junto com este briefing. Assim que nos derem luz verde sobre a voz, tom e estrutura ali descritos, entregaremos o copy completo do site — cada página, pronto a inserir no protótipo.</p>
+    <h3>Cronograma</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Milestone</th><th>Objetivo</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Descoberta + estratégia + prototipagem</strong></td><td>Abril</td></tr>
+          <tr><td><strong>Prototipagem de design + revisão</strong></td><td>Maio</td></tr>
+          <tr><td><strong>Construção, integração de conteúdo + lançamento</strong></td><td>Junho</td></tr>
+          <tr><td><strong>Lançamento + passagem de testemunho</strong></td><td>Final de Junho</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O nosso objetivo é ter o site completo e no ar até ao final de junho. É apertado mas exequível — desde que as peças de conteúdo (testemunhos, fotografias do estúdio, retratos da equipa) cheguem dentro do prazo.</p>
+    <h3>Após o lançamento</h3>
+    <p>O último passo é a passagem de testemunho e formação — vamos guiar-vos sobre como manter o site no Sanity para que possam atualizar projetos, adicionar novo trabalho e gerir conteúdo por conta própria. Também vos enviaremos algumas opções de suporte e manutenção contínua, mas trataremos disso mais perto do lançamento.</p>
+  </section>
+
+</main>
+
+<div class="lang-tooltip" id="langTooltip">
+  <p>View this page in Portuguese? 🇵🇹</p>
+  <div class="lang-tooltip-actions">
+    <button class="lang-tooltip-btn primary" id="tooltipSwitch">Ver em Português</button>
+  </div>
+</div>
+
+<footer class="footer">
+  <p><span>SALT Studio</span> for Photon</p>
+</footer>
+
+<script>
+  // --- Language toggle ---
+  const langToggle = document.getElementById('langToggle');
+  const langTooltip = document.getElementById('langTooltip');
+  const tooltipSwitch = document.getElementById('tooltipSwitch');
+
+  function setLang(lang) {
+    document.documentElement.lang = lang;
+    localStorage.setItem('photon-lang', lang);
+    langToggle.innerHTML = lang === 'pt'
+      ? '<span class="flag">🇺🇸</span><span class="lang-label">EN</span>'
+      : '<span class="flag">🇵🇹</span><span class="lang-label">PT</span>';
+    langToggle.setAttribute('aria-label', lang === 'pt' ? 'Switch to English' : 'Mudar para Português');
+    window.scrollTo(0, 0);
+    setTimeout(() => {
+      document.querySelectorAll('.section').forEach(s => { s.classList.remove('visible'); fadeObserver.observe(s); });
+      initProgress();
+    }, 50);
+  }
+
+  const savedLang = localStorage.getItem('photon-lang');
+  if (savedLang === 'pt') { setLang('pt'); }
+  else if (!localStorage.getItem('photon-lang-tooltip-seen')) {
+    setTimeout(() => { langTooltip.classList.add('visible'); setTimeout(() => { langTooltip.classList.remove('visible'); }, 8000); }, 3000);
+  }
+
+  langToggle.addEventListener('click', () => {
+    setLang(document.documentElement.lang === 'pt' ? 'en' : 'pt');
+    langTooltip.classList.remove('visible');
+    localStorage.setItem('photon-lang-tooltip-seen', 'true');
+  });
+  tooltipSwitch.addEventListener('click', () => { setLang('pt'); langTooltip.classList.remove('visible'); localStorage.setItem('photon-lang-tooltip-seen', 'true'); });
+
+  // --- Progress and scroll tracking ---
+  const progressBar = document.getElementById('progressBar');
+  const progressTracker = document.getElementById('progressTracker');
+
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.section').forEach(section => fadeObserver.observe(section));
+
+  function initProgress() {
+    progressTracker.innerHTML = '';
+    const activeSections = Array.from(document.querySelectorAll('.section')).filter(s => {
+      const m = s.closest('main'); return m && getComputedStyle(m).display !== 'none';
+    });
+    const total = activeSections.length;
+    activeSections.forEach((section, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'progress-dot'; dot.dataset.index = i;
+      dot.addEventListener('click', () => section.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      progressTracker.appendChild(dot);
+    });
+    const counter = document.createElement('div');
+    counter.className = 'progress-counter';
+    counter.innerHTML = '<span class="current">01</span> / ' + String(total).padStart(2, '0');
+    progressTracker.appendChild(counter);
+    const dots = progressTracker.querySelectorAll('.progress-dot');
+    let cur = 0;
+    function updateProgress() {
+      const pct = Math.min((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100, 100);
+      progressBar.style.width = pct + '%';
+      let active = 0;
+      activeSections.forEach((s, i) => { if (s.getBoundingClientRect().top < window.innerHeight * 0.5) active = i; });
+      if (active !== cur) {
+        cur = active;
+        dots.forEach((d, i) => { d.classList.remove('active'); if (i < active) d.classList.add('visited'); else d.classList.remove('visited'); });
+        if (dots[active]) dots[active].classList.add('active');
+        counter.innerHTML = '<span class="current">' + String(active + 1).padStart(2, '0') + '</span> / ' + String(total).padStart(2, '0');
+      }
+    }
+    window.removeEventListener('scroll', window._ph); window._ph = updateProgress;
+    window.addEventListener('scroll', updateProgress, { passive: true }); updateProgress();
+  }
+  initProgress();
+</script>
+
+</body>
+</html>

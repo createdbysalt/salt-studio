@@ -1,0 +1,35 @@
+---
+description: React components — flat layout, Tailwind, visual editing
+globs: components/**/*
+alwaysApply: false
+---
+
+# Component conventions
+
+**Canonical doc:** `components/CLAUDE.md`
+
+## Layout
+
+Flat `components/` — no feature subfolders except `OptimisticSortOrder/` (server `index.tsx` + client `index.client.tsx`).
+
+## Exports & styling
+
+- Named exports (default only on legacy `ImageBox.tsx`)
+- Tailwind inline; conditionals via template literals — **no `cn()` / `clsx`**
+- Async server components OK when you need `await draftMode()`
+
+## Types
+
+- Prefer `@/sanity.types` (generated). Narrow types in `@/types` only when needed.
+- Never hand-edit `sanity.types.ts`
+
+## Portable text & images
+
+- All rich text through **`CustomPortableText.tsx`** — extend it for new block types
+- Sanity images through **`ImageBox`** + `urlForImage`
+
+## Visual editing
+
+- `createDataAttribute` + `data-sanity` for Presentation overlays on arrays/derived values
+- `stegaClean()` when you need raw strings (conditions, `Date`, etc.)
+- `OptimisticSortOrder/` pattern: lazy client half only in draft mode

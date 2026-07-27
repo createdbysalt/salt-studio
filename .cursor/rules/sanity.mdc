@@ -1,0 +1,43 @@
+---
+description: Sanity schemas, GROQ, live fetch, Presentation tool
+globs: sanity/**/*
+alwaysApply: false
+---
+
+# Sanity conventions
+
+**Canonical doc:** `sanity/CLAUDE.md` — read before schema or query changes.
+
+## Registering schemas
+
+1. Define in `sanity/schemas/<kind>/<name>.ts` with `defineType` / `defineField`
+2. Import into `sanity.config.ts` → `schema.types`
+3. Singletons: also add to `singletonPlugin([...])` and `pageStructure([...])`
+4. Run `npm run typegen`
+
+## Client-friendly schemas (required)
+
+- Every field needs a `description` in plain English
+- Use field `groups` on complex documents
+- Validation: `.error()` / `.warning()` with reasons, not bare `.required()`
+- Limit portable-text decorators/annotations; renderer is `components/CustomPortableText.tsx`
+
+## Queries
+
+- All queries in `sanity/lib/queries.ts` use `defineQuery` from `next-sanity`
+- Singleton: `*[_type == "home"][0]{...}`; slug filter: `$slug` param, not string interpolation
+- After schema/query changes: `npm run typegen`
+
+## Fetching
+
+- **`sanityFetch`** for request-time reads (live revalidation + draft mode)
+- `<SanityLive />` in `app/(personal)/layout.tsx` — one copy, don't move to pages
+- Token via `sanity/lib/token.ts` (`server-only`); never expose to client
+
+## New URL-backed document types
+
+Update `sanity/plugins/resolve.ts` (`mainDocuments`, `locations`) and `resolveHref` in `sanity/lib/utils.ts`.
+
+## Media Library
+
+Before uploads or tag changes, read `brand-identity/asset-tagging-strategy.md`.

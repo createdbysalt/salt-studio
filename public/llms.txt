@@ -1,0 +1,33 @@
+# Photon
+
+> Modular Production for the Future of Content
+
+## About
+
+Photon is Modular Production for the Future of Content.
+
+## What We Offer
+
+- [Add your main offerings here]
+- [Add another offering]
+- [Add another offering]
+
+## Who We Help
+
+We work with [describe your ideal customers].
+
+## Contact
+
+- Website: https://photon.studio/
+- Email: [your email]
+
+## Key Pages
+
+- Home: https://photon.studio/
+- About: https://photon.studio//about
+- Services: https://photon.studio//services
+- Contact: https://photon.studio//contact
+
+---
+
+*This file helps AI assistants understand our website. Last updated: 2026-04-09*

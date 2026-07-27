@@ -1,0 +1,641 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+/*
+ * =============================================================================
+ * SALT STUDIO DESIGN TOKENS (legacy Photon visual system — redesign pending)
+ * =============================================================================
+ * Source of truth: design.md (homepage + /work full-bleed baseline).
+ * Preview: /brand · Agent skill: .cursor/skills/salt-design/ (legacy look until redesign)
+ * =============================================================================
+ */
+
+@theme {
+  /* ---- Layout: chrome insets vs media bleed (from /work) ---- */
+  --spacing-chrome: 20px; /* px-5 — page titles, filters, forms */
+  --spacing-chrome-md: 24px; /* md:px-6 */
+  --spacing-media-caption: 16px; /* p-4 — type inset ON media */
+  --spacing-media-caption-md: 20px; /* md:p-5 */
+  --spacing-hairline: 2px; /* work grid gap — contact sheet, not cards */
+
+  /* ---- Brand / semantic (dark default) ---- */
+  --color-primary: #ffffff;
+  --color-primary-hover: rgba(255, 255, 255, 0.9);
+  --color-primary-light: rgba(255, 255, 255, 0.12);
+
+  --color-secondary: rgba(255, 255, 255, 0.5);
+  --color-secondary-hover: rgba(255, 255, 255, 0.85);
+  --color-secondary-light: rgba(255, 255, 255, 0.08);
+
+  /* Solar — focus / rare status on light pages only; not a hero accent */
+  --color-accent: #e8d5a3;
+  --color-accent-hover: #d4bc89;
+  --color-accent-light: rgba(232, 213, 163, 0.15);
+
+  --color-background: #1a1a1a;
+  --color-foreground: #ffffff;
+  --color-muted: #141414;
+  --color-muted-foreground: rgba(255, 255, 255, 0.5);
+  --color-border: rgba(255, 255, 255, 0.4);
+
+  /* Surfaces */
+  --color-surface: #141414;
+  --color-surface-hover: #1c1c1c;
+  --color-border-subtle: rgba(255, 255, 255, 0.1);
+
+  /* Light mode — cool paper white (editorial interiors, Capabilities, etc.) */
+  --color-background-light: #f4f4f4;
+  --color-surface-light: #ebebeb;
+  --color-foreground-light: #0d0d0d;
+  --color-muted-foreground-light: rgba(0, 0, 0, 0.45);
+  --color-border-light: rgba(0, 0, 0, 0.15);
+
+  /* State */
+  --color-success: #4a9b6f;
+  --color-warning: #e8a830;
+  --color-error: #e85050;
+  --color-info: #5080e8;
+
+  /* Type scale (Pitch Sans) */
+  --text-display: clamp(48px, 8vw, 128px);
+  --text-display--line-height: 0.9;
+  --text-h1: clamp(36px, 5vw, 72px);
+  --text-h1--line-height: 1;
+  --text-h2: clamp(24px, 3vw, 48px);
+  --text-h2--line-height: 1.1;
+  --text-h3: clamp(18px, 2vw, 32px);
+  --text-h3--line-height: 1.2;
+  --text-label: 0.6875rem; /* 11px */
+  --text-label--line-height: 1.4;
+  --text-telemetry: 0.625rem; /* 10px */
+  --text-telemetry--line-height: 1.4;
+  --text-body: 1.125rem; /* 18px */
+  --text-body--line-height: 1.65;
+
+  --tracking-label: 0.18em;
+  --tracking-telemetry: 0.12em;
+  --tracking-marquee: 0.26em;
+}
+
+/*
+ * =============================================================================
+ * BASE PALETTE & SCALES
+ * =============================================================================
+ */
+
+@theme {
+  /* Fonts — Pitch Sans (sans + mono), loaded via next/font/local in app/layout.tsx */
+  --font-mono:
+    var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono',
+    monospace;
+  --font-sans:
+    var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    'Liberation Sans', Helvetica, Arial, system-ui, sans-serif;
+  /* No serif in rebrand — system fallback so legacy font-serif classes don't break */
+  --font-serif: Georgia, 'Times New Roman', Times, serif;
+
+  /* Border radius — sharp by default (mission-control) */
+  --radius-none: 0;
+  --radius-sm: 0;
+  --radius: 0;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-full: 9999px;
+
+  /* Spacing (custom scale — note: spacing-8 = 136px, not Tailwind default) */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 20px;
+  --spacing-5: 32px;
+  --spacing-6: 52px;
+  --spacing-7: 84px;
+  --spacing-8: 136px;
+  --spacing-9: 220px;
+
+  /* Scrolling nav row — py-5 + h-5 (mobile), py-6 + h-10 (md). h-10 is 2.5rem, not spacing-10. */
+  --project-nav-height: 96px;
+  --project-nav-height-md: 144px;
+
+  /* Colors */
+  --color-white: #ffffff;
+  --color-black: #0d0e12;
+
+  --color-gray-50: #f6f6f8;
+  --color-gray-100: #eeeef1;
+  --color-gray-200: #e3e4e8;
+  --color-gray-300: #bbbdc9;
+  --color-gray-400: #9499ad;
+  --color-gray-500: #727892;
+  --color-gray-600: #515870;
+  --color-gray-700: #383d51;
+  --color-gray-800: #252837;
+  --color-gray-900: #1b1d27;
+  --color-gray-950: #13141b;
+
+  --color-blue-50: #f5f8ff;
+  --color-blue-100: #e5edff;
+  --color-blue-200: #dbe5ff;
+  --color-blue-300: #a8bfff;
+  --color-blue-400: #7595ff;
+  --color-blue-500: #556bfc;
+  --color-blue-600: #4043e7;
+  --color-blue-700: #2927aa;
+  --color-blue-800: #192457;
+  --color-blue-900: #161a41;
+  --color-blue-950: #101228;
+
+  --color-purple-50: #f8f5ff;
+  --color-purple-100: #f1ebff;
+  --color-purple-200: #ece1fe;
+  --color-purple-300: #ccb1fc;
+  --color-purple-400: #b087f7;
+  --color-purple-500: #8f57ef;
+  --color-purple-600: #721fe5;
+  --color-purple-700: #4c1a9e;
+  --color-purple-800: #2f1862;
+  --color-purple-900: #23173f;
+  --color-purple-950: #181128;
+
+  --color-magenta-50: #fef6f9;
+  --color-magenta-100: #fde8ef;
+  --color-magenta-200: #fcdee9;
+  --color-magenta-300: #f7abc5;
+  --color-magenta-400: #f0709b;
+  --color-magenta-500: #e72767;
+  --color-magenta-600: #b11651;
+  --color-magenta-700: #7c1342;
+  --color-magenta-800: #4b1130;
+  --color-magenta-900: #341325;
+  --color-magenta-950: #1f0f14;
+
+  --color-red-50: #fff6f5;
+  --color-red-100: #ffe7e5;
+  --color-red-200: #ffdedc;
+  --color-red-300: #fdada5;
+  --color-red-400: #f77769;
+  --color-red-500: #ef4434;
+  --color-red-600: #cc2819;
+  --color-red-700: #8b2018;
+  --color-red-800: #4d1714;
+  --color-red-900: #321615;
+  --color-red-950: #1e1011;
+
+  --color-orange-50: #fff7f0;
+  --color-orange-100: #ffeadb;
+  --color-orange-200: #ffddc7;
+  --color-orange-300: #ffb685;
+  --color-orange-400: #ff8e42;
+  --color-orange-500: #fa6400;
+  --color-orange-600: #b14802;
+  --color-orange-700: #7c3404;
+  --color-orange-800: #461e07;
+  --color-orange-900: #32160b;
+  --color-orange-950: #21120d;
+
+  --color-yellow-50: #fefae1;
+  --color-yellow-100: #fcf3bb;
+  --color-yellow-200: #f9e994;
+  --color-yellow-300: #f7d455;
+  --color-yellow-400: #f9bc15;
+  --color-yellow-500: #d28a04;
+  --color-yellow-600: #965908;
+  --color-yellow-700: #653a0b;
+  --color-yellow-800: #3b220c;
+  --color-yellow-900: #271a11;
+  --color-yellow-950: #181410;
+
+  --color-green-50: #e7fef5;
+  --color-green-100: #c5fce8;
+  --color-green-200: #a9f9dc;
+  --color-green-300: #59f3ba;
+  --color-green-400: #0ff0a1;
+  --color-green-500: #04b97a;
+  --color-green-600: #01794f;
+  --color-green-700: #015133;
+  --color-green-800: #023120;
+  --color-green-900: #06231a;
+  --color-green-950: #071715;
+
+  --color-cyan-50: #e7fefe;
+  --color-cyan-100: #c5fcfc;
+  --color-cyan-200: #96f8f8;
+  --color-cyan-300: #62efef;
+  --color-cyan-400: #18e2e2;
+  --color-cyan-500: #04b8be;
+  --color-cyan-600: #037782;
+  --color-cyan-700: #024950;
+  --color-cyan-800: #042f34;
+  --color-cyan-900: #072227;
+  --color-cyan-950: #0d181c;
+}
+
+/*
+ * =============================================================================
+ * ANIMATIONS
+ * =============================================================================
+ */
+
+@keyframes logo-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-logo-scroll {
+  animation: logo-scroll 30s linear infinite;
+}
+
+.animate-logo-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Homepage hero — client-name marquee (two duplicated groups → -50%) */
+@keyframes client-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/*
+ * =============================================================================
+ * BASE + THEME SWITCH
+ * =============================================================================
+ */
+
+@layer base {
+  :root {
+    --tw-prose-body: #ffffff;
+    --tw-prose-headings: #ffffff;
+    --tw-prose-lead: rgba(255, 255, 255, 0.7);
+    --tw-prose-links: #ffffff;
+    --tw-prose-bold: #ffffff;
+    --tw-prose-counters: rgba(255, 255, 255, 0.5);
+    --tw-prose-bullets: rgba(255, 255, 255, 0.5);
+    --tw-prose-hr: rgba(255, 255, 255, 0.1);
+    --tw-prose-quotes: #ffffff;
+    --tw-prose-quote-borders: rgba(255, 255, 255, 0.4);
+    --tw-prose-captions: rgba(255, 255, 255, 0.5);
+    --tw-prose-code: #ffffff;
+    --tw-prose-pre-code: #1a1a1a;
+    --tw-prose-pre-bg: #ffffff;
+    --tw-prose-th-borders: rgba(255, 255, 255, 0.1);
+    --tw-prose-td-borders: rgba(255, 255, 255, 0.1);
+    --tw-prose-invert-body: #0d0d0d;
+    --tw-prose-invert-headings: #0d0d0d;
+    --tw-prose-invert-lead: rgba(0, 0, 0, 0.65);
+    --tw-prose-invert-links: #0d0d0d;
+    --tw-prose-invert-bold: #0d0d0d;
+    --tw-prose-invert-counters: rgba(0, 0, 0, 0.45);
+    --tw-prose-invert-bullets: rgba(0, 0, 0, 0.45);
+    --tw-prose-invert-hr: rgba(0, 0, 0, 0.15);
+    --tw-prose-invert-quotes: #0d0d0d;
+    --tw-prose-invert-quote-borders: rgba(0, 0, 0, 0.2);
+    --tw-prose-invert-captions: rgba(0, 0, 0, 0.45);
+    --tw-prose-invert-code: #0d0d0d;
+    --tw-prose-invert-pre-code: #ffffff;
+    --tw-prose-invert-pre-bg: #1a1a1a;
+    --tw-prose-invert-th-borders: rgba(0, 0, 0, 0.15);
+    --tw-prose-invert-td-borders: rgba(0, 0, 0, 0.15);
+  }
+
+  /* Light sections / pages — set data-theme="light" on main or section */
+  [data-theme='light'] {
+    --color-background: var(--color-background-light);
+    --color-foreground: var(--color-foreground-light);
+    --color-muted: var(--color-surface-light);
+    --color-muted-foreground: var(--color-muted-foreground-light);
+    --color-border: var(--color-border-light);
+    --color-surface: var(--color-surface-light);
+    --color-surface-hover: #e0e0e0;
+    --color-border-subtle: rgba(0, 0, 0, 0.08);
+    --color-primary: #0d0d0d;
+    --color-primary-hover: rgba(13, 13, 13, 0.85);
+    --color-primary-light: rgba(13, 13, 13, 0.08);
+    --color-secondary: rgba(0, 0, 0, 0.45);
+    --color-secondary-hover: rgba(0, 0, 0, 0.7);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .prose blockquote {
+    font-weight: inherit;
+    font-style: normal;
+  }
+
+  .prose pre {
+    border-radius: 0;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@keyframes salt-shimmer {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes salt-scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+/*
+ * =============================================================================
+ * COMPONENT UTILITIES
+ * =============================================================================
+ * Ghost buttons match GhostCTA on the homepage. Prefer these over one-off
+ * border/tracking stacks when building interior pages.
+ */
+
+@layer utilities {
+  /* Hairline between full-bleed media tiles (/work grid) */
+  .gap-hairline {
+    gap: var(--spacing-hairline);
+  }
+
+  /* Work grid — media push-in on card hover (parent needs `.group`). */
+  .work-card-media-zoom {
+    transform: translateZ(0);
+    transform-origin: center;
+    transition: transform 700ms ease-out;
+    will-change: transform;
+  }
+
+  .group:hover .work-card-media-zoom,
+  .group:focus-within .work-card-media-zoom {
+    transform: scale(1.05) translateZ(0);
+  }
+
+  .project-hero-overlap-nav {
+    position: relative;
+    z-index: 2;
+    margin-top: calc(-1 * var(--project-nav-height));
+  }
+
+  @media (min-width: 768px) {
+    .project-hero-overlap-nav {
+      margin-top: calc(-1 * var(--project-nav-height-md));
+    }
+  }
+
+  /* Full viewport — nav overlap is handled by negative margin on the wrapper. */
+  .project-hero-overlap-nav .project-hero-shell {
+    height: 100svh;
+    max-height: 100svh;
+    min-height: 100svh;
+    background-color: #1a1a1a;
+  }
+
+  .project-hero-overlap-nav .project-hero-header {
+    height: 100svh;
+    max-height: 100svh;
+    min-height: 100svh;
+    background-color: #1a1a1a;
+  }
+
+  /* Soft blur dissolve at the bottom of the hero media. */
+  .project-hero-bottom-blur {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 3;
+    height: 42%;
+    pointer-events: none;
+    backdrop-filter: blur(28px) saturate(0.8);
+    -webkit-backdrop-filter: blur(28px) saturate(0.8);
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.4) 30%,
+      rgba(0, 0, 0, 0.85) 65%,
+      black 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.4) 30%,
+      rgba(0, 0, 0, 0.85) 65%,
+      black 100%
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-hero-bottom-blur {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+
+  .project-hero-expand-icon {
+    transform: scale(1) translateZ(0);
+    transform-origin: bottom right;
+    transition:
+      transform 450ms ease-out,
+      opacity 300ms ease-out;
+    will-change: transform;
+  }
+
+  .group:hover .project-hero-expand-icon,
+  .group:focus-visible .project-hero-expand-icon {
+    transform: scale(1.18) translateZ(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-card-media-zoom {
+      transition: none;
+    }
+
+    .group:hover .work-card-media-zoom,
+    .group:focus-within .work-card-media-zoom {
+      transform: translateZ(0);
+    }
+
+    .project-hero-expand-icon {
+      transition: opacity 300ms ease-out;
+    }
+
+    .group:hover .project-hero-expand-icon,
+    .group:focus-visible .project-hero-expand-icon {
+      transform: scale(1) translateZ(0);
+    }
+  }
+
+  /*
+   * Chrome inset — UI only (nav-adjacent titles, search, filters, forms).
+   * Never wrap a media grid or product hero in this.
+   */
+  .page-chrome {
+    padding-inline: var(--spacing-chrome);
+  }
+
+  @media (min-width: 768px) {
+    .page-chrome {
+      padding-inline: var(--spacing-chrome-md);
+    }
+  }
+
+  /* Edge-to-edge media band — cancels accidental horizontal padding */
+  .media-bleed {
+    width: 100%;
+    max-width: none;
+    padding-inline: 0;
+    margin-inline: 0;
+  }
+
+  /*
+   * Caption stack sitting ON a media tile (bottom-left recipe).
+   * Pair with absolute positioning + bottom gradient in the component.
+   */
+  .media-caption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: var(--spacing-media-caption);
+  }
+
+  @media (min-width: 768px) {
+    .media-caption {
+      padding: var(--spacing-media-caption-md);
+    }
+  }
+
+  .animate-salt-shimmer {
+    animation: salt-shimmer 1.8s ease-in-out infinite;
+  }
+
+  .animate-salt-scan {
+    animation: salt-scan 1.4s ease-in-out infinite;
+  }
+
+  .text-label {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    line-height: var(--text-label--line-height);
+    text-transform: uppercase;
+  }
+
+  .text-telemetry {
+    font-family: var(--font-mono);
+    font-size: var(--text-telemetry);
+    font-weight: 400;
+    letter-spacing: var(--tracking-telemetry);
+    line-height: var(--text-telemetry--line-height);
+    text-transform: uppercase;
+  }
+
+  .text-display {
+    font-family: var(--font-sans);
+    font-size: var(--text-display);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: var(--text-display--line-height);
+    text-transform: uppercase;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid color-mix(in srgb, var(--color-foreground) 40%, transparent);
+    padding: 0.375rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--color-foreground);
+    background: transparent;
+    transition:
+      border-color 300ms ease,
+      color 300ms ease,
+      background-color 300ms ease;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--color-foreground);
+  }
+
+  .btn-ghost-light {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid color-mix(in srgb, var(--color-foreground-light) 25%, transparent);
+    padding: 0.375rem 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--color-foreground-light);
+    background: transparent;
+    transition:
+      border-color 300ms ease,
+      color 300ms ease,
+      background-color 300ms ease;
+  }
+
+  .btn-ghost-light:hover {
+    border-color: var(--color-foreground-light);
+  }
+
+  .btn-solid {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid var(--color-foreground);
+    padding: 0.5rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--color-background);
+    background: var(--color-foreground);
+    transition:
+      background-color 300ms ease,
+      color 300ms ease,
+      border-color 300ms ease;
+  }
+
+  .btn-solid:hover {
+    background: color-mix(in srgb, var(--color-foreground) 90%, transparent);
+  }
+}

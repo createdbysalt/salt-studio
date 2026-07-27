@@ -1,0 +1,34 @@
+---
+description: Salt Studio project core — stack, paths, non-negotiables
+alwaysApply: true
+---
+
+# Salt Studio — project core
+
+Full reference: **`CLAUDE.md`** and **`AGENTS.md`**.
+
+Sanity project: **`jkqf2ng5`**. Never write to Photon’s **`25ywlhce`**. Env secrets: 1Password vault **`salt-studio-development`**, item **`salt-studio-sanity`**.
+
+## Stack
+
+Next.js 16.2 (Turbopack), React 19.2 (Compiler on), Sanity 5.19, Tailwind 4.2, TypeScript 5.9. Dev server: `npm run dev` → port 4000.
+
+## Non-negotiables
+
+1. Never hand-edit `sanity.types.ts` / `schema.json` — change schemas, then `npm run typegen`.
+2. Server components by default; `'use client'` only for browser APIs, state, effects, handlers.
+3. GROQ: `defineQuery` in `sanity/lib/queries.ts`. Reads: `sanityFetch` from `sanity/lib/live.ts`, not `client.fetch`.
+4. Tailwind inline in `className`; template literals for conditionals — **no `cn()` / `clsx`**.
+5. Images: only `cdn.sanity.io` in `next.config.ts` `remotePatterns`.
+6. Don't edit managed blocks in `AGENTS.md` between `BEGIN:nextjs-agent-rules` / `END:nextjs-agent-rules`.
+7. Run `npm run type-check` before shipping.
+8. Load env from 1Password `salt-studio-development` / `salt-studio-sanity` — not a hand-maintained secret dump.
+
+## Critical paths
+
+- Sanity: `sanity.config.ts`, `sanity/lib/*`, `sanity/schemas/`
+- Public site: `app/(personal)/`
+- Studio: `app/edit/` (not `(personal)`)
+- Draft enable: `app/api/draft-mode/enable/route.ts`
+
+When editing in a folder, also follow its scoped rule and read its `CLAUDE.md`.

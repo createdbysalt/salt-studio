@@ -1,0 +1,25 @@
+---
+description: Next.js API route handlers
+globs: app/api/**/*
+alwaysApply: false
+---
+
+# API route conventions
+
+**Canonical doc:** `app/api/CLAUDE.md`
+
+## Existing route
+
+`app/api/draft-mode/enable/route.ts` — `defineEnableDraftMode` with `client.withConfig({token})`. Registered in `sanity.config.ts` as `previewUrl.previewMode.enable`. **If you move it, update the config.**
+
+## New routes
+
+- Export named handlers: `export async function GET(request: Request)`
+- File path = URL path (`app/api/foo/route.ts` → `/api/foo`)
+- Import tokens from `@/sanity/lib/token` (server-only), not raw `process.env`
+- Prefer **server actions** over new API routes for UI-triggered mutations
+- Draft disable is a server action in `app/(personal)/layout.tsx`, not an API route here
+
+## Writes to Sanity
+
+Use a separate `server-only` write-token module and `SANITY_API_WRITE_TOKEN` — don't reuse the read token.

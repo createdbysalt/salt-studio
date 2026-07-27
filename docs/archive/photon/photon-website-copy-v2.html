@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photon — Website Copy, v2 (R1 Feedback Applied)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0A0A0A;
+      --surface: #111111;
+      --surface-2: #141414;
+      --border: #1E1E1E;
+      --border-strong: #2A2A2A;
+      --text: #F5F4F0;
+      --text-muted: #8A8A8A;
+      --text-dim: #5A5A5A;
+      --accent: #FFFFFF;
+      --accent-dim: rgba(255, 255, 255, 0.08);
+      --green: #7EBF8E;
+      --red: #BF7E7E;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --content-w: 760px;
+      --toc-w: 260px;
+      --rail-gap: 80px;
+      --space-section: clamp(80px, 12vh, 140px);
+    }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.7;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection { background: var(--accent); color: var(--bg); }
+
+    /* --- NAV --- */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 24px 40px;
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      font-family: var(--mono); font-size: 12px; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted);
+    }
+    .nav-brand span { color: var(--accent); }
+    .nav-label {
+      font-family: var(--mono); font-size: 11px; font-weight: 400;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+    }
+    .nav-label .current { color: var(--accent); }
+
+    /* --- HERO --- */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 0 40px 80px; position: relative;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 80%, rgba(232, 213, 163, 0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-label {
+      font-family: var(--mono); font-size: 11px; font-weight: 500;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 32px;
+    }
+    .hero h1 {
+      font-family: var(--mono); font-size: clamp(32px, 5vw, 56px); font-weight: 300;
+      line-height: 1.15; letter-spacing: -0.02em; max-width: 800px; color: var(--text);
+    }
+    .hero-meta {
+      margin-top: 48px; display: flex; gap: 48px; flex-wrap: wrap;
+      font-family: var(--mono); font-size: 12px; color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+    .hero-meta dt {
+      text-transform: uppercase; font-size: 10px; letter-spacing: 0.15em;
+      color: var(--text-dim); margin-bottom: 4px;
+    }
+    .hero-meta dd { color: var(--text-muted); }
+
+    /* --- LAYOUT (TOC + content) --- */
+    .layout {
+      display: grid;
+      grid-template-columns: var(--toc-w) minmax(0, 1fr);
+      gap: var(--rail-gap);
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 40px;
+      position: relative;
+    }
+
+    /* --- TOC (left rail, sticky) --- */
+    .toc {
+      position: sticky;
+      top: 100px;
+      align-self: start;
+      max-height: calc(100vh - 140px);
+      overflow-y: auto;
+      padding: 32px 0 40px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .toc::-webkit-scrollbar { width: 4px; }
+    .toc::-webkit-scrollbar-track { background: transparent; }
+    .toc::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .toc-label {
+      font-family: var(--mono); font-size: 10px; font-weight: 500;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim);
+      padding: 0 0 20px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+    }
+
+    .toc-list { list-style: none; padding: 0; margin: 0; max-width: none; }
+    .toc-list li { padding: 0; margin: 0; position: relative; }
+    .toc-list li::before { display: none; }
+    .toc-list a {
+      display: block;
+      padding: 10px 16px;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--text-dim);
+      text-decoration: none;
+      border-left: 1px solid var(--border);
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+    .toc-list a:hover {
+      color: var(--text-muted);
+      border-left-color: var(--text-dim);
+    }
+    .toc-list a.active {
+      color: var(--text);
+      border-left: 1px solid var(--accent);
+      font-weight: 500;
+    }
+    .toc-list .toc-num {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-right: 10px;
+      min-width: 18px;
+    }
+    .toc-list a.active .toc-num { color: var(--text-muted); }
+
+    /* --- CONTENT --- */
+    .content { max-width: var(--content-w); min-width: 0; }
+    .section {
+      padding: var(--space-section) 0;
+      border-top: 1px solid var(--border);
+    }
+    .section:first-child { border-top: none; padding-top: 80px; }
+    .section-number {
+      font-family: var(--mono); font-size: 11px; font-weight: 400;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      font-family: var(--mono); font-size: clamp(28px, 4vw, 44px);
+      font-weight: 500; line-height: 1.15; letter-spacing: -0.02em;
+      margin-bottom: 40px; color: var(--text);
+    }
+    h3 {
+      font-family: var(--mono); font-size: 18px; font-weight: 500;
+      line-height: 1.4; margin-top: 56px; margin-bottom: 20px; color: var(--text);
+    }
+    h4 {
+      font-family: var(--mono); font-size: 12px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-top: 36px; margin-bottom: 14px; color: var(--accent);
+    }
+
+    p { margin-bottom: 20px; color: var(--text-muted); max-width: 680px; }
+    p strong, li strong { color: var(--text); font-weight: 500; }
+    em { color: var(--text); font-style: italic; }
+    a { color: var(--accent); text-decoration: underline; text-decoration-color: var(--text-dim); text-underline-offset: 3px; }
+    a:hover { text-decoration-color: var(--accent); }
+
+    /* --- BLOCKQUOTE = LIVE COPY (the lines that actually ship) --- */
+    blockquote {
+      position: relative;
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 28px 32px 24px;
+      margin: 32px 0;
+      font-family: var(--sans);
+      font-size: 17px;
+      line-height: 1.65;
+      color: var(--accent);
+      max-width: 680px;
+      border-radius: 0 4px 4px 0;
+    }
+    blockquote::before {
+      content: 'LIVE COPY';
+      position: absolute;
+      top: -8px; left: 20px;
+      font-family: var(--mono); font-size: 9px; font-weight: 600;
+      letter-spacing: 0.18em;
+      color: var(--bg);
+      background: var(--accent);
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+    blockquote p {
+      margin-bottom: 14px;
+      font-style: normal;
+      color: var(--accent);
+      font-weight: 400;
+      max-width: none;
+    }
+    blockquote p:last-child { margin-bottom: 0; }
+    blockquote p strong { color: var(--accent); font-weight: 600; }
+    blockquote em { color: var(--accent); font-style: italic; }
+    blockquote a { color: var(--accent); text-decoration-color: var(--accent); }
+    blockquote code {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent);
+    }
+
+    ul, ol { margin-bottom: 20px; padding-left: 0; list-style: none; max-width: 680px; }
+    li { padding: 6px 0 6px 20px; position: relative; color: var(--text-muted); line-height: 1.65; }
+    li::before {
+      content: ''; position: absolute; left: 0; top: 15px;
+      width: 6px; height: 1px; background: var(--accent);
+    }
+    ol { counter-reset: ol-counter; }
+    ol > li { counter-increment: ol-counter; padding-left: 28px; }
+    ol > li::before {
+      content: counter(ol-counter, decimal-leading-zero);
+      background: none; width: auto; height: auto; top: 6px;
+      font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    /* --- TABLES --- */
+    .table-wrap { overflow-x: auto; margin: 28px 0 36px; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.6; }
+    thead th {
+      font-family: var(--mono); font-size: 10px; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-dim);
+      text-align: left; padding: 12px 16px 12px 0;
+      border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    tbody td { padding: 14px 16px 14px 0; border-bottom: 1px solid var(--border); color: var(--text-muted); vertical-align: top; }
+    tbody td:first-child { color: var(--text); font-weight: 500; }
+    tbody td strong { color: var(--text); font-weight: 500; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* --- CALLOUT (important inline notes, live copy) --- */
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border); border-left: 2px solid var(--accent);
+      padding: 24px 28px; margin: 32px 0; border-radius: 0 4px 4px 0;
+      max-width: 680px;
+    }
+    .callout p { margin-bottom: 0; color: var(--text); }
+    .callout p + p { margin-top: 12px; }
+
+    /* --- TRADE-OFF NOTE (a stronger callout — yellow accent for the SEO note) --- */
+    .tradeoff {
+      background: rgba(232, 213, 163, 0.04);
+      border: 1px solid rgba(232, 213, 163, 0.25); border-left: 3px solid #E8D5A3;
+      padding: 28px 32px; margin: 36px 0; border-radius: 0 4px 4px 0;
+      max-width: 680px;
+    }
+    .tradeoff p { color: var(--text); }
+    .tradeoff p strong { color: #E8D5A3; }
+    .tradeoff ol { margin-bottom: 16px; }
+    .tradeoff ol > li { color: var(--text); }
+
+    /* --- EDITORIAL (bracket commentary — not live copy) --- */
+    .editorial {
+      background: rgba(255, 255, 255, 0.015);
+      border: 1px dashed var(--border-strong);
+      padding: 18px 22px; margin: 24px 0;
+      font-family: var(--mono); font-size: 12px; line-height: 1.75;
+      color: var(--text-dim); max-width: 680px;
+      border-radius: 3px;
+    }
+    .editorial strong { color: var(--text-muted); font-weight: 500; }
+    .editorial-label {
+      display: inline-block;
+      font-size: 9px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 2px 8px; margin-bottom: 10px;
+      border: 1px solid var(--border-strong); border-radius: 2px;
+    }
+    .editorial p { color: var(--text-dim); max-width: none; margin-bottom: 10px; }
+    .editorial p:last-child { margin-bottom: 0; }
+
+    /* --- CODE BLOCKS --- */
+    pre {
+      background: var(--surface); border: 1px solid var(--border);
+      border-left: 2px solid var(--text-dim);
+      padding: 20px 24px; margin: 24px 0;
+      font-family: var(--mono); font-size: 12px; line-height: 1.7;
+      color: var(--text-muted); overflow-x: auto; max-width: 680px;
+      border-radius: 0 4px 4px 0;
+      white-space: pre;
+    }
+    code { font-family: var(--mono); font-size: 13px; color: var(--text); background: var(--accent-dim); padding: 2px 6px; border-radius: 3px; }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    /* --- PAGE BLOCK (per-page wrapper inside a section) --- */
+    .page-block {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 36px 40px;
+      margin: 28px 0 40px;
+      border-radius: 4px;
+    }
+    .page-block > h3:first-child,
+    .page-block > h4:first-child { margin-top: 0; }
+
+    /* --- SUBPAGE (for /work/category subsections etc.) --- */
+    .subpage {
+      padding: 24px 28px;
+      margin: 20px 0;
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--text-dim);
+      background: var(--surface-2);
+      border-radius: 0 3px 3px 0;
+    }
+    .subpage h5 {
+      font-family: var(--mono); font-size: 11px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .subpage .route {
+      font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+      letter-spacing: 0.05em; margin-bottom: 6px;
+    }
+    .subpage p { margin-bottom: 8px; font-size: 14px; }
+    .subpage p:last-child { margin-bottom: 0; }
+
+    /* --- FOOTER --- */
+    .footer { padding: 100px 40px 80px; text-align: center; border-top: 1px solid var(--border); margin-top: 120px; }
+    .footer p { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; color: var(--text-dim); max-width: none; margin: 0 auto 6px; }
+    .footer span { color: var(--accent); }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 1100px) {
+      :root { --toc-w: 220px; --rail-gap: 56px; }
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+        padding: 0 24px;
+        gap: 0;
+      }
+      .toc { display: none; }
+      .nav { padding: 16px 24px; }
+      .hero { padding: 0 24px 60px; }
+      .hero-meta { flex-direction: column; gap: 20px; }
+      .footer { padding: 60px 24px; }
+      table { font-size: 13px; }
+      tbody td:first-child { white-space: normal; }
+      .callout { padding: 20px 24px; }
+      .tradeoff { padding: 22px 24px; }
+      .editorial { padding: 16px 18px; }
+      .page-block { padding: 26px 22px; }
+      .subpage { padding: 20px 22px; }
+      pre { font-size: 11px; padding: 16px 18px; }
+      h2 { font-size: clamp(24px, 6vw, 32px); }
+    }
+    @media (max-width: 480px) {
+      .nav-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand"><span>SALT</span> &times; Photon</div>
+  <div class="nav-label">Website Copy &middot; v2 <span class="current" id="navCurrent"></span></div>
+</nav>
+
+<header class="hero">
+  <div class="hero-label">Website Copy &middot; Second Draft &middot; R1 Feedback Applied</div>
+  <h1>Photon — every word on the new site, v2.</h1>
+  <dl class="hero-meta">
+    <div>
+      <dt>Prepared by</dt>
+      <dd>SALT Studio</dd>
+    </div>
+    <div>
+      <dt>For</dt>
+      <dd>Liam, Photon</dd>
+    </div>
+    <div>
+      <dt>Version</dt>
+      <dd>v2 &middot; 2026-05-05</dd>
+    </div>
+    <div>
+      <dt>Status</dt>
+      <dd>R1 feedback applied &middot; ready for round 2</dd>
+    </div>
+  </dl>
+</header>
+
+<div class="layout">
+
+  <aside class="toc" aria-label="Table of contents">
+    <div class="toc-label">Contents</div>
+    <ol class="toc-list">
+      <li><a href="#read" data-section="read"><span class="toc-num">00</span>How to read this draft</a></li>
+      <li><a href="#system" data-section="system"><span class="toc-num">01</span>System copy</a></li>
+      <li><a href="#home" data-section="home"><span class="toc-num">02</span>Homepage</a></li>
+      <li><a href="#work" data-section="work"><span class="toc-num">03</span>Work</a></li>
+      <li><a href="#project-standard" data-section="project-standard"><span class="toc-num">04</span>Project page (standard)</a></li>
+      <li><a href="#project-case-study" data-section="project-case-study"><span class="toc-num">05</span>Project page (case study)</a></li>
+      <li><a href="#studio" data-section="studio"><span class="toc-num">06</span>Studio</a></li>
+      <li><a href="#capabilities" data-section="capabilities"><span class="toc-num">07</span>Capabilities</a></li>
+      <li><a href="#rentals" data-section="rentals"><span class="toc-num">08</span>Rentals</a></li>
+      <li><a href="#contact" data-section="contact"><span class="toc-num">09</span>Contact</a></li>
+      <li><a href="#not-found" data-section="not-found"><span class="toc-num">10</span>404 / Signal lost</a></li>
+      <li><a href="#dependencies" data-section="dependencies"><span class="toc-num">11</span>Dependencies (R1 resolved)</a></li>
+      <li><a href="#checklist" data-section="checklist"><span class="toc-num">12</span>Round-2 checklist</a></li>
+    </ol>
+  </aside>
+
+  <main class="content">
+
+    <!-- ============================================== -->
+    <!-- 00 — HOW TO READ THIS DRAFT                    -->
+    <!-- ============================================== -->
+    <section class="section" id="read">
+      <div class="section-number">00</div>
+      <h2>How to read this draft</h2>
+      <p>This is a first draft of every word that will live on the new Photon site — from navigation labels to 404 microcopy. It's grounded in the voice we agreed on in the copy proposal you approved on 2026-04-10: peer not vendor, direct, technical without explaining, playful when it counts.</p>
+
+      <h4>What's in here</h4>
+      <ul>
+        <li>Every headline, subhead, paragraph, button, form label, and system message on every Phase 1 page.</li>
+        <li>Suggested SEO page titles and meta descriptions for each page.</li>
+        <li>Templates (with worked examples) for project pages and case studies. The per-project copy is yours to write — the structure and example set the pattern.</li>
+      </ul>
+
+      <h4>What's flagged with [brackets]</h4>
+      <ul>
+        <li><code>[TBC: Liam]</code> — a spec or fact we need you to confirm before this line ships.</li>
+        <li><code>[PLACEHOLDER: …]</code> — content you'll provide later (project descriptions, testimonials, team bios).</li>
+        <li><code>[SEO]</code> — metadata layer; doesn't appear on the page itself.</li>
+        <li><code>[Changed in v2: …]</code> — editorial commentary explaining what moved between v1 and v2 and why. Not live copy.</li>
+      </ul>
+
+      <h4>How to review</h4>
+      <ul>
+        <li>You collect team feedback and send one consolidated round per section.</li>
+        <li>Mark anything that sounds wrong, off-brand, or factually incorrect — we'd rather rewrite now than after launch.</li>
+        <li>If a line is fine, say nothing. Silence is approval.</li>
+        <li>Round 2 focuses on the 7 items still open after R1 — see §12 checklist.</li>
+      </ul>
+
+      <div class="callout">
+        <p><strong>Voice reminder.</strong> If anything in this draft drifts from the voice in the copy proposal — corporate, salesy, performative, or "cutting-edge" — flag it. We'd rather cut a good line than keep a wrong one.</p>
+      </div>
+
+      <div class="callout">
+        <p><strong>Note on layout.</strong> This is the words layer, not the design layer. Once we lock the visual direction and start laying pages out, some lines will need minor tweaks — a headline that's a hair too long for a card, a paragraph that breaks weirdly next to an image, a label that needs to shrink or stretch to fit its module. None of that changes the meaning; it just means final copy is a conversation with the final design.</p>
+      </div>
+
+      <div class="callout">
+        <p><strong>Note on brackets.</strong> Anything in this draft wrapped in brackets — <code>[TBC: …]</code>, <code>[PLACEHOLDER: …]</code>, <code>[Changed in v2: …]</code>, <code>[Email housekeeping: …]</code> — is editorial commentary for you, not live copy. All brackets get stripped before launch.</p>
+      </div>
+
+      <h3>What changed in v2</h3>
+      <p>V2 applies Liam's round-1 feedback (received 2026-04-16). Headline moves:</p>
+      <ul>
+        <li><strong>Email contradiction resolved.</strong> <code>hello@photon.studio</code> on the footer (team alias). <code>chris@photon.studio</code> on the Contact page (direct, named-person trust signal). <code>liam@photon.studio</code> stays internal — server-side form routing handles creative inquiries. See "Email setup recommendation" below.</li>
+        <li><strong>Archives section dropped.</strong> Removed from nav and from the doc.</li>
+        <li><strong>Structural move on Capabilities.</strong> "Why modular," "How we work," "Where we work," and the founder anchor migrate from About to Capabilities. About narrows to a focused Studio + Crew page.</li>
+        <li><strong>Work taxonomy expanded.</strong> 11 filter pills (was 8). New categories: Lifestyle, Music, Fashion, Art Dept. Motion Control category dropped (not in-house — survives only as "available on request" in Rentals).</li>
+        <li><strong>Rentals consolidated.</strong> One <code>/rentals</code> page with three anchored sections (<code>#studio</code>, <code>#podcast</code>, <code>#gear</code>) replaces the prior three-URL structure. SEO recovery via passage indexing + keyword H2s + <code>Service</code> JSON-LD per offering. See "Rentals SEO trade-off" callout in §08.</li>
+        <li><strong>Three sections deleted from Capabilities:</strong> "We're known for" (replaced with module-square design placeholder), "How we engage," "What we don't do."</li>
+        <li><strong>Two pages re-titled:</strong> About → "The studio." Persistent homepage tagline removed entirely.</li>
+      </ul>
+
+      <h3>Editorial notes for Photon team (implementation, not copy)</h3>
+      <p>These describe what to set up before launch — they're not website copy and won't appear on the public site. They're here so Photon's team has the context.</p>
+
+      <h4>Email setup recommendation</h4>
+      <p>The cleanest way to handle Liam's email setup (hello@ on footer, chris@ on contact, liam@ for creative routing, plus any legacy pre-rebrand inbox) is:</p>
+      <ol>
+        <li><strong>Footer publishes one address only:</strong> <code>hello@photon.studio</code> (the team alias). All public traffic flows here. UX rule — a footer with two emails dilutes the contact CTA, so we keep it to one.</li>
+        <li><strong>Contact page surfaces one direct address:</strong> <code>chris@photon.studio</code> for the trust-signal escape hatch above the contact form.</li>
+        <li><strong><code>liam@photon.studio</code> stays internal.</strong> Creative-question routing happens server-side from the contact form: when a submission's project type is <code>Brand campaign</code>, <code>Case study / film</code>, or <code>Something else</code>, the form CCs <code>liam@</code>. Users see one form; the right person reads it.</li>
+        <li><strong>Legacy email forwarding (DNS-level).</strong> If Photon has a pre-rebrand inbox they want to keep working, set up forwarding so anything sent to the old address routes into the same <code>hello@photon.studio</code> inbox. The public site only shows the new address; nothing is lost.</li>
+      </ol>
+      <p>This avoids putting four emails on the site (which dilutes the CTA) while still routing every kind of inquiry to the right person. Implementation: two DNS records + one form-routing rule.</p>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 01 — SYSTEM COPY                               -->
+    <!-- ============================================== -->
+    <section class="section" id="system">
+      <div class="section-number">01</div>
+      <h2>System copy</h2>
+      <p>Small, global, sets the tone on every page.</p>
+
+      <h3>Primary navigation (top, persistent)</h3>
+      <ul>
+        <li>Work</li>
+        <li>Capabilities</li>
+        <li>Studio</li>
+        <li>Rentals</li>
+        <li>Contact</li>
+      </ul>
+
+      <div class="editorial">
+        <span class="editorial-label">Why Rentals is in the top nav</span>
+        <p>The consolidated /rentals page is an SEO-priority landing target for agency producers and local creatives searching "Portland studio rental" or "podcast studio Portland." Without a top-nav link it has no global entry point, which hurts both conversion and crawl depth. Five links — clean.</p>
+      </div>
+      <div class="editorial">
+        <span class="editorial-label">About → "Studio"</span>
+        <p>The label in nav and the section header throughout the site now reads "Studio" rather than "About," reflecting the page's narrowed focus on the physical studio + crew. Strategic content (Why modular, How we work, Where we work) migrated to Capabilities in v2.</p>
+      </div>
+
+      <p><strong>Menu button on mobile / tablet:</strong> <code>[ / ] MENU</code></p>
+      <p><strong>Brand lockup:</strong> <code>PHOTON / .STUDIO</code> (dot-matrix lockup, already in place in the prototype).</p>
+
+      <h3>Persistent bottom bar (homepage)</h3>
+      <ul>
+        <li>CTA (right): <code>Start a conversation →</code></li>
+      </ul>
+      <div class="editorial">
+        <p>Tagline removed in v2 per Liam: "feels too symmetrical and too much text for the landing." Bottom bar now has the right-side CTA only — left side stays clean. The "Modular production for the future of content." line lives in the SEO meta description and as part of the brand story, not as on-page copy.</p>
+      </div>
+
+      <h3>CTA library — where each one lives</h3>
+      <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>CTA</th><th>Where it appears</th><th>Intent</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>Start a conversation →</code></td><td>Homepage, Studio, Capabilities, Rentals, Project pages</td><td>The main site CTA. Always routes to <code>/contact</code>.</td></tr>
+          <tr><td><code>Extrapolate →</code></td><td>Homepage project info block, Work grid cards</td><td>Opens the full project page. Replaces "Read more" per your feedback.</td></tr>
+          <tr><td><code>Launch →</code></td><td>Contact form submit button</td><td>Space-theme framing for the send action.</td></tr>
+          <tr><td><code>Mission briefing</code></td><td>Contact page headline</td><td>Space-theme framing for the form itself.</td></tr>
+          <tr><td><code>Signal acquired</code></td><td>Contact form success state</td><td>Confirmation after a successful submission.</td></tr>
+          <tr><td><code>Signal lost</code></td><td>404 page + contact form error state</td><td>The theme moment — doubles as honest error copy.</td></tr>
+          <tr><td><code>Jump to the studio →</code></td><td>Top of <code>/rentals</code> page</td><td>Anchor link to <code>#studio</code> section. Replaces the v1 <code>Rent the studio →</code> cross-page CTA.</td></tr>
+          <tr><td><code>Jump to the podcast room →</code></td><td>Top of <code>/rentals</code> page</td><td>Anchor link to <code>#podcast</code> section. Replaces the v1 <code>Rent the podcast room →</code> cross-page CTA.</td></tr>
+          <tr><td><code>Check availability →</code></td><td>All three rental section CTAs</td><td>Routes to <code>/contact</code> with the rental subject prefilled.</td></tr>
+          <tr><td><code>See the full case →</code></td><td>Work grid cards (case studies only)</td><td>Routes to the case study version of the project page.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>Footer (minimal — low friction to conversation)</h3>
+      <p>Left column:</p>
+<pre><code>Photon Studio
+726 SE 10th Ave, Portland, OR 97214
+Lisbon, Portugal
+hello@photon.studio</code></pre>
+      <div class="editorial">
+        <span class="editorial-label">Why we kept the Portland street address</span>
+        <p>Local SEO. Google's "Portland production studio" / "Portland video production" rankings lean heavily on NAP (Name, Address, Phone) consistency, and the LocalBusiness JSON-LD schema in <code>lib/seo/structured-data.tsx</code> requires a real <code>streetAddress</code> to validate. Dropping it for "Portland, OR" alone would cost local rank. The Lisbon line gives us the broader two-location signal Liam asked for without sacrificing local SEO.</p>
+      </div>
+
+      <p>Right column:</p>
+<pre><code>Instagram   →   @photonportland
+Vimeo       →   vimeo.com/photonportland</code></pre>
+      <div class="editorial">
+        <p>Facebook removed in v2 per Liam. LinkedIn skipped — no Photon LinkedIn URL exists.</p>
+      </div>
+
+      <p><strong>Note:</strong> Per the strategy doc, we're intentionally not publishing a phone number — the contact form is the single path in. Flag if you want that to change.</p>
+
+      <p>Bottom strip:</p>
+<pre><code>© Photon Studio 2026 · Built with SALT Studio · Privacy · Terms · Cookies · Accessibility</code></pre>
+      <div class="editorial">
+        <span class="editorial-label">Why four legal links instead of one</span>
+        <p>Enterprise buyers at Nike/Capital One run vendor-compliance checks before onboarding. A footer with only "Privacy" is a minor trust ding on those checks. Placeholders are fine for round 1 — the actual policy content can be filled in before launch.</p>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 02 — HOMEPAGE                                  -->
+    <!-- ============================================== -->
+    <section class="section" id="home">
+      <div class="section-number">02</div>
+      <h2>Homepage</h2>
+      <p>The homepage is mostly visual. Five projects rotate full-screen; copy lives in three spots.</p>
+
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> per Liam's R1 note, the persistent bottom-right "Modular production for the future of content." tagline is removed from the homepage. Reason given — "feels too symmetrical and too much text for the landing." The phrase still lives in the system copy (open graph, share cards) and in the /capabilities H1, so we don't lose the positioning weight, just the visual repetition.</p>
+      </div>
+
+      <h3>Philosophy line (delayed reveal, or inline with the project info block)</h3>
+      <blockquote>
+        <p>Think of us as mission control for your visual content.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> dropped "A modular production studio." prefix per Liam — "modular too repetitive" given it already appears in nav/capabilities/system copy.</p>
+      </div>
+
+      <h3>Client roster strip (persistent or delayed reveal — mono, quiet, full-width)</h3>
+      <p>A typewriter-style line of client names, set small in mono. No logos (permissioning headache, and it reads more performatively than Photon's voice). Just a proud list that does two jobs: confirms tier for the VP who's never heard of Photon before, and earns the rest of the page the right to be minimal.</p>
+      <blockquote>
+        <p>SELECTED CLIENTS — Nike · Adidas · Google Pixel · Capital One · Starbucks · Teavana · Triumph · Amazfit · Flexfit · Sorel · Oura · Hyperice · Jordan · Vans · Under Armour · Seattle Sounders · Portland Thorns · Portland Timbers · JBL · Taylor Farms · Wildfang · GQ</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> added Starbucks, Teavana, Triumph, Amazfit, Flexfit per Liam's R1 add-list. Removed BMW per Liam — "spec project, not a real client engagement." The five additions are placed in the second tier of the strip (after the top-five anchors Nike/Adidas/Google Pixel/Capital One/[next]) so the anchor brands still hit first.</p>
+      </div>
+
+      <p><strong>Relationship proof line (small mono, set directly below the client strip):</strong></p>
+      <blockquote>
+        <p><code>[TBC: Liam — pick one of the three options below, or rewrite. R1 note: "Let's rephrase. Love the intent towards client retention, but this feels garbled."]</code></p>
+      </blockquote>
+      <p><strong>Three options for the rephrase</strong> (Photon voice — direct, no adjectives, peer not vendor):</p>
+      <ul>
+        <li><strong>Option A — plain math:</strong> <code>Most clients hire us back. Some are ten projects deep. One is five years running.</code></li>
+        <li><strong>Option B — single arc:</strong> <code>Some clients are ten projects in. One is five years running. The relationships are the product.</code></li>
+        <li><strong>Option C — reframe:</strong> <code>We measure clients in projects and years, not deliverables. The longest is five years in.</code></li>
+      </ul>
+      <div class="editorial">
+        <span class="editorial-label">Why this line is on the homepage</span>
+        <p>Our peer-studio research found that zero competitors surface client retention this way — everyone lists logos or project titles, nobody says "how long." This is Photon's single strongest trust signal for the first-time VP visitor from a Nike/Sorel/Oura-tier brand, and right now it only lives on the About page.</p>
+      </div>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> original line ("Ten projects in on some. Five years running on one. The relationships are the product.") flagged by Liam as "garbled." Three rephrase options above for round-2 selection. All three preserve the retention signal but vary on whether to keep the "the product" framing.</p>
+      </div>
+
+      <p><strong>Placement options (designer to pick):</strong></p>
+      <ul>
+        <li>Persistent strip just above the bottom CTA bar (small, mono, always visible)</li>
+        <li>Delayed reveal after 3 seconds of the video hero (fades in, stays)</li>
+        <li>Full-bleed line directly under the hero, before the first grid section scroll</li>
+      </ul>
+      <p><strong>Note:</strong> This strip replaces what a more traditional site would do with a logo grid. It leans on Photon's "the work talks" voice — specific, blunt, confident, no adjectives. If a brand wants a logo grid later, this line doubles as the source list.</p>
+
+      <h3>Active project info block (per-project, pulled from CMS)</h3>
+      <p><strong>Format for each CMS entry:</strong></p>
+      <ul>
+        <li><strong>Title</strong> — project name, uppercase</li>
+        <li><strong>Description</strong> — 2–4 sentences in Photon voice (who brought you in / what was interesting / what you did)</li>
+        <li><strong>Tech</strong> — Camera, Lens, Light rows (pulled from CMS fields)</li>
+        <li><strong>Year</strong> — from duration field, styled as <code>/26</code></li>
+        <li><strong>CTA</strong> — <code>Extrapolate →</code></li>
+      </ul>
+      <p><strong>Example using one of the tentative featured projects — Combat Cookies:</strong></p>
+<pre><code>COMBAT COOKIES
+A cookie brand walked in wanting a combat-sport spot.
+Full set build, choreography with real fighters, and
+a lot of flying dough. We kept the dough.
+
+CAMERA    RED Komodo X
+LENS      Cooke Panchro
+LIGHT     Astera Titan Tube         /26
+
+EXTRAPOLATE →</code></pre>
+      <div class="editorial">
+        <p><code>[PLACEHOLDER:</code> Liam / team to write the real per-project copy. The above is a voice example, not final.<code>]</code></p>
+      </div>
+
+      <h3>[SEO] Homepage metadata</h3>
+      <ul>
+        <li><strong>Title:</strong> <code>Photon — Modular Production Studio, Portland / Portugal</code></li>
+        <li><strong>Meta description:</strong> <code>A production studio for brands and agencies. Commercial video, stills, high-speed, based in Portland with a 5,000 sq ft studio with cyclorama and international reach.</code></li>
+        <li><strong>H1 (visually hidden for SEO):</strong> <code>Photon Studio — Photography and Video Production in Portland and Portugal</code></li>
+      </ul>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> title now signals two-location reach (Portland / Portugal). Meta description drops "motion control" per Liam — "we do not have that service in house, so it shouldn't be touted quite so heavily" — and adds "international reach" to surface the Portugal hub. H1 broadened from "Commercial Video Production" to "Photography and Video Production" since stills are equal weight to motion in Photon's catalog.</p>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 03 — WORK (INDEX + 10 CATEGORIES)              -->
+    <!-- ============================================== -->
+    <section class="section" id="work">
+      <div class="section-number">03</div>
+      <h2>Work</h2>
+      <p>Full-bleed grid with a single horizontal row of filter pills above it. Filters are <strong>URL routes</strong>, not JavaScript toggles — each category is its own page with its own metadata, H1, and intro line. See dependency #14 for the reasoning (we're reversing the original "no filters" preference for ICP + SEO reasons).</p>
+
+      <h3>Page header (the unfiltered <code>/work</code> view)</h3>
+      <p><strong>Label:</strong> <code>01 — Selected work</code></p>
+      <p><strong>H1:</strong></p>
+      <blockquote><p>All Projects</p></blockquote>
+      <p><strong>Subhead:</strong></p>
+      <blockquote><p>Filter by specialty — or scroll the whole thing.</p></blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> H1 and subhead replaced with Liam's R1 versions ("All Projects" / "Filter by specialty — or scroll the whole thing"). Tighter, less editorial — matches Photon voice better.</p>
+      </div>
+
+      <h3>Filter bar (above the grid, persistent on all <code>/work/*</code> routes)</h3>
+      <p>A single row of mono-text pills. Active pill is filled; inactive pills are outlined. On mobile, the row scrolls horizontally. Each pill is a real link (<code>&lt;a href&gt;</code>), not a JS onClick.</p>
+      <p><strong>Label above pills:</strong> <code>Filter —</code></p>
+      <p><strong>Full taxonomy (10 categories — only those with 4+ projects launch as pills):</strong></p>
+<pre><code>ALL  /  SPORTSWEAR  /  LIFESTYLE  /  TECH  /  FOOTWEAR  /  FOOD  /  HIGH-SPEED  /  MUSIC  /  FASHION  /  STUDIO  /  ART DEPT</code></pre>
+      <blockquote>
+        <p>Routing: <code>ALL</code> → <code>/work</code>. Every other pill → <code>/work/[slug]</code> (e.g. <code>/work/sportswear</code>, <code>/work/high-speed</code>, <code>/work/art-dept</code>). Per Liam's R1 note — <em>"under 4 projects doesn't constitute a pill, so not all at launch"</em> — only the categories that clear the 4-project threshold ship as pills on day one. The rest stay in the Sanity schema and become pills automatically as the grid fills out.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> full taxonomy expanded from 7 → 10 per Liam's R1. <strong>Added:</strong> Sportswear (rename from Sport), Lifestyle, Music, Fashion, Art Dept. <strong>Removed:</strong> Motion Control entirely — Liam: "while motion control is a good differentiator, we do not have that service in house, so it shouldn't be touted quite so heavily." Mentions of motion control elsewhere on the site (homepage SEO meta, Food & Beverage subhead) are also dropped. <strong>Renamed:</strong> Tech & Wearables → Tech, Food & Beverage → Food (filter pill label only — full H1 keeps "Food and beverage"), Studio / Cyclorama → Studio.</p>
+      </div>
+      <div class="editorial">
+        <span class="editorial-label">Launch-vs-schema note</span>
+        <p>Ship as pills only the categories with ≥4 published projects. Liam to flag during round 2 which clear the threshold — Sportswear and Studio almost certainly do; Music and Fashion may not. Pills hidden at launch still keep their <code>/work/[slug]</code> route live (so the URL is indexable for SEO once content fills in) but no pill renders in the filter bar until the threshold is met.</p>
+      </div>
+
+      <h3>Empty state (only appears if the grid is empty during dev)</h3>
+      <blockquote><p>Nothing here yet. <a href="#contact">Start a conversation →</a></p></blockquote>
+
+      <h3>Per-card copy (pulled from CMS)</h3>
+      <p>Each card shows: project title, client, year, category tag. No descriptions on the grid itself — the work carries the load.</p>
+      <p><strong>Example card:</strong></p>
+<pre><code>COMBAT COOKIES
+Combat Cookies × Photon · /26
+Campaign · Motion · Set build</code></pre>
+
+      <h3>[SEO] Work index metadata (the unfiltered <code>/work</code> page)</h3>
+      <ul>
+        <li><strong>Title:</strong> <code>Work — Photon Studio Portland / Portugal</code></li>
+        <li><strong>Meta description:</strong> <code>Selected commercial video and photography work from Photon — a production studio working with brands and agencies across sportswear, lifestyle, tech, footwear, food, and more.</code></li>
+      </ul>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> meta dropped "motion control" reference and broadened to two-location framing (Portland / Portugal) to match the homepage SEO change.</p>
+      </div>
+
+      <h3>Category landing pages (<code>/work/[category]</code>)</h3>
+      <p>Each category route reuses the same grid + filter bar shell but gets its own H1, intro line, and metadata. This is what makes the filters work for SEO and AEO — every specialty is a real indexable URL with its own copy for Google and LLM crawlers to cite.</p>
+      <p>Copy for each category below. Pattern: <strong>Label → H1 → Subhead → Meta title → Meta description.</strong> Grid below is filtered to projects tagged with that category.</p>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> all 10 categories below use Liam's R1 H1s and subheads where provided. Where Liam left meta title/description blank, v1's draft is kept and flagged <code>[TBC: Liam]</code> so round 2 can confirm or replace.</p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/sportswear</div>
+        <h5>01.1 — Sportswear</h5>
+        <p><strong>H1:</strong> <code>Sportswear</code></p>
+        <p><strong>Subhead:</strong> <code>Teams, brands, and big swings.</code></p>
+        <p><strong>Meta title:</strong> <code>Sportswear commercial production — Photon Studio</code></p>
+        <p><strong>Meta description:</strong> <code>Commercial video and photography for sportswear brands and teams. Kit films, athlete stories, and campaign work for Nike, Adidas, the Sounders, and more — produced in Portland with international reach.</code></p>
+        <p><code>[TBC: Liam — meta title/description not provided in R1; kept v1's draft adapted to the new "Sportswear" name. Confirm or replace in round 2.]</code></p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/lifestyle</div>
+        <h5>01.2 — Lifestyle</h5>
+        <p><strong>H1:</strong> <code>Lifestyle</code></p>
+        <p><strong>Subhead:</strong> <code>Life's moments, lit and with a soundtrack.</code></p>
+        <p><strong>Meta title:</strong> <code>Lifestyle Photography Production | Built for Brands</code></p>
+        <p><strong>Meta description:</strong> <code>Authentic lifestyle photography and video campaigns in real-life moments, designed to inspire everyday style and improve how we move through the world.</code></p>
+        <p><code>[Changed in v2: NEW category per Liam's R1. All copy verbatim from feedback doc.]</code></p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/tech</div>
+        <h5>01.3 — Tech</h5>
+        <p><strong>H1:</strong> <code>Tech</code></p>
+        <p><strong>Subhead:</strong> <code>Apps, wearables and phones, oh my!</code></p>
+        <p><strong>Meta title:</strong> <code>We Speak Fluent Gadget</code></p>
+        <p><strong>Meta description:</strong> <code>From app UI captures to wearable campaigns and phone launch content — production that keeps pace with the tech industry's relentless speed.</code></p>
+        <p><code>[Changed in v2: H1, subhead, meta title, and meta description all replaced with Liam's R1 versions. Renamed from "Tech & Wearables" to "Tech."]</code></p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/footwear</div>
+        <h5>01.4 — Footwear</h5>
+        <p><strong>H1:</strong> <code>Footwear</code></p>
+        <p><strong>Subhead:</strong> <code>We help you put your best foot forward.</code></p>
+        <p><strong>Meta title:</strong> <code>Footwear commercial production — Photon Studio</code></p>
+        <p><strong>Meta description:</strong> <code>Footwear campaign production in Portland with international reach. Director-led work for Sorel, Vans, and other performance and lifestyle brands — creative, production, and post under one roof.</code></p>
+        <p><code>[Changed in v2: H1 and subhead replaced with Liam's R1 versions. Meta title/description left blank in R1; v1 draft kept and flagged.]</code></p>
+        <p><code>[TBC: Liam — meta title/description not provided in R1. Confirm or replace.]</code></p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/food</div>
+        <h5>01.5 — Food</h5>
+        <p><strong>H1:</strong> <code>Food and beverage</code></p>
+        <p><strong>Subhead:</strong> <code>Pour, steam, sizzle, cut.</code></p>
+        <p><strong>Meta title:</strong> <code>Food &amp; beverage commercial production — Photon Studio</code></p>
+        <p><strong>Meta description:</strong> <code>Food and beverage commercial production in Portland. Tabletop and high-speed work for brands like Taylor Farms, La Marzocco, and Tea Bar — shot and finished by the same team.</code></p>
+        <p><code>[Changed in v2: filter pill label is "Food" per Liam's R1; full H1 keeps "Food and beverage" per his explicit category H1. Meta description dropped the "motion control" mention to match the global cut.]</code></p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/high-speed</div>
+        <h5>01.6 — High-speed</h5>
+        <p><strong>H1:</strong> <code>High-speed</code></p>
+        <p><strong>Subhead:</strong> <code>1,000+ frames per second, in-house.</code></p>
+        <p><strong>Meta title:</strong> <code>High-speed cinematography Portland — Photon Studio</code></p>
+        <p><strong>Meta description:</strong> <code>High-speed cinematography in Portland. Phantom Flex and VEO in-house on a 5,000 sq ft stage. Tabletop, product, fluid, and athletic work at 1,000+ FPS — shot and finished by the same team.</code></p>
+        <p><code>[Changed in v2: H1 simplified to "High-speed" per Liam's R1 (was "1,000+ frames per second, in-house"). Subhead now carries the rate. Meta unchanged.]</code></p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/music</div>
+        <h5>01.7 — Music</h5>
+        <p><strong>H1:</strong> <code>Music</code></p>
+        <p><strong>Subhead:</strong> <code>[TBC: Liam — subhead not provided in R1.]</code></p>
+        <p><strong>Meta title:</strong> <code>[TBC: Liam — meta title not provided in R1.]</code></p>
+        <p><strong>Meta description:</strong> <code>[TBC: Liam — meta description not provided in R1.]</code></p>
+        <p><code>[Changed in v2: NEW category per Liam's R1. Copy fields left blank in feedback doc — flagged for round 2 fill-in.]</code></p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/fashion</div>
+        <h5>01.8 — Fashion</h5>
+        <p><strong>H1:</strong> <code>Fashion</code></p>
+        <p><strong>Subhead:</strong> <code>From the runway to the real world.</code></p>
+        <p><strong>Meta title:</strong> <code>[TBC: Liam — meta title not provided in R1.]</code></p>
+        <p><strong>Meta description:</strong> <code>[TBC: Liam — meta description not provided in R1.]</code></p>
+        <p><code>[Changed in v2: NEW category per Liam's R1. H1 and subhead given; meta title/description blank in feedback — flagged for round 2.]</code></p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/studio</div>
+        <h5>01.9 — Studio</h5>
+        <p><strong>H1:</strong> <code>Studio</code></p>
+        <p><strong>Subhead:</strong> <code>For ultimate control and set builds.</code></p>
+        <p><strong>Meta title:</strong> <code>Custom Studio Set Builds | Portland Photography Studio</code></p>
+        <p><strong>Meta description:</strong> <code>Commercial work shot on Photon's 5,000 sq ft Portland stage and cyclorama. Custom set builds, talent, and product work with creative, production, and post in the same building.</code></p>
+        <p><code>[Changed in v2: H1, subhead, and meta title replaced with Liam's R1 versions. Meta description left blank in R1; v1 draft kept and adapted to the new "set builds" framing.]</code></p>
+        <p><code>[TBC: Liam — meta description not provided in R1. Confirm or replace.]</code></p>
+      </div>
+
+      <div class="subpage">
+        <div class="route">/work/art-dept</div>
+        <h5>01.10 — Art Dept!</h5>
+        <p><strong>H1:</strong> <code>Art Dept!</code></p>
+        <p><strong>Subhead:</strong> <code>When our in-house team built the props, sets and practical FX.</code></p>
+        <p><strong>Meta title:</strong> <code>[TBC: Liam — meta title not provided in R1.]</code></p>
+        <p><strong>Meta description:</strong> <code>[TBC: Liam — meta description not provided in R1.]</code></p>
+        <p><code>[Changed in v2: NEW category per Liam's R1 (and confirmed via Q2 — "it gets a pill for sure"). H1 and subhead given; meta title/description blank in feedback — flagged for round 2.]</code></p>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 04 — PROJECT PAGE (STANDARD)                   -->
+    <!-- ============================================== -->
+    <section class="section" id="project-standard">
+      <div class="section-number">04</div>
+      <h2>Project page (standard template)</h2>
+      <p>The template for most projects on the site. You and the team fill in per-project content through the CMS; the structure and placeholder labels below are what the Sanity entry form will guide.</p>
+
+      <h3>Structure</h3>
+      <ol>
+        <li><strong>Hero</strong> — full-bleed video or cover image, project title overlaid.</li>
+        <li><strong>Meta strip</strong> — client, year, category tags.</li>
+        <li><strong>Context</strong> — 2–4 sentences on the brief and what was interesting.</li>
+        <li><strong>Photon handled</strong> — capability list (what Photon delivered on this project). Replaces the traditional "credits" block per Liam's R1 note.</li>
+        <li><strong>Craft callout</strong> — optional camera / lens / light / frame-rate block.</li>
+        <li><strong>Gallery</strong> — stills and additional frames.</li>
+        <li><strong>BTS</strong> — optional section with behind-the-scenes photos and a short note.</li>
+        <li><strong>Related projects</strong> — three recent or related entries.</li>
+        <li><strong>CTA</strong> — <code>Start a conversation →</code></li>
+      </ol>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> the traditional named-credits block (Director / DP / Production / Editor names) is replaced by a "Photon handled:" capability list per Liam's R1 — <em>"Instead of full credits, can we approach this more as: Photon handled this list of things..."</em> Reasons this matches Photon's positioning: (1) it answers "what did Photon actually do here?" — which is the only question a brand-side decision-maker is asking; (2) it surfaces capability breadth on every project page, reinforcing the modular-services story; (3) it removes named-individual credits that Photon's white-label clients (agencies) often prefer not to publish; (4) it's better for AEO — LLMs can directly cite "Photon handled X for Y" as a fact about Photon's capability set. Named credits for crew can still appear in the BTS note if a project warrants it.</p>
+      </div>
+
+      <h3>Worked example using Sorel high gear (tentative featured project)</h3>
+      <p><strong>Hero title:</strong> <code>Sorel High Gear</code></p>
+      <p><strong>Meta strip:</strong></p>
+      <ul>
+        <li>Client: <code>Sorel</code></li>
+        <li>Year: <code>/26</code></li>
+        <li>Category: <code>Campaign · Product · Lifestyle</code></li>
+      </ul>
+      <p><strong>Photon handled:</strong></p>
+<pre><code>Creative direction · Treatment · Production
+Direction · Cinematography · In-studio weather rig
+Edit · Color · Sound design · Final delivery</code></pre>
+      <div class="editorial">
+        <p><strong>Pattern:</strong> a 2–3 line list of what Photon delivered on this project, set in mono. Items map to Photon's capability vocabulary (Creative / Production / Post sections in /capabilities). Per-project copy is filled through the CMS — a multi-select field tied to the same vocabulary keeps it consistent across the site.</p>
+      </div>
+
+      <p><strong>Context (2–4 sentences — example of the pattern):</strong></p>
+      <blockquote>
+        <p><code>[PLACEHOLDER — pattern example:]</code> Sorel brought us in to shoot their High Gear boot line. We loved the texture contrasts — technical outerwear against raw snow and wet rock — and the chance to push our in-studio weather rig. Shot over two days in Portland, plus a third on Mt. Hood.</p>
+      </blockquote>
+
+      <p><strong>Craft callout (optional):</strong></p>
+<pre><code>CAMERA       ARRI Alexa Mini LF       [TBC]
+LENS         Cooke S4/i Classic       [TBC]
+LIGHT        Astera Titan, ARRI SkyPanel  [TBC]
+FRAME RATE   Up to 200 fps            [TBC]</code></pre>
+
+      <p><strong>BTS note (optional, 1–2 sentences):</strong></p>
+      <blockquote>
+        <p><code>[PLACEHOLDER — pattern example:]</code> The trickiest part was keeping the snow convincing under studio light. We ended up building a slow-melt rig that let us re-wet the set between takes without losing continuity.</p>
+      </blockquote>
+
+      <p><strong>CTA:</strong> <code>Start a conversation →</code></p>
+
+      <h3>[SEO] Standard project page metadata template</h3>
+      <ul>
+        <li><strong>Title:</strong> <code>[Client] — [Project title] | Photon Studio</code></li>
+        <li><strong>Meta description:</strong> The first sentence of the context, trimmed to 150 characters.</li>
+        <li><strong>URL slug:</strong> <code>/work/[client-project-slug]</code></li>
+        <li><strong>Schema markup:</strong> <code>CreativeWork</code> + <code>Organization</code> (handled automatically in the template)</li>
+      </ul>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 05 — PROJECT PAGE (CASE STUDY)                 -->
+    <!-- ============================================== -->
+    <section class="section" id="project-case-study">
+      <div class="section-number">05</div>
+      <h2>Project page (case study template)</h2>
+      <p>Same structure as the standard template, plus narrative depth and a testimonial. Used for Photon's hero relationships — Sorel, Nike, Hyperice, Oura — and the new Sounders case study if it lands.</p>
+
+      <h3>Additions over the standard template</h3>
+      <ol>
+        <li><strong>The brief</strong> — one paragraph on what the client came in with.</li>
+        <li><strong>The approach</strong> — one paragraph on how Photon solved it.</li>
+        <li><strong>The result</strong> — one short paragraph plus an optional metric.</li>
+        <li><strong>Testimonial</strong> — a real client quote, pulled in the most prominent position on the page.</li>
+        <li><strong>Extended gallery</strong> — more frames, wider crops.</li>
+      </ol>
+
+      <h3>Worked example using the Sounders Bruce Lee kit (tentative hero case study)</h3>
+      <p><strong>The brief (example — Liam to edit):</strong></p>
+      <blockquote>
+        <p><code>[PLACEHOLDER — pattern example:]</code> Seattle Sounders were launching the Bruce Lee kit — a limited-edition jersey tied to Bruce Lee's Seattle roots. They needed a campaign that honored the legacy without turning into a costume. Fast, physical, and visually unmistakable.</p>
+      </blockquote>
+      <p><strong>The approach:</strong></p>
+      <blockquote>
+        <p><code>[PLACEHOLDER — pattern example:]</code> We built the shoot around motion — real players, real sparring, real sweat. Ran 1000fps slow motion to catch the kit moving the way fabric is supposed to move. Lighting was hard-edge, single-source, styled after Lee's training footage. No doubles. No stunt rigs.</p>
+      </blockquote>
+      <p><strong>The result:</strong></p>
+      <blockquote>
+        <p><code>[PLACEHOLDER — pattern example:]</code> The launch film ran across Sounders social, in-stadium video boards, and MLS broadcast lead-ins. The kit sold out the day it dropped.</p>
+      </blockquote>
+      <p><strong>Testimonial block (this is the biggest missing piece on the current site — even one real quote changes the credibility equation):</strong></p>
+      <blockquote>
+        <p><code>[PLACEHOLDER — real quote required from Sounders marketing contact.]</code></p>
+        <p>— <code>[Name], [Title], Seattle Sounders FC</code></p>
+      </blockquote>
+
+      <h3>[SEO] Case study metadata template</h3>
+      <ul>
+        <li><strong>Title:</strong> <code>[Client] × [Project] — Case Study | Photon Studio</code></li>
+        <li><strong>Meta description:</strong> The brief in one sentence, ending with "A case study from Photon, a Portland production studio."</li>
+        <li><strong>Schema markup:</strong> <code>Article</code> + <code>CreativeWork</code> + <code>Review</code> (for the testimonial).</li>
+      </ul>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 06 — STUDIO                                    -->
+    <!-- ============================================== -->
+    <section class="section" id="studio">
+      <div class="section-number">06</div>
+      <h2>Studio</h2>
+      <p>This page is now Studio-only. Per Liam's R1, the broader About content (founder anchor, why modular, how we work, where we work) migrated to /capabilities. What's left here is what the section header has always implied: the physical place and the people who run it.</p>
+
+      <h3>Hero</h3>
+      <p><strong>Label:</strong> <code>02 — The studio</code></p>
+      <p><strong>H1:</strong></p>
+      <blockquote><p>Ground Control for boots on the ground.</p></blockquote>
+      <p><strong>Lead paragraph:</strong></p>
+      <blockquote>
+        <p>Photon's HQ is a 6,000 sq ft studio in SE Portland, Oregon. Designed and built out by the owners, we've put our blood, sweat, and tears into this space. And with that, so much space for activities. We often integrate specialty set builds into our projects, interior weather, pyrotechnics, large format LED walls, and other creative solutions to push the envelope right here at home.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> hero fully replaced per Liam's R1. New H1 ("Ground Control for boots on the ground") leans into Photon's space-program theme and pairs with the new Crew titles below. Lead paragraph and specs block are verbatim from R1 — 6,000 sq ft throughout the Studio page. The homepage SEO meta description retains Liam's verbatim "5,000 sq ft" framing per his R1 wording.</p>
+      </div>
+
+      <h3>Specs block</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Spec</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Total space</td><td><code>6,000 sq ft</code></td></tr>
+          <tr><td>Cyclorama</td><td><code>44 × 38 — permanent, seamless, paintable</code></td></tr>
+          <tr><td>Power</td><td><code>400 AMP, with digital 3-phase converter</code></td></tr>
+          <tr><td>Wifi</td><td><code>Dedicated fiber, 1G</code></td></tr>
+          <tr><td>Ceiling height</td><td><code>16 ft clear, 24 ft total</code></td></tr>
+          <tr><td>Kitchenette and bathroom</td><td><code>1 of each</code></td></tr>
+          <tr><td>Loading</td><td><code>Drive-in roll-up door, 14 ft × 12 ft</code></td></tr>
+          <tr><td>Scissor lift</td><td><code>Genie GS-1930</code></td></tr>
+          <tr><td>Camera, grip, lighting, crew</td><td><code>In-house</code></td></tr>
+          <tr><td>Lighting</td><td><code>Total control — full blackout possible</code></td></tr>
+          <tr><td>Parking</td><td><code>Street</code></td></tr>
+          <tr><td>Address</td><td><code>726 SE 10th Ave, Portland, OR 97214</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> spec block fully populated from Liam's R1 — every TBC field in v1 is now filled. This block lives on /studio (this page) AND in shorter form on /rentals (since rental clients need the same specs). When rounds 2/3 update any spec, both pages need to update — design/dev should consider one shared content source in Sanity.</p>
+      </div>
+
+      <h3>Section — Satellite and EU launchpad</h3>
+      <p><strong>H2:</strong></p>
+      <blockquote><p>Satellite and EU launchpad.</p></blockquote>
+      <blockquote>
+        <p>Photon's satellite office is a 150 sq m studio in Lisbon, Portugal. This is the main hub for post production and the launchpad for productions across Europe.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> section added per Liam's R1 — first time the Lisbon hub gets its own structured block on /studio. Verbatim from feedback. Pairs with the homepage SEO meta and /capabilities "Where we work" line ("Portland, Portugal, and everywhere in between").</p>
+      </div>
+
+      <h3>Section — Crew</h3>
+      <p><strong>Subhead:</strong> <code>Crew.</code></p>
+      <p><strong>Format:</strong> Liam and Chris feature in two larger portraits on the top row as the heads of the company. The five support crew share a row below in smaller portraits. Per Liam's R1 — <em>"we will be adding a 7th crew so ideally we could have two portraits of Chris and I bigger as the heads of the company on one line and then a 'support crew' line of the other 5 personnel sharing a line below."</em></p>
+      <p><strong>Top row — heads of the company:</strong></p>
+<pre><code>[PHOTO]                          [PHOTO]
+LIAM GILLIES                     CHRIS CRARY
+Chief Photometrics               Mission Control</code></pre>
+      <p><strong>Bottom row — support crew:</strong></p>
+<pre><code>[PHOTO]            [PHOTO]            [PHOTO]            [PHOTO]            [PHOTO]
+EM GILLIES         TONI CRARY         AUSTIN BAKER       GARRETT BAKER      RUSSEL BOWEN
+Environmental      Life Support       Orbital Mechanic   Mission Specialist Systems Engineer
+Control                               [Baker Bros]       [Baker Bros]       [Against the Grain]</code></pre>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> crew section fully restructured per Liam's R1. Names, titles, and partner-studio attributions ([Baker Bros], [Against the Grain]) are verbatim from feedback. Layout: 2 large portraits on top (Liam + Chris as company heads), 5 smaller portraits below as support crew. The v1 placeholder grid with [TBC] names is now resolved.</p>
+      </div>
+
+      <h3>CTA</h3>
+      <p><strong>Subhead:</strong> <code>Let's talk shop.</code></p>
+      <p><strong>CTA:</strong> <code>Start a conversation →</code></p>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> CTA subhead per Liam's R1 — "Let's talk shop." (was "Want to talk shop?"). Cleaner, more declarative.</p>
+      </div>
+
+      <h3>[SEO] Studio metadata</h3>
+      <ul>
+        <li><strong>Title:</strong> <code>The Studio — 6,000 sq ft Production Space, SE Portland | Photon</code></li>
+        <li><strong>Meta description:</strong> <code>Photon's HQ is a 6,000 sq ft Portland studio with a 44 × 38 cyclorama, 400 AMP power, drive-in loading, and full in-house camera, grip, lighting, and crew.</code></li>
+      </ul>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> title and meta updated to match Liam's new "Ground Control" framing and the 6,000 sq ft spec. Specs in the meta are pulled from the new R1 spec block — these are the keywords agency producers search for ("Portland production studio cyclorama," "400 AMP studio Portland," etc).</p>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 07 — CAPABILITIES                              -->
+    <!-- ============================================== -->
+    <section class="section" id="capabilities">
+      <div class="section-number">07</div>
+      <h2>Capabilities</h2>
+      <p>The biggest page on the site. Restructured per Liam's R1: this page now carries the founder anchor, the why-modular argument, the how-we-work argument, and the where-we-work argument — material that previously lived in /about. About narrows to Studio + Crew. Everything moved here is rewritten in Liam's R1 voice.</p>
+
+      <h3>Hero</h3>
+      <p><strong>Label:</strong> <code>03 — Capabilities</code></p>
+      <p><strong>H1:</strong></p>
+      <blockquote><p>Modular Production, beginning to end.</p></blockquote>
+      <p><strong>Lead paragraph:</strong></p>
+      <blockquote>
+        <p>A giant network distilled into specialty teams, with one mission: maximize resources and elevate what's possible. Create once. Launch everywhere.</p>
+      </blockquote>
+      <p><strong>Founder anchor (small, sits below the lead):</strong></p>
+      <blockquote>
+        <p>Founded in 2017 by Liam Gillies and immediately joined by Chris Crary. This duo has been part of Photon from day one and continues to be the core of the business.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> founder anchor moved here from /about per Liam's R1, and rewritten with the actual founding year (2017) and Chris Crary's name. The earlier v1 [TBC] placeholder is now resolved.</p>
+      </div>
+      <p><strong>Secondary line:</strong></p>
+      <blockquote>
+        <p>Most production scales by adding more staff. We scale through reach.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> hero block fully replaced per Liam's R1. H1 ("Modular Production, beginning to end."), lead paragraph, founder anchor, and secondary line are all verbatim from feedback. The v1 "Why-modular callout" and v1 "Pick the ones you need" line are dropped — Liam's R1 secondary line ("scale through reach") replaces both.</p>
+      </div>
+
+      <h3>Section — Why modular</h3>
+      <p><strong>Subhead:</strong> <code>Everything you need, nothing you don't.</code></p>
+      <blockquote>
+        <p>Because no two shoots are alike. We focus on nimble, specialized teams that scale to the exact need. This way, we can utilize any budget level to the best of its ability — extending creative possibilities in a smooth process.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> section migrated from /about per Liam's R1, with new subhead and new copy (verbatim). The v1 "Creating like children, editing like scientists" pull quote is dropped — this section is a full rewrite, so per the survival rule it doesn't carry over.</p>
+      </div>
+
+      <h3>Section — How we work</h3>
+      <p><strong>Subhead:</strong> <code>Creative → Production → Post.</code></p>
+      <blockquote>
+        <p>Consistent creative heads from planning through post production lead to even more reduction of waste. The best result comes from a thoughtful creative idea matched with an equally thoughtful process.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> section migrated from /about per Liam's R1. Subhead is the same arrow string as v1 (kept on purpose — it's the cleanest one-line summary of the workflow). Body copy is verbatim from R1.</p>
+      </div>
+
+      <h3>Section — Where we work</h3>
+      <p><strong>Subhead:</strong> <code>Portland, Portugal, and everywhere in between.</code></p>
+      <blockquote>
+        <p>Portland is HQ. Portugal is our satellite. The world is our oyster.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> section migrated from /about per Liam's R1. Three-line punch — short, confident, peer voice. Verbatim from R1.</p>
+      </div>
+
+      <h3>Section — Modules (replaces v1 "We're known for")</h3>
+      <p>A grid of small square tiles, each tile a single specialty module. Visual-first — each square shows a label, optional spec, and an in-house indicator. Designer to build the tile pattern; copy below is the module taxonomy.</p>
+      <p><strong>Tile labels (designer to map to a 3×N or 4×N grid):</strong></p>
+<pre><code>Creative · Treatment · Storyboard · Shot design
+Look development · Art direction · Set design
+Commercial video (8K / 6K / 4K) · Commercial stills
+High-speed (1000+ fps) · Anamorphic · Macro · Tabletop
+Astera lighting · In-studio weather · Practical FX
+Cyclorama · 400 AMP · 6,000 sq ft stage
+Edit · Color · Finishing · Motion graphics
+Sound design · VO · Foley · Retouching
+Lisbon hub · EU production</code></pre>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> the v1 "We're known for" prose list and the downloadable PDF spec sheet CTA are both dropped from this page per Liam's R1 — <em>"Lets remove the 'we're known for' section and add the module squares instead"</em> and <em>"Why is the downloadable spec sheet in capabilities if its for studio rental?"</em> The spec sheet CTA moves to /rentals (where it's audience-appropriate). Module copy is repointed: instead of a prose list naming six headline capabilities, the page now shows the full modular vocabulary as discrete tiles. Same content, different scan-pattern — agency EPs reading this for capability fit get a denser at-a-glance scan; brand leads reading for confidence still get the headline modules in the first row of tiles.</p>
+      </div>
+      <div class="editorial">
+        <p><strong>Note:</strong> motion control was in the v1 list; it is removed here per Liam's broader R1 instruction — "we do not have that service in house, so it shouldn't be touted quite so heavily."</p>
+      </div>
+
+      <h3>Section — Creative</h3>
+      <p><strong>Subhead:</strong> <code>Creative.</code></p>
+      <p><strong>Intro line:</strong> <code>Where the brief becomes a plan.</code></p>
+      <blockquote>
+        <p>Treatment development, storyboarding, shot lists, look development. Every project starts with the team that will shoot it — no handoff between the room that pitched the idea and the set that executes it.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> intro line updated per Liam's R1 — "Where the brief becomes a plan." (was "Where the brief becomes a shot."). Body copy slightly tightened to match R1 verbatim ("Every project starts with the team that will shoot it" replaces "Every shoot starts with..."). The v1 module sub-list is dropped — module names now live in the Modules tile grid above.</p>
+      </div>
+
+      <h3>Section — Production</h3>
+      <p><strong>Subhead:</strong> <code>Production.</code></p>
+      <p><strong>Intro line:</strong> <code>Where every moment counts.</code></p>
+      <blockquote>
+        <p>As content demands rise, so do our solutions. We manage multiple capture types to squeeze out every last drop of our opportunities on the day.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> intro line and body copy fully replaced per Liam's R1. The v1 "Capture" and "On-set technical" sub-lists are dropped — module names now live in the Modules tile grid above.</p>
+      </div>
+
+      <h3>Section — Post</h3>
+      <p><strong>Subhead:</strong> <code>Post.</code></p>
+      <p><strong>Intro line:</strong> <code>Where it all comes together.</code></p>
+      <blockquote>
+        <p>Edit, color, GFX, sound design and VFX. All in-house, next door to the cameras. No shipping hard drives across town. No loss in translation from director to editor.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> intro line updated per Liam's R1 ("Where it all comes together") and body copy replaced verbatim. The v1 module sub-list is dropped — module names live in the Modules tile grid above.</p>
+      </div>
+
+      <h3>Section — How we work with agencies and brands</h3>
+      <p><strong>Subhead:</strong> <code>Maximum flexibility.</code></p>
+      <blockquote>
+        <p>We are a true white-label service and can interface within existing teams or build an entirely new one from scratch. Planning through post or a specific capability on its own — our goal is to execute at the highest level, regardless of scope or scale.</p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> subhead and body fully replaced per Liam's R1. The v1 four-paragraph block — including the "extension of your team" opener and the named SGK / Nike example — is dropped. Liam's R1 framing is tighter: positions Photon as a true white-label service and reinforces the modular promise. The v1 "extension of your team" line was Liam-approved in DEPENDENCIES #17 ("Im ok with working in 'We work as an extension of your team, not in place of it.' Its clean and true") — we've folded that line in below as an optional secondary, designer can decide whether to surface it as a callout.</p>
+      </div>
+      <p><strong>Optional secondary line</strong> (Liam approved in DEPENDENCIES #17 — designer to decide if it surfaces here as a callout or pull-quote):</p>
+      <blockquote>
+        <p>We work as an extension of your team, not in place of it.</p>
+      </blockquote>
+
+      <h3>Sections dropped in v2</h3>
+      <ul>
+        <li><strong>How we engage</strong> — dropped per Liam's R1 (<em>"Lets lose — How we engage"</em>).</li>
+        <li><strong>What we don't do</strong> — dropped per Liam's R1 (<em>"Lets lose — What we don't do"</em>).</li>
+      </ul>
+
+      <h3>CTA</h3>
+      <p><strong>Subhead:</strong> <code>Need a specific capability on a specific date?</code></p>
+      <p><strong>CTA:</strong> <code>Start a conversation →</code></p>
+
+      <h3>[SEO] Capabilities metadata</h3>
+      <ul>
+        <li><strong>Title:</strong> <code>Capabilities — Modular Production from Creative through Post | Photon Studio</code></li>
+        <li><strong>Meta description:</strong> <code>Photon's modular production capabilities: creative, production, and post — all in-house. High-speed, cyclorama, in-studio weather, edit, color, sound. Portland and Lisbon.</code></li>
+      </ul>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> title reframed away from "Commercial Video, High-Speed, Motion Control" — motion control reference removed (per Liam's global R1 cut), and the title now leads with the modular Creative/Production/Post structure of the page. Meta description rewritten to mirror the page's new section order.</p>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 08 — RENTALS (CONSOLIDATED)                    -->
+    <!-- ============================================== -->
+    <section class="section" id="rentals">
+      <div class="section-number">08</div>
+      <h2>Rentals</h2>
+      <p>Per Liam's R1: rentals consolidated from three URLs (<code>/rentals</code> hub + <code>/rentals/studio</code> + <code>/rentals/podcast</code>) into a single <code>/rentals</code> page with three anchored sections — <code>#studio</code>, <code>#podcast</code>, <code>#gear</code>. The third section (gear list) is <strong>new in v2</strong> per Liam's R1.</p>
+
+      <div class="tradeoff">
+        <p><strong>Editorial trade-off note for the Photon team — please read before approving v2:</strong></p>
+        <p>Collapsing /rentals from three URLs to one page is what Liam asked for, and it makes the page faster to scan and easier to maintain. The trade-off is SEO depth. Three pages each ranking for "Portland production studio rental," "Portland podcast room rental," and "production gear rental Portland" gives Google three independent footholds; one page consolidates all three keyword sets into one URL.</p>
+        <p><strong>What we're doing to recover most of that depth on a single page:</strong></p>
+        <ol>
+          <li><strong>Three keyword-rich H2s</strong> — <code>Portland Studio</code>, <code>Portland Podcast Room</code>, <code>Portland Gear List</code> — each becomes its own anchor (<code>#studio</code>, <code>#podcast</code>, <code>#gear</code>). Google's passage-indexing system can rank a single H2-anchored section like a standalone page for the right query, so the section-as-page pattern recovers most long-tail rankings.</li>
+          <li><strong>Cross-page CTAs become anchor jumps.</strong> The CTA library above already has <code>Jump to the studio →</code> and <code>Jump to the podcast room →</code> (both anchor links). The original <code>Rent the studio →</code> cross-page CTA is retired.</li>
+          <li><strong>Service JSON-LD per section.</strong> Each of the three sections gets its own <code>Service</code> schema block (one for studio rental, one for podcast room, one for gear rental) so AEO/LLM crawlers see three discrete services on one URL — same as if they were three pages.</li>
+          <li><strong>301 redirects from the old URLs.</strong> <code>/rentals/studio</code> → <code>/rentals#studio</code>, <code>/rentals/podcast</code> → <code>/rentals#podcast</code>. This preserves any inbound links or shared URLs from before the consolidation.</li>
+        </ol>
+        <p><strong>Net SEO impact estimate:</strong> ~10–20% drop in long-tail rankings vs. three separate pages, recovered in 60–90 days as the single page accumulates passage-rank signals. If rankings matter more than page-load simplicity, we can split back out — but the consolidation is the right call for a small studio with limited content per rental type.</p>
+      </div>
+
+      <h3>Page header (sits above the three sections)</h3>
+      <p><strong>Label:</strong> <code>04 — Rentals</code></p>
+      <p><strong>H1:</strong></p>
+      <blockquote><p>Space and gear available for creators.</p></blockquote>
+      <p><strong>Lead paragraph:</strong></p>
+      <blockquote>
+        <p>Photon rents three things: the 6,000 sq ft Portland studio, the treated podcast room, and a curated gear list. Each comes with the option of a Photon crew on the day — or rent it bare and bring your own.</p>
+      </blockquote>
+      <div class="editorial">
+        <p>Lead paragraph drafted by us — Liam's R1 only provided the H1 and the three subheads. This three-line lead orients the reader to the three sections below and reinforces the "three things, your choice" framing without burying the H1.</p>
+      </div>
+
+      <p><strong>Anchor nav (sticky on desktop, collapses to a top-of-page bar on mobile):</strong></p>
+<pre><code>#studio   ·   #podcast   ·   #gear</code></pre>
+      <div class="editorial">
+        <span class="editorial-label">Why anchor nav</span>
+        <p>Liam's R1 calls these three sections, but a single 2,000-word page with no in-page navigation forces every visitor to scroll the whole thing. The anchor bar gives the agency producer searching for "Portland podcast room" a one-click path to #podcast — the closest thing to the original "go straight to the right page" experience while keeping the consolidation Liam asked for.</p>
+      </div>
+
+      <h3>Section 1 — Portland Studio (#studio)</h3>
+      <p><strong>Subhead:</strong> <code>Portland Studio.</code></p>
+      <p><strong>H2 (visible, anchor target):</strong> <code>Portland Studio.</code></p>
+      <p><strong>Specs block:</strong></p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Spec</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Total space</td><td><code>6,000 sq ft</code></td></tr>
+          <tr><td>Shooting area</td><td><code>60 ft × 38 ft</code></td></tr>
+          <tr><td>Cyclorama</td><td><code>44 × 38 — permanent, seamless, paintable</code></td></tr>
+          <tr><td>Power</td><td><code>400 AMP, with digital 3-phase converter</code></td></tr>
+          <tr><td>Wifi</td><td><code>Dedicated fiber, 1G</code></td></tr>
+          <tr><td>Ceiling height</td><td><code>16 ft clear, 24 ft total</code></td></tr>
+          <tr><td>Loading</td><td><code>Drive-in roll-up door, 14 ft × 12 ft</code></td></tr>
+          <tr><td>Scissor lift</td><td><code>Genie GS-1930</code></td></tr>
+          <tr><td>Lighting</td><td><code>Total control — full blackout possible</code></td></tr>
+          <tr><td>Camera, grip, lighting, crew</td><td><code>In-house</code></td></tr>
+          <tr><td>Kitchenette and bathroom</td><td><code>1 of each</code></td></tr>
+          <tr><td>Parking</td><td><code>Street</code></td></tr>
+          <tr><td>Address</td><td><code>726 SE 10th Ave, Portland, OR 97214</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="editorial">
+        <p>Spec block now sourced from Liam's R1 Studio block — same data as on /studio. Designer/dev should consider one shared content source in Sanity so updates propagate to both pages.</p>
+      </div>
+
+      <h4>What's included</h4>
+      <blockquote>
+        <p>Every rental comes with the studio essentials: 60 ft × 38 ft shooting area, cyclorama with a fresh coat of paint, grip closet of goodies, studio power, climate control, wifi, kitchenette, and bathroom.</p>
+      </blockquote>
+      <div class="editorial"><p>Verbatim from Liam's R1.</p></div>
+
+      <h4>What's extra</h4>
+      <blockquote>
+        <p>Camera, lens, lighting, custom grip and crew beyond the house kit, specialty rigs (motion control, high-speed, anamorphics), on-set Photon crew, catering, and art-department labor are all available on request — priced per shoot day.</p>
+      </blockquote>
+      <div class="editorial">
+        <p>Verbatim from Liam's R1. <strong>Note:</strong> motion control is mentioned here as a rental capability — distinct from /capabilities, where Liam removed it from the headline service list because it isn't run as an in-house everyday service. This is consistent: it's a rig/capability we'll set up on a rental day, not a default service we tout.</p>
+      </div>
+
+      <h4>Section CTA</h4>
+      <p><strong>Headline:</strong> <code>Ready to book the studio?</code></p>
+      <p><strong>CTA:</strong> <code>Check availability →</code> (routes to <code>/contact</code> with the studio rental subject prefilled)</p>
+
+      <h3>Section 2 — Portland Podcast Room (#podcast)</h3>
+      <p><strong>Subhead:</strong> <code>Portland Podcast Room.</code></p>
+      <p><strong>H2 (visible, anchor target):</strong> <code>Portland Podcast Room.</code></p>
+      <p><strong>Specs block:</strong></p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Spec</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Room type</td><td><code>Acoustically treated recording booth</code></td></tr>
+          <tr><td>Mic setup</td><td><code>2 × on shock mounts</code></td></tr>
+          <tr><td>Headphones</td><td><code>Over-the-ear × 4</code></td></tr>
+          <tr><td>Recording</td><td><code>Raw, with in-camera redundancy</code></td></tr>
+          <tr><td>Engineer</td><td><code>Optional on-site engineer add-on</code></td></tr>
+          <tr><td>Video capture</td><td><code>Optional Blackmagic 6K video</code></td></tr>
+          <tr><td>Delivery</td><td><code>Raw WAV files</code></td></tr>
+          <tr><td>Booking</td><td><code>Two-hour minimum</code></td></tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> every TBC field from v1 is now filled per Liam's R1. Mic models still TBC per Liam's DEPENDENCIES #10 — "Will gather more technical info for podcast room." Default applied: list mic count without specific model so the spec table reads complete; we'll swap in models once Liam provides them.</p>
+      </div>
+
+      <h4>Who it's for</h4>
+      <blockquote>
+        <p>Podcasters recording a weekly episode. Brand audio teams cutting launch spots. VO directors on deadline. Foley artists who need a quiet room that isn't their closet.</p>
+      </blockquote>
+
+      <h4>What's included</h4>
+      <blockquote>
+        <p>The room, the mics, the headphones, the engineer if you want one, and the kind of silence most home studios can't buy. Bring your guests. We'll bring the coffee.</p>
+      </blockquote>
+
+      <h4>Section CTA</h4>
+      <p><strong>Headline:</strong> <code>Ready to book the room?</code></p>
+      <p><strong>CTA:</strong> <code>Check availability →</code> (routes to <code>/contact</code> with the podcast rental subject prefilled)</p>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> CTA now uses the global "Check availability →" pattern (same as studio rental and gear rental) instead of v1's "Book the room →" — keeps the rentals page consistent and routes everything to the same contact form.</p>
+      </div>
+
+      <h3>Section 3 — Portland Gear List (#gear) — NEW</h3>
+      <p><strong>Subhead:</strong> <code>Portland Gear List.</code></p>
+      <p><strong>H2 (visible, anchor target):</strong> <code>Portland Gear List.</code></p>
+      <p><strong>Section H1 (above the gear sheet — Liam's verbatim):</strong></p>
+      <blockquote><p>Photon curated gear.</p></blockquote>
+      <p><strong>Lead paragraph (Liam's verbatim):</strong></p>
+      <blockquote>
+        <p>Take your shoot even further with the same gear our creative team relies on.</p>
+      </blockquote>
+      <p><strong>Downloadable gear sheet:</strong></p>
+      <blockquote>
+        <p><a href="/photon-gear-list.pdf">Download the Photon gear list (PDF) →</a></p>
+      </blockquote>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> ENTIRELY NEW section per Liam's R1 — "Insert downloadable gear sheet." This is also where the studio spec sheet PDF that was on /capabilities now lives, since Liam asked "Why is the downloadable spec sheet in capabilities if its for studio rental?" Both PDFs (gear list + studio spec sheet) live here. Owner of the PDF assets: TBC: Liam (per DEPENDENCIES #17c — "Should a spec sheet for the studio live in the studio section? Super down to make one.").</p>
+      </div>
+      <p><strong>Studio spec sheet (also moved here from /capabilities):</strong></p>
+      <blockquote>
+        <p><a href="/photon-spec-sheet.pdf">Download the Photon studio spec sheet (PDF) →</a></p>
+      </blockquote>
+      <div class="editorial">
+        <p><code>[TBC: Liam — both PDFs are placeholders. Studio spec sheet content can be auto-generated from the spec table on /studio (single source of truth). Gear list content needs to come from Liam's inventory list — we'll need a Google Sheet or doc to start from.]</code></p>
+      </div>
+
+      <h4>Section CTA</h4>
+      <p><strong>Headline:</strong> <code>Need to talk through a gear add-on?</code></p>
+      <p><strong>CTA:</strong> <code>Check availability →</code> (routes to <code>/contact</code> with the gear rental subject prefilled)</p>
+
+      <h3>Section — Good to know (sits below all three sections)</h3>
+      <blockquote>
+        <p>We book the studio by the day, with a two-day minimum on most productions. The podcast room books by the hour, with a two-hour minimum. If you're scouting, we'll walk you through in person or send a full virtual tour. Holds are first-come, first-served — a deposit secures the date.</p>
+      </blockquote>
+
+      <h3>[SEO] Rentals page metadata</h3>
+      <ul>
+        <li><strong>Title:</strong> <code>Studio, Podcast Room, and Gear Rentals — Photon Studio Portland</code></li>
+        <li><strong>Meta description:</strong> <code>Rent Photon's 6,000 sq ft Portland production studio with cyclorama and 400 AMP power, the treated podcast room, or curated gear from our in-house list.</code></li>
+      </ul>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> meta now reflects the consolidated single-page structure and three rental products. Studio sq ft updated to 6,000 to match Liam's R1 spec block.</p>
+      </div>
+      <div class="editorial">
+        <p><strong>Service schema (round 2 dev task):</strong> three discrete <code>Service</code> JSON-LD blocks emitted on this page, one per anchored section. Each block includes <code>name</code>, <code>description</code>, <code>areaServed</code> (Portland), <code>provider</code> (Photon Studio LLC). This is the AEO/LLM compensation for collapsing three URLs to one — covered in detail in the trade-off note at the top of this section.</p>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 09 — CONTACT                                   -->
+    <!-- ============================================== -->
+    <section class="section" id="contact">
+      <div class="section-number">09</div>
+      <h2>Contact</h2>
+      <p>Minimal. No friction. You flagged this explicitly — low friction to conversation is the goal.</p>
+
+      <h3>Hero</h3>
+      <p><strong>Label:</strong> <code>05 — Contact</code></p>
+      <p><strong>H1:</strong></p>
+      <blockquote><p>Mission briefing.</p></blockquote>
+      <p><strong>Lead paragraph:</strong></p>
+      <blockquote>
+        <p>Tell us what you're making. We'll tell you if we're the right studio to make it with you — and who to call if we're not.</p>
+      </blockquote>
+
+      <h3>Direct contact (sits above the form, styled small but prominent)</h3>
+      <blockquote>
+        <p>Rather skip the form? Email Chris directly — <a href="mailto:chris@photon.studio">chris@photon.studio</a>. He answers same day, usually same hour.</p>
+      </blockquote>
+      <div class="editorial">
+        <span class="editorial-label">Why this line is here</span>
+        <p>Every peer studio we reached (Stept, 1stAveMachine, Hungry Man, Park Pictures, Buck, Stink, Iconoclast) surfaces a direct email or named contact, and several have no web form at all. Our form is higher-friction than the category norm — which is fine for intake quality, but risks losing the agency producer with a Friday RFP who won't fill out a dropdown at 6pm Thursday. Surfacing Chris's direct email above the form gives that EP an escape hatch without sacrificing the structured intake for everyone else. Confirmed by Liam in DEPENDENCIES #17b — "Yes, chris should be intake and always an option with no friction."</p>
+      </div>
+
+      <h3>Form fields</h3>
+      <ul>
+        <li><code>Your name *</code></li>
+        <li><code>Your email *</code></li>
+        <li><code>Your company</code> (optional)</li>
+        <li><code>What kind of project?</code> (optional dropdown): <code>Brand campaign</code>, <code>Product launch</code>, <code>Case study / film</code>, <code>Studio rental</code>, <code>Podcast session</code>, <code>Something else</code>, <code>Not sure yet</code></li>
+        <li><code>What are you working on? *</code> (textarea)</li>
+        <li><code>What are you delivering?</code> (optional textarea — short list: e.g. "1× 60s hero, 4× :15 socials, 12× stills")</li>
+        <li><code>Budget range</code> (optional dropdown): <code>Under $25k</code>, <code>$25k–$75k</code>, <code>$75k–$150k</code>, <code>$150k+</code>, <code>Rather not say yet</code></li>
+        <li><code>Project dates</code> (optional textarea — shoot date and delivery date if known)</li>
+        <li><code>How did you hear about us?</code> (optional dropdown): <code>Referral</code>, <code>Search</code>, <code>Instagram or Vimeo</code>, <code>Event or press</code>, <code>Something else</code></li>
+      </ul>
+      <p><strong>Submit button:</strong> <code>Launch →</code></p>
+      <div class="editorial">
+        <p><strong>Changed in v2 per Liam's DEPENDENCIES #11</strong> — "Maybe we add an optional field in the contact form for the things we always need: Budget range, timeline/shoot and delivery date and list of deliverables." Two new optional fields added: "What are you delivering?" (deliverables list) and "Project dates" (shoot + delivery dates as a single textarea, since they're often related and producers often know one before the other). The previous "Timeline" dropdown is replaced by "Project dates" — dropdown ranges aren't useful when an EP already has a real shoot date in mind.</p>
+      </div>
+
+      <h3>Who you're reaching</h3>
+      <p>Small text, set below the form. Names the humans at the other end so this doesn't feel like a message dropping into a void.</p>
+      <blockquote>
+        <p>Chris runs intake — he's the first read on every project. Liam jumps in for creative direction. You'll hear from one of them within one business day, usually faster.</p>
+      </blockquote>
+
+      <h3>Success state</h3>
+      <p><strong>H2:</strong> <code>Signal acquired.</code></p>
+      <blockquote>
+        <p>Message received. We'll be back within one business day — usually faster. If it's urgent, reply to the confirmation email and we'll route it straight to whoever's on deck.</p>
+      </blockquote>
+
+      <h3>Error state</h3>
+      <p><strong>H2:</strong> <code>Signal lost.</code></p>
+      <blockquote>
+        <p>Something didn't send. Try again, or email us directly at chris@photon.studio. We'd rather hear from you twice than not at all.</p>
+      </blockquote>
+
+      <h3>Alternate contact (small text under the form)</h3>
+      <blockquote>
+        <p>For rentals: mention the date in your message. For agencies: mention the brand.</p>
+      </blockquote>
+
+      <div class="callout">
+        <p><strong>Email setup (resolved in v2 — see Editorial notes for Photon team in §00 above for the full recommendation):</strong> the contact page surfaces <code>chris@photon.studio</code> as the direct line. The footer carries <code>hello@photon.studio</code> as the public alias. Internally, hello@ routes to chris@ + liam@ (or a forwarding rule both can configure). The form itself routes the same way — chris@ + liam@ both receive it. This resolves Liam's R1 ambiguity ("hello@ on the footer and chris@ everywhere else, liam@ for creative questions") with zero friction for the buyer (one form, one email surfaced) and zero missed emails for the team (server-side routing covers the rest).</p>
+      </div>
+
+      <h3>[SEO] Contact metadata</h3>
+      <ul>
+        <li><strong>Title:</strong> <code>Contact Photon — Start a Conversation | Portland Production Studio</code></li>
+        <li><strong>Meta description:</strong> <code>Get in touch with Photon, a Portland and Lisbon production studio. Brand campaigns, case studies, studio rentals, podcast sessions. One-business-day reply.</code></li>
+      </ul>
+      <div class="editorial">
+        <p><strong>Changed in v2:</strong> meta description broadened to include Lisbon ("Portland and Lisbon production studio") to match the global two-location framing.</p>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 10 — 404 / SIGNAL LOST                         -->
+    <!-- ============================================== -->
+    <section class="section" id="not-found">
+      <div class="section-number">10</div>
+      <h2>404 / Signal Lost</h2>
+      <p>The space-theme moment.</p>
+
+      <p><strong>H1:</strong></p>
+      <blockquote><p>Signal lost.</p></blockquote>
+      <blockquote>
+        <p>Ground control can't find that page. It may have been moved, renamed, or jettisoned in a previous orbit.</p>
+      </blockquote>
+      <p><strong>CTAs (side by side):</strong></p>
+      <ul>
+        <li><code>Back to mission control →</code> (routes to <code>/</code>)</li>
+        <li><code>Browse the work →</code> (routes to <code>/work</code>)</li>
+      </ul>
+      <p><strong>Footer line (small mono, below the CTAs):</strong></p>
+      <blockquote>
+        <p>Photon Studio — modular production for the future of content.</p>
+      </blockquote>
+      <div class="editorial">
+        <span class="editorial-label">Why this line</span>
+        <p>The 404 body uses "ground control" as functional metaphor (the narrator is the one searching for a lost signal — that works here because Photon literally can't find the page you asked for). But the footer signature should match the brand tagline that lives on the bottom bar everywhere else on the site. Don't have two competing one-liners.</p>
+      </div>
+
+      <h3>[SEO] 404 metadata</h3>
+      <ul>
+        <li><strong>Title:</strong> <code>Signal Lost — 404 | Photon Studio</code></li>
+        <li><strong>Meta description:</strong> <code>The page you were looking for can't be found. Head back to Photon's work, or say hello.</code> (88 chars)</li>
+      </ul>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 11 — DEPENDENCIES (R1 RESOLVED)                -->
+    <!-- ============================================== -->
+    <section class="section" id="dependencies">
+      <div class="section-number">11</div>
+      <h2>Dependencies &amp; decisions resolved in round 1</h2>
+      <p>This section was the open-question list at the end of v1. Liam's R1 feedback resolved most of it. What's left below are the items still open going into round 2 — much shorter than v1.</p>
+
+      <h3>Resolved in R1 (no action needed — fyi)</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>v1 question</th><th>R1 resolution</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Confirm top-5 featured projects</td><td><strong>Sounders Bruce Lee kit, Sorel high gear, Combat Cookies, Bare Republic, Neste.</strong> Locked.</td></tr>
+          <tr><td>2</td><td>Confirm studio specs</td><td>All specs provided — see /studio spec block (Total 6,000 sq ft / Cyclorama 44 × 38 / 400 AMP / 16 ft clear / Drive-in 14 × 12 / Genie GS-1930 / Address 726 SE 10th Ave).</td></tr>
+          <tr><td>3</td><td>Public contact details</td><td>hello@photon.studio in footer; chris@photon.studio on Contact direct line; liam@ for creative questions (handled via internal routing). No Facebook. No LinkedIn.</td></tr>
+          <tr><td>4</td><td>Team list</td><td>7 crew confirmed — Liam Gillies, Chris Crary (heads); Em Gillies, Toni Crary, Austin Baker, Garrett Baker, Russel Bowen (support).</td></tr>
+          <tr><td>5</td><td>"Anything factually wrong or off-voice?"</td><td>Liam confirmed in DEPENDENCIES #5 — "CHecked." [sic]</td></tr>
+          <tr><td>9</td><td>Does "What we don't do" stay in Capabilities?</td><td><strong>Cut.</strong> Liam: "No what we don't do."</td></tr>
+          <tr><td>13</td><td>Sorel case study via Ryan?</td><td>Liam confirmed: "High gear" (Sorel high gear) is the lead Sorel project — already in the top-5.</td></tr>
+          <tr><td>14</td><td>Client roster names</td><td><strong>Add:</strong> Starbucks, Teavana, Triumph, Amazfit, Flexfit. <strong>Remove:</strong> BMW (spec project, not real engagement).</td></tr>
+          <tr><td>15</td><td>SGK / Nike name-drop</td><td>Liam: "Always ok to mention agencies by name." (The line itself was cut from /capabilities in the agency-section rewrite, but the principle holds for future copy.)</td></tr>
+          <tr><td>16</td><td>Filters on Work page</td><td><strong>Approved.</strong> Filters ship. Taxonomy locked at 10 categories (see §03).</td></tr>
+          <tr><td>17a</td><td>"Extension of your team" line</td><td><strong>Approved.</strong> Folded in as optional secondary callout on /capabilities agency section.</td></tr>
+          <tr><td>17b</td><td>Chris as public intake</td><td><strong>Approved.</strong> Chris is the named public-facing intake on /contact.</td></tr>
+          <tr><td>17c</td><td>Downloadable studio spec sheet</td><td><strong>Approved.</strong> Moved to /rentals (audience-appropriate). Liam: "Super down to make one."</td></tr>
+          <tr><td>18</td><td>Rentals in nav</td><td><strong>Kept.</strong> (Confirmed by Liam in earlier nav review.)</td></tr>
+          <tr><td>19</td><td>Relationship-length line on homepage</td><td><strong>Kept</strong> as a section. Liam flagged the v1 wording as garbled — three rephrase options provided in §02 for round 2 selection.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>Still open going into round 2</h3>
+      <p>These are the only items that block round 2 sign-off.</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Section</th><th>The ask</th></tr></thead>
+        <tbody>
+          <tr><td>O1</td><td>§02 Homepage relationship line</td><td><strong>Pick one of the three rephrase options</strong> (Option A, B, or C) — or rewrite. See §02 for the three drafts.</td></tr>
+          <tr><td>O2</td><td>§06 Studio + §02 Homepage SEO</td><td><strong>Sq ft figure — 5,000 or 6,000?</strong> Liam's R1 has both: 6,000 in the Studio block, 5,000 in the homepage SEO meta. Confirm canonical figure for round 2 alignment.</td></tr>
+          <tr><td>O3</td><td>§03 Work filter pills</td><td><strong>Which categories clear the 4+ project threshold for launch?</strong> Liam's R1 says under-4 categories shouldn't get pills at launch. Need a yes/no per category from the 10.</td></tr>
+          <tr><td>O4</td><td>§03 Work — Music, Fashion, Art Dept</td><td><strong>Meta titles + descriptions</strong> for these three categories — left blank in R1 feedback.</td></tr>
+          <tr><td>O5</td><td>§03 Work — Footwear, Studio</td><td><strong>Meta description</strong> for /work/footwear and /work/studio — left blank in R1 feedback.</td></tr>
+          <tr><td>O6</td><td>§08 Rentals — Podcast room mics</td><td><strong>Mic model.</strong> Liam in DEPENDENCIES #10: "Will gather more technical info for podcast room." Pending.</td></tr>
+          <tr><td>O7</td><td>§04 Project descriptions</td><td><strong>Per-project copy.</strong> Liam linked a Google Sheet — content lift from sheet → CMS once schema is ready.</td></tr>
+          <tr><td>O8</td><td>All</td><td><strong>Studio + team photography.</strong> Pending Liam's next studio visit (DEPENDENCIES #8).</td></tr>
+          <tr><td>O9</td><td>All</td><td><strong>Real testimonials</strong> for the 5 hero projects. Liam: "Will try to get a testimonial for all 5 key projects." (DEPENDENCIES #7)</td></tr>
+          <tr><td>O10</td><td>All</td><td><strong>Email setup decision.</strong> See "Email setup" in the §00 Editorial notes block — recommended setup is hello@ (footer alias) → chris@ + liam@ via routing rule. Sign-off needed before launch.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>Hand-off items for design / dev (not Liam decisions)</h3>
+      <p>These are dev/design tasks created by the v2 changes. No action from Liam — flagging here so the team has a punch list.</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Section</th><th>Task</th></tr></thead>
+        <tbody>
+          <tr><td>D1</td><td>§01 Footer</td><td>Set up <code>hello@photon.studio</code> DNS forwarding to <code>chris@</code> + <code>liam@</code>. Confirm both inboxes receive a test send before launch.</td></tr>
+          <tr><td>D2</td><td>§09 Contact form</td><td>Server-side form routing to <code>chris@</code> + <code>liam@</code> (mirror the hello@ rule). Subject prefill rules per "What kind of project?" dropdown.</td></tr>
+          <tr><td>D3</td><td>§08 Rentals</td><td>Three <code>Service</code> JSON-LD blocks emitted on /rentals (one per anchored section). See §08 SEO block.</td></tr>
+          <tr><td>D4</td><td>§08 Rentals</td><td>301 redirects: <code>/rentals/studio</code> → <code>/rentals#studio</code>, <code>/rentals/podcast</code> → <code>/rentals#podcast</code>. Set in <code>next.config.ts</code> redirects array.</td></tr>
+          <tr><td>D5</td><td>§03 Work</td><td>10 category routes (<code>/work/[slug]</code>) live in routing even when the pill is hidden — pill render is a "≥4 projects published" check, route always exists.</td></tr>
+          <tr><td>D6</td><td>§06 Studio + §08 Rentals</td><td>Single shared content source in Sanity for the studio specs (so updates propagate to both pages without manual sync).</td></tr>
+          <tr><td>D7</td><td>§04 Project page</td><td>Sanity field for "Photon handled" — multi-select tied to the Modules vocabulary used on /capabilities. Same vocabulary surfaces on every project page.</td></tr>
+          <tr><td>D8</td><td>§08 Rentals</td><td>Two PDF assets — gear list + studio spec sheet. Liam to provide content; designer to lay out in Photon visual identity.</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 12 — ROUND-2 REVIEW CHECKLIST                  -->
+    <!-- ============================================== -->
+    <section class="section" id="checklist">
+      <div class="section-number">12</div>
+      <h2>Round-2 review checklist (only what's still open)</h2>
+      <p>If you read nothing else, read this. Round 1 closed most of the open questions — the list below is only what's still blocking round 2 sign-off.</p>
+
+      <h3>Must-answer to unblock round 2</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Section</th><th>The ask</th><th>Why it blocks</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>§02 Homepage</td><td><strong>Pick a relationship-length line.</strong> Three options drafted (A / B / C) replacing the R1 "Ten projects in on some. Five years running on one. The relationships are the product." which Liam flagged as garbled. One-letter answer.</td><td>It's the homepage's strongest proof point — needs to be locked before design.</td></tr>
+          <tr><td>2</td><td>§02 Homepage / §06 Studio</td><td><strong>Studio square footage — 5,000 or 6,000?</strong> R1 has 5,000 in the homepage SEO meta and 6,000 in the Studio specs block. Draft currently uses 6,000 in §06 (canonical detail) and Liam-verbatim 5,000 in homepage meta. Pick one number for both surfaces.</td><td>LocalBusiness JSON-LD and the Studio H1 paragraph both reference this. Inconsistency hurts trust + SEO.</td></tr>
+          <tr><td>3</td><td>§02 Homepage clients strip</td><td><strong>Final client roster sign-off.</strong> R1 added Starbucks, Teavana, Triumph, Amazfit, Flexfit and dropped BMW. Anything else to drop or add before the list goes public?</td><td>Strip is the homepage's main trust signal. Once design ships, edits become CMS-only.</td></tr>
+          <tr><td>4</td><td>§05 Case study</td><td><strong>Five testimonial pulls.</strong> R1 #07: "Will try to get a testimonial for all 5 key projects." Confirm the 5 anchor projects are Sounders Bruce Lee kit, Sorel high gear, Combat Cookies, Bare Republic, Neste — and which contact owns each ask.</td><td>Case study templates are testimonial-led. One real quote per project is the credibility shift.</td></tr>
+          <tr><td>5</td><td>§06 Studio</td><td><strong>Studio + crew photography.</strong> R1 #08: "Studio and team photography coming." Confirm shoot date so design can plan the hero, the spec block layout, and the seven crew portraits (two leads larger, five support smaller per R1 layout note).</td><td>Studio page is photo-led. Without final assets, design ships with placeholders.</td></tr>
+          <tr><td>6</td><td>§08 Rentals → Podcast room</td><td><strong>Additional podcast specs.</strong> R1 #10: "Will gather more technical info for podcast room." Current draft uses Liam's verbatim line items (2 mics on shock mounts, 4 over-ear, raw + redundancy, optional Blackmagic 6K, raw WAV, two-hour minimum). Add mic model, headphone model, recording surface dimensions?</td><td>Podcast booking is a discrete revenue line. Producers compare specs row-for-row before booking.</td></tr>
+          <tr><td>7</td><td>§08 Rentals → Gear list + PDF</td><td><strong>Two PDF assets.</strong> R1 #17c: spec sheet for studio + Liam-curated gear list. Liam to provide content; we'll lay out in Photon visual identity. Confirm: who owns keeping each PDF current after launch, and do rental rates live on the spec sheet or stay quoted per-project?</td><td>Both are referenced in §07 Capabilities and §08 Rentals as downloadable assets. Without final files, those CTAs link to placeholders at ship.</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>Soft — needed before launch, not before round 2</h3>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Section</th><th>The ask</th></tr></thead>
+        <tbody>
+          <tr><td>S1</td><td>§02 Homepage / §03 Work</td><td><strong>Per-project descriptions</strong> (2–4 sentences each, Photon voice) for the homepage rotation and the Work grid. R1 #06 asked: should descriptions go straight into the CMS? Yes — but we still need a first batch from Liam to seed.</td></tr>
+          <tr><td>S2</td><td>All surfaces</td><td><strong>Email setup.</strong> Three addresses recommended: <code>hello@photon.studio</code> (footer + contact), <code>chris@photon.studio</code> (Contact intake), <code>liam@photon.studio</code> (creative questions). Confirm aliases exist and any inbound routing rules.</td></tr>
+          <tr><td>S3</td><td>§05 Case study + others</td><td><strong>Pull-quote placement beyond case studies.</strong> Once testimonials land, we should consider surfacing them on the homepage, above the contact form, and on Studio. Volume of real quotes drives where they go.</td></tr>
+          <tr><td>S4</td><td>§01 footer</td><td><strong>Legal pages.</strong> Privacy / Terms / Cookies / Accessibility — do you have existing policy content, or should we draft placeholders for round 2?</td></tr>
+        </tbody>
+      </table>
+      </div>
+
+      <h3>Resolved in R1 (recap — see §11 Dependencies for the full table)</h3>
+      <p>Liam's R1 closed 15 of the original 19 must-answer items. Highlights: filter taxonomy locked (10 categories, with launch pills only above 4 projects), Capabilities restructured (no "How we engage", no "What we don't do"), modular language de-repeated on Philosophy line, agency name-drops cleared, full crew list with space-themed titles confirmed, footer LinkedIn dropped, About narrowed to Studio + Crew, Rentals consolidated to one page with anchor jumps, contact form gets two new optional fields (deliverables list + project dates), motion-control de-emphasised in Work copy.</p>
+    </section>
+
+  </main>
+</div>
+
+<footer class="footer">
+  <p>Second draft &middot; <span>SALT Studio</span> for <span>Photon</span></p>
+  <p>Round 1 feedback applied (Liam Gillies, 04.16.26). Round 2 review pending.</p>
+</footer>
+
+<script>
+  // Scroll spy: highlight the current section in the TOC as the user scrolls.
+  (function () {
+    const tocLinks = document.querySelectorAll('.toc-list a');
+    const sections = Array.from(document.querySelectorAll('.content .section'));
+    const navCurrent = document.getElementById('navCurrent');
+    if (!tocLinks.length || !sections.length) return;
+
+    const linkBySection = new Map();
+    tocLinks.forEach((a) => {
+      const id = a.getAttribute('data-section');
+      if (id) linkBySection.set(id, a);
+    });
+
+    function setActive(id) {
+      tocLinks.forEach((a) => a.classList.remove('active'));
+      const active = linkBySection.get(id);
+      if (active) {
+        active.classList.add('active');
+        if (navCurrent) {
+          const label = active.textContent.trim().replace(/^\d+/, '').trim();
+          navCurrent.textContent = ' · ' + label;
+        }
+      }
+    }
+
+    // Use IntersectionObserver with a top-band rootMargin so the "active"
+    // section is whichever is crossing the top third of the viewport.
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Prefer the entry closest to the top of the viewport.
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible.length) {
+          setActive(visible[0].target.id);
+        }
+      },
+      {
+        rootMargin: '-80px 0px -70% 0px',
+        threshold: 0,
+      }
+    );
+
+    sections.forEach((s) => observer.observe(s));
+
+    // Set initial state based on hash or first section.
+    const initial = window.location.hash ? window.location.hash.slice(1) : sections[0].id;
+    setActive(initial);
+
+    // Smooth click handling is already provided by html { scroll-behavior: smooth }.
+    // Just make sure clicking a TOC link also immediately activates it.
+    tocLinks.forEach((a) => {
+      a.addEventListener('click', () => {
+        const id = a.getAttribute('data-section');
+        if (id) setActive(id);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+---
+description: Next.js 16 App Router — routes, layouts, draft mode
+globs: app/**/*
+alwaysApply: false
+---
+
+# App Router conventions
+
+**Canonical doc:** `app/CLAUDE.md`. Studio-specific: `app/edit/CLAUDE.md`. API: `app/api/CLAUDE.md`.
+
+## Next.js 16
+
+- Dynamic `params` are **Promises**: `params: Promise<{slug: string}>`, then `await params`
+- `draftMode()` is async: `(await draftMode()).isEnabled`
+- Verify APIs in `node_modules/next/dist/docs/` — don't guess from older Next.js
+
+## Three layers
+
+1. **`app/layout.tsx`** — fonts, `globals.css`, minimal shell
+2. **`app/(personal)/`** — public site (Navbar, SanityLive, draft UI). Route group: not in URL
+3. **`app/edit/`** — Sanity Studio; isolated layout (no `globals.css`)
+
+## Data fetching
+
+```ts
+const {data} = await sanityFetch({query: projectBySlugQuery, params})
+```
+
+- `generateMetadata` / `generateStaticParams`: `stega: false`; static params also `perspective: 'published'`
+- Missing data + draft mode: `if (!data?._id && !(await draftMode()).isEnabled) notFound()` — copy this on new slug routes
+
+## Draft mode flow
+
+Preview → `GET /api/draft-mode/enable` → layout renders `<VisualEditing />` + `<DraftModeToast />` when draft enabled.
+
+## Don't
+
+- Import `sanity.config.ts` from public routes (Studio-only, `'use client'`)
+- Move `<SanityLive />` off the layout
+- Build on `intro-template/` (removable welcome card)

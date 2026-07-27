@@ -1,0 +1,129 @@
+/**
+ * Sets up the Presentation Resolver API,
+ * see https://www.sanity.io/docs/presentation-resolver-api for more information.
+ */
+
+import {resolveHref} from '@/sanity/lib/utils'
+import {defineDocuments, defineLocations} from 'sanity/presentation'
+
+export const mainDocuments = defineDocuments([
+  {
+    route: '/',
+    filter: `_type == "home"`,
+  },
+  {
+    route: '/work',
+    filter: `_type == "workPage"`,
+  },
+  {
+    route: '/work/:slug',
+    filter: `_type == "workCategory" && slug.current == $slug`,
+  },
+  {
+    route: '/capabilities',
+    filter: `_type == "capabilitiesPage"`,
+  },
+  {
+    route: '/studio',
+    filter: `_type == "studioPage"`,
+  },
+  {
+    route: '/contact',
+    filter: `_type == "contactPage"`,
+  },
+  {
+    route: '/rentals/:slug',
+    filter: `_type == "rentalPage" && slug.current == $slug`,
+  },
+  {
+    route: '/projects/:slug',
+    filter: `_type == "project" && slug.current == $slug`,
+  },
+  {
+    route: '/legal/:slug',
+    filter: `_type == "legalPage" && slug.current == $slug`,
+  },
+  {
+    route: '/:slug',
+    filter: `_type == "page" && slug.current == $slug`,
+  },
+])
+
+export const locations = {
+  settings: defineLocations({
+    message: 'This document is used on all pages',
+    tone: 'caution',
+  }),
+  home: defineLocations({
+    message: 'This document is used to render the front page',
+    tone: 'positive',
+    locations: [{title: 'Home', href: resolveHref('home')!}],
+  }),
+  project: defineLocations({
+    select: {title: 'title', slug: 'slug.current'},
+    resolve: (doc) => {
+      const href = resolveHref('project', doc?.slug)
+      return {locations: href ? [{title: doc?.title || 'Untitled', href}] : []}
+    },
+  }),
+  page: defineLocations({
+    select: {title: 'title', slug: 'slug.current'},
+    resolve: (doc) => {
+      const href = resolveHref('page', doc?.slug)
+      return {locations: href ? [{title: doc?.title || 'Untitled', href}] : []}
+    },
+  }),
+  legalPage: defineLocations({
+    select: {title: 'title.en', slug: 'slug.current', pageType: 'pageType'},
+    resolve: (doc) => {
+      const href = resolveHref('legalPage', doc?.slug)
+      return {
+        locations: href ? [{title: doc?.title || doc?.pageType || 'Legal Page', href}] : [],
+      }
+    },
+  }),
+  notFoundPage: defineLocations({
+    message: 'This document defines the 404 page content',
+    tone: 'caution',
+  }),
+  workPage: defineLocations({
+    message: 'Work index page',
+    tone: 'positive',
+    locations: [{title: 'Work', href: resolveHref('workPage')!}],
+  }),
+  capabilitiesPage: defineLocations({
+    message: 'Capabilities page',
+    tone: 'positive',
+    locations: [{title: 'Capabilities', href: resolveHref('capabilitiesPage')!}],
+  }),
+  studioPage: defineLocations({
+    message: 'Studio page',
+    tone: 'positive',
+    locations: [{title: 'Studio', href: resolveHref('studioPage')!}],
+  }),
+  contactPage: defineLocations({
+    message: 'Contact page',
+    tone: 'positive',
+    locations: [{title: 'Contact', href: resolveHref('contactPage')!}],
+  }),
+  rentalPage: defineLocations({
+    select: {title: 'title', slug: 'slug.current', headline: 'headline'},
+    resolve: (doc) => {
+      const href = resolveHref('rentalPage', doc?.slug)
+      return {
+        locations: href ? [{title: doc?.headline || doc?.title || 'Rental', href}] : [],
+      }
+    },
+  }),
+  workCategory: defineLocations({
+    select: {title: 'filterLabel', slug: 'slug.current'},
+    resolve: (doc) => {
+      const href = resolveHref('workCategory', doc?.slug)
+      return {locations: href ? [{title: doc?.title || 'Work category', href}] : []}
+    },
+  }),
+  teamMember: defineLocations({
+    message: 'Team members appear on the Studio page crew section',
+    tone: 'caution',
+  }),
+}

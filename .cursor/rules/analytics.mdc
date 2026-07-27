@@ -1,0 +1,28 @@
+---
+description: GTM, GA4, consent, typed analytics events
+globs: lib/analytics/**/*
+alwaysApply: false
+---
+
+# Analytics conventions
+
+**Canonical doc:** `lib/analytics/CLAUDE.md`
+
+## Dual tracking
+
+| Source | Config | Client editable? |
+| --- | --- | --- |
+| Salt GTM/GA4 | `NEXT_PUBLIC_GTM_ID` in env | No |
+| Client GA4 | Sanity Developer Settings → `clientGoogleAnalyticsId` | Yes |
+
+Wired in `app/layout.tsx`: `GoogleTagManagerScript`, `ClientGoogleAnalyticsScript`, `ConsentProvider`, trackers.
+
+## Usage
+
+- Import helpers from `@/lib/analytics` (`trackCTAClick`, `trackFormSubmit`, etc.)
+- **Never bypass consent** — all `track*` functions check consent
+- Trackers (`PageViewTracker`, `ScrollTracker`, etc.) live once in root layout only
+
+## Debug
+
+`AnalyticsDebugOverlay` in dev; verify events in GTM Preview before launch.

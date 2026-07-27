@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photon — Copy Proposal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0A0A0A;
+      --surface: #111111;
+      --border: #1E1E1E;
+      --text: #F5F4F0;
+      --text-muted: #8A8A8A;
+      --text-dim: #5A5A5A;
+      --accent: #FFFFFF;
+      --accent-dim: rgba(255, 255, 255, 0.08);
+      --green: #7EBF8E;
+      --red: #BF7E7E;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', -apple-system, sans-serif;
+      --max-w: 960px;
+      --space-section: clamp(80px, 12vh, 140px);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 16px;
+      line-height: 1.7;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    /* --- NAV --- */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 24px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 10, 10, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-brand {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .nav-brand span { color: var(--accent); }
+
+    .nav-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* --- HERO --- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 40px 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(ellipse at 70% 80%, rgba(232, 213, 163, 0.03) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 32px;
+    }
+
+    .hero h1 {
+      font-family: var(--mono);
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 300;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      max-width: 800px;
+      color: var(--text);
+    }
+
+    .hero-meta {
+      margin-top: 48px;
+      display: flex;
+      gap: 48px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+
+    .hero-meta dt {
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .hero-meta dd { color: var(--text-muted); }
+
+    /* --- CONTENT --- */
+    .content {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .section {
+      padding: var(--space-section) 0;
+      border-top: 1px solid var(--border);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section-number {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-family: var(--mono);
+      font-size: clamp(24px, 3.5vw, 36px);
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      margin-bottom: 40px;
+      color: var(--text);
+    }
+
+    h3 {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-top: 56px;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    h4 {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 40px;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    p {
+      margin-bottom: 20px;
+      color: var(--text-muted);
+      max-width: 680px;
+    }
+
+    p strong, li strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    em { color: var(--text); font-style: italic; }
+
+    blockquote {
+      border-left: 2px solid var(--accent);
+      padding: 20px 0 20px 28px;
+      margin: 32px 0;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      max-width: 680px;
+    }
+
+    blockquote strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    blockquote p {
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+
+    blockquote p:last-child { margin-bottom: 0; }
+
+    ul, ol {
+      margin-bottom: 20px;
+      padding-left: 0;
+      list-style: none;
+      max-width: 680px;
+    }
+
+    li {
+      padding: 8px 0;
+      padding-left: 20px;
+      position: relative;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 17px;
+      width: 6px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    /* --- TABLES --- */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 28px 0 36px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    thead th {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-align: left;
+      padding: 12px 16px 12px 0;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 14px 16px 14px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      vertical-align: top;
+    }
+
+    tbody td:first-child {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    tbody td strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* --- VOICE CARD --- */
+    .voice-trait {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+    }
+
+    .voice-trait:last-child { border-bottom: none; }
+
+    .voice-trait .label {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .voice-trait .value {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* --- USE / AVOID --- */
+    .word-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin: 28px 0;
+    }
+
+    .word-col h4 { margin-top: 0; }
+
+    .word-col.use li::before { background: var(--green); }
+    .word-col.avoid li::before { background: var(--red); }
+
+    .word-col li {
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 6px 0 6px 20px;
+    }
+
+    /* --- CALLOUT --- */
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--accent);
+      padding: 28px 32px;
+      margin: 36px 0;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .callout p {
+      margin-bottom: 0;
+      color: var(--text);
+    }
+
+    /* --- CHANGE ITEM --- */
+    .change-item {
+      padding: 40px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .change-item:last-child { border-bottom: none; }
+
+    .change-item .num {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .change-item h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+    }
+
+    /* --- SUMMARY GRID --- */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin: 32px 0;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 28px;
+      border-radius: 4px;
+    }
+
+    .summary-card h4 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 12px;
+    }
+
+    .summary-card p {
+      margin-bottom: 0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* --- FOOTER --- */
+    .footer {
+      padding: 80px 40px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer p {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      max-width: none;
+      margin: 0 auto;
+    }
+
+    .footer span { color: var(--accent); }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 768px) {
+      .nav { padding: 16px 24px; }
+      .hero { padding: 0 24px 60px; }
+      .content { padding: 0 24px; }
+      .hero-meta { flex-direction: column; gap: 20px; }
+      .footer { padding: 60px 24px; }
+      .voice-trait { grid-template-columns: 1fr; gap: 4px; }
+      .word-grid { grid-template-columns: 1fr; gap: 32px; }
+      .summary-grid { grid-template-columns: 1fr; }
+      table { font-size: 13px; }
+      tbody td:first-child { white-space: normal; }
+      .callout { padding: 20px 24px; }
+    }
+
+    /* --- PROGRESS --- */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: var(--accent);
+      z-index: 200;
+      width: 0%;
+      transition: width 0.15s ease-out;
+    }
+
+    .progress-tracker {
+      position: fixed;
+      right: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .progress-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1px solid var(--text-dim);
+      background: transparent;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .progress-dot.active {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .progress-dot.visited {
+      border-color: var(--text-muted);
+      background: var(--text-muted);
+    }
+
+    .progress-counter {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-top: 8px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .progress-counter .current {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .progress-tracker { right: 12px; }
+      .progress-dot { width: 6px; height: 6px; }
+    }
+
+    @media (max-width: 480px) {
+      .nav-label { display: none; }
+      .progress-tracker { display: none; }
+    }
+
+    /* --- LANGUAGE TOGGLE --- */
+    .lang-toggle { display: flex; align-items: center; gap: 12px; }
+    .lang-btn {
+      background: none; border: 1px solid var(--border); border-radius: 4px;
+      padding: 6px 10px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 10px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim);
+      transition: all 0.3s ease;
+    }
+    .lang-btn:hover { border-color: var(--text-muted); color: var(--text-muted); }
+    .lang-btn .flag { font-size: 14px; line-height: 1; }
+    .lang-btn .lang-label { display: none; }
+    @media (min-width: 480px) { .lang-btn .lang-label { display: inline; } }
+
+    .lang-tooltip {
+      position: fixed; bottom: 24px; right: 24px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px;
+      max-width: 300px; z-index: 300; opacity: 0; transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease; pointer-events: none;
+    }
+    .lang-tooltip.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .lang-tooltip p { font-size: 13px; line-height: 1.5; color: var(--text-muted); margin-bottom: 12px; max-width: none; }
+    .lang-tooltip-actions { display: flex; gap: 8px; }
+    .lang-tooltip-btn {
+      background: none; border: 1px solid var(--border); border-radius: 4px;
+      padding: 6px 14px; cursor: pointer; font-family: var(--mono); font-size: 10px;
+      font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-dim); transition: all 0.2s ease;
+    }
+    .lang-tooltip-btn:hover { border-color: var(--text-muted); color: var(--text-muted); }
+    .lang-tooltip-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+    .lang-tooltip-btn.primary:hover { opacity: 0.85; }
+
+    .content-pt, .hero-pt { display: none; }
+    html[lang="pt"] .content-en { display: none; }
+    html[lang="pt"] .content-pt { display: block; }
+    html[lang="pt"] .hero-en { display: none; }
+    html[lang="pt"] .hero-pt { display: flex; }
+  </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="progress-tracker" id="progressTracker"></div>
+
+<nav class="nav">
+  <div class="nav-brand"><span>SALT</span> &times; Photon</div>
+  <div class="lang-toggle">
+    <div class="nav-label">Copy Proposal</div>
+    <button class="lang-btn" id="langToggle" aria-label="Mudar para Português">
+      <span class="flag">🇵🇹</span>
+      <span class="lang-label">PT</span>
+    </button>
+  </div>
+</nav>
+
+<header class="hero hero-en">
+  <div class="hero-label">Copy Proposal</div>
+  <h1>Photon — Copy Direction</h1>
+  <dl class="hero-meta">
+    <div>
+      <dt>Prepared by</dt>
+      <dd>SALT Studio</dd>
+    </div>
+    <div>
+      <dt>For</dt>
+      <dd>Chris &amp; Liam, Photon</dd>
+    </div>
+  </dl>
+</header>
+
+<header class="hero hero-pt">
+  <div class="hero-label">Proposta de Copy</div>
+  <h1>Photon — Direção de Copy</h1>
+  <dl class="hero-meta">
+    <div>
+      <dt>Preparado por</dt>
+      <dd>SALT Studio</dd>
+    </div>
+    <div>
+      <dt>Para</dt>
+      <dd>Chris &amp; Liam, Photon</dd>
+    </div>
+  </dl>
+</header>
+
+<main class="content content-en">
+
+  <!-- 01 YOUR VOICE -->
+  <section class="section" id="voice">
+    <div class="section-number">01</div>
+    <h2>Your voice, as we hear it</h2>
+    <p>Before we write a single headline, we want to make sure we understand how Photon sounds. Here's what we picked up from your deck, your project descriptions, and your existing site:</p>
+
+    <p><strong>Photon sounds like a peer, not a vendor.</strong> You say "SGK brought us in" and "Oura brought us in" — that's a collaborator speaking, not someone selling a service. You lead with what made the shoot interesting, not with the client's name. The work is the story.</p>
+
+    <p><strong>You're direct.</strong> No preamble, no buildup. "The trickiest part was light placement, as there were no windows in the kitchen." That's Photon — specific, honest, straight to the point.</p>
+
+    <p><strong>You're technical without being exclusive.</strong> You reference Astera lighting systems, split diopters, Simera-C, 1000fps — and you never stop to explain them. That works. Your audience knows this language. Explaining it would actually undercut your credibility.</p>
+
+    <p><strong>You're playful when it counts.</strong> "Creating like children and editing like scientists." "Pitch Me Harder." "F it, I'm in!" The space theme — Mission Control, Orbital Mechanic, Chief Photometrics — that's personality baked into the brand, not a gimmick. It works because you commit to it.</p>
+
+    <p><strong>What Photon doesn't sound like:</strong> corporate, inflated, or salesy. No "cutting-edge solutions." No "world-class innovation." No "we're passionate about storytelling." You let the work do that.</p>
+
+    <h4>The voice, summarized</h4>
+    <div style="margin: 28px 0 36px; border-top: 1px solid var(--border);">
+      <div class="voice-trait">
+        <div class="label">Formal ↔ Casual</div>
+        <div class="value">Casual-leaning. First-person plural. Conversational without being sloppy.</div>
+      </div>
+      <div class="voice-trait">
+        <div class="label">Serious ↔ Playful</div>
+        <div class="value">Mostly serious about the craft, with dry humor underneath. The space theme is the biggest playful commitment.</div>
+      </div>
+      <div class="voice-trait">
+        <div class="label">Reserved ↔ Enthusiastic</div>
+        <div class="value">Selectively enthusiastic. "We loved the energy" — never performative, always tied to something specific.</div>
+      </div>
+      <div class="voice-trait">
+        <div class="label">Simple ↔ Sophisticated</div>
+        <div class="value">Technically sophisticated. Assumes the reader knows what they're looking at.</div>
+      </div>
+      <div class="voice-trait">
+        <div class="label">Warm ↔ Distant</div>
+        <div class="value">Warm enough. "We" and "us" throughout. Collaborative, not transactional.</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <p><strong>Does this feel right?</strong> If we're missing something — if Photon's voice in your head sounds different from what we've described — now is the time to tell us.</p>
+    </div>
+  </section>
+
+  <!-- 02 HOW COPY NEEDS TO WORK -->
+  <section class="section" id="function">
+    <div class="section-number">02</div>
+    <h2>How the copy needs to work</h2>
+    <p>The site has two jobs: impress the right people, and be findable by them.</p>
+    <p>Your primary audience — VPs of Brand Marketing, Creative Directors at companies like Nike, Oura, BMW — already knows what a production studio is. They're evaluating whether <em>Photon</em> is the right one. The copy doesn't need to educate. It needs to differentiate.</p>
+    <p>Your secondary audience — agency producers like your SGK contact — is evaluating infrastructure and reliability. They need to see specs, capacity, and professionalism.</p>
+    <p>Both audiences are sophisticated readers. They will notice if the copy is generic. They will also notice if it's trying too hard.</p>
+
+    <h4>What that means for tone, page by page</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Page type</th><th>Tone</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Homepage, Work grid</strong></td><td>Minimal. Let the visuals lead.</td><td>Your audience evaluates portfolio quality in seconds. Words can only slow that down.</td></tr>
+          <tr><td><strong>Project pages</strong></td><td>Specific and technical. Short.</td><td>"SGK brought us in to shoot..." — that's the model. What was the brief, what was interesting, what did you do.</td></tr>
+          <tr><td><strong>About, Philosophy</strong></td><td>Warm, direct, personal.</td><td>This is where the visitor decides if they want to work <em>with you</em>. Personality matters.</td></tr>
+          <tr><td><strong>Capabilities</strong></td><td>Confident, structured, scannable.</td><td>This is the deck as a web experience. Modular concept explained plainly. Technical modules inventoried clearly.</td></tr>
+          <tr><td><strong>Rentals</strong></td><td>Practical, inviting, specs-forward.</td><td>An agency producer is checking if the space fits their shoot. Give them what they need fast.</td></tr>
+          <tr><td><strong>Contact</strong></td><td>Simple. No friction.</td><td>Name, email, message. That's it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 03 KEEPING YOUR LANGUAGE -->
+  <section class="section" id="keeping">
+    <div class="section-number">03</div>
+    <h2>Where we're keeping your language</h2>
+    <p>Some of what you already have is strong. We're not changing it — we're giving it more room to breathe.</p>
+
+    <h4>Lines we want to build on</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Your line</th><th>Where it lives</th><th>Why it works</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>"Modular production for the future of content"</strong></td><td>Homepage tagline, Capabilities header</td><td>It's specific. It says what you do and positions you in one breath. Most studios can't do that.</td></tr>
+          <tr><td><strong>"A giant network distilled into specialty teams"</strong></td><td>About page, Capabilities positioning</td><td>This is your strongest differentiator stated plainly. It answers the "you're only 6 people?" objection before it forms.</td></tr>
+          <tr><td><strong>"Creating like children and editing like scientists"</strong></td><td>About / Philosophy section</td><td>Memorable. Shows the balance between creative freedom and technical precision.</td></tr>
+          <tr><td><strong>"Few hands make light work"</strong></td><td>About page</td><td>Reframes boutique as an advantage.</td></tr>
+          <tr><td><strong>"Create once. Launch everywhere."</strong></td><td>Capabilities or Homepage</td><td>Speaks directly to brands managing content across platforms.</td></tr>
+          <tr><td><strong>"Think of us as mission control for your visual content"</strong></td><td>About page or Homepage</td><td>The space theme in one sentence. Positions Photon as the hub, not just a vendor.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Project description voice</h4>
+    <p>Your existing project descriptions are excellent templates for the new site. They follow a pattern we want to keep:</p>
+
+    <blockquote>
+      <strong>Who brought you in → what was interesting → what you did</strong>
+      <p>"SGK brought us in to shoot this HO23 Nike x DSG Campaign. We loved the energy we were able to get through lighting, movement and set design."</p>
+      <p>"Oura brought us in to produce a series of vignettes to illustrate varying features of the O Move. All shot in our studio in one day."</p>
+      <p>"The trickiest part was light placement, as there were no windows in the kitchen. We also had to wrap everything for safety as we knew it was gonna be a huge mess!"</p>
+    </blockquote>
+
+    <p>This is the voice. Direct, specific, craft-focused. We'll follow this pattern for every project page — just structured into consistent sections (context, approach, BTS) so the reader always knows where they are.</p>
+  </section>
+
+  <!-- 04 SUGGESTING CHANGES -->
+  <section class="section" id="changes">
+    <div class="section-number">04</div>
+    <h2>Where we're suggesting changes — and why</h2>
+
+    <div class="change-item">
+      <div class="num">01</div>
+      <h3>CTAs — keeping the personality, adjusting for the audience</h3>
+      <p>Your current CTAs — "Pitch Me Harder," "F it, I'm in!" — are bold and memorable. They work in certain contexts: social, BTS content, creative community touchpoints.</p>
+      <p>For the main site, we're recommending CTAs that carry the same energy but feel right for a VP of Brand Marketing at Nike deciding whether to reach out:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Current vibe</th><th>Proposed direction</th><th>Why the shift</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>"Pitch Me Harder"</strong></td><td>"Mission briefing starts here"</td><td>Keeps the space theme. Feels inviting without being casual about a business relationship.</td></tr>
+            <tr><td><strong>"F it, I'm in!"</strong></td><td>"Let's make something"</td><td>Confident and collaborative. Doesn't assume familiarity with someone you haven't met yet.</td></tr>
+            <tr><td><strong>Generic "Contact"</strong></td><td>"Start a conversation"</td><td>Warmer than "Contact." Lower commitment than "Get a Quote."</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><strong>We're not losing the personality</strong> — we're adjusting it for the moment. The Archives page, the BTS section, the 404 page? That's where "Pitch Me Harder" energy belongs. The contact form? That's where a creative director needs to feel like a professional conversation is starting.</p>
+    </div>
+
+    <div class="change-item">
+      <div class="num">02</div>
+      <h3>Project descriptions — adding structure without losing voice</h3>
+      <p>Your current descriptions are strong but inconsistent in length and depth. Some projects get one sentence. Others get a paragraph. The new site introduces two templates:</p>
+      <p><strong>Standard project page:</strong> 2-4 sentences of context (the brief, the approach, what was interesting), plus a BTS section with optional technical callouts.</p>
+      <p><strong>Case study page:</strong> Same voice, more depth — the brief, the challenge, the approach, the outcome, plus a client testimonial. These are for your hero relationships: Sorel, Nike, Hyperice, Oura.</p>
+      <p>The voice stays the same. The structure just gives every project a consistent shape so visitors know what to expect.</p>
+    </div>
+
+    <div class="change-item">
+      <div class="num">03</div>
+      <h3>Capabilities page — from deck to narrative</h3>
+      <p>Your deck is dense with great content. On the web, we need to reorganize it so a visitor can scan it in 30 seconds <em>or</em> go deep on a specific capability.</p>
+
+      <h4>What's changing</h4>
+      <p>The deck organizes by internal department (Motion, Lighting, Effects, Post). That makes sense internally. For the site, we're reorganizing by what the client is looking for:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Deck structure</th><th>Site structure</th><th>Why</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Technical departments</strong> (Motion, Lighting, Effects, Post)</td><td><strong>Production phases</strong> (Creative → Production → Post)</td><td>A Creative Director thinks in phases: "Can you concept? Can you shoot? Can you finish?" They don't think in departments.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The actual capabilities stay the same — we're just reframing them around how your client evaluates a production partner.</p>
+
+      <h4>What's staying</h4>
+      <p>The modular concept is the lead. "A giant network distilled into specialty teams with the mission to maximize resources and elevate what's possible" — that's the opening. The detailed technical modules (8K/6K/4K, slow motion, motion control, anamorphics, pyrotechnics) are still there as scannable inventory. A Creative Director who needs 1000fps wants to see that number, not a paragraph about your "high-speed capabilities."</p>
+    </div>
+
+    <div class="change-item">
+      <div class="num">04</div>
+      <h3>Homepage philosophy — one new line</h3>
+      <p>Right now the homepage is all portfolio and logos. We're recommending a short Philosophy section (2-4 sentences, max) that does one thing: tell the visitor <em>why Photon is different from other studios they're evaluating.</em></p>
+      <p>This is also where we suggest adding a single line that acknowledges agency relationships: something like "We work direct with brands and alongside agencies when the project calls for it." This gives agency producers — a real channel for you — a reason to keep scrolling instead of wondering if the site is only for brands.</p>
+    </div>
+
+    <div class="change-item">
+      <div class="num">05</div>
+      <h3>Space theme — committed, not forced</h3>
+      <p>The space theme is a real asset. It makes you memorable in a category full of minimal-everything studios. But it works best when it feels natural rather than labored.</p>
+
+      <h4>Where the theme should be front and center</h4>
+      <ul>
+        <li>Team titles (Mission Control, Chief Photometrics, etc.)</li>
+        <li>CTAs ("Mission briefing starts here," "Signal acquired")</li>
+        <li>404 page ("Signal Lost")</li>
+        <li>Easter eggs and micro-interactions</li>
+      </ul>
+
+      <h4>Where it should stay quiet</h4>
+      <ul>
+        <li>Project descriptions — these should sound like you talking about the work, not performing a theme</li>
+        <li>Capabilities content — specs and services in plain language</li>
+        <li>Rentals — agency producers booking studio space want clarity, not metaphor</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 05 SEO & AEO -->
+  <section class="section" id="seo">
+    <div class="section-number">05</div>
+    <h2>SEO and AEO: copy that gets found</h2>
+    <p>Your current site is invisible to search. The rebuild changes that. Here's how copy decisions directly affect discoverability — and why some of our recommendations exist.</p>
+
+    <h4>What we're targeting</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Search term</th><th>Where it lives on the site</th><th>What we need in the copy</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>"commercial video production Portland"</strong></td><td>Homepage, Capabilities</td><td>These words need to appear naturally — in page titles, meta descriptions, and body copy. Not stuffed. Just present.</td></tr>
+          <tr><td><strong>"Portland studio rental"</strong></td><td>Rentals hub, Studio rental page</td><td>Dedicated page with the phrase in the heading, specs, and descriptions. This is a real search people make.</td></tr>
+          <tr><td><strong>"cyclorama studio Portland"</strong></td><td>Studio rental page</td><td>Your 350 sqm cyclorama is a search magnet. The word "cyclorama" should appear in headings and body copy — most people searching this term are ready to book.</td></tr>
+          <tr><td><strong>"high speed cinematography Portland"</strong></td><td>Capabilities page</td><td>A dedicated section on slow-motion / high-speed capability, with specific specs (1000fps+). Specialty terms have low competition — you can own these.</td></tr>
+          <tr><td><strong>"podcast studio rental Portland"</strong></td><td>Podcast rental page</td><td>Separate page means separate SEO. This is a niche search with low competition and real intent.</td></tr>
+          <tr><td><strong>"motion control video production"</strong></td><td>Capabilities page</td><td>Same idea. Specific capability + specific page = search visibility.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>How this shapes the copy</h4>
+    <p><strong>Page titles and headings matter.</strong> "Our Capabilities" as a page title is invisible to search. "Production Capabilities — Video, Photography, Motion Control" gives Google something to work with while still reading naturally to humans.</p>
+    <p><strong>Each page needs to earn its own search result.</strong> This is why Studio Rental and Podcast Rental are separate pages, not tabs on one page. Each one targets a different search query with different intent.</p>
+    <p><strong>Project pages are SEO content too.</strong> A project titled "Nike DSG Campaign — Commercial Video Production" performs better in search than "DSG HO23." We can keep the creative title on the page itself while using descriptive titles in metadata.</p>
+    <p><strong>AEO (Answer Engine Optimization) is the next layer.</strong> When someone asks an AI assistant "What's the best production studio in Portland for high-speed cinematography?", the answer pulls from structured data on your site. We're building that structure into the code (schema markup, structured headings, FAQ patterns on Capabilities and Rentals) so your content feeds AI answers — not just Google results.</p>
+
+    <h4>What this means for how you write project descriptions</h4>
+    <p>Nothing changes about the voice. But we'll add a few fields in the CMS that help with discoverability:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Field</th><th>Example</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>SEO title</strong></td><td>"Nike DSG Campaign — Commercial Video Production by Photon"</td><td>What Google shows. Different from the creative title.</td></tr>
+          <tr><td><strong>Meta description</strong></td><td>"SGK brought Photon in for Nike's HO23 DSG Campaign. Shot in Portland with high-speed capture and full set design."</td><td>150 characters that show up in search results. Written in your voice.</td></tr>
+          <tr><td><strong>Category tags</strong></td><td>Campaign, Stills, Product, Sport</td><td>Not visible to users at launch — but they feed structured data and future filtering.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>You write the project descriptions exactly like you always have. We handle the SEO layer behind the scenes.</p>
+  </section>
+
+  <!-- 06 WHO WRITES WHAT -->
+  <section class="section" id="ownership">
+    <div class="section-number">06</div>
+    <h2>Copy by page — who writes what</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Page</th><th>Who writes</th><th>What it needs</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Homepage</strong></td><td>SALT drafts, you approve</td><td>Tagline, philosophy statement (2-4 sentences), contact CTA. Minimal — the visuals carry this page.</td></tr>
+          <tr><td><strong>Work grid</strong></td><td>No copy needed</td><td>Project cards pull from CMS. Titles and client names only.</td></tr>
+          <tr><td><strong>Project pages (standard)</strong></td><td>You write, we structure</td><td>2-4 sentences per project in your voice. We build the CMS template with consistent sections.</td></tr>
+          <tr><td><strong>Project pages (case study)</strong></td><td>Collaborative</td><td>You write the brief/approach/outcome. We help shape the narrative arc. You source the testimonial.</td></tr>
+          <tr><td><strong>About</strong></td><td>SALT drafts, you approve</td><td>Opening mission statement, philosophy / modular model explanation. Team descriptions are just names + titles — no bios needed.</td></tr>
+          <tr><td><strong>Capabilities</strong></td><td>SALT drafts, you approve</td><td>We restructure the deck content for web. You verify technical accuracy.</td></tr>
+          <tr><td><strong>Rentals (hub)</strong></td><td>SALT drafts</td><td>Short intro copy, routes to Studio and Podcast pages.</td></tr>
+          <tr><td><strong>Studio rental</strong></td><td>Collaborative</td><td>We write the positioning and flow. You verify specs and amenities.</td></tr>
+          <tr><td><strong>Podcast rental</strong></td><td>Collaborative</td><td>Same approach.</td></tr>
+          <tr><td><strong>Contact</strong></td><td>SALT drafts</td><td>CTA headline, form labels. Minimal.</td></tr>
+          <tr><td><strong>404</strong></td><td>SALT drafts</td><td>"Signal Lost" — space theme moment. Fun, brief, routes back into the site.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 07 COMPETITOR ANGLE -->
+  <section class="section" id="competitors">
+    <div class="section-number">07</div>
+    <h2>The competitor angle</h2>
+    <p>Here's what we noticed about how production studios in your space handle copy — and where Photon can stand out.</p>
+
+    <h4>What most studios do</h4>
+    <ul>
+      <li><strong>Generic portfolio voice:</strong> "We had the pleasure of working with [Brand] on their latest campaign." This is everywhere. It's polite, forgettable, and interchangeable.</li>
+      <li><strong>Service pages as bullet lists:</strong> A flat list of services with no explanation of <em>how</em> or <em>why</em>. No differentiation.</li>
+      <li><strong>No technical specificity:</strong> "We offer high-end video production." High-end how? What camera? What frame rate? What capability do you have that the next studio doesn't?</li>
+      <li><strong>Missing social proof:</strong> Case studies without client quotes. Projects without context. Beautiful work with zero narrative.</li>
+    </ul>
+
+    <h4>Where Photon's copy stands out</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Competitor pattern</th><th>Photon's advantage</th><th>How we use it</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>"We had the pleasure of working with..."</strong></td><td>"SGK brought us in to shoot..."</td><td>Your project voice is already specific and active. We keep it. Every competitor who writes in passive voice makes you look sharper by contrast.</td></tr>
+          <tr><td><strong>Flat service lists</strong></td><td>Modular production system with technical depth</td><td>The Capabilities page isn't a list — it's a story about how you work, with the technical inventory to back it up.</td></tr>
+          <tr><td><strong>No specs</strong></td><td>1000fps, motion control, cyclorama, 400 AMP, Astera, anamorphics</td><td>You name the tools. That's a trust signal for production-literate buyers. It also feeds SEO for specialty searches.</td></tr>
+          <tr><td><strong>No client voice</strong></td><td>Case study pages with real testimonials</td><td>Even one real quote from Sorel or Nike changes the entire credibility equation. This is the biggest gap in the category — and the biggest opportunity for Photon.</td></tr>
+          <tr><td><strong>"About us" = generic mission</strong></td><td>Space-themed team with modular philosophy</td><td>You have a genuine brand identity. Most studios don't. The About page should lean into it.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 08 WORDS -->
+  <section class="section" id="words">
+    <div class="section-number">08</div>
+    <h2>Words and phrases</h2>
+
+    <div class="word-grid">
+      <div class="word-col use">
+        <h4>Use these — they sound like Photon</h4>
+        <ul>
+          <li>"Brought us in"</li>
+          <li>"Shot in our studio"</li>
+          <li>"The trickiest part was..."</li>
+          <li>"We changed things up"</li>
+          <li>Module, modular, production, studio</li>
+          <li>1000fps, MOCO, cyclorama, DMX</li>
+          <li>Mission, orbit, launch, ground control</li>
+        </ul>
+      </div>
+      <div class="word-col avoid">
+        <h4>Avoid these — not Photon</h4>
+        <ul>
+          <li>"Solutions" / "deliverables"</li>
+          <li>"Cutting-edge" / "state-of-the-art"</li>
+          <li>"We're passionate about..."</li>
+          <li>"World-class" / "best-in-class"</li>
+          <li>"Leverage" / "synergy"</li>
+          <li>"We had the pleasure of..."</li>
+          <li>Any CTA that sounds like a car dealership</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 SUMMARY -->
+  <section class="section" id="summary">
+    <div class="section-number">09</div>
+    <h2>Summary</h2>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <h4>We're keeping</h4>
+        <p>Your voice, your directness, your technical fluency, the space theme, your project description style.</p>
+      </div>
+      <div class="summary-card">
+        <h4>We're adding</h4>
+        <p>Consistent structure across pages, SEO-aware headings and metadata, a philosophy section that explains the modular model, CTAs that match the audience for each page, case study templates that make room for client testimonials.</p>
+      </div>
+      <div class="summary-card">
+        <h4>We're adjusting</h4>
+        <p>CTA tone for the main site (keeping the bold personality for BTS and community pages), capabilities organization (client-facing phases instead of internal departments), and adding the invisible SEO/AEO layer that gets the site found.</p>
+      </div>
+      <div class="summary-card">
+        <h4>We're not doing</h4>
+        <p>Rewriting Photon's voice. The voice is the voice. We're just giving it a stage that matches the quality of the work.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<main class="content content-pt">
+
+  <section class="section" id="voice-pt">
+    <div class="section-number">01</div>
+    <h2>A vossa voz, como a ouvimos</h2>
+    <p>Antes de escrevermos um único título, queremos garantir que compreendemos como a Photon soa. Eis o que captámos a partir do vosso deck, das descrições dos projetos e do vosso site atual:</p>
+    <p><strong>A Photon soa como um par, não como um fornecedor.</strong> Dizem "a SGK trouxe-nos" e "a Oura trouxe-nos" — é um colaborador a falar, não alguém a vender um serviço. Lideram com o que tornou a sessão interessante, não com o nome do cliente. O trabalho é a história.</p>
+    <p><strong>São diretos.</strong> Sem preâmbulos, sem rodeios. "A parte mais complicada foi a colocação da luz, porque não havia janelas na cozinha." Isto é a Photon — específica, honesta, direta ao assunto.</p>
+    <p><strong>São técnicos sem serem excludentes.</strong> Referenciam sistemas de iluminação Astera, dioptrias divididas, Simera-C, 1000fps — e nunca param para explicar. E funciona. O vosso público conhece esta linguagem. Explicá-la seria, na verdade, minar a vossa credibilidade.</p>
+    <p><strong>São divertidos quando conta.</strong> "Criar como crianças e editar como cientistas." "Pitch Me Harder." "F it, I'm in!" O tema espacial — Mission Control, Orbital Mechanic, Chief Photometrics — é personalidade enraizada na marca, não um truque. Funciona porque se comprometem com ele.</p>
+    <p><strong>O que a Photon não soa:</strong> corporativa, inflada ou comercial. Nada de "soluções de ponta." Nada de "inovação de classe mundial." Nada de "somos apaixonados por storytelling." Deixam o trabalho fazer isso.</p>
+    <h4>A voz, resumida</h4>
+    <div style="margin: 28px 0 36px; border-top: 1px solid var(--border);">
+      <div class="voice-trait"><div class="label">Formal ↔ Casual</div><div class="value">Tendência casual. Primeira pessoa do plural. Conversacional sem ser desleixado.</div></div>
+      <div class="voice-trait"><div class="label">Sério ↔ Divertido</div><div class="value">Maioritariamente sério sobre o ofício, com humor seco por baixo. O tema espacial é o maior compromisso com o lado divertido.</div></div>
+      <div class="voice-trait"><div class="label">Reservado ↔ Entusiasta</div><div class="value">Seletivamente entusiasta. "Adorámos a energia" — nunca performativo, sempre ligado a algo específico.</div></div>
+      <div class="voice-trait"><div class="label">Simples ↔ Sofisticado</div><div class="value">Tecnicamente sofisticado. Assume que o leitor sabe o que está a ver.</div></div>
+      <div class="voice-trait"><div class="label">Caloroso ↔ Distante</div><div class="value">Caloroso o suficiente. "Nós" ao longo de tudo. Colaborativo, não transacional.</div></div>
+    </div>
+    <div class="callout">
+      <p><strong>Isto soa certo?</strong> Se nos está a escapar algo — se a voz da Photon na vossa cabeça soa diferente do que descrevemos — agora é a altura de nos dizerem.</p>
+    </div>
+  </section>
+
+  <section class="section" id="function-pt">
+    <div class="section-number">02</div>
+    <h2>Como o copy precisa de funcionar</h2>
+    <p>O site tem dois trabalhos: impressionar as pessoas certas e ser encontrável por elas.</p>
+    <p>O vosso público principal — VPs de Marketing de Marca, Diretores Criativos em empresas como Nike, Oura, BMW — já sabe o que é um estúdio de produção. Estão a avaliar se a <em>Photon</em> é o certo. O copy não precisa de educar. Precisa de diferenciar.</p>
+    <p>O vosso público secundário — produtores de agência como o vosso contacto na SGK — está a avaliar infraestrutura e fiabilidade. Precisam de ver especificações, capacidade e profissionalismo.</p>
+    <p>Ambos os públicos são leitores sofisticados. Vão notar se o copy for genérico. Também vão notar se estiver a esforçar-se demais.</p>
+    <h4>O que isso significa para o tom, página a página</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tipo de página</th><th>Tom</th><th>Porquê</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Homepage, Grelha de trabalhos</strong></td><td>Mínimo. Deixar os visuais liderar.</td><td>O vosso público avalia a qualidade do portefólio em segundos. Palavras só podem abrandar isso.</td></tr>
+          <tr><td><strong>Páginas de projeto</strong></td><td>Específico e técnico. Curto.</td><td>"A SGK trouxe-nos para fotografar..." — é esse o modelo. Qual era o briefing, o que foi interessante, o que fizeram.</td></tr>
+          <tr><td><strong>Sobre, Filosofia</strong></td><td>Caloroso, direto, pessoal.</td><td>É aqui que o visitante decide se quer trabalhar <em>convosco</em>. A personalidade importa.</td></tr>
+          <tr><td><strong>Competências</strong></td><td>Confiante, estruturado, digitalizável.</td><td>É o deck como experiência web. Conceito modular explicado de forma clara.</td></tr>
+          <tr><td><strong>Alugueres</strong></td><td>Prático, convidativo, especificações primeiro.</td><td>Um produtor de agência está a verificar se o espaço serve. Dar-lhes o que precisam rapidamente.</td></tr>
+          <tr><td><strong>Contacto</strong></td><td>Simples. Sem fricção.</td><td>Nome, email, mensagem. É isso.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="keeping-pt">
+    <div class="section-number">03</div>
+    <h2>Onde estamos a manter a vossa linguagem</h2>
+    <p>Parte do que já têm é forte. Não estamos a mudar — estamos a dar-lhe mais espaço para respirar.</p>
+    <h4>Frases que queremos usar como base</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>A vossa frase</th><th>Onde vive</th><th>Porquê funciona</th></tr></thead>
+        <tbody>
+          <tr><td><strong>"Modular production for the future of content"</strong></td><td>Tagline da homepage, cabeçalho de Competências</td><td>É específica. Diz o que fazem e posiciona-vos de uma só vez.</td></tr>
+          <tr><td><strong>"A giant network distilled into specialty teams"</strong></td><td>Página Sobre, posicionamento de Competências</td><td>É o vosso diferenciador mais forte, dito de forma direta.</td></tr>
+          <tr><td><strong>"Creating like children and editing like scientists"</strong></td><td>Secção Sobre / Filosofia</td><td>Memorável. Mostra o equilíbrio entre liberdade criativa e precisão técnica.</td></tr>
+          <tr><td><strong>"Few hands make light work"</strong></td><td>Página Sobre</td><td>Reenquadra o boutique como vantagem.</td></tr>
+          <tr><td><strong>"Create once. Launch everywhere."</strong></td><td>Competências ou Homepage</td><td>Fala diretamente a marcas que gerem conteúdo em múltiplas plataformas.</td></tr>
+          <tr><td><strong>"Think of us as mission control for your visual content"</strong></td><td>Página Sobre ou Homepage</td><td>O tema espacial numa frase. Posiciona a Photon como o centro, não apenas um fornecedor.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>Voz das descrições de projeto</h4>
+    <p>As vossas descrições de projeto existentes são excelentes modelos para o novo site. Seguem um padrão que queremos manter:</p>
+    <blockquote>
+      <strong>Quem vos trouxe → o que foi interessante → o que fizeram</strong>
+      <p>"A SGK trouxe-nos para fotografar esta campanha Nike x DSG HO23. Adorámos a energia que conseguimos criar através da iluminação, movimento e cenografia."</p>
+      <p>"A Oura trouxe-nos para produzir uma série de vinhetas para ilustrar várias funcionalidades do O Move. Tudo filmado no nosso estúdio num só dia."</p>
+      <p>"A parte mais complicada foi a colocação da luz, porque não havia janelas na cozinha. Também tivemos de proteger tudo por segurança porque sabíamos que ia ser uma grande confusão!"</p>
+    </blockquote>
+    <p>Esta é a voz. Direta, específica, focada no ofício. Vamos seguir este padrão para cada página de projeto — apenas estruturado em secções consistentes (contexto, abordagem, bastidores) para que o leitor saiba sempre onde está.</p>
+  </section>
+
+  <section class="section" id="changes-pt">
+    <div class="section-number">04</div>
+    <h2>Onde estamos a sugerir mudanças — e porquê</h2>
+    <div class="change-item">
+      <div class="num">01</div>
+      <h3>CTAs — manter a personalidade, ajustar ao público</h3>
+      <p>Os vossos CTAs atuais — "Pitch Me Harder", "F it, I'm in!" — são ousados e memoráveis. Funcionam em certos contextos: redes sociais, conteúdo de bastidores, pontos de contacto com a comunidade criativa.</p>
+      <p>Para o site principal, estamos a recomendar CTAs que carregam a mesma energia mas soam certos para um VP de Marketing de Marca na Nike a decidir se deve contactar:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Vibe atual</th><th>Direção proposta</th><th>Porquê a mudança</th></tr></thead>
+          <tbody>
+            <tr><td><strong>"Pitch Me Harder"</strong></td><td>"Mission briefing starts here"</td><td>Mantém o tema espacial. Parece convidativo sem ser casual sobre uma relação de negócio.</td></tr>
+            <tr><td><strong>"F it, I'm in!"</strong></td><td>"Let's make something"</td><td>Confiante e colaborativo. Não assume familiaridade com alguém que ainda não conhecem.</td></tr>
+            <tr><td><strong>"Contact" genérico</strong></td><td>"Start a conversation"</td><td>Mais caloroso que "Contacto." Menor compromisso que "Pedir Orçamento."</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Não estamos a perder a personalidade</strong> — estamos a ajustá-la ao momento. A página de Arquivo, a secção de bastidores, a página 404? É aí que pertence a energia do "Pitch Me Harder". O formulário de contacto? É onde um diretor criativo precisa de sentir que está a começar uma conversa profissional.</p>
+    </div>
+    <div class="change-item">
+      <div class="num">02</div>
+      <h3>Descrições de projeto — adicionar estrutura sem perder a voz</h3>
+      <p>As vossas descrições atuais são fortes mas inconsistentes em extensão e profundidade. O novo site introduz dois templates:</p>
+      <p><strong>Página de projeto standard:</strong> 2-4 frases de contexto (o briefing, a abordagem, o que foi interessante), mais uma secção de bastidores com notas técnicas opcionais.</p>
+      <p><strong>Página de estudo de caso:</strong> A mesma voz, mais profundidade — o briefing, o desafio, a abordagem, o resultado, mais um testemunho do cliente. Estes são para as vossas relações principais: Sorel, Nike, Hyperice, Oura.</p>
+      <p>A voz mantém-se igual. A estrutura apenas dá a cada projeto uma forma consistente.</p>
+    </div>
+    <div class="change-item">
+      <div class="num">03</div>
+      <h3>Página de Competências — de deck a narrativa</h3>
+      <p>O vosso deck é denso com ótimo conteúdo. Na web, precisamos de reorganizá-lo para que um visitante o consiga analisar em 30 segundos <em>ou</em> aprofundar-se numa competência específica.</p>
+      <h4>O que está a mudar</h4>
+      <p>O deck organiza por departamento interno (Motion, Lighting, Effects, Post). Para o site, estamos a reorganizar pelo que o cliente procura:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Estrutura do deck</th><th>Estrutura do site</th><th>Porquê</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Departamentos técnicos</strong> (Motion, Lighting, Effects, Post)</td><td><strong>Fases de produção</strong> (Criativo → Produção → Pós)</td><td>Um Diretor Criativo pensa em fases: "Conseguem concetualizar? Conseguem filmar? Conseguem finalizar?" Não pensam em departamentos.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>As competências em si mantêm-se — estamos apenas a reenquadrá-las em torno de como o vosso cliente avalia um parceiro de produção.</p>
+      <h4>O que se mantém</h4>
+      <p>O conceito modular lidera. "Uma grande rede destilada em equipas especializadas com a missão de maximizar recursos e elevar o que é possível" — essa é a abertura. Os módulos técnicos detalhados (8K/6K/4K, slow motion, motion control, anamórficos, pirotecnia) continuam lá como inventário digitalizável.</p>
+    </div>
+    <div class="change-item">
+      <div class="num">04</div>
+      <h3>Filosofia da homepage — uma nova frase</h3>
+      <p>Neste momento a homepage é toda portefólio e logótipos. Estamos a recomendar uma secção curta de Filosofia (2-4 frases, máximo) que faça uma coisa: dizer ao visitante <em>porque é que a Photon é diferente dos outros estúdios que estão a avaliar.</em></p>
+      <p>É também aqui que sugerimos adicionar uma única frase que reconheça relações com agências: algo como "Trabalhamos diretamente com marcas e ao lado de agências quando o projeto o pede."</p>
+    </div>
+    <div class="change-item">
+      <div class="num">05</div>
+      <h3>Tema espacial — comprometido, não forçado</h3>
+      <p>O tema espacial é um verdadeiro trunfo. Torna-vos memoráveis numa categoria cheia de estúdios minimalistas. Mas funciona melhor quando parece natural em vez de forçado.</p>
+      <h4>Onde o tema deve estar em destaque</h4>
+      <ul>
+        <li>Títulos da equipa (Mission Control, Chief Photometrics, etc.)</li>
+        <li>CTAs ("Mission briefing starts here", "Signal acquired")</li>
+        <li>Página 404 ("Signal Lost")</li>
+        <li>Easter eggs e micro-interações</li>
+      </ul>
+      <h4>Onde deve ficar discreto</h4>
+      <ul>
+        <li>Descrições de projeto — devem soar como vocês a falar sobre o trabalho, não a representar um tema</li>
+        <li>Conteúdo de competências — especificações e serviços em linguagem clara</li>
+        <li>Alugueres — produtores de agência a reservar espaço querem clareza, não metáforas</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="seo-pt">
+    <div class="section-number">05</div>
+    <h2>SEO e AEO: copy que é encontrado</h2>
+    <p>O vosso site atual é invisível para pesquisa. A reconstrução muda isso. Eis como as decisões de copy afetam diretamente a descoberta.</p>
+    <h4>O que estamos a visar</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Termo de pesquisa</th><th>Onde vive no site</th><th>O que precisamos no copy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>"commercial video production Portland"</strong></td><td>Homepage, Competências</td><td>Estas palavras precisam de aparecer naturalmente — em títulos de página, meta descrições e corpo de texto.</td></tr>
+          <tr><td><strong>"Portland studio rental"</strong></td><td>Hub de Alugueres, Página de aluguer de estúdio</td><td>Página dedicada com a frase no título, especificações e descrições.</td></tr>
+          <tr><td><strong>"cyclorama studio Portland"</strong></td><td>Página de aluguer de estúdio</td><td>O vosso ciclorama de 350 m² é um íman de pesquisa. A palavra "ciclorama" deve aparecer em títulos e corpo de texto.</td></tr>
+          <tr><td><strong>"high speed cinematography Portland"</strong></td><td>Página de Competências</td><td>Secção dedicada a slow-motion / alta velocidade, com especificações concretas (1000fps+).</td></tr>
+          <tr><td><strong>"podcast studio rental Portland"</strong></td><td>Página de aluguer de podcast</td><td>Página separada significa SEO separado. Pesquisa de nicho com baixa concorrência e intenção real.</td></tr>
+          <tr><td><strong>"motion control video production"</strong></td><td>Página de Competências</td><td>Capacidade específica + página específica = visibilidade de pesquisa.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h4>Como isto molda o copy</h4>
+    <p><strong>Títulos e cabeçalhos de página importam.</strong> "As Nossas Competências" como título é invisível para pesquisa. "Competências de Produção — Vídeo, Fotografia, Motion Control" dá ao Google algo com que trabalhar.</p>
+    <p><strong>Cada página precisa de merecer o seu próprio resultado de pesquisa.</strong> É por isso que Aluguer de Estúdio e Aluguer de Podcast são páginas separadas, não separadores numa página.</p>
+    <p><strong>Páginas de projeto também são conteúdo SEO.</strong> Um projeto intitulado "Campanha Nike DSG — Produção de Vídeo Comercial" tem melhor desempenho em pesquisa do que "DSG HO23."</p>
+    <p><strong>AEO (Answer Engine Optimization) é a camada seguinte.</strong> Quando alguém pergunta a um assistente de IA "Qual é o melhor estúdio de produção em Portland para cinematografia de alta velocidade?", a resposta é extraída de dados estruturados no vosso site. Estamos a construir essa estrutura no código.</p>
+    <h4>O que isto significa para como escrevem descrições de projeto</h4>
+    <p>Nada muda na voz. Mas vamos adicionar alguns campos no CMS que ajudam na descoberta:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Campo</th><th>Exemplo</th><th>Propósito</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Título SEO</strong></td><td>"Campanha Nike DSG — Produção de Vídeo Comercial por Photon"</td><td>O que o Google mostra. Diferente do título criativo.</td></tr>
+          <tr><td><strong>Meta descrição</strong></td><td>"A SGK trouxe a Photon para a campanha Nike HO23 DSG. Filmada em Portland com captura de alta velocidade e cenografia completa."</td><td>150 caracteres que aparecem nos resultados de pesquisa.</td></tr>
+          <tr><td><strong>Tags de categoria</strong></td><td>Campanha, Stills, Produto, Desporto</td><td>Não visíveis para utilizadores no lançamento — mas alimentam dados estruturados e filtragem futura.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Vocês escrevem as descrições de projeto exatamente como sempre fizeram. Nós tratamos da camada SEO nos bastidores.</p>
+  </section>
+
+  <section class="section" id="ownership-pt">
+    <div class="section-number">06</div>
+    <h2>Copy por página — quem escreve o quê</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Página</th><th>Quem escreve</th><th>O que precisa</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Homepage</strong></td><td>SALT escreve o rascunho, vocês aprovam</td><td>Tagline, declaração de filosofia (2-4 frases), CTA de contacto. Mínimo.</td></tr>
+          <tr><td><strong>Grelha de trabalhos</strong></td><td>Sem copy necessário</td><td>Cards de projeto puxados do CMS. Apenas títulos e nomes de clientes.</td></tr>
+          <tr><td><strong>Páginas de projeto (standard)</strong></td><td>Vocês escrevem, nós estruturamos</td><td>2-4 frases por projeto na vossa voz.</td></tr>
+          <tr><td><strong>Páginas de projeto (estudo de caso)</strong></td><td>Colaborativo</td><td>Vocês escrevem o briefing/abordagem/resultado. Nós ajudamos a moldar o arco narrativo. Vocês obtêm o testemunho.</td></tr>
+          <tr><td><strong>Sobre</strong></td><td>SALT escreve o rascunho, vocês aprovam</td><td>Declaração de missão, explicação de filosofia / modelo modular.</td></tr>
+          <tr><td><strong>Competências</strong></td><td>SALT escreve o rascunho, vocês aprovam</td><td>Nós reestruturamos o conteúdo do deck para a web. Vocês verificam a precisão técnica.</td></tr>
+          <tr><td><strong>Alugueres (hub)</strong></td><td>SALT escreve o rascunho</td><td>Copy de introdução curto, encaminha para páginas de Estúdio e Podcast.</td></tr>
+          <tr><td><strong>Aluguer de estúdio</strong></td><td>Colaborativo</td><td>Nós escrevemos o posicionamento e fluxo. Vocês verificam especificações e comodidades.</td></tr>
+          <tr><td><strong>Aluguer de podcast</strong></td><td>Colaborativo</td><td>Mesma abordagem.</td></tr>
+          <tr><td><strong>Contacto</strong></td><td>SALT escreve o rascunho</td><td>Título CTA, labels do formulário. Mínimo.</td></tr>
+          <tr><td><strong>404</strong></td><td>SALT escreve o rascunho</td><td>"Signal Lost" — momento do tema espacial. Divertido, breve.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="competitors-pt">
+    <div class="section-number">07</div>
+    <h2>O ângulo competitivo</h2>
+    <p>Eis o que notámos sobre como os estúdios de produção no vosso espaço lidam com copy — e onde a Photon se pode destacar.</p>
+    <h4>O que a maioria dos estúdios faz</h4>
+    <ul>
+      <li><strong>Voz de portefólio genérica:</strong> "Tivemos o prazer de trabalhar com [Marca] na sua última campanha." Isto está em todo o lado. É educado, esquecível e intercambiável.</li>
+      <li><strong>Páginas de serviço como listas:</strong> Uma lista plana de serviços sem explicação de <em>como</em> ou <em>porquê</em>. Sem diferenciação.</li>
+      <li><strong>Sem especificidade técnica:</strong> "Oferecemos produção de vídeo de alta qualidade." Alta qualidade como? Que câmara? Que frame rate?</li>
+      <li><strong>Falta de prova social:</strong> Estudos de caso sem citações de clientes. Projetos sem contexto. Trabalho bonito com zero narrativa.</li>
+    </ul>
+    <h4>Onde o copy da Photon se destaca</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Padrão da concorrência</th><th>Vantagem da Photon</th><th>Como a usamos</th></tr></thead>
+        <tbody>
+          <tr><td><strong>"Tivemos o prazer de trabalhar com..."</strong></td><td>"A SGK trouxe-nos para fotografar..."</td><td>A vossa voz de projeto já é específica e ativa. Mantemos. Cada concorrente que escreve na voz passiva faz-vos parecer mais afiados.</td></tr>
+          <tr><td><strong>Listas de serviços planas</strong></td><td>Sistema de produção modular com profundidade técnica</td><td>A página de Competências não é uma lista — é uma história sobre como trabalham.</td></tr>
+          <tr><td><strong>Sem especificações</strong></td><td>1000fps, motion control, ciclorama, 400 AMP, Astera, anamórficos</td><td>Vocês nomeiam as ferramentas. Isso é um sinal de confiança para compradores com literacia de produção.</td></tr>
+          <tr><td><strong>Sem voz do cliente</strong></td><td>Páginas de estudo de caso com testemunhos reais</td><td>Mesmo uma citação real da Sorel ou Nike muda toda a equação de credibilidade.</td></tr>
+          <tr><td><strong>"Sobre nós" = missão genérica</strong></td><td>Equipa com tema espacial e filosofia modular</td><td>Vocês têm uma identidade de marca genuína. A maioria dos estúdios não tem.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section" id="words-pt">
+    <div class="section-number">08</div>
+    <h2>Palavras e frases</h2>
+    <div class="word-grid">
+      <div class="word-col use">
+        <h4>Usar — soam como Photon</h4>
+        <ul>
+          <li>"Brought us in" / "Trouxeram-nos"</li>
+          <li>"Shot in our studio" / "Filmado no nosso estúdio"</li>
+          <li>"The trickiest part was..." / "A parte mais complicada foi..."</li>
+          <li>"We changed things up" / "Mudámos a abordagem"</li>
+          <li>Module, modular, production, studio</li>
+          <li>1000fps, MOCO, cyclorama, DMX</li>
+          <li>Mission, orbit, launch, ground control</li>
+        </ul>
+      </div>
+      <div class="word-col avoid">
+        <h4>Evitar — não é Photon</h4>
+        <ul>
+          <li>"Soluções" / "entregáveis"</li>
+          <li>"De ponta" / "estado da arte"</li>
+          <li>"Somos apaixonados por..."</li>
+          <li>"Classe mundial" / "melhor da classe"</li>
+          <li>"Alavancar" / "sinergia"</li>
+          <li>"Tivemos o prazer de..."</li>
+          <li>Qualquer CTA que soe a concessionário</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="summary-pt">
+    <div class="section-number">09</div>
+    <h2>Resumo</h2>
+    <div class="summary-grid">
+      <div class="summary-card"><h4>Estamos a manter</h4><p>A vossa voz, a vossa objetividade, a vossa fluência técnica, o tema espacial, o vosso estilo de descrição de projetos.</p></div>
+      <div class="summary-card"><h4>Estamos a adicionar</h4><p>Estrutura consistente entre páginas, títulos e metadados otimizados para SEO, uma secção de filosofia que explica o modelo modular, CTAs que combinam com o público de cada página, templates de estudo de caso com espaço para testemunhos.</p></div>
+      <div class="summary-card"><h4>Estamos a ajustar</h4><p>Tom dos CTAs para o site principal (mantendo a personalidade ousada para bastidores e páginas de comunidade), organização de competências (fases orientadas ao cliente em vez de departamentos internos) e adição da camada invisível de SEO/AEO.</p></div>
+      <div class="summary-card"><h4>Não estamos a fazer</h4><p>Reescrever a voz da Photon. A voz é a voz. Estamos apenas a dar-lhe um palco que combina com a qualidade do trabalho.</p></div>
+    </div>
+  </section>
+
+</main>
+
+<div class="lang-tooltip" id="langTooltip">
+  <p>View this page in Portuguese? 🇵🇹</p>
+  <div class="lang-tooltip-actions">
+    <button class="lang-tooltip-btn primary" id="tooltipSwitch">Ver em Português</button>
+  </div>
+</div>
+
+<footer class="footer">
+  <p><span>SALT Studio</span> for Photon</p>
+</footer>
+
+<script>
+  // --- Language toggle ---
+  const langToggle = document.getElementById('langToggle');
+  const langTooltip = document.getElementById('langTooltip');
+  const tooltipSwitch = document.getElementById('tooltipSwitch');
+
+  function setLang(lang) {
+    document.documentElement.lang = lang;
+    localStorage.setItem('photon-lang', lang);
+    langToggle.innerHTML = lang === 'pt'
+      ? '<span class="flag">🇺🇸</span><span class="lang-label">EN</span>'
+      : '<span class="flag">🇵🇹</span><span class="lang-label">PT</span>';
+    langToggle.setAttribute('aria-label', lang === 'pt' ? 'Switch to English' : 'Mudar para Português');
+    window.scrollTo(0, 0);
+    setTimeout(() => {
+      document.querySelectorAll('.section').forEach(s => { s.classList.remove('visible'); fadeObserver.observe(s); });
+      initProgress();
+    }, 50);
+  }
+
+  const savedLang = localStorage.getItem('photon-lang');
+  if (savedLang === 'pt') { setLang('pt'); }
+  else if (!localStorage.getItem('photon-lang-tooltip-seen')) {
+    setTimeout(() => { langTooltip.classList.add('visible'); setTimeout(() => { langTooltip.classList.remove('visible'); }, 8000); }, 3000);
+  }
+
+  langToggle.addEventListener('click', () => {
+    setLang(document.documentElement.lang === 'pt' ? 'en' : 'pt');
+    langTooltip.classList.remove('visible');
+    localStorage.setItem('photon-lang-tooltip-seen', 'true');
+  });
+  tooltipSwitch.addEventListener('click', () => { setLang('pt'); langTooltip.classList.remove('visible'); localStorage.setItem('photon-lang-tooltip-seen', 'true'); });
+
+  // --- Progress and scroll tracking ---
+  const progressBar = document.getElementById('progressBar');
+  const progressTracker = document.getElementById('progressTracker');
+
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.section').forEach(section => fadeObserver.observe(section));
+
+  function initProgress() {
+    progressTracker.innerHTML = '';
+    const activeSections = Array.from(document.querySelectorAll('.section')).filter(s => {
+      const m = s.closest('main'); return m && getComputedStyle(m).display !== 'none';
+    });
+    const total = activeSections.length;
+    activeSections.forEach((section, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'progress-dot'; dot.dataset.index = i;
+      dot.addEventListener('click', () => section.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      progressTracker.appendChild(dot);
+    });
+    const counter = document.createElement('div');
+    counter.className = 'progress-counter';
+    counter.innerHTML = '<span class="current">01</span> / ' + String(total).padStart(2, '0');
+    progressTracker.appendChild(counter);
+    const dots = progressTracker.querySelectorAll('.progress-dot');
+    let cur = 0;
+    function updateProgress() {
+      const pct = Math.min((window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100, 100);
+      progressBar.style.width = pct + '%';
+      let active = 0;
+      activeSections.forEach((s, i) => { if (s.getBoundingClientRect().top < window.innerHeight * 0.5) active = i; });
+      if (active !== cur) {
+        cur = active;
+        dots.forEach((d, i) => { d.classList.remove('active'); if (i < active) d.classList.add('visited'); else d.classList.remove('visited'); });
+        if (dots[active]) dots[active].classList.add('active');
+        counter.innerHTML = '<span class="current">' + String(active + 1).padStart(2, '0') + '</span> / ' + String(total).padStart(2, '0');
+      }
+    }
+    window.removeEventListener('scroll', window._ph); window._ph = updateProgress;
+    window.addEventListener('scroll', updateProgress, { passive: true }); updateProgress();
+  }
+  initProgress();
+</script>
+
+</body>
+</html>

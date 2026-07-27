@@ -1,0 +1,36 @@
+---
+description: Sanity Studio mount at /edit
+globs: app/edit/**/*
+alwaysApply: false
+---
+
+# Studio route (`/edit`)
+
+**Canonical doc:** `app/edit/CLAUDE.md`
+
+## CSS isolation
+
+`app/edit/layout.tsx` must **not** import `globals.css` or Tailwind preflight. Same fonts as root layout for consistent Presentation previews.
+
+## Mount
+
+```tsx
+// app/edit/[[...index]]/page.tsx
+export const dynamic = 'force-static'
+export default function StudioPage() {
+  return <NextStudio config={config} />
+}
+```
+
+- Catch-all `[[...index]]` for Studio internal routing
+- `studioUrl` constant: `sanity/lib/api.ts` → `'/edit'`
+
+## Customization
+
+| What | Where |
+| --- | --- |
+| Theme | `sanity/plugins/studioTheme.ts` |
+| Logo | `sanity/plugins/studioComponents.tsx` |
+| Desk structure | `sanity/plugins/settings.tsx` |
+
+No analytics in the Studio — public site only.

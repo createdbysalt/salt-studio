@@ -1,0 +1,9 @@
+{
+  "client_slug": "photon",
+  "client_name": "Photon",
+  "preset": "studio",
+  "context": "client",
+  "capture": "disabled",
+  "created": "2026-05-09",
+  "notes": "Archived (-old folder). Capture disabled. Flip to 'enabled' if reactivated."
+}
