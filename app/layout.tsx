@@ -14,7 +14,7 @@ import {ogImageUrl, seoConfig} from '@/lib/seo'
 import {sanityFetch} from '@/sanity/lib/live'
 import {developerSettingsQuery} from '@/sanity/lib/queries'
 import type {Metadata} from 'next'
-import localFont from 'next/font/local'
+import {Geist, Geist_Mono} from 'next/font/google'
 import {Suspense} from 'react'
 
 // Site-wide default social share card: the auto-generated /api/og branded card.
@@ -37,24 +37,16 @@ export const metadata: Metadata = {
   },
 }
 
-const sans = localFont({
-  src: [
-    {path: '../public/fonts/PitchSans-Light.otf', weight: '300', style: 'normal'},
-    {path: '../public/fonts/PitchSans-Regular.otf', weight: '400', style: 'normal'},
-    {path: '../public/fonts/PitchSans-Medium.otf', weight: '500', style: 'normal'},
-    {path: '../public/fonts/PitchSans-SemiBold.otf', weight: '600', style: 'normal'},
-  ],
+// Brand typefaces per the 2026-07 visual identity: Geist (titles/body) + Geist Mono
+// (labels). Variable fonts — full weight axis available.
+const sans = Geist({
+  subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
 })
 
-const mono = localFont({
-  src: [
-    {path: '../public/fonts/PitchSans-Light.otf', weight: '300', style: 'normal'},
-    {path: '../public/fonts/PitchSans-Regular.otf', weight: '400', style: 'normal'},
-    {path: '../public/fonts/PitchSans-Medium.otf', weight: '500', style: 'normal'},
-    {path: '../public/fonts/PitchSans-SemiBold.otf', weight: '600', style: 'normal'},
-  ],
+const mono = Geist_Mono({
+  subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
 })

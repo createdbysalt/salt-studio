@@ -28,8 +28,8 @@ app/
 
 ## The three distinct layers of this app
 
-1. **Root layout (`app/layout.tsx`)** — loads the three Google fonts (PT Serif, Inter, IBM Plex Mono) as CSS variables, imports `globals.css`, and wraps everything in `<html>` + `<body>`. No navigation, no providers. Keep it minimal.
-2. **`(personal)` route group** — the public portfolio site. Its layout loads the settings singleton, renders the Navbar and footer, includes `<SanityLive />` for live revalidation, and conditionally renders draft-mode UI.
+1. **Root layout (`app/layout.tsx`)** — loads the brand fonts (Geist as `--font-sans`, Geist Mono as `--font-mono`) as CSS variables, imports `globals.css`, and wraps everything in `<html>` + `<body>`. No navigation, no providers. Keep it minimal.
+2. **`(personal)` route group** — the public portfolio site. Its layout loads the settings singleton, renders the Navbar and footer inside `<LenisProvider>` (smooth scroll + GSAP ScrollTrigger sync), mounts `<PageTransition />` (curtain wipe on internal navigation), includes `<SanityLive />` for live revalidation, and conditionally renders draft-mode UI. Motion primitives live in `components/motion/` — see `components/CLAUDE.md`.
 3. **`admin/` route** — the Sanity Studio at `/edit`, mounted via `NextStudio`. Has its own `layout.tsx` that does NOT import `globals.css` — this isolates the Studio from client brand styles. Catch-all routing because the Studio has its own internal navigation.
 
 These layers are independent. `(personal)` routes never render inside the Studio, and the Studio has no relationship to the public Navbar/footer. The `/edit` layout ensures client CSS customizations don't bleed into the Studio UI.
@@ -202,7 +202,7 @@ This is only necessary when you want an overlay on text that isn't already handl
 
 - **Root global CSS:** `app/globals.css` — imported in `app/layout.tsx`.
 - **Public site CSS:** `@/styles/index.css` — imported at the top of `app/(personal)/layout.tsx`. That's where most of the site-specific Tailwind setup lives.
-- **Fonts:** loaded in `app/layout.tsx` via `next/font/google` as `--font-serif` (PT Serif), `--font-sans` (Inter), `--font-mono` (IBM Plex Mono). Tailwind references these variables in the `@theme` block in `app/globals.css`.
+- **Fonts:** loaded in `app/layout.tsx` via `next/font/google` as `--font-sans` (Geist) and `--font-mono` (Geist Mono). Tailwind references these variables in the `@theme` block in `app/globals.css`.
 
 If you need to add a new font, do it in `app/layout.tsx` alongside the others, expose it as a CSS variable, and add it to the `@theme` block in `app/globals.css`.
 

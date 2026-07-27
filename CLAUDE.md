@@ -42,7 +42,7 @@ Visit `/brand` to see and customize the visual design tokens.
 | Tailwind CSS | 4.2                | CSS-based config in `app/globals.css`; includes `@tailwindcss/typography` |
 | TypeScript   | 5.9.3              | `strict: false` but `strictNullChecks: true`                              |
 | Turbopack    | built-in           | Used in both `dev` and `build` scripts                                    |
-| Fonts        | `next/font/google` | PT Serif, Inter, IBM Plex Mono loaded in `app/layout.tsx`                 |
+| Fonts        | `next/font/google` | Geist (`--font-sans`) + Geist Mono (`--font-mono`) loaded in `app/layout.tsx` |
 
 Don't assume patterns from older Next.js versions work here. When writing Next-specific code, verify against the installed version first.
 
