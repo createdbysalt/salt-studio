@@ -100,6 +100,10 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const backdropRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const closeWrapRef = useRef<HTMLDivElement>(null)
+  const closeBtnRef = useRef<HTMLButtonElement>(null)
+  const closeMagnetRef = useRef<HTMLSpanElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const openRef = useRef(open)
   const lenis = useLenis()
@@ -124,17 +128,27 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
 
       const backdrop = backdropRef.current
       const panel = panelRef.current
+      const closeWrap = closeWrapRef.current
+      const closeBtn = closeBtnRef.current
+      const magnet = closeMagnetRef.current
       if (!backdrop || !panel) return
 
       const reduced = prefersReducedMotion()
-      gsap.killTweensOf([backdrop, panel])
+      gsap.killTweensOf([backdrop, panel, closeWrap, closeBtn, magnet])
 
       if (open) {
         gsap.set(panel, {xPercent: 100})
         gsap.set(backdrop, {opacity: 0})
+        if (closeWrap) gsap.set(closeWrap, {opacity: 0, y: -14, scale: 0.88})
         setInteractive(true)
 
         const revealEls = gsap.utils.toArray<HTMLElement>('[data-about-reveal]', panel)
+        const labelOut = closeBtn?.querySelector<HTMLElement>('[data-close-label="out"]')
+        const labelIn = closeBtn?.querySelector<HTMLElement>('[data-close-label="in"]')
+        const escOut = closeBtn?.querySelector<HTMLElement>('[data-close-esc="out"]')
+        const escIn = closeBtn?.querySelector<HTMLElement>('[data-close-esc="in"]')
+        const escBg = closeBtn?.querySelector<HTMLElement>('[data-close-esc-bg]')
+
         const tl = gsap.timeline()
         tl.to(
           backdrop,
@@ -154,6 +168,20 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
           },
           0,
         )
+
+        if (closeWrap) {
+          tl.to(
+            closeWrap,
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: reduced ? 0.01 : 0.7,
+              ease: 'expo.out',
+            },
+            reduced ? 0 : 0.35,
+          )
+        }
 
         if (reduced) {
           gsap.set(revealEls, {clearProps: 'opacity,transform'})
@@ -177,8 +205,80 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
           )
         }
 
+        // Hover: dual-layer text swap + ESC flip.
+        const cleanups: Array<() => void> = []
+        if (closeBtn && labelOut && labelIn && escOut && escIn) {
+          gsap.set(labelIn, {yPercent: 110})
+          gsap.set(escIn, {yPercent: 110})
+
+          const hoverTl = gsap.timeline({paused: true})
+          hoverTl
+            .to(labelOut, {yPercent: -110, duration: 0.38, ease: EASE.outQuint}, 0)
+            .to(labelIn, {yPercent: 0, duration: 0.38, ease: EASE.outQuint}, 0)
+            .to(escOut, {yPercent: -110, duration: 0.34, ease: EASE.outQuint}, 0.02)
+            .to(escIn, {yPercent: 0, duration: 0.34, ease: EASE.outQuint}, 0.02)
+          if (escBg) {
+            hoverTl.to(
+              escBg,
+              {backgroundColor: 'rgba(255,255,255,0.28)', duration: 0.3, ease: EASE.outCubic},
+              0,
+            )
+          }
+
+          const onEnter = () => hoverTl.play()
+          const onLeave = () => hoverTl.reverse()
+          closeBtn.addEventListener('pointerenter', onEnter)
+          closeBtn.addEventListener('pointerleave', onLeave)
+          cleanups.push(() => {
+            closeBtn.removeEventListener('pointerenter', onEnter)
+            closeBtn.removeEventListener('pointerleave', onLeave)
+            hoverTl.kill()
+          })
+        }
+
+        // Magnetic pull toward the cursor — the “cool” bit.
+        if (closeBtn && magnet) {
+          const xTo = gsap.quickTo(magnet, 'x', {duration: 0.45, ease: EASE.outQuint})
+          const yTo = gsap.quickTo(magnet, 'y', {duration: 0.45, ease: EASE.outQuint})
+          const maxPull = 10
+
+          const onMove = (event: PointerEvent) => {
+            const rect = closeBtn.getBoundingClientRect()
+            const cx = rect.left + rect.width / 2
+            const cy = rect.top + rect.height / 2
+            const dx = (event.clientX - cx) / (rect.width / 2)
+            const dy = (event.clientY - cy) / (rect.height / 2)
+            xTo(gsap.utils.clamp(-1, 1, dx) * maxPull)
+            yTo(gsap.utils.clamp(-1, 1, dy) * maxPull)
+          }
+          const onLeaveMagnet = () => {
+            xTo(0)
+            yTo(0)
+          }
+          const onDown = () => {
+            gsap.to(magnet, {scale: 0.94, duration: 0.16, ease: EASE.outCubic})
+          }
+          const onUp = () => {
+            gsap.to(magnet, {scale: 1, duration: 0.35, ease: 'expo.out'})
+          }
+
+          magnet.addEventListener('pointermove', onMove)
+          magnet.addEventListener('pointerleave', onLeaveMagnet)
+          magnet.addEventListener('pointerdown', onDown)
+          magnet.addEventListener('pointerup', onUp)
+          magnet.addEventListener('pointercancel', onUp)
+          cleanups.push(() => {
+            magnet.removeEventListener('pointermove', onMove)
+            magnet.removeEventListener('pointerleave', onLeaveMagnet)
+            magnet.removeEventListener('pointerdown', onDown)
+            magnet.removeEventListener('pointerup', onUp)
+            magnet.removeEventListener('pointercancel', onUp)
+          })
+        }
+
         return () => {
           tl.kill()
+          cleanups.forEach((fn) => fn())
         }
       }
 
@@ -188,6 +288,19 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
           if (!openRef.current) setPresent(false)
         },
       })
+      if (closeWrap) {
+        tl.to(
+          closeWrap,
+          {
+            opacity: 0,
+            y: -10,
+            scale: 0.94,
+            duration: reduced ? 0.01 : 0.35,
+            ease: 'power2.in',
+          },
+          0,
+        )
+      }
       tl.to(
         panel,
         {
@@ -257,10 +370,10 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
       <button
         ref={backdropRef}
         type="button"
-        aria-label="Close about panel"
+        aria-label="Dismiss about panel"
         tabIndex={interactive ? 0 : -1}
         onClick={close}
-        className="absolute inset-0 bg-black/40 opacity-0"
+        className="absolute inset-0 bg-black/70 opacity-0 backdrop-blur-[6px] supports-[backdrop-filter]:bg-black/55"
       />
 
       <aside
@@ -268,67 +381,111 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="absolute inset-y-0 right-0 flex w-full max-w-[min(100vw,36rem)] flex-col bg-[#f3f3f3] text-[#08090a] shadow-[-24px_0_80px_rgba(0,0,0,0.35)] will-change-transform md:max-w-[min(100vw,40rem)]"
+        className="absolute inset-y-0 right-0 flex w-full max-w-[min(100vw,45rem)] flex-col bg-[#f3f3f3] text-[#08090a] shadow-[-24px_0_80px_rgba(0,0,0,0.35)] will-change-transform"
       >
-        <div className="flex items-center justify-between gap-4 px-5 py-3 md:px-7 md:py-3.5">
-          <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-            <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
-            About the studio
-          </p>
-
-          <button
-            type="button"
-            onClick={close}
-            aria-label="Close about panel"
-            className="group inline-flex items-center gap-2 rounded-sm bg-[#08090a] py-1.5 pl-3.5 pr-1.5 font-mono text-[11px] uppercase tracking-label text-white transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:opacity-90 active:scale-[0.98]"
+        {/* Close is pinned to the panel (not the scroll) so it never leaves — and never covers the eyebrow. */}
+        <div
+          ref={closeWrapRef}
+          className="pointer-events-none absolute top-[28px] right-[28px] z-20"
+        >
+          <span
+            ref={closeMagnetRef}
+            className="pointer-events-auto relative inline-flex will-change-transform"
           >
-            <span>Close</span>
-            <span
-              aria-hidden
-              className="rounded-[3px] bg-white/15 px-1.5 py-[5px] text-[10px] tracking-[0.08em] text-white/75 transition-colors duration-300 group-hover:bg-white/20 group-hover:text-white/90"
+            <button
+              ref={closeBtnRef}
+              type="button"
+              onClick={close}
+              aria-label="Close about panel"
+              className="relative isolate inline-flex items-center gap-2 overflow-hidden rounded-sm bg-[#08090a] py-1.5 pl-3.5 pr-1.5 font-mono text-[11px] uppercase tracking-label text-white"
             >
-              ESC
-            </span>
-          </button>
+              <span className="relative inline-block h-[1em] overflow-hidden leading-none">
+                <span data-close-label="out" className="block">
+                  Close
+                </span>
+                <span
+                  data-close-label="in"
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 block"
+                >
+                  Close
+                </span>
+              </span>
+              <span
+                data-close-esc-bg
+                className="relative inline-block h-[1.65em] min-w-[2.1rem] overflow-hidden rounded-[3px] bg-white/15 px-1.5 text-center text-[10px] leading-[1.65em] tracking-[0.08em] text-white/75"
+              >
+                <span data-close-esc="out" className="block">
+                  ESC
+                </span>
+                <span
+                  data-close-esc="in"
+                  aria-hidden
+                  className="absolute inset-x-0 top-0 block"
+                >
+                  ESC
+                </span>
+              </span>
+            </button>
+          </span>
         </div>
 
         <div
+          ref={scrollRef}
           data-lenis-prevent
           className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
         >
-          <div className="px-5 pb-10 pt-1 md:px-7 md:pb-14">
+          <div className="px-[28px] pb-[56px] pt-[40px]">
+            {/* Header eyebrow — same top band as Close; scrolls away with content. */}
+            <p
+              data-about-reveal
+              className="flex items-center gap-2 pr-[110px] font-sans text-[18px] font-semibold tracking-[-0.01em] text-[#08090a]/55"
+            >
+              <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+              About the studio
+            </p>
+
             <h2 id={titleId} className="sr-only">
               About Salt Studio
             </h2>
 
+            {/* Monolog-measured: 24px / 500 / -0.015em / 1.1 leading, ~32px under eyebrow */}
             <div
               data-about-reveal
-              className="space-y-5 text-[15px] leading-[1.55] text-[#08090a]/80 md:space-y-6 md:text-[17px] md:leading-[1.55]"
+              className="mt-[32px] space-y-[22px] text-[22px] font-medium leading-[1.1] tracking-[-0.015em] text-[#08090a] md:text-[24px]"
             >
               {ABOUT_BIO.map((paragraph) => (
                 <p key={paragraph.slice(0, 32)}>{paragraph}</p>
               ))}
             </div>
 
+            <div data-about-reveal className="mt-[22px]">
+              <Link
+                href={ABOUT_CTA.primaryHref}
+                onClick={close}
+                className="group inline-flex items-center gap-[0.4em] font-sans text-[18px] font-medium tracking-[-0.015em] text-[#08090a]/75 transition-colors duration-300 hover:text-[#08090a] md:text-[20px]"
+              >
+                <span>{ABOUT_CTA.primaryLabel}</span>
+                <span
+                  aria-hidden
+                  className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[5px]"
+                >
+                  →
+                </span>
+              </Link>
+            </div>
+
             <div
               data-about-reveal
-              className="mt-10 flex items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[#08090a]/40 md:mt-12 md:text-[11px]"
+              className="mt-[40px] flex items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[#08090a]/40 md:text-[11px]"
             >
-              <span aria-hidden className="inline-flex items-center gap-[3px]">
-                {Array.from({length: 6}).map((_, i) => (
-                  <span
-                    key={i}
-                    className="inline-block size-[3px] rounded-[0.5px] bg-[#08090a]/28"
-                  />
-                ))}
-              </span>
               <span>{ABOUT_META_LINE.established}</span>
               <span className="text-right">{ABOUT_META_LINE.location}</span>
             </div>
 
             <div
               data-about-reveal
-              className="relative mt-5 aspect-[1080/1434] w-full overflow-hidden bg-[#08090a]/08 md:mt-6"
+              className="relative mt-[20px] aspect-[1080/1434] w-full overflow-hidden bg-[#08090a]/08"
             >
               <video
                 ref={videoRef}
@@ -342,19 +499,19 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
               />
             </div>
 
-            <section data-about-reveal className="mt-14 md:mt-16">
-              <div className="grid gap-6 md:grid-cols-[7.5rem_minmax(0,1fr)] md:gap-10">
-                <p className="inline-flex items-center gap-2 self-start font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
+            <section data-about-reveal className="mt-[56px] md:mt-[64px]">
+              <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
+                <p className="flex items-center gap-2 self-start font-sans text-[18px] font-semibold tracking-[-0.01em] text-[#08090a]/55">
                   <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
                   Our principles
                 </p>
-                <ul className="space-y-8 md:space-y-9">
+                <ul className="space-y-[28px] md:space-y-[32px]">
                   {ABOUT_PRINCIPLES.map((principle) => (
                     <li key={principle.title}>
-                      <p className="font-sans text-[15px] font-semibold leading-snug tracking-[-0.02em] text-[#08090a] md:text-base">
+                      <p className="font-sans text-[20px] font-medium leading-[1.15] tracking-[-0.015em] text-[#08090a] md:text-[22px]">
                         {principle.title}
                       </p>
-                      <p className="mt-2 text-[14px] leading-relaxed text-[#08090a]/65 md:text-[15px]">
+                      <p className="mt-[8px] text-[16px] font-medium leading-[1.25] tracking-[-0.01em] text-[#08090a]/65 md:text-[17px]">
                         {principle.body}
                       </p>
                     </li>
@@ -365,29 +522,22 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
 
             <section
               data-about-reveal
-              className="mt-14 border-t border-[#08090a]/10 pt-10 md:mt-16 md:pt-12"
+              className="mt-[56px] rounded-sm bg-[#08090a] px-[24px] py-[28px] text-[#f3f3f3] md:mt-[64px] md:px-[28px] md:py-[32px]"
             >
-              <div className="grid gap-6 md:grid-cols-[7.5rem_minmax(0,1fr)] md:gap-10">
-                <p className="inline-flex items-center gap-2 self-start font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                  <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+              <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
+                <p className="flex items-center gap-2 self-start font-sans text-[18px] font-semibold tracking-[-0.01em] text-white/55">
+                  <span aria-hidden className="inline-block size-1.5 rounded-full bg-white/40" />
                   {ABOUT_CTA.eyebrow}
                 </p>
                 <div>
-                  <p className="text-[15px] leading-relaxed text-[#08090a]/75 md:text-base">
+                  <p className="text-[20px] font-medium leading-[1.15] tracking-[-0.015em] text-white md:text-[22px]">
                     {ABOUT_CTA.body}
                   </p>
-                  <div className="mt-6 flex flex-wrap items-center gap-3">
-                    <Link
-                      href={ABOUT_CTA.primaryHref}
-                      onClick={close}
-                      className="inline-flex items-center rounded-sm bg-[#08090a] px-4 py-3 font-mono text-[11px] uppercase tracking-label text-white transition-opacity hover:opacity-85"
-                    >
-                      {ABOUT_CTA.primaryLabel}
-                    </Link>
+                  <div className="mt-[24px]">
                     <Link
                       href={ABOUT_CTA.secondaryHref}
                       onClick={close}
-                      className="inline-flex items-center rounded-sm border border-[#08090a]/25 px-4 py-3 font-mono text-[11px] uppercase tracking-label text-[#08090a] transition-colors hover:border-[#08090a]/50"
+                      className="inline-flex items-center rounded-sm border border-white/30 px-4 py-3 font-mono text-[11px] uppercase tracking-label text-white transition-colors hover:border-white/60"
                     >
                       {ABOUT_CTA.secondaryLabel}
                     </Link>

@@ -11,27 +11,27 @@ export const ABOUT_META_LINE = {
 } as const
 
 export const ABOUT_BIO = [
-  "Hey — I'm Gabriella. I started Salt Studio because I kept watching good organizations stay invisible online. Churches, nonprofits, people carrying something bigger than themselves — stuck with tools that couldn't carry their voice.",
-  "I'm a youth pastor and a lifelong computer nerd. For a long time those felt like separate lives. Salt is what happened when they stopped being separate. I build for the people I sit with on Tuesday nights: small teams with real missions and no time to waste on noise.",
-  'We work quietly and carefully. Subtle. Essential. Transformative. If that sounds like your kind of partner, I\'d love to talk.',
+  "Hey, I'm Gabriella. I started Salt Studio because I kept watching good organizations get stuck with the wrong tools. Websites nobody on their team could update without calling a developer. Hours every week going to repetitive work that didn't need a person. Small teams with more mission than time.",
+  "I love systems and processes. Give me a messy workflow and I'll happily lose an afternoon making it run smoother. I've also spent years inside small mission-driven teams, so I know exactly where the hours go. Salt is that obsession put to work. I build custom AI that takes the repetitive work off your plate, and websites that sound like the mission behind them, set up so you can change anything yourself in minutes.",
+  "The name is the approach. Salt doesn't overpower. It draws out what's already there. If that sounds like your kind of studio, I'd love to talk.",
 ] as const
 
 export const ABOUT_PRINCIPLES = [
   {
-    title: 'Reveal, don\'t impose',
-    body: 'Every creative decision answers one question: does this draw out what\'s already true about your mission — or add noise on top of it?',
+    title: "Reveal, don't impose",
+    body: "Every creative decision answers one question: does this draw out what's already true about your mission, or add noise on top of it?",
   },
   {
     title: 'All in, few at a time',
-    body: 'We take fewer projects so each one gets everything. When we commit, we\'re fully present — start to finish, no handoffs into the void.',
+    body: "A few projects a year, one build at a time. You'll know the launch week before you sign and exactly how many hours we need from you. When we commit, we're fully present, start to finish.",
   },
   {
-    title: 'People before platforms',
-    body: 'Behind every brand is a person with real stakes. We never lose sight of that. The most powerful digital experiences are the ones that feel unmistakably human.',
+    title: 'Your hours are the point',
+    body: 'Everything we build should hand you time back. AI that takes over the repetitive work. A site you can change yourself in minutes. If it adds to your plate, we built the wrong thing.',
   },
   {
-    title: 'Built to endure',
-    body: 'Trends fade. We make things quiet enough to last and clear enough to work — years later, still right.',
+    title: 'Yours to keep',
+    body: 'Your accounts, your data, your site, your tools. If you ever want to leave, you take everything with you, free. Things built to last shouldn\'t need a hostage clause.',
   },
 ] as const
 
