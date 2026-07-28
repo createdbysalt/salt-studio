@@ -38,30 +38,35 @@ export function CapabilitiesBentoHero({headline, subheadline, items}: Capabiliti
       const createTween = () => {
         flipCtx?.revert()
         gallery.classList.remove('capabilities-bento-gallery--final')
+        gsap.set(tiles, {clearProps: 'all'})
 
         flipCtx = gsap.context(() => {
-          gallery.classList.add('capabilities-bento-gallery--final')
+          // Capture compact bento, then switch to expanded layout and Flip between.
           const flipState = Flip.getState(tiles)
-          gallery.classList.remove('capabilities-bento-gallery--final')
+          gallery.classList.add('capabilities-bento-gallery--final')
 
-          const flip = Flip.to(flipState, {
+          const flip = Flip.from(flipState, {
             simple: true,
+            absolute: true,
             ease: 'expoScale(1, 5)',
           })
 
-          gsap.timeline({
-            scrollTrigger: {
-              trigger: gallery,
-              start: 'center center',
-              end: '+=100%',
-              scrub: true,
-              pin: wrap,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
-            },
-          }).add(flip)
+          gsap
+            .timeline({
+              scrollTrigger: {
+                trigger: wrap,
+                start: 'top top',
+                end: '+=100%',
+                scrub: true,
+                pin: true,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
+              },
+            })
+            .add(flip)
 
           return () => {
+            gallery.classList.remove('capabilities-bento-gallery--final')
             gsap.set(tiles, {clearProps: 'all'})
           }
         }, wrap)
@@ -107,15 +112,15 @@ export function CapabilitiesBentoHero({headline, subheadline, items}: Capabiliti
         className="capabilities-bento-wrap relative flex h-svh w-full items-center justify-center overflow-hidden"
       >
         <div ref={galleryRef} className="capabilities-bento-gallery" data-bento-gallery>
-          {items.map((item) => {
+          {items.map((item, index) => {
             const media = (
               <Image
                 src={item.src}
                 alt={item.title}
                 fill
-                sizes="(max-width: 768px) 100vw, 40vw"
+                sizes="(max-width: 768px) 50vw, 35vw"
                 className="object-cover object-top"
-                priority
+                priority={index < 4}
               />
             )
 
