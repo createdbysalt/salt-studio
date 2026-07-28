@@ -1,17 +1,13 @@
-import {normalizeCtaLabel} from '@/components/homeHero'
-import {HomeProjectSlider} from '@/components/HomeProjectSlider'
+import {normalizeCtaLabel, resolveCtaHref} from '@/components/homeHero'
+import {HomeHeroStage} from '@/components/HomeHeroStage'
 import {HomeServicesShowcase} from '@/components/HomeServicesShowcase'
 import {ClipReveal} from '@/components/motion/ClipReveal'
 import {LineReveal} from '@/components/motion/LineReveal'
-import {WordSwap} from '@/components/motion/WordSwap'
-import {
-  filterProjectsWithVideo,
-  withWorkPosters,
-  type WorkProjectCard,
-} from '@/components/ProjectGrid'
+import {filterProjectsWithVideo, withWorkPosters} from '@/components/ProjectGrid'
 import type {HomePageQueryResult} from '@/sanity.types'
 import {sanityFetch} from '@/sanity/lib/live'
 import {allProjectsQuery} from '@/sanity/lib/queries'
+import {urlForImage} from '@/sanity/lib/utils'
 import {ArrowUpRight} from 'lucide-react'
 import {stegaClean} from 'next-sanity'
 import Link from 'next/link'
@@ -23,15 +19,8 @@ export interface HomePageProps {
 type HomeSection = NonNullable<NonNullable<HomePageQueryResult>['sections']>[number]
 type SectionOf<T extends HomeSection['_type']> = Extract<HomeSection, {_type: T}>
 
-const SERVICES_HREF = '/capabilities'
 const WAITLIST_HREF = '/quiz'
 const CONTACT_HREF = '/contact'
-
-const FALLBACK = {
-  subheadline:
-    'We build tools that know your content, answer your people, and carry your voice — and the digital spaces to match.',
-  ctaMicrocopy: '30 minutes. You leave with a clear next step — either way.',
-} as const
 
 /** TinyWins-style edge-anchored splits. `\n` = intentional line break within a side. */
 const HERO_PRIMARY = {
@@ -93,25 +82,17 @@ export async function HomePage({data}: HomePageProps) {
         switch (section._type) {
           case 'homeHeroSection':
             return (
-              <HomeHero
+              <HomeHeroStage
                 key={section._key}
-                section={section}
-                bookingQuarter={bookingQuarter}
                 projects={heroSliderProjects}
+                primary={HERO_PRIMARY}
+                secondary={HERO_SECONDARY}
               />
             )
           case 'homeProofSection':
             return null
           case 'homeServicesSection':
-            return (
-              <HomeServices
-                key={section._key}
-                section={section}
-                statement={
-                  hero?.subheadline?.trim() || FALLBACK.subheadline
-                }
-              />
-            )
+            return <HomeServices key={section._key} section={section} />
           case 'homeWorkSection':
             return null
           case 'homeProductSection':
@@ -134,71 +115,130 @@ export async function HomePage({data}: HomePageProps) {
   )
 }
 
-function HomeHero({
-  section,
-  bookingQuarter,
-  projects,
-}: {
-  section: SectionOf<'homeHeroSection'>
-  bookingQuarter: string
-  projects: WorkProjectCard[]
-}) {
-  const ctaLabel = normalizeCtaLabel(section.ctaLabel)
-  const ctaMicrocopy = section.ctaMicrocopy?.trim() || FALLBACK.ctaMicrocopy
+function HomeServices({section}: {section: SectionOf<'homeServicesSection'>}) {
+  const fromServices = (section.services ?? [])
+    .filter((item) => Boolean(item?.title && item?.shortDescription))
+    .map((item) => {
+      const next = item!.nextStep
+      const href = next?.buttonLabel ? resolveCtaHref(next) : null
 
-  return (
-    <section className="flex min-h-[100dvh] flex-col pb-8 md:pb-10">
-      {/* Split type clears the fixed nav, then sits tight underneath — inset matches pills. */}
-      <h1 className="mt-28 w-full px-3 font-sans text-[clamp(2.15rem,3.8vw,4.5rem)] font-semibold uppercase leading-[0.9] tracking-[-0.03em] text-foreground sm:mt-32 sm:px-4">
-        <WordSwap primary={HERO_PRIMARY} secondary={HERO_SECONDARY} />
-      </h1>
+      return {
+        _key: item!._key,
+        title: item!.title!,
+        body: item!.shortDescription!,
+        headline: item!.headline ?? null,
+        priceLine: item!.priceLine,
+        timelineLine: item!.timelineLine ?? null,
+        timeline: (item!.timeline ?? [])
+          .filter((phase) => Boolean(phase?.label && phase?.duration))
+          .map((phase) => ({
+            _key: phase!._key,
+            label: phase!.label!,
+            duration: phase!.duration!,
+            detail: phase!.detail,
+          })),
+        linkLabel: item!.linkLabel,
+        detailEyebrow: item!.detailEyebrow ?? null,
+        detailBody: item!.detailBody ?? null,
+        sceneLine: item!.sceneLine ?? null,
+        detailImageUrl: item!.detailImage?.asset?._ref
+          ? urlForImage({asset: {_ref: item!.detailImage.asset._ref}})
+              ?.width(1600)
+              .height(1200)
+              .fit('crop')
+              .url()
+          : null,
+        backgroundImageUrl: item!.backgroundImage?.asset?._ref
+          ? urlForImage({asset: {_ref: item!.backgroundImage.asset._ref}})
+              ?.width(2400)
+              .height(1600)
+              .fit('crop')
+              .url()
+          : null,
+        backgroundVideoUrl: item!.backgroundVideoUrl ?? null,
+        deliverables: (item!.deliverables ?? [])
+          .filter((row) => Boolean(row?.title))
+          .map((row) => ({_key: row!._key, title: row!.title!, detail: row!.detail})),
+        capabilities: (item!.capabilities ?? [])
+          .filter((cap) => Boolean(cap?._id && cap?.name))
+          .map((cap) => ({_id: cap!._id, name: cap!.name!, kind: cap!.kind})),
+        idealFor: (item!.idealFor ?? []).filter((line): line is string => Boolean(line?.trim())),
+        notAFit: (item!.notAFit ?? []).filter((line): line is string => Boolean(line?.trim())),
+        stepsLabel: item!.stepsLabel ?? null,
+        steps: (item!.steps ?? [])
+          .filter((step) => Boolean(step?.text))
+          .map((step) => ({_key: step!._key, lead: step!.lead, text: step!.text!})),
+        projects: (item!.featuredProjects ?? [])
+          .filter((project) => Boolean(project?._id && project?.title))
+          .map((project) => ({
+            _id: project!._id,
+            title: project!.title!,
+            slug: project!.slug,
+            client: project!.client,
+            imageUrl: project!.coverImage?.asset?._ref
+              ? urlForImage({asset: {_ref: project!.coverImage.asset._ref}})
+                  ?.width(800)
+                  .height(600)
+                  .fit('crop')
+                  .url()
+              : null,
+          })),
+        testimonials: (item!.testimonials ?? [])
+          .filter((quote) => Boolean(quote?._id && quote?.quote && quote?.author))
+          .map((quote) => ({
+            _id: quote!._id,
+            quote: quote!.quote!,
+            author: quote!.author!,
+            role: quote!.role,
+          })),
+        clients: (item!.clients ?? [])
+          .filter((client) => Boolean(client?._id && client?.name))
+          .map((client) => ({_id: client!._id, name: client!.name!})),
+        proofAnchor: item!.proofAnchor ?? null,
+        nextStep:
+          next?.buttonLabel && href
+            ? {
+                subhead: next.subhead,
+                buttonLabel: next.buttonLabel,
+                href,
+              }
+            : null,
+        routingLine: item!.routingLine ?? null,
+      }
+    })
 
-      <HomeProjectSlider projects={projects} />
-
-      {/* CTA only — subheadline lives in the services statement below */}
-      <div className="mt-auto flex w-full flex-col items-start gap-3 px-3 pt-6 sm:px-4 md:items-end md:pt-8">
-        <Link href={CONTACT_HREF} className="btn-solid">
-          {ctaLabel}
-          <ArrowUpRight aria-hidden className="h-3.5 w-3.5" strokeWidth={2.5} />
-        </Link>
-        <p className="max-w-[28ch] font-mono text-[11px] uppercase tracking-label text-foreground/40 md:text-right">
-          {ctaMicrocopy}
-          {bookingQuarter ? ` · Currently booking ${bookingQuarter}` : null}
-        </p>
-      </div>
-    </section>
-  )
-}
-
-function HomeServices({
-  section,
-  statement,
-}: {
-  section: SectionOf<'homeServicesSection'>
-  statement: string
-}) {
-  const cards = (section.cards ?? [])
-    .filter((card): card is NonNullable<typeof card> & {title: string; body: string} =>
-      Boolean(card?.title && card?.body),
-    )
+  const fromLegacy = (section.cards ?? [])
+    .filter((card) => Boolean(card?.title && card?.body))
     .map((card) => ({
-      _key: card._key,
-      title: card.title,
-      body: card.body,
-      priceLine: card.priceLine,
-      linkLabel: card.linkLabel,
+      _key: card!._key,
+      title: card!.title!,
+      body: card!.body!,
+      priceLine: card!.priceLine,
+      linkLabel: card!.linkLabel,
+      detailEyebrow: card!.detailEyebrow ?? null,
+      detailBody: card!.detailBody ?? null,
+      detailImageUrl: card!.detailImage?.asset?._ref
+        ? urlForImage({asset: {_ref: card!.detailImage.asset._ref}})
+            ?.width(1600)
+            .height(1200)
+            .fit('crop')
+            .url()
+        : null,
+      backgroundImageUrl: card!.hoverImage?.asset?._ref
+        ? urlForImage({asset: {_ref: card!.hoverImage.asset._ref}})
+            ?.width(2400)
+            .height(1600)
+            .fit('crop')
+            .url()
+        : null,
+      backgroundVideoUrl: card!.backgroundVideoUrl ?? null,
     }))
+
+  const cards = fromServices.length > 0 ? fromServices : fromLegacy
 
   if (cards.length === 0) return null
 
-  return (
-    <HomeServicesShowcase
-      label={section.label}
-      statement={statement}
-      cards={cards}
-      href={SERVICES_HREF}
-    />
-  )
+  return <HomeServicesShowcase label={section.label} cards={cards} />
 }
 
 function HomeProduct({section}: {section: SectionOf<'homeProductSection'>}) {

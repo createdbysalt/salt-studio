@@ -16,8 +16,8 @@ type StatusPageProps = {
 }
 
 /**
- * Shared light-stage status surface (error / 404). Ink on paper, Geist display,
- * mono labels — matches DESIGN.md, not the legacy Photon dark field.
+ * Shared dark status surface (error / 404). Compact logo top-left;
+ * copy centered in the stage.
  */
 export function StatusPage({
   eyebrow,
@@ -28,35 +28,40 @@ export function StatusPage({
   footer,
 }: StatusPageProps) {
   return (
-    <main className="fixed inset-0 z-[60] flex min-h-svh flex-col overflow-y-auto bg-background px-3 py-10 text-foreground sm:px-4 md:py-14">
-      <div className="flex flex-1 flex-col justify-center">
-        <div className="mx-auto w-full max-w-[40rem]">
-          <Link
-            href="/"
-            className="inline-flex text-foreground transition-opacity duration-300 hover:opacity-70"
-            aria-label="Salt Studio — Home"
-          >
-            <SaltWordmark className="h-7 w-auto sm:h-8" />
-          </Link>
+    <main
+      data-theme="dark"
+      className="fixed inset-0 z-[60] flex min-h-svh flex-col overflow-y-auto bg-background text-foreground"
+    >
+      <header className="shrink-0 px-3 pt-3 sm:px-4 sm:pt-4">
+        <Link
+          href="/"
+          className="inline-flex text-foreground transition-opacity duration-300 hover:opacity-70"
+          aria-label="Salt Studio — Home"
+        >
+          <SaltWordmark className="h-4 w-auto sm:h-5" />
+        </Link>
+      </header>
 
-          <p className="mt-14 font-mono text-[11px] uppercase tracking-label text-foreground/40 md:mt-16">
+      <div className="page-chrome flex flex-1 flex-col items-center justify-center py-16 text-center md:py-20">
+        <div className="w-full max-w-[42rem]">
+          <p className="font-mono text-[11px] uppercase tracking-label text-foreground/40">
             {eyebrow}
           </p>
 
-          <h1 className="mt-4 font-sans text-[clamp(2.5rem,6vw,4.5rem)] font-semibold uppercase leading-[0.92] tracking-[-0.03em]">
+          <h1 className="mt-5 font-sans text-[clamp(2.75rem,7vw,5rem)] font-bold uppercase leading-[0.9] tracking-[-0.035em]">
             {headline}
           </h1>
 
-          <p className="mt-6 max-w-[36ch] text-base leading-relaxed text-foreground/70 md:text-lg">
+          <p className="mx-auto mt-6 max-w-[34ch] text-base leading-relaxed text-foreground/55 md:text-lg">
             {message}
           </p>
 
-          <div className="mt-10 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <StatusAction control={primary} variant="solid" />
             {secondary ? <StatusAction control={secondary} variant="ghost" /> : null}
           </div>
 
-          {footer ? <div className="mt-12">{footer}</div> : null}
+          {footer ? <div className="mt-14">{footer}</div> : null}
         </div>
       </div>
     </main>

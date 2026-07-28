@@ -11,6 +11,7 @@ import {
   StarIcon,
   TagIcon,
   WarningOutlineIcon,
+  WrenchIcon,
 } from '@sanity/icons'
 import type {ComponentType} from 'react'
 import type {StructureBuilder, StructureResolver} from 'sanity/structure'
@@ -137,6 +138,7 @@ export const saltDeskStructure: StructureResolver = (S) => {
           S.documentTypeListItem('project').title('Projects'),
           S.documentTypeListItem('workCategory').title('Work Categories').icon(TagIcon),
           S.documentTypeListItem('capability').title('Capabilities').icon(CodeBlockIcon),
+          S.documentTypeListItem('service').title('Services').icon(WrenchIcon),
           // ─── People ───
           S.divider().title('People'),
           S.documentTypeListItem('client').title('Clients').icon(CaseIcon),

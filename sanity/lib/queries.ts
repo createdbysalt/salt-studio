@@ -23,7 +23,67 @@ export const homePageQuery = defineQuery(`
       },
       _type == "homeServicesSection" => {
         label,
-        cards[]{ _key, title, body, priceLine, linkLabel }
+        services[]{
+          _key,
+          ...@->{
+            _id,
+            title,
+            "slug": slug.current,
+            headline,
+            shortDescription,
+            priceLine,
+            timelineLine,
+            linkLabel,
+            timeline[]{ _key, label, duration, detail },
+            deliverables[]{ _key, title, detail },
+            capabilities[]->{ _id, name, kind },
+            idealFor,
+            notAFit,
+            detailEyebrow,
+            detailBody,
+            sceneLine,
+            stepsLabel,
+            steps[]{ _key, lead, text },
+            detailImage{ asset, alt, hotspot, crop },
+            backgroundImage{ asset, alt, hotspot, crop },
+            backgroundVideoUrl,
+            featuredProjects[]->{
+              _id,
+              title,
+              "slug": slug.current,
+              coverImage,
+              "client": client->name
+            },
+            testimonials[]->{
+              _id,
+              quote,
+              author,
+              role
+            },
+            clients[]->{ _id, name },
+            proofAnchor,
+            nextStep->{
+              _id,
+              subhead,
+              buttonLabel,
+              link,
+              contactSubject
+            },
+            routingLine
+          }
+        },
+        cards[]{
+          _key,
+          title,
+          body,
+          priceLine,
+          linkLabel,
+          detailEyebrow,
+          detailBody,
+          detailImage{ asset, alt, hotspot, crop },
+          hoverImage{ asset, alt, hotspot, crop },
+          backgroundVideoUrl,
+        }
       },
       _type == "homeWorkSection" => {
         label,

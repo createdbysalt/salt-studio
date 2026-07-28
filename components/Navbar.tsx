@@ -65,7 +65,8 @@ export function Navbar({data}: NavbarProps) {
   return (
     <>
       <header
-        className="pointer-events-none fixed top-0 z-[70] w-full bg-transparent"
+        className="pointer-events-none fixed top-0 z-[70] w-full bg-transparent transition-opacity duration-300 [[data-service-panel-open]_&]:pointer-events-none [[data-service-panel-open]_&]:opacity-0"
+        data-site-nav
         data-sanity={dataAttribute?.('menuItems')}
         data-nav-on-color={onColor ? 'true' : 'false'}
       >

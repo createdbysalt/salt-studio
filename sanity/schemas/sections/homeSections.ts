@@ -115,15 +115,30 @@ export const homeServicesSection = defineType({
       name: 'label',
       title: 'Section label',
       type: 'string',
-      initialValue: 'What we do',
+      initialValue: 'How we can help',
       description: 'Small label above the three service cards.',
     }),
     defineField({
-      name: 'cards',
-      title: 'Service cards',
+      name: 'services',
+      title: 'Services',
       type: 'array',
       description:
-        'Exactly three cards — one per service. Each card links to the Services page (price after value — never straight to contact).',
+        'Pick the three services for this band — order here is the order on the page. Edit each service under Dynamic Content → Services.',
+      of: [defineArrayMember({type: 'reference', to: [{type: 'service'}]})],
+      validation: (rule) =>
+        rule.length(3).error('The triad is exactly three services — one per offering'),
+    }),
+    defineField({
+      name: 'cards',
+      title: 'Service cards (legacy)',
+      type: 'array',
+      deprecated: {
+        reason:
+          'Use the Services references above. Legacy inline cards are read-only until content is moved to Dynamic Content → Services.',
+      },
+      readOnly: true,
+      hidden: ({value}) => value === undefined,
+      description: 'Legacy inline cards. Prefer Services references.',
       of: [
         defineArrayMember({
           type: 'object',
@@ -135,7 +150,6 @@ export const homeServicesSection = defineType({
               title: 'Service name',
               type: 'string',
               description: 'e.g. “AI builds”, “The Salt site”, “Site care”.',
-              validation: (rule) => rule.required().error('Every card needs a service name'),
             }),
             defineField({
               name: 'body',
@@ -143,29 +157,58 @@ export const homeServicesSection = defineType({
               type: 'text',
               rows: 3,
               description: 'One or two plain sentences on what this service is.',
-              validation: (rule) => rule.required().error('Every card needs a description'),
             }),
             defineField({
               name: 'priceLine',
               title: 'Price line',
               type: 'string',
-              description: 'The visible starting price, e.g. “Pilots from $15,000”. Keep it true.',
+              description: 'The visible starting price, e.g. “Pilots from $15,000”.',
             }),
             defineField({
               name: 'linkLabel',
               title: 'Link label',
               type: 'string',
-              initialValue: 'See how it works',
-              description: 'The link text at the end of the card (goes to the Services page).',
+              description: 'Opens the service detail side panel.',
+            }),
+            defineField({
+              name: 'detailEyebrow',
+              title: 'Panel eyebrow',
+              type: 'string',
+              description: 'Small label at the top of the side panel.',
+            }),
+            defineField({
+              name: 'detailBody',
+              title: 'Panel body',
+              type: 'text',
+              rows: 8,
+              description: 'Longer explanation shown in the side panel.',
+            }),
+            defineField({
+              name: 'detailImage',
+              title: 'Panel image',
+              type: 'image',
+              options: {hotspot: true},
+              description: 'Optional image at the bottom of the side panel.',
+            }),
+            defineField({
+              name: 'hoverImage',
+              title: 'Background image',
+              type: 'image',
+              options: {hotspot: true},
+              description: 'Full-bleed still behind this service when it’s active.',
+            }),
+            defineField({
+              name: 'backgroundVideoUrl',
+              title: 'Background video URL',
+              type: 'url',
+              description: 'Optional MP4 or Vimeo URL for the active background.',
             }),
           ],
           preview: {
-            select: {title: 'title', subtitle: 'priceLine'},
+            select: {title: 'title', subtitle: 'priceLine', media: 'hoverImage'},
           },
         }),
       ],
-      validation: (rule) =>
-        rule.length(3).error('The triad is exactly three cards — one per service'),
     }),
   ],
   preview: sectionPreview('label', 'Services Triad'),

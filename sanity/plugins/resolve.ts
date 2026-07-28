@@ -87,6 +87,11 @@ export const locations = {
     tone: 'positive',
     locations: [{title: 'Capabilities', href: resolveHref('servicesPage')!}],
   }),
+  service: defineLocations({
+    message: 'This service powers the homepage “How we can help” band',
+    tone: 'positive',
+    locations: [{title: 'Home', href: resolveHref('home')!}],
+  }),
   aboutPage: defineLocations({
     message: 'About page — hidden on the live site until published',
     tone: 'positive',

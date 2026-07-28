@@ -48,6 +48,22 @@ export type Avatar = {
   _type: 'image'
 }
 
+export type DetailImage = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "detailImage.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  _type: 'image'
+}
+
+export type HoverImage = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "hoverImage.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  _type: 'image'
+}
+
 export type ProjectCreditsSection = {
   _type: 'projectCreditsSection'
   enabled?: boolean
@@ -360,16 +376,33 @@ export type HomeWorkSection = {
   linkLabel?: string
 }
 
+export type ServiceReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'service'
+}
+
 export type HomeServicesSection = {
   _type: 'homeServicesSection'
   enabled?: boolean
   internalName?: string
   label?: string
+  services?: Array<
+    {
+      _key: string
+    } & ServiceReference
+  >
   cards?: Array<{
     title?: string
     body?: string
     priceLine?: string
     linkLabel?: string
+    detailEyebrow?: string
+    detailBody?: string
+    detailImage?: DetailImage
+    hoverImage?: HoverImage
+    backgroundVideoUrl?: string
     _type: 'homeServiceCard'
     _key: string
   }>
@@ -712,6 +745,133 @@ export type Testimonial = {
   project?: ProjectReference
 }
 
+export type CapabilityReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'capability'
+}
+
+export type TestimonialReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'testimonial'
+}
+
+export type CallToActionReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'callToAction'
+}
+
+export type Service = {
+  _id: string
+  _type: 'service'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  slug?: Slug
+  headline?: string
+  shortDescription?: string
+  priceLine?: string
+  timelineLine?: string
+  linkLabel?: string
+  sortOrder?: number
+  backgroundImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: 'image'
+  }
+  backgroundVideoUrl?: string
+  timeline?: Array<{
+    label?: string
+    duration?: string
+    detail?: string
+    _type: 'serviceTimelinePhase'
+    _key: string
+  }>
+  deliverables?: Array<{
+    title?: string
+    detail?: string
+    _type: 'serviceDeliverable'
+    _key: string
+  }>
+  capabilities?: Array<
+    {
+      _key: string
+    } & CapabilityReference
+  >
+  workCategories?: Array<
+    {
+      _key: string
+    } & WorkCategoryReference
+  >
+  idealFor?: Array<string>
+  notAFit?: Array<string>
+  detailEyebrow?: string
+  detailBody?: string
+  sceneLine?: string
+  stepsLabel?: string
+  steps?: Array<{
+    lead?: string
+    text?: string
+    _type: 'serviceDetailStep'
+    _key: string
+  }>
+  detailImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    _type: 'image'
+  }
+  featuredProjects?: Array<
+    {
+      _key: string
+    } & ProjectReference
+  >
+  testimonials?: Array<
+    {
+      _key: string
+    } & TestimonialReference
+  >
+  clients?: Array<
+    {
+      _key: string
+    } & ClientReference
+  >
+  proofAnchor?: string
+  nextStep?: CallToActionReference
+  routingLine?: string
+}
+
+export type SanityImageCrop = {
+  _type: 'sanity.imageCrop'
+  top?: number
+  bottom?: number
+  left?: number
+  right?: number
+}
+
+export type SanityImageHotspot = {
+  _type: 'sanity.imageHotspot'
+  x?: number
+  y?: number
+  height?: number
+  width?: number
+}
+
+export type Slug = {
+  _type: 'slug'
+  current?: string
+  source?: string
+}
+
 export type Capability = {
   _id: string
   _type: 'capability'
@@ -738,22 +898,6 @@ export type Capability = {
   sortOrder?: number
 }
 
-export type SanityImageCrop = {
-  _type: 'sanity.imageCrop'
-  top?: number
-  bottom?: number
-  left?: number
-  right?: number
-}
-
-export type SanityImageHotspot = {
-  _type: 'sanity.imageHotspot'
-  x?: number
-  y?: number
-  height?: number
-  width?: number
-}
-
 export type WorkCategory = {
   _id: string
   _type: 'workCategory'
@@ -766,12 +910,6 @@ export type WorkCategory = {
   subhead?: string
   seoTitle?: string
   seoDescription?: string
-}
-
-export type Slug = {
-  _type: 'slug'
-  current?: string
-  source?: string
 }
 
 export type QuizSubmission = {
@@ -805,13 +943,6 @@ export type QuizSubmission = {
     referrer?: string
     landingPath?: string
   }
-}
-
-export type CapabilityReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'capability'
 }
 
 export type Project = {
@@ -944,13 +1075,6 @@ export type Client = {
   tier?: 'known' | 'less-known'
   featured?: boolean
   sortOrder?: number
-}
-
-export type CallToActionReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'callToAction'
 }
 
 export type Page = {
@@ -1568,6 +1692,8 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | LogoImage
   | Avatar
+  | DetailImage
+  | HoverImage
   | ProjectCreditsSection
   | ProjectStatsSection
   | ProjectQuoteSection
@@ -1597,6 +1723,7 @@ export type AllSanitySchemaTypes =
   | HomeProductSection
   | ProjectReference
   | HomeWorkSection
+  | ServiceReference
   | HomeServicesSection
   | ClientReference
   | HomeProofSection
@@ -1626,16 +1753,18 @@ export type AllSanitySchemaTypes =
   | ServiceBlock
   | ContactForm
   | Testimonial
-  | Capability
+  | CapabilityReference
+  | TestimonialReference
+  | CallToActionReference
+  | Service
   | SanityImageCrop
   | SanityImageHotspot
-  | WorkCategory
   | Slug
+  | Capability
+  | WorkCategory
   | QuizSubmission
-  | CapabilityReference
   | Project
   | Client
-  | CallToActionReference
   | Page
   | LegalPage
   | CallToAction
@@ -1661,7 +1790,7 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: homePageQuery
-// Query: *[_id == "home"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    hiddenH1,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "homeHeroSection" => {        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter      },      _type == "homeProofSection" => {        label,        clients[]{ _key, ...@->{ _id, name, website } }      },      _type == "homeServicesSection" => {        label,        cards[]{ _key, title, body, priceLine, linkLabel }      },      _type == "homeWorkSection" => {        label,        projects[]{          _key,          ...@->{            _id,            title,            "slug": slug.current,            overview,            coverImage,            videoUrl,            year,            "client": client->name          }        },        linkLabel      },      _type == "homeProductSection" => { headline, body, ctaLabel },      _type == "homePhilosophySection" => { line1, line2 },      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },    },  }
+// Query: *[_id == "home"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    hiddenH1,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "homeHeroSection" => {        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter      },      _type == "homeProofSection" => {        label,        clients[]{ _key, ...@->{ _id, name, website } }      },      _type == "homeServicesSection" => {        label,        services[]{          _key,          ...@->{            _id,            title,            "slug": slug.current,            headline,            shortDescription,            priceLine,            timelineLine,            linkLabel,            timeline[]{ _key, label, duration, detail },            deliverables[]{ _key, title, detail },            capabilities[]->{ _id, name, kind },            idealFor,            notAFit,            detailEyebrow,            detailBody,            sceneLine,            stepsLabel,            steps[]{ _key, lead, text },            detailImage{ asset, alt, hotspot, crop },            backgroundImage{ asset, alt, hotspot, crop },            backgroundVideoUrl,            featuredProjects[]->{              _id,              title,              "slug": slug.current,              coverImage,              "client": client->name            },            testimonials[]->{              _id,              quote,              author,              role            },            clients[]->{ _id, name },            proofAnchor,            nextStep->{              _id,              subhead,              buttonLabel,              link,              contactSubject            },            routingLine          }        },        cards[]{          _key,          title,          body,          priceLine,          linkLabel,          detailEyebrow,          detailBody,          detailImage{ asset, alt, hotspot, crop },          hoverImage{ asset, alt, hotspot, crop },          backgroundVideoUrl,        }      },      _type == "homeWorkSection" => {        label,        projects[]{          _key,          ...@->{            _id,            title,            "slug": slug.current,            overview,            coverImage,            videoUrl,            year,            "client": client->name          }        },        linkLabel      },      _type == "homeProductSection" => { headline, body, ctaLabel },      _type == "homePhilosophySection" => { line1, line2 },      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },    },  }
 export type HomePageQueryResult =
   | {
       _id: 'home'
@@ -1895,12 +2024,111 @@ export type HomePageQueryResult =
             enabled: boolean | null
             internalName: string | null
             label: string | null
+            services: Array<{
+              _key: string
+              _id: string
+              title: string | null
+              slug: string | null
+              headline: string | null
+              shortDescription: string | null
+              priceLine: string | null
+              timelineLine: string | null
+              linkLabel: string | null
+              timeline: Array<{
+                _key: string
+                label: string | null
+                duration: string | null
+                detail: string | null
+              }> | null
+              deliverables: Array<{
+                _key: string
+                title: string | null
+                detail: string | null
+              }> | null
+              capabilities: Array<{
+                _id: string
+                name: string | null
+                kind: 'discipline' | 'framework' | 'language' | 'platform' | 'tool' | null
+              }> | null
+              idealFor: Array<string> | null
+              notAFit: Array<string> | null
+              detailEyebrow: string | null
+              detailBody: string | null
+              sceneLine: string | null
+              stepsLabel: string | null
+              steps: Array<{
+                _key: string
+                lead: string | null
+                text: string | null
+              }> | null
+              detailImage: {
+                asset: SanityImageAssetReference | null
+                alt: null
+                hotspot: SanityImageHotspot | null
+                crop: SanityImageCrop | null
+              } | null
+              backgroundImage: {
+                asset: SanityImageAssetReference | null
+                alt: null
+                hotspot: SanityImageHotspot | null
+                crop: SanityImageCrop | null
+              } | null
+              backgroundVideoUrl: string | null
+              featuredProjects: Array<{
+                _id: string
+                title: string | null
+                slug: string | null
+                coverImage: {
+                  asset?: SanityImageAssetReference
+                  media?: unknown
+                  hotspot?: SanityImageHotspot
+                  crop?: SanityImageCrop
+                  alt?: string
+                  _type: 'image'
+                } | null
+                client: string | null
+              }> | null
+              testimonials: Array<{
+                _id: string
+                quote: string | null
+                author: string | null
+                role: string | null
+              }> | null
+              clients: Array<{
+                _id: string
+                name: string | null
+              }> | null
+              proofAnchor: string | null
+              nextStep: {
+                _id: string
+                subhead: string | null
+                buttonLabel: string | null
+                link: string | null
+                contactSubject: string | null
+              } | null
+              routingLine: string | null
+            }> | null
             cards: Array<{
               _key: string
               title: string | null
               body: string | null
               priceLine: string | null
               linkLabel: string | null
+              detailEyebrow: string | null
+              detailBody: string | null
+              detailImage: {
+                asset: SanityImageAssetReference | null
+                alt: null
+                hotspot: SanityImageHotspot | null
+                crop: SanityImageCrop | null
+              } | null
+              hoverImage: {
+                asset: SanityImageAssetReference | null
+                alt: null
+                hotspot: SanityImageHotspot | null
+                crop: SanityImageCrop | null
+              } | null
+              backgroundVideoUrl: string | null
             }> | null
           }
         | {
@@ -2061,6 +2289,16 @@ export type HomePageQueryResult =
   | {
       _id: 'home'
       _type: 'sanity.imageAsset'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
+    }
+  | {
+      _id: 'home'
+      _type: 'service'
       seoTitle: null
       seoDescription: null
       ogImage: null
@@ -2501,6 +2739,15 @@ export type ServicesPageQueryResult =
   | {
       _id: 'servicesPage'
       _type: 'sanity.imageAsset'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'service'
       seoTitle: null
       seoDescription: null
       ogImage: null
@@ -2993,6 +3240,15 @@ export type AboutPageQueryResult =
   | {
       _id: 'aboutPage'
       _type: 'sanity.imageAsset'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'service'
       seoTitle: null
       seoDescription: null
       ogImage: null
@@ -4515,6 +4771,15 @@ export type ContactPageQueryResult =
     }
   | {
       _id: 'contactPage'
+      _type: 'service'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
       _type: 'servicesPage'
       seoTitle: string | null
       seoDescription: string | null
@@ -4619,7 +4884,7 @@ export type ContactPageQueryResult =
 
 declare module '@sanity/client' {
   interface SanityQueries {
-    '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "homeHeroSection" => {\n        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter\n      },\n      _type == "homeProofSection" => {\n        label,\n        clients[]{ _key, ...@->{ _id, name, website } }\n      },\n      _type == "homeServicesSection" => {\n        label,\n        cards[]{ _key, title, body, priceLine, linkLabel }\n      },\n      _type == "homeWorkSection" => {\n        label,\n        projects[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            overview,\n            coverImage,\n            videoUrl,\n            year,\n            "client": client->name\n          }\n        },\n        linkLabel\n      },\n      _type == "homeProductSection" => { headline, body, ctaLabel },\n      _type == "homePhilosophySection" => { line1, line2 },\n      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },\n    },\n  }\n': HomePageQueryResult
+    '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "homeHeroSection" => {\n        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter\n      },\n      _type == "homeProofSection" => {\n        label,\n        clients[]{ _key, ...@->{ _id, name, website } }\n      },\n      _type == "homeServicesSection" => {\n        label,\n        services[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            headline,\n            shortDescription,\n            priceLine,\n            timelineLine,\n            linkLabel,\n            timeline[]{ _key, label, duration, detail },\n            deliverables[]{ _key, title, detail },\n            capabilities[]->{ _id, name, kind },\n            idealFor,\n            notAFit,\n            detailEyebrow,\n            detailBody,\n            sceneLine,\n            stepsLabel,\n            steps[]{ _key, lead, text },\n            detailImage{ asset, alt, hotspot, crop },\n            backgroundImage{ asset, alt, hotspot, crop },\n            backgroundVideoUrl,\n            featuredProjects[]->{\n              _id,\n              title,\n              "slug": slug.current,\n              coverImage,\n              "client": client->name\n            },\n            testimonials[]->{\n              _id,\n              quote,\n              author,\n              role\n            },\n            clients[]->{ _id, name },\n            proofAnchor,\n            nextStep->{\n              _id,\n              subhead,\n              buttonLabel,\n              link,\n              contactSubject\n            },\n            routingLine\n          }\n        },\n        cards[]{\n          _key,\n          title,\n          body,\n          priceLine,\n          linkLabel,\n          detailEyebrow,\n          detailBody,\n          detailImage{ asset, alt, hotspot, crop },\n          hoverImage{ asset, alt, hotspot, crop },\n          backgroundVideoUrl,\n        }\n      },\n      _type == "homeWorkSection" => {\n        label,\n        projects[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            overview,\n            coverImage,\n            videoUrl,\n            year,\n            "client": client->name\n          }\n        },\n        linkLabel\n      },\n      _type == "homeProductSection" => { headline, body, ctaLabel },\n      _type == "homePhilosophySection" => { line1, line2 },\n      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },\n    },\n  }\n': HomePageQueryResult
     '\n  *[_id == "servicesPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "servicesHeroSection" => { headline, subheadline },\n      _type == "servicesListSection" => { serviceAi, serviceSite, serviceCare },\n      _type == "servicesFitSection" => {\n        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints\n      },\n      _type == "servicesProcessSection" => {\n        headline,\n        steps[]{ _key, lead, text },\n        recommendationDays,\n        ctaLabel\n      },\n      _type == "servicesFaqSection" => { faq },\n      _type == "servicesFinalCtaSection" => { headline, ctaLabel, microcopy },\n    },\n  }\n': ServicesPageQueryResult
     '\n  *[_id == "aboutPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "aboutOpeningSection" => { line1, line2, body },\n      _type == "aboutStorySection" => { body, offHoursLine, photo },\n      _type == "aboutSmallnessSection" => { headline, body },\n      _type == "aboutConvictionsSection" => { headline, lines, closingLine },\n      _type == "aboutProductSection" => { body, linkLabel },\n      _type == "aboutClosingSection" => { body, ctaLabel, microcopy },\n    },\n  }\n': AboutPageQueryResult
     '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    body[]{\n      ...,\n      _type == "ctaRef" => {\n        "cta": @->{subhead, buttonLabel, link, contactSubject}\n      }\n    },\n    overview,\n    title,\n    "slug": slug.current,\n  }\n': PagesBySlugQueryResult

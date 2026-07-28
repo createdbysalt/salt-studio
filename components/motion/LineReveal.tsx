@@ -13,6 +13,8 @@ interface LineRevealProps {
   delay?: number
   /** Per-line stagger in seconds */
   stagger?: number
+  /** Per-line tween duration in seconds */
+  duration?: number
   /** ScrollTrigger start position */
   start?: string
 }
@@ -29,6 +31,7 @@ export function LineReveal({
   className,
   delay = 0,
   stagger = 0.08,
+  duration = DURATION.reveal,
   start = 'top 85%',
 }: LineRevealProps) {
   const scope = useRef<HTMLElement>(null)
@@ -44,7 +47,7 @@ export function LineReveal({
         onSplit: (self) =>
           gsap.from(self.lines, {
             yPercent: 110,
-            duration: DURATION.reveal,
+            duration,
             ease: EASE.outCubic,
             stagger,
             delay,
@@ -58,7 +61,7 @@ export function LineReveal({
 
       return () => split.revert()
     },
-    {scope},
+    {scope, dependencies: [delay, stagger, duration, start]},
   )
 
   return (

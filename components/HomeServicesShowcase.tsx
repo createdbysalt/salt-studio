@@ -1,121 +1,503 @@
 'use client'
 
+import {LineReveal} from '@/components/motion/LineReveal'
+import {gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {useGSAP} from '@gsap/react'
+import {ServiceDetailPanel} from '@/components/ServiceDetailPanel'
+import {isVimeoUrl, vimeoBackgroundSrc} from '@/lib/vimeo'
 import {ArrowUpRight} from 'lucide-react'
-import Link from 'next/link'
-import {useState} from 'react'
+import {stegaClean} from 'next-sanity'
+import {useEffect, useRef, useState} from 'react'
+
+/** TinyWins-style elbow arrow (exact path geometry). */
+function ServiceElbowArrow({className}: {className?: string}) {
+  return (
+    <svg
+      viewBox="0 0 64 65.7933"
+      fill="none"
+      className={className}
+      aria-hidden
+      focusable="false"
+    >
+      <path
+        d="M34 13.7227L57 36.2227L34 58.7227"
+        stroke="currentColor"
+        strokeWidth="10"
+        strokeLinecap="square"
+      />
+      <path
+        d="M5 5.72266L5 36.7227H51"
+        stroke="currentColor"
+        strokeWidth="10"
+        strokeLinecap="square"
+      />
+    </svg>
+  )
+}
 
 export type HomeServiceCard = {
   _key: string
   title: string
   body: string
+  headline?: string | null
   priceLine?: string | null
+  timelineLine?: string | null
+  timeline?: Array<{
+    _key: string
+    label: string
+    duration: string
+    detail?: string | null
+  }> | null
   linkLabel?: string | null
+  detailEyebrow?: string | null
+  detailBody?: string | null
+  sceneLine?: string | null
+  detailImageUrl?: string | null
+  /** Full-bleed still (also poster when a video is set). */
+  backgroundImageUrl?: string | null
+  /** MP4 or Vimeo — muted looping background for this service. */
+  backgroundVideoUrl?: string | null
+  deliverables?: Array<{_key: string; title: string; detail?: string | null}> | null
+  capabilities?: Array<{_id: string; name: string; kind?: string | null}> | null
+  idealFor?: string[] | null
+  notAFit?: string[] | null
+  stepsLabel?: string | null
+  steps?: Array<{_key: string; lead?: string | null; text: string}> | null
+  projects?: Array<{
+    _id: string
+    title: string
+    slug?: string | null
+    client?: string | null
+    imageUrl?: string | null
+  }> | null
+  testimonials?: Array<{
+    _id: string
+    quote: string
+    author: string
+    role?: string | null
+  }> | null
+  clients?: Array<{_id: string; name: string}> | null
+  proofAnchor?: string | null
+  nextStep?: {
+    subhead?: string | null
+    buttonLabel: string
+    href: string
+  } | null
+  routingLine?: string | null
 }
 
 type HomeServicesShowcaseProps = {
   label?: string | null
-  statement: string
+  lead?: string | null
+  headline?: string | null
   cards: HomeServiceCard[]
-  href?: string
+}
+
+const FALLBACK_LEAD = 'We bring the flavor of innovation.'
+const FALLBACK_HEADLINE = "Let's build for the future."
+
+const INK = '#08090a'
+const PAPER = '#ffffff'
+
+/**
+ * Services bridge: light type beat that snaps to ink at the bottom
+ * (nav-style surface flip + mix-blend headline), then a dark “How we can help”
+ * expand list.
+ */
+export function HomeServicesShowcase({
+  label = 'How we can help',
+  lead,
+  headline,
+  cards,
+}: HomeServicesShowcaseProps) {
+  const [active, setActive] = useState<number | null>(null)
+  if (cards.length === 0) return null
+
+  const leadText = lead?.trim() || FALLBACK_LEAD
+  const headlineText = headline?.trim() || FALLBACK_HEADLINE
+
+  return (
+    <>
+      <TypeBeatBridge lead={leadText} headline={headlineText} />
+      <WhatWeDoBand
+        label={label}
+        cards={cards}
+        active={active}
+        setActive={setActive}
+      />
+    </>
+  )
 }
 
 /**
- * TinyWins-style services band: oversized bordered statement + numbered
- * service switcher. Hover/focus a number to reveal that service.
+ * Pin the type beat fully white first. Near the end of the pin, off-page ink
+ * banks rise from below the fold and invert the type via mix-blend.
  */
-export function HomeServicesShowcase({
-  label = 'What we do',
-  statement,
-  cards,
-  href = '/capabilities',
-}: HomeServicesShowcaseProps) {
-  const [active, setActive] = useState(0)
-  const card = cards[active] ?? cards[0]
-  if (!card) return null
+function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
+  const triggerRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLElement>(null)
+  const inkRef = useRef<HTMLDivElement>(null)
+  const themeDarkRef = useRef(false)
+
+  useGSAP(
+    () => {
+      if (!triggerRef.current || !panelRef.current || !inkRef.current) return
+
+      const trigger = triggerRef.current
+      const panel = panelRef.current
+      const ink = inkRef.current
+      const banks = ink.querySelectorAll<HTMLElement>('[data-ink-bank]')
+      const veil = ink.querySelector<HTMLElement>('[data-ink="veil"]')
+
+      if (prefersReducedMotion()) {
+        panel.setAttribute('data-theme', 'dark')
+        gsap.set(panel, {backgroundColor: INK})
+        gsap.set(banks, {yPercent: -70})
+        if (veil) gsap.set(veil, {opacity: 1})
+        return
+      }
+
+      gsap.set(panel, {backgroundColor: PAPER})
+      // Fully below the fold — soft crown must not peek until the rise starts.
+      gsap.set(banks, {yPercent: 8})
+      if (veil) gsap.set(veil, {opacity: 0})
+      themeDarkRef.current = false
+      panel.removeAttribute('data-theme')
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.35,
+          onUpdate: (self) => {
+            const dark = self.progress > 0.82
+            if (dark === themeDarkRef.current) return
+            themeDarkRef.current = dark
+            if (dark) panel.setAttribute('data-theme', 'dark')
+            else panel.removeAttribute('data-theme')
+          },
+        },
+      })
+
+      const [a, b, c] = banks
+      // Hold white for most of the pin; rise only in the last stretch.
+      if (a) tl.fromTo(a, {yPercent: 8}, {yPercent: -70, ease: 'power1.inOut', duration: 0.38}, 0.58)
+      if (b) tl.fromTo(b, {yPercent: 10}, {yPercent: -66, ease: 'power2.inOut', duration: 0.36}, 0.62)
+      if (c) tl.fromTo(c, {yPercent: 6}, {yPercent: -74, ease: 'sine.inOut', duration: 0.38}, 0.6)
+      if (veil) tl.to(veil, {opacity: 1, ease: 'none', duration: 0.14}, 0.88)
+
+      return () => {
+        tl.scrollTrigger?.kill()
+        tl.kill()
+        panel.removeAttribute('data-theme')
+      }
+    },
+    {scope: triggerRef},
+  )
+
+  // Soft top only; solid ink below extends off-page so you never see a blob outline.
+  const bankGradient = `linear-gradient(
+    to top,
+    ${INK} 0%,
+    ${INK} 58%,
+    rgba(8, 9, 10, 0.55) 78%,
+    transparent 100%
+  )`
 
   return (
-    <section className="flex min-h-[100dvh] flex-col border-t border-foreground/15 bg-background text-foreground">
-      <div className="flex flex-1 flex-col px-3 pt-6 sm:px-4 md:pt-8">
-        <div className="flex flex-1 flex-col border border-foreground px-6 py-8 md:px-20 md:py-10">
-          <h2 className="mt-auto w-full font-sans text-[clamp(1.75rem,4.2vw,3.75rem)] font-semibold uppercase leading-[0.9] tracking-[-0.04em] text-foreground">
-            {statement}
-          </h2>
+    <div ref={triggerRef} className="relative h-[160vh]">
+      <section
+        ref={panelRef}
+        className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden bg-background px-3 pb-10 pt-28 text-center text-foreground sm:px-4 md:px-12 md:pb-14 md:pt-32"
+      >
+        <div ref={inkRef} aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          {/* Parked under the fold (top: 100%+); wider than viewport — no side edges */}
+          <div
+            data-ink-bank
+            className="absolute left-[-20%] top-full h-[160%] w-[140%] will-change-transform"
+            style={{background: bankGradient}}
+          />
+          <div
+            data-ink-bank
+            className="absolute left-[-35%] top-full h-[150%] w-[170%] will-change-transform"
+            style={{
+              background: `linear-gradient(
+                to top,
+                ${INK} 0%,
+                ${INK} 50%,
+                rgba(8, 9, 10, 0.4) 74%,
+                transparent 100%
+              )`,
+            }}
+          />
+          <div
+            data-ink-bank
+            className="absolute left-[-10%] top-full h-[155%] w-[130%] will-change-transform"
+            style={{
+              background: `linear-gradient(
+                to top,
+                ${INK} 0%,
+                rgba(8, 9, 10, 0.85) 62%,
+                transparent 100%
+              )`,
+            }}
+          />
+          <div data-ink="veil" className="absolute inset-0" style={{backgroundColor: INK}} />
         </div>
+
+        <div className="relative z-10 w-full mix-blend-difference text-white">
+          <LineReveal
+            as="p"
+            start="top 85%"
+            className="mx-auto max-w-[40ch] font-sans text-[clamp(1.15rem,1.8vw,1.75rem)] font-medium leading-[1.3] tracking-[-0.03em] text-white/70 md:max-w-none"
+          >
+            {lead}
+          </LineReveal>
+
+          <LineReveal
+            as="h2"
+            start="top 88%"
+            delay={0.35}
+            stagger={0.16}
+            duration={1.05}
+            className="mx-auto mt-32 w-full max-w-[min(96vw,80rem)] font-sans text-[clamp(3.25rem,10vw,10rem)] font-bold uppercase leading-[0.88] tracking-[-0.04em] text-white md:mt-44"
+          >
+            {headline}
+          </LineReveal>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function WhatWeDoBand({
+  label,
+  cards,
+  active,
+  setActive,
+}: {
+  label: string | null | undefined
+  cards: HomeServiceCard[]
+  active: number | null
+  setActive: (i: number | null) => void
+}) {
+  const [panelIndex, setPanelIndex] = useState<number | null>(null)
+  const panelOpen = panelIndex !== null
+  const panelCard = panelIndex !== null ? cards[panelIndex] : null
+
+  return (
+    <section
+      data-theme="dark"
+      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden bg-background py-24 text-foreground md:py-28"
+      style={{backgroundColor: INK}}
+      onMouseLeave={() => {
+        if (!panelOpen) setActive(null)
+      }}
+    >
+      {/* Full-bleed media — each layer already darkened so nothing flashes bright */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        {cards.map((item, i) => (
+          <ServiceBackground
+            key={item._key}
+            card={item}
+            active={i === active}
+          />
+        ))}
       </div>
 
-      <div className="shrink-0 px-3 pt-4 pb-8 sm:px-4 md:px-20 md:pt-2.5 md:pb-8">
-        <div className="grid items-start gap-x-4 gap-y-6 md:grid-cols-[minmax(6.5rem,1fr)_minmax(0,2.4fr)_minmax(10rem,1.2fr)_minmax(6.5rem,1fr)] md:gap-x-6">
-          <p className="font-mono text-[11px] uppercase tracking-label text-foreground">
-            {label}
-          </p>
+      <div className="page-chrome relative z-10 grid w-full items-start gap-6 md:grid-cols-[minmax(9rem,18vw)_minmax(0,1fr)] md:gap-12 lg:gap-16">
+        <p className="max-w-[14ch] text-[15px] leading-[0.95] text-foreground/70 md:text-base md:leading-[0.95]">
+          {label?.trim() || 'How we can help'}
+        </p>
 
-          <div className="flex gap-x-6 md:gap-x-10">
-            <div
-              className="flex flex-col gap-y-1 md:gap-y-0.5"
-              role="tablist"
-              aria-label={label ?? 'Services'}
-            >
-              {cards.map((item, i) => {
-                const isActive = i === active
-                return (
-                  <button
-                    key={item._key}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    aria-controls={`home-service-panel-${item._key}`}
-                    id={`home-service-tab-${item._key}`}
-                    onMouseEnter={() => setActive(i)}
-                    onFocus={() => setActive(i)}
-                    onClick={() => setActive(i)}
-                    className={`block text-left font-sans text-[clamp(1.5rem,2.1vw,2.5rem)] font-semibold leading-none tracking-[-0.05em] transition-colors duration-150 ${
-                      isActive ? 'text-foreground' : 'text-foreground/15 hover:text-foreground/40'
+        <ul className="flex min-w-0 flex-col" role="list">
+          {cards.map((item, i) => {
+            const isActive = i === active
+            const openPanel = () => {
+              setActive(i)
+              setPanelIndex(i)
+            }
+
+            return (
+              <li key={item._key} onMouseEnter={() => setActive(i)}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isActive}
+                  aria-haspopup="dialog"
+                  onClick={openPanel}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
+                      openPanel()
+                    }
+                  }}
+                  onFocus={() => setActive(i)}
+                  className="group cursor-pointer outline-none focus-visible:outline-none"
+                >
+                  <p
+                    className={`font-sans text-[clamp(3.25rem,9.5vw,8rem)] font-bold uppercase leading-[0.95] tracking-[-0.045em] transition-colors duration-200 ${
+                      isActive || active === null
+                        ? 'text-foreground'
+                        : 'text-foreground/20'
                     }`}
                   >
-                    {i + 1}
-                  </button>
-                )
-              })}
-            </div>
+                    <span className="inline-flex items-baseline">
+                      {item.title}
+                      {isActive ? (
+                        <span
+                          aria-hidden
+                          className="ml-[0.18em] inline-block h-[0.14em] w-[0.14em] -translate-y-[0.55em] rounded-full bg-accent"
+                        />
+                      ) : null}
+                    </span>
+                  </p>
 
-            <div
-              id={`home-service-panel-${card._key}`}
-              role="tabpanel"
-              aria-labelledby={`home-service-tab-${card._key}`}
-              className="min-w-0 pt-0.5"
-            >
-              <p className="font-sans text-[clamp(1.35rem,2vw,2rem)] font-semibold uppercase leading-[1.05] tracking-[-0.03em] text-foreground">
-                {card.title}
-              </p>
-              {card.priceLine ? (
-                <p className="mt-3 font-mono text-[11px] uppercase tracking-label text-foreground/50">
-                  {card.priceLine}
-                </p>
-              ) : null}
-              <Link
-                href={href}
-                className="group mt-4 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-foreground/55 transition-colors duration-300 hover:text-foreground"
-              >
-                {card.linkLabel?.trim() || 'See how'}
-                <ArrowUpRight
-                  aria-hidden
-                  size={12}
-                  strokeWidth={2.5}
-                  className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                />
-              </Link>
-            </div>
-          </div>
-
-          <div className="min-w-0 md:pt-1">
-            <p className="max-w-[34ch] text-[14px] leading-snug text-foreground/70 md:text-[15px]">
-              {card.body}
-            </p>
-          </div>
-
-          <div className="hidden md:block" aria-hidden />
-        </div>
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      isActive ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                    }`}
+                  >
+                    <div className="min-h-0 overflow-hidden">
+                      <div
+                        className={`flex items-start gap-3 pb-5 pt-3 md:gap-4 md:pb-7 md:pt-4 ${
+                          isActive ? 'opacity-100' : 'opacity-0'
+                        } transition-opacity duration-300`}
+                      >
+                        <ServiceElbowArrow className="mt-0.5 size-6 shrink-0 overflow-visible text-foreground md:mt-1 md:size-10" />
+                        <div className="min-w-0 max-w-[36ch]">
+                          <p className="text-[15px] leading-snug text-foreground/80 md:text-base">
+                            {item.body}
+                          </p>
+                          <span className="mt-4 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-foreground/70 transition-colors duration-300 group-hover:text-foreground">
+                            {item.linkLabel?.trim() || 'See how it works'}
+                            <ArrowUpRight
+                              aria-hidden
+                              size={12}
+                              strokeWidth={2.5}
+                              className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                            />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            )
+          })}
+        </ul>
       </div>
+
+      <ServiceDetailPanel
+        open={panelOpen}
+        onClose={() => setPanelIndex(null)}
+        content={
+          panelCard
+            ? {
+                title: panelCard.title,
+                headline: panelCard.headline,
+                eyebrow: panelCard.detailEyebrow,
+                body: panelCard.detailBody?.trim() || panelCard.body,
+                meta: panelCard.priceLine,
+                timelineLine: panelCard.timelineLine,
+                timeline: panelCard.timeline,
+                sceneLine: panelCard.sceneLine,
+                imageUrl: panelCard.detailImageUrl,
+                deliverables: panelCard.deliverables,
+                capabilities: panelCard.capabilities,
+                idealFor: panelCard.idealFor,
+                notAFit: panelCard.notAFit,
+                stepsLabel: panelCard.stepsLabel,
+                steps: panelCard.steps,
+                projects: panelCard.projects,
+                testimonials: panelCard.testimonials,
+                clients: panelCard.clients,
+                proofAnchor: panelCard.proofAnchor,
+                nextStep: panelCard.nextStep,
+                routingLine: panelCard.routingLine,
+              }
+            : null
+        }
+      />
     </section>
+  )
+}
+
+function ServiceBackground({
+  card,
+  active,
+}: {
+  card: HomeServiceCard
+  active: boolean
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoUrl = card.backgroundVideoUrl
+    ? stegaClean(card.backgroundVideoUrl).trim()
+    : ''
+  const vimeoSrc = videoUrl && isVimeoUrl(videoUrl) ? vimeoBackgroundSrc(videoUrl) : null
+  const mp4Src = videoUrl && !isVimeoUrl(videoUrl) ? videoUrl : null
+  const hasMedia = Boolean(card.backgroundImageUrl || vimeoSrc || mp4Src)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !mp4Src) return
+    if (active) {
+      void video.play().catch(() => {})
+    } else {
+      video.pause()
+    }
+  }, [active, mp4Src])
+
+  if (!hasMedia) return null
+
+  return (
+    <div
+      className={`absolute inset-0 transition-opacity duration-500 ease-out ${
+        active ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
+      {(vimeoSrc || mp4Src) && card.backgroundImageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={card.backgroundImageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : null}
+
+      {vimeoSrc ? (
+        <iframe
+          title=""
+          src={active ? vimeoSrc : undefined}
+          className="absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 border-0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          tabIndex={-1}
+        />
+      ) : mp4Src ? (
+        <video
+          ref={videoRef}
+          src={mp4Src}
+          poster={card.backgroundImageUrl || undefined}
+          className="absolute inset-0 h-full w-full object-cover"
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        />
+      ) : card.backgroundImageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={card.backgroundImageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : null}
+
+      {/* Scrim lives on the layer — fades in already dark, no bright flash */}
+      <div className="absolute inset-0 bg-black/88" />
+    </div>
   )
 }

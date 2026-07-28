@@ -6,10 +6,16 @@ import {Draggable, DURATION, EASE, gsap, prefersReducedMotion} from '@/component
 import {useGSAP} from '@gsap/react'
 import {ArrowUpRight} from 'lucide-react'
 import Link from 'next/link'
-import {useMemo, useRef} from 'react'
+import {useEffect, useMemo, useRef} from 'react'
 
 type HomeProjectSliderProps = {
   projects: WorkProjectCard[]
+  /** When false, autoplay is held (e.g. while the hero scrub shrinks the strip). */
+  autoplay?: boolean
+  /** Hero scrub owns track x — disable drag / normalize so it isn't fought. */
+  interactionLock?: boolean
+  /** Keep overflow visible (hero edge-bleed). Don't toggle mid-scroll — that jitters. */
+  bleed?: boolean
 }
 
 const AUTOPLAY_MS = 4200
@@ -21,9 +27,20 @@ const LOOP_COPIES = 3
  * duplicated sets. Autoplay + drag. Project info on hover.
  * Reduced motion → single set, native horizontal scroll.
  */
-export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
+export function HomeProjectSlider({
+  projects,
+  autoplay = true,
+  interactionLock = false,
+  bleed = false,
+}: HomeProjectSliderProps) {
   const scope = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLUListElement>(null)
+  const autoplayRef = useRef(autoplay)
+  autoplayRef.current = autoplay
+  const lockRef = useRef(interactionLock)
+  lockRef.current = interactionLock
+  const autoplayControls = useRef<{start: () => void; stop: () => void} | null>(null)
+  const draggableRef = useRef<Draggable | null>(null)
 
   const items = useMemo(
     () => projects.filter((p) => p._id && (p.coverImage?.asset?._ref || p.videoUrl)),
@@ -78,7 +95,7 @@ export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
        * project stays centered — never animate back to the start.
        */
       const normalize = () => {
-        if (setLen < 1) return
+        if (lockRef.current || setLen < 1) return
         const step = cardStep()
         if (!step) return
         const setW = step * setLen
@@ -96,6 +113,7 @@ export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
 
       /** Step forward/back one card — always adjacent, then silent-wrap. */
       const goBy = (dir: number, duration = 0.65) => {
+        if (lockRef.current) return
         if (!dir) {
           gsap.set(track, {x: centerX(index)})
           draggable?.update()
@@ -126,6 +144,7 @@ export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
 
       /** Snap to a concrete card index (drag), then silent-wrap into the middle. */
       const goTo = (next: number, duration = 0.65) => {
+        if (lockRef.current) return
         if (next < 0 || next > cards.length - 1) {
           normalize()
           return
@@ -151,12 +170,14 @@ export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
 
       const startAutoplay = () => {
         stopAutoplay()
-        if (paused || setLen < 2) return
+        if (paused || !autoplayRef.current || setLen < 2) return
         autoplayTimer = setInterval(() => {
-          if (paused) return
+          if (paused || !autoplayRef.current) return
           goBy(1)
         }, AUTOPLAY_MS)
       }
+
+      autoplayControls.current = {start: startAutoplay, stop: stopAutoplay}
 
       // Intro — equal size, full opacity, cover always visible
       gsap.set(cards, {y: 48, autoAlpha: 0, scale: 1, opacity: 1})
@@ -199,16 +220,22 @@ export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
         inertia: false,
         bounds: undefined,
         zIndexBoost: false,
+        // Let vertical page scroll win on touch; only claim clear horizontal drags.
+        allowNativeTouchScrolling: true,
+        lockAxis: true,
         onPress() {
+          if (lockRef.current) return
           dragMoved = false
           paused = true
           stopAutoplay()
           gsap.killTweensOf(track)
         },
         onDrag() {
+          if (lockRef.current) return
           if (Math.abs(this.deltaX) > 3) dragMoved = true
         },
         onDragEnd() {
+          if (lockRef.current) return
           const x = this.x
           let closest = index
           let closestDist = Infinity
@@ -235,6 +262,7 @@ export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
           startAutoplay()
         },
       })[0]
+      draggableRef.current = draggable
 
       const onClickCapture = (event: MouseEvent) => {
         if (dragMoved) {
@@ -257,6 +285,7 @@ export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
       root.addEventListener('pointerleave', onPointerLeave)
 
       const onResize = () => {
+        if (lockRef.current) return
         gsap.killTweensOf(track)
         gsap.set(track, {x: centerX(index)})
         normalize()
@@ -275,6 +304,8 @@ export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
 
       return () => {
         stopAutoplay()
+        autoplayControls.current = null
+        draggableRef.current = null
         draggable.kill()
         track.removeEventListener('click', onClickCapture, true)
         root.removeEventListener('pointerenter', onPointerEnter)
@@ -286,13 +317,28 @@ export function HomeProjectSlider({projects}: HomeProjectSliderProps) {
     {scope, dependencies: [items.length]},
   )
 
+  useEffect(() => {
+    if (autoplay) autoplayControls.current?.start()
+    else autoplayControls.current?.stop()
+  }, [autoplay])
+
+  useEffect(() => {
+    const d = draggableRef.current
+    if (!d) return
+    if (interactionLock) d.disable()
+    else d.enable()
+  }, [interactionLock])
+
   if (items.length === 0) return null
 
   return (
-    <div ref={scope} className="relative mt-40 w-full overflow-hidden md:mt-52">
+    <div
+      ref={scope}
+      className={`relative w-full ${bleed ? 'overflow-visible' : 'overflow-hidden'}`}
+    >
       <ul
         ref={trackRef}
-        data-lenis-prevent
+        data-hero-track
         className="relative flex w-max cursor-grab items-stretch will-change-transform motion-reduce:w-full motion-reduce:cursor-default motion-reduce:overflow-x-auto motion-reduce:px-3 active:cursor-grabbing sm:motion-reduce:px-4"
         aria-label="Selected projects"
       >

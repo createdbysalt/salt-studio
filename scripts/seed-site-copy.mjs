@@ -4,8 +4,8 @@
  * Source of truth: salt-studio-knowledge-base/studio/website/copy/*.md
  * (2026-07-26, conversion-reviewed). What gets written:
  *
- *   PUBLISHED  clients ×5 · CTA ×1 · home · workPage · contactPage · servicesPage
- *              · settings (patched, not replaced)
+ *   PUBLISHED  clients ×5 · CTA ×1 · services ×3 · home · workPage · contactPage
+ *              · servicesPage · settings (patched, not replaced)
  *   DRAFTS     project ×5 (case studies — STATUS: HOLD until launches/permissions)
  *              · page "About" (BLOCKED on [GABRIELLA] founder beats)
  *
@@ -239,6 +239,352 @@ const ctaDoc = {
   link: '/contact',
 }
 
+const deliverable = (key, title, detail) => ({
+  _type: 'serviceDeliverable',
+  _key: key,
+  title,
+  detail,
+})
+const serviceStep = (key, text, lead) => ({
+  _type: 'serviceDetailStep',
+  _key: key,
+  ...(lead ? {lead} : {}),
+  text,
+})
+const timelinePhase = (key, label, duration, detail) => ({
+  _type: 'serviceTimelinePhase',
+  _key: key,
+  label,
+  duration,
+  ...(detail ? {detail} : {}),
+})
+
+// --- Services (published) — homepage How we can help + detail panel --------
+const serviceDocs = [
+  {
+    _id: 'service-ai-builds',
+    _type: 'service',
+    title: 'AI builds',
+    slug: slugFld('ai-builds'),
+    headline: 'AI, built around you',
+    shortDescription:
+      'Custom AI tools built around how your organization actually works — assistants that know your content, answer your people, and carry your voice.',
+    priceLine: 'Pilots from $15,000 · full builds from $75,000',
+    timelineLine: 'Pilot in weeks · full build by milestone',
+    linkLabel: 'See how it works',
+    sortOrder: 1,
+    timeline: [
+      timelinePhase(
+        'ai-t1',
+        'Pilot',
+        '2–4 weeks',
+        'Bounded assessment on your real content, with success criteria agreed up front.',
+      ),
+      timelinePhase(
+        'ai-t2',
+        'Build',
+        'By milestone',
+        'Fixed scope, milestone billing, a hard end date.',
+      ),
+      timelinePhase(
+        'ai-t3',
+        'Handoff',
+        '1 week',
+        'Training, admin access, and ownership — your data, your accounts, your tool.',
+      ),
+    ],
+    detailEyebrow: 'How it works',
+    detailBody:
+      'Custom AI tools for organizations with a mission — assistants that know your content, answer your people, and carry your voice. Not a chatbot bolted on. A tool built around how your organization actually works.\n\nWe take one build at a time. Fixed scope, clear milestones, a hard timeline — so you always know where things stand.',
+    sceneLine:
+      'Monday morning: thirty questions came in overnight. All answered, in your voice, with your actual information. Your team reads coffee-in-hand instead of triaging.',
+    stepsLabel: 'How it works',
+    steps: [
+      serviceStep(
+        'ai-step-1',
+        'A bounded assessment on your real content, with success criteria we agree on before we start. Enough for a board to approve without a leap of faith.',
+        'Pilot first.',
+      ),
+      serviceStep('ai-step-2', 'Fixed scope, milestone billing, a hard timeline.', 'Then the build.'),
+      serviceStep('ai-step-3', 'Your data, your accounts, your tool.', 'Then it’s yours.'),
+    ],
+    deliverables: [
+      deliverable(
+        'ai-d1',
+        'Scoped AI pilot',
+        'Working proof on your real content, with success criteria written down before we start.',
+      ),
+      deliverable(
+        'ai-d2',
+        'Production assistant or tool',
+        'Built around your workflows — not a generic chatbot skin.',
+      ),
+      deliverable(
+        'ai-d3',
+        'Knowledge connected to your content',
+        'Grounded answers from the sources your organization already trusts.',
+      ),
+      deliverable(
+        'ai-d4',
+        'Admin handoff & training',
+        'Your team can run it — accounts, data, and ownership stay with you.',
+      ),
+      deliverable(
+        'ai-d5',
+        'Milestone plan & timeline',
+        'Fixed scope, visible checkpoints, no open-ended build.',
+      ),
+    ],
+    capabilities: [
+      'capability-openai',
+      'capability-claude',
+      'capability-ai-sdk',
+      'capability-mcp',
+      'capability-hermes',
+      'capability-nextjs',
+      'capability-sanity',
+      'capability-typescript',
+      'capability-python',
+      'capability-supabase',
+    ].map(keyedRef),
+    workCategories: [keyedRef('workCategory-ai-automation')],
+    idealFor: [
+      'Your organization has a mission — and real content people ask about every day',
+      'You’d rather prove it works with a pilot than bet the budget on a promise',
+      'You want fixed scope, clear milestones, and one build at a time',
+    ],
+    notAFit: [
+      'You need an open-ended R&D engagement with no success criteria',
+      'You want a generic off-the-shelf chatbot with a logo slap',
+      'You’re looking for an agency of record to staff a standing AI team',
+    ],
+    featuredProjects: [keyedRef('project-mfi-canada')],
+    clients: [keyedRef('client-mfi-canada')],
+    proofAnchor:
+      'Built alongside our work with churches, ministries, and small teams — organizations with real content and real questions.',
+    nextStep: ref('cta-book-discovery-call'),
+  },
+  {
+    _id: 'service-salt-site',
+    _type: 'service',
+    title: 'The Salt site',
+    slug: slugFld('the-salt-site'),
+    headline: 'The Salt site',
+    shortDescription:
+      'A complete website — brand, copy, design, build — delivered in weeks, not months. One fixed investment, built closely with the one person who can say yes.',
+    priceLine: 'From $5,500 · a limited number each year',
+    timelineLine: 'Delivered in weeks, not months',
+    linkLabel: 'See how it works',
+    sortOrder: 2,
+    timeline: [
+      timelinePhase(
+        'site-t1',
+        'Kickoff & scope',
+        'Week 1',
+        'Scope written down, launch week locked, your time commitment listed in hours.',
+      ),
+      timelinePhase(
+        'site-t2',
+        'Brand, copy & design',
+        '2–4 weeks',
+        'Direction, writing, and design in one focused pass — not an endless loop.',
+      ),
+      timelinePhase(
+        'site-t3',
+        'Build & launch',
+        '2–3 weeks',
+        'Build, CMS handoff, analytics, and a known launch week.',
+      ),
+    ],
+    detailEyebrow: 'How it works',
+    detailBody:
+      'A complete website — brand, copy, design, build — delivered in weeks, not months. One fixed investment, one focused process, built closely with the one person who can say yes.\n\nWe run the project. Your total time commitment is listed in hours, up front. You’ll know the launch week before you sign.',
+    stepsLabel: 'The deal, plainly',
+    steps: [
+      serviceStep(
+        'site-step-1',
+        'Scope is written down before we start. New ideas go to a parked list you can buy later — the price you signed is the price.',
+      ),
+      serviceStep('site-step-2', 'You’ll know the launch week before you sign.'),
+      serviceStep(
+        'site-step-3',
+        'We run the project. Your total time commitment is listed in hours, up front.',
+      ),
+    ],
+    deliverables: [
+      deliverable(
+        'site-d1',
+        'Brand direction',
+        'Visual identity and voice that fit the organization — not a template skin.',
+      ),
+      deliverable(
+        'site-d2',
+        'Site copy',
+        'Clear, conversion-minded writing that says what you do and who it’s for.',
+      ),
+      deliverable(
+        'site-d3',
+        'Design & build',
+        'A fast, modern site on a stack you can keep — typically Next.js + Sanity.',
+      ),
+      deliverable(
+        'site-d4',
+        'CMS handoff',
+        'Editable content without a developer for every change.',
+      ),
+      deliverable(
+        'site-d5',
+        'Launch-ready analytics',
+        'Tracking set up so you can see what the site is actually doing.',
+      ),
+    ],
+    capabilities: [
+      'capability-brand-strategy',
+      'capability-visual-identity',
+      'capability-copywriting',
+      'capability-content-strategy',
+      'capability-figma',
+      'capability-nextjs',
+      'capability-sanity',
+      'capability-tailwind',
+      'capability-typescript',
+      'capability-seo-aeo',
+      'capability-conversion-design',
+      'capability-vercel',
+    ].map(keyedRef),
+    workCategories: [
+      keyedRef('workCategory-web-software'),
+      keyedRef('workCategory-brand-identity'),
+    ],
+    idealFor: [
+      'One person who can say yes — websites are single-decision-maker by design',
+      'You want a fixed scope, a visible price, and a known launch week',
+      'You’re ready for a complete site, not an endless redesign loop',
+    ],
+    notAFit: [
+      'The scope needs to stay open while we build',
+      'Decisions run through a committee',
+      'You need an agency of record — we take a few projects a year, and give them everything',
+    ],
+    featuredProjects: [
+      keyedRef('project-crossroads-life-church'),
+      keyedRef('project-cultivated'),
+      keyedRef('project-photon-studio'),
+    ],
+    clients: [
+      keyedRef('client-crossroads-life-church'),
+      keyedRef('client-cultivated'),
+      keyedRef('client-photon-studio'),
+      keyedRef('client-enjoy-life-church'),
+    ],
+    nextStep: ref('cta-book-discovery-call'),
+  },
+  {
+    _id: 'service-site-care',
+    _type: 'service',
+    title: 'Site care',
+    slug: slugFld('site-care'),
+    headline: 'Site care',
+    shortDescription:
+      'For the sites we’ve built: fast, secure, and cared for — so you never think about them.',
+    priceLine: 'From $100/month',
+    timelineLine: 'Ongoing, month to month',
+    linkLabel: 'See how it works',
+    sortOrder: 3,
+    timeline: [
+      timelinePhase(
+        'care-t1',
+        'Onboarding',
+        'First week',
+        'Access, monitoring, and a clear picture of what’s covered.',
+      ),
+      timelinePhase(
+        'care-t2',
+        'Ongoing care',
+        'Month to month',
+        'Updates, performance, security — so you never think about the site.',
+      ),
+      timelinePhase(
+        'care-t3',
+        'Exit (anytime)',
+        'Free',
+        'You take everything with you. No ransom, no lock-in.',
+      ),
+    ],
+    detailEyebrow: 'How it works',
+    detailBody:
+      'For the sites we’ve built: we keep them fast, secure, and cared for — so you never think about them.\n\nAnd if you ever want to leave, you take everything with you. Free. That’s the deal.',
+    stepsLabel: 'What’s covered',
+    steps: [
+      serviceStep(
+        'care-step-1',
+        'Performance watched and tended — so the site stays as quick as the day it launched.',
+        'Keep it fast.',
+      ),
+      serviceStep(
+        'care-step-2',
+        'Updates, monitoring, and the unglamorous work that keeps things from breaking.',
+        'Keep it secure.',
+      ),
+      serviceStep(
+        'care-step-3',
+        'If you ever want out, you take everything with you. No ransom, no lock-in.',
+        'Leave free.',
+      ),
+    ],
+    deliverables: [
+      deliverable('care-d1', 'Hosting & upkeep', 'The site stays online, updated, and watched.'),
+      deliverable(
+        'care-d2',
+        'Security & dependency updates',
+        'The boring maintenance that prevents expensive surprises.',
+      ),
+      deliverable(
+        'care-d3',
+        'Performance check-ins',
+        'We notice when things slow down — before your visitors do.',
+      ),
+      deliverable(
+        'care-d4',
+        'Content help when you need it',
+        'Light edits and guidance so you’re never stuck in the CMS alone.',
+      ),
+      deliverable('care-d5', 'Clean exit, anytime', 'You own the site. Leaving costs nothing.'),
+    ],
+    capabilities: [
+      'capability-vercel',
+      'capability-sanity',
+      'capability-nextjs',
+      'capability-ga4',
+      'capability-gtm',
+      'capability-resend',
+    ].map(keyedRef),
+    workCategories: [keyedRef('workCategory-web-software')],
+    idealFor: [
+      'You already have a Salt-built site (or one we’re about to launch)',
+      'You want the site cared for without thinking about it every month',
+      'You value an exit that’s free and clean',
+    ],
+    notAFit: [
+      'You’re looking for a cold entry point — care is for sites we’ve built',
+      'You need a full retainer agency for ongoing marketing campaigns',
+      'You want us to maintain a site we didn’t build without a conversation first',
+    ],
+    featuredProjects: [
+      keyedRef('project-crossroads-life-church'),
+      keyedRef('project-cultivated'),
+      keyedRef('project-enjoy-life-church'),
+    ],
+    clients: [
+      keyedRef('client-crossroads-life-church'),
+      keyedRef('client-cultivated'),
+      keyedRef('client-enjoy-life-church'),
+    ],
+    routingLine:
+      'Have a site that needs a caretaker? Worth asking on the call — sometimes the answer is yes.',
+  },
+]
+
 // --- home (published) — homepage.md ----------------------------------------
 const homeDoc = {
   _id: 'home',
@@ -272,32 +618,11 @@ const homeDoc = {
       _key: 'services',
       enabled: true,
       internalName: 'Services Triad',
-      label: 'What we do',
-      cards: [
-        {
-          _type: 'homeServiceCard',
-          _key: 'svc-ai',
-          title: 'AI builds',
-          body: 'Custom AI tools built around how your organization actually works — assistants that know your content, answer your people, and carry your voice.',
-          priceLine: 'Pilots from $15,000',
-          linkLabel: 'See how it works',
-        },
-        {
-          _type: 'homeServiceCard',
-          _key: 'svc-site',
-          title: 'The Salt site',
-          body: 'A complete website — brand, copy, design, build — delivered in weeks, not months. One fixed investment, built closely with the one person who can say yes.',
-          priceLine: 'From $5,500',
-          linkLabel: 'See how it works',
-        },
-        {
-          _type: 'homeServiceCard',
-          _key: 'svc-care',
-          title: 'Site care',
-          body: 'For the sites we’ve built: fast, secure, and cared for — so you never think about them.',
-          priceLine: 'From $100/month',
-          linkLabel: 'See how it works',
-        },
+      label: 'How we can help',
+      services: [
+        {_type: 'reference', _ref: 'service-ai-builds', _key: 'svc-ai'},
+        {_type: 'reference', _ref: 'service-salt-site', _key: 'svc-site'},
+        {_type: 'reference', _ref: 'service-site-care', _key: 'svc-care'},
       ],
     },
     {
@@ -954,6 +1279,7 @@ const published = [
   ...workCategoryDocs,
   ...capabilityDocs,
   ctaDoc,
+  ...serviceDocs,
   homeDoc,
   workPageDoc,
   contactPageDoc,
