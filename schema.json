@@ -1832,6 +1832,36 @@
     }
   },
   {
+    "type": "type",
+    "name": "callToAction.reference",
+    "value": {
+      "type": "object",
+      "attributes": {
+        "_ref": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          }
+        },
+        "_type": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string",
+            "value": "reference"
+          }
+        },
+        "_weak": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "boolean"
+          },
+          "optional": true
+        }
+      },
+      "dereferencesTo": "callToAction"
+    }
+  },
+  {
     "name": "homeFinalCtaSection",
     "type": "type",
     "value": {
@@ -1872,10 +1902,11 @@
           },
           "optional": true
         },
-        "ctaLabel": {
+        "cta": {
           "type": "objectAttribute",
           "value": {
-            "type": "string"
+            "type": "inline",
+            "name": "callToAction.reference"
           },
           "optional": true
         },
@@ -4330,36 +4361,6 @@
     }
   },
   {
-    "type": "type",
-    "name": "callToAction.reference",
-    "value": {
-      "type": "object",
-      "attributes": {
-        "_ref": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string"
-          }
-        },
-        "_type": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "string",
-            "value": "reference"
-          }
-        },
-        "_weak": {
-          "type": "objectAttribute",
-          "value": {
-            "type": "boolean"
-          },
-          "optional": true
-        }
-      },
-      "dereferencesTo": "callToAction"
-    }
-  },
-  {
     "name": "service",
     "type": "document",
     "attributes": {
@@ -4861,6 +4862,20 @@
         "value": {
           "type": "inline",
           "name": "callToAction.reference"
+        },
+        "optional": true
+      },
+      "fitCheckLabel": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "fitCheckHref": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
         },
         "optional": true
       },

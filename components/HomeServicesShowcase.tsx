@@ -83,6 +83,7 @@ export type HomeServiceCard = {
     buttonLabel: string
     href: string
   } | null
+  fitCheck?: {label: string; href: string} | null
   routingLine?: string | null
 }
 
@@ -130,48 +131,53 @@ export function HomeServicesShowcase({
 }
 
 /**
- * Pin the type beat fully white first. Near the end of the pin, off-page ink
- * banks rise from below the fold and invert the type via mix-blend.
+ * GSAP curve-swipe ink wipe (MorphSVG), scrubbed by scroll instead of click.
+ * Paths match https://demos.gsap.com/demo/curve-swipe/ — hidden → bulge → cover.
+ */
+const CURVE_PATH_HIDDEN = 'M 0 100 V 100 Q 50 100 100 100 V 100 z'
+const CURVE_PATH_BULGE = 'M 0 100 V 50 Q 50 0 100 50 V 100 z'
+const CURVE_PATH_COVER = 'M 0 100 V 0 Q 50 0 100 0 V 100 z'
+
+/**
+ * Pin the type beat. As the section settles into view, a curved ink swipe
+ * morphs up from the fold and inverts the type via mix-blend.
  */
 function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
   const triggerRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLElement>(null)
-  const inkRef = useRef<HTMLDivElement>(null)
+  const pathRef = useRef<SVGPathElement>(null)
   const themeDarkRef = useRef(false)
 
   useGSAP(
     () => {
-      if (!triggerRef.current || !panelRef.current || !inkRef.current) return
+      if (!triggerRef.current || !panelRef.current || !pathRef.current) return
 
       const trigger = triggerRef.current
       const panel = panelRef.current
-      const ink = inkRef.current
-      const banks = ink.querySelectorAll<HTMLElement>('[data-ink-bank]')
-      const veil = ink.querySelector<HTMLElement>('[data-ink="veil"]')
+      const path = pathRef.current
 
       if (prefersReducedMotion()) {
         panel.setAttribute('data-theme', 'dark')
         gsap.set(panel, {backgroundColor: INK})
-        gsap.set(banks, {yPercent: -70})
-        if (veil) gsap.set(veil, {opacity: 1})
+        gsap.set(path, {attr: {d: CURVE_PATH_COVER}})
         return
       }
 
       gsap.set(panel, {backgroundColor: PAPER})
-      // Fully below the fold — soft crown must not peek until the rise starts.
-      gsap.set(banks, {yPercent: 8})
-      if (veil) gsap.set(veil, {opacity: 0})
+      gsap.set(path, {attr: {d: CURVE_PATH_HIDDEN}})
       themeDarkRef.current = false
       panel.removeAttribute('data-theme')
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger,
-          start: 'top top',
+          // Begin while the type beat is filling the viewport — not after a
+          // full white pin + extra scroll at the bottom.
+          start: 'top 30%',
           end: 'bottom bottom',
           scrub: 0.35,
           onUpdate: (self) => {
-            const dark = self.progress > 0.82
+            const dark = self.progress > 0.55
             if (dark === themeDarkRef.current) return
             themeDarkRef.current = dark
             if (dark) panel.setAttribute('data-theme', 'dark')
@@ -180,12 +186,12 @@ function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
         },
       })
 
-      const [a, b, c] = banks
-      // Hold white for most of the pin; rise only in the last stretch.
-      if (a) tl.fromTo(a, {yPercent: 8}, {yPercent: -70, ease: 'power1.inOut', duration: 0.38}, 0.58)
-      if (b) tl.fromTo(b, {yPercent: 10}, {yPercent: -66, ease: 'power2.inOut', duration: 0.36}, 0.62)
-      if (c) tl.fromTo(c, {yPercent: 6}, {yPercent: -74, ease: 'sine.inOut', duration: 0.38}, 0.6)
-      if (veil) tl.to(veil, {opacity: 1, ease: 'none', duration: 0.14}, 0.88)
+      // Same two-stage morph as the GSAP curve-swipe demo, scroll-scrubbed.
+      tl.to(path, {morphSVG: CURVE_PATH_BULGE, ease: 'power2.in', duration: 0.45}, 0).to(
+        path,
+        {morphSVG: CURVE_PATH_COVER, ease: 'power2.out', duration: 0.55},
+        0.45,
+      )
 
       return () => {
         tl.scrollTrigger?.kill()
@@ -196,55 +202,20 @@ function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
     {scope: triggerRef},
   )
 
-  // Soft top only; solid ink below extends off-page so you never see a blob outline.
-  const bankGradient = `linear-gradient(
-    to top,
-    ${INK} 0%,
-    ${INK} 58%,
-    rgba(8, 9, 10, 0.55) 78%,
-    transparent 100%
-  )`
-
   return (
     <div ref={triggerRef} className="relative h-[160vh]">
       <section
         ref={panelRef}
         className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden bg-background px-3 pb-10 pt-28 text-center text-foreground sm:px-4 md:px-12 md:pb-14 md:pt-32"
       >
-        <div ref={inkRef} aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-          {/* Parked under the fold (top: 100%+); wider than viewport — no side edges */}
-          <div
-            data-ink-bank
-            className="absolute left-[-20%] top-full h-[160%] w-[140%] will-change-transform"
-            style={{background: bankGradient}}
-          />
-          <div
-            data-ink-bank
-            className="absolute left-[-35%] top-full h-[150%] w-[170%] will-change-transform"
-            style={{
-              background: `linear-gradient(
-                to top,
-                ${INK} 0%,
-                ${INK} 50%,
-                rgba(8, 9, 10, 0.4) 74%,
-                transparent 100%
-              )`,
-            }}
-          />
-          <div
-            data-ink-bank
-            className="absolute left-[-10%] top-full h-[155%] w-[130%] will-change-transform"
-            style={{
-              background: `linear-gradient(
-                to top,
-                ${INK} 0%,
-                rgba(8, 9, 10, 0.85) 62%,
-                transparent 100%
-              )`,
-            }}
-          />
-          <div data-ink="veil" className="absolute inset-0" style={{backgroundColor: INK}} />
-        </div>
+        <svg
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-0 h-full w-full"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+        >
+          <path ref={pathRef} fill={INK} d={CURVE_PATH_HIDDEN} />
+        </svg>
 
         <div className="relative z-10 w-full mix-blend-difference text-white">
           <LineReveal
@@ -416,6 +387,7 @@ function WhatWeDoBand({
                 clients: panelCard.clients,
                 proofAnchor: panelCard.proofAnchor,
                 nextStep: panelCard.nextStep,
+                fitCheck: panelCard.fitCheck,
                 routingLine: panelCard.routingLine,
               }
             : null

@@ -1,12 +1,12 @@
+import {HomeCapabilitiesScrub} from '@/components/HomeCapabilitiesScrub'
 import {normalizeCtaLabel, resolveCtaHref} from '@/components/homeHero'
 import {HomeHeroStage} from '@/components/HomeHeroStage'
 import {HomeServicesShowcase} from '@/components/HomeServicesShowcase'
-import {ClipReveal} from '@/components/motion/ClipReveal'
 import {LineReveal} from '@/components/motion/LineReveal'
 import {filterProjectsWithVideo, withWorkPosters} from '@/components/ProjectGrid'
 import type {HomePageQueryResult} from '@/sanity.types'
 import {sanityFetch} from '@/sanity/lib/live'
-import {allProjectsQuery} from '@/sanity/lib/queries'
+import {allProjectsQuery, capabilitiesQuery} from '@/sanity/lib/queries'
 import {urlForImage} from '@/sanity/lib/utils'
 import {ArrowUpRight} from 'lucide-react'
 import {stegaClean} from 'next-sanity'
@@ -20,17 +20,16 @@ type HomeSection = NonNullable<NonNullable<HomePageQueryResult>['sections']>[num
 type SectionOf<T extends HomeSection['_type']> = Extract<HomeSection, {_type: T}>
 
 const WAITLIST_HREF = '/quiz'
-const CONTACT_HREF = '/contact'
 
 /** TinyWins-style edge-anchored splits. `\n` = intentional line break within a side. */
 const HERO_PRIMARY = {
-  left: 'AI assistants\nand refined websites',
+  left: 'Custom AI\nand websites',
   right: 'for organizations\nwith a mission.',
 } as const
 
 const HERO_SECONDARY = {
   left: "Salt doesn't\noverpower.",
-  right: "It draws out\nwhat's already there.",
+  right: "It draws out what's\nalready there.",
 } as const
 
 /**
@@ -40,8 +39,6 @@ const HERO_SECONDARY = {
  */
 export async function HomePage({data}: HomePageProps) {
   const sections = (data?.sections ?? []).filter((section) => section.enabled !== false)
-  const hero = sections.find((s): s is SectionOf<'homeHeroSection'> => s._type === 'homeHeroSection')
-  const bookingQuarter = hero?.bookingQuarter ? stegaClean(hero.bookingQuarter).trim() : ''
 
   const workSection = sections.find(
     (s): s is SectionOf<'homeWorkSection'> => s._type === 'homeWorkSection',
@@ -97,16 +94,22 @@ export async function HomePage({data}: HomePageProps) {
             return null
           case 'homeProductSection':
             return <HomeProduct key={section._key} section={section} />
-          case 'homePhilosophySection':
-            return <HomePhilosophy key={section._key} section={section} />
-          case 'homeFinalCtaSection':
+          case 'homePhilosophySection': {
+            const finalCta = sections.find(
+              (s): s is SectionOf<'homeFinalCtaSection'> => s._type === 'homeFinalCtaSection',
+            )
             return (
-              <HomeFinalCta
+              <HomePhilosophy
                 key={section._key}
                 section={section}
-                bookingQuarter={bookingQuarter}
+                closingLine={finalCta?.headline ?? null}
+                emailLine={finalCta?.emailLine ?? null}
+                cta={finalCta?.cta ?? null}
               />
             )
+          }
+          case 'homeFinalCtaSection':
+            return null
           default:
             return null
         }
@@ -203,6 +206,10 @@ function HomeServices({section}: {section: SectionOf<'homeServicesSection'>}) {
                 href,
               }
             : null,
+        fitCheck:
+          item!.fitCheckLabel?.trim() && item!.fitCheckHref?.trim()
+            ? {label: item!.fitCheckLabel!, href: item!.fitCheckHref!}
+            : null,
         routingLine: item!.routingLine ?? null,
       }
     })
@@ -241,101 +248,126 @@ function HomeServices({section}: {section: SectionOf<'homeServicesSection'>}) {
   return <HomeServicesShowcase label={section.label} cards={cards} />
 }
 
-function HomeProduct({section}: {section: SectionOf<'homeProductSection'>}) {
-  if (!section.headline && !section.body) return null
+async function HomeProduct({section}: {section: SectionOf<'homeProductSection'>}) {
+  const {data: capabilities} = await sanityFetch({query: capabilitiesQuery})
+
+  // Pill pile — names only. Mix kinds so the drop looks varied, not grouped.
+  const items = (capabilities ?? [])
+    .filter((cap) => Boolean(cap?.name?.trim()))
+    .map((cap) => ({
+      _id: cap._id,
+      name: stegaClean(cap.name ?? '').trim(),
+      kind: cap.kind ?? '',
+    }))
+    .sort((a, b) => {
+      // Stable interleave by kind hash so tools/disciplines aren’t clumped
+      const ha = a._id.charCodeAt(a._id.length - 1) + a.name.length
+      const hb = b._id.charCodeAt(b._id.length - 1) + b.name.length
+      return ha - hb || a.name.localeCompare(b.name)
+    })
+    .map(({_id, name}) => ({_id, name}))
+
+  const waitlistLabel = section.ctaLabel?.trim() || 'Join the waitlist'
+  const waitlistBody = section.body?.trim()
+
+  if (items.length === 0 && !waitlistBody && !section.ctaLabel) return null
 
   return (
-    <ClipReveal className="bg-accent text-white">
-      <section className="page-chrome py-20 md:py-28">
-        <div className="max-w-[720px]">
-          {section.headline ? (
-            <h2 className="font-sans text-[clamp(1.75rem,3.5vw,3.25rem)] font-semibold uppercase leading-[0.95] tracking-[-0.02em]">
-              {section.headline}
-            </h2>
-          ) : null}
-          {section.body ? (
-            <p className="mt-6 max-w-[55ch] text-lg leading-relaxed text-white/85">
-              {section.body}
+    <div className="bg-accent text-white">
+      {items.length > 0 ? (
+        <HomeCapabilitiesScrub items={items} label="What we work with" />
+      ) : null}
+
+      {/* Thin waitlist strip — product CTA parked under the capabilities scrub */}
+      <section className="page-chrome border-t border-white/15 py-10 md:py-12">
+        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end md:gap-10">
+          <div className="min-w-0 max-w-[52ch]">
+            <p className="font-mono text-[11px] uppercase tracking-label text-white/55">
+              {section.headline?.trim() || 'What we’re building'}
             </p>
-          ) : null}
+            {waitlistBody ? (
+              <p className="mt-2 text-base leading-relaxed text-white/85">
+                {waitlistBody}
+              </p>
+            ) : null}
+          </div>
           <Link
             href={WAITLIST_HREF}
-            className="mt-10 inline-flex items-center gap-2 rounded-lg border border-white bg-white px-5 py-3 font-mono text-[12px] font-medium uppercase tracking-label text-[#08090A] transition-colors duration-300 hover:bg-white/90"
+            className="inline-flex shrink-0 items-center gap-2 rounded border border-white bg-white px-5 py-3 font-mono text-[12px] font-medium uppercase tracking-label text-[#08090A] transition-colors duration-300 hover:bg-white/90"
           >
-            {section.ctaLabel?.trim() || 'Join the waitlist'}
+            {waitlistLabel}
             <ArrowUpRight aria-hidden className="h-3.5 w-3.5" strokeWidth={2.5} />
           </Link>
         </div>
       </section>
-    </ClipReveal>
+    </div>
   )
 }
 
-function HomePhilosophy({section}: {section: SectionOf<'homePhilosophySection'>}) {
+function HomePhilosophy({
+  section,
+  closingLine,
+  emailLine,
+  cta,
+}: {
+  section: SectionOf<'homePhilosophySection'>
+  closingLine?: string | null
+  emailLine?: string | null
+  cta?: SectionOf<'homeFinalCtaSection'>['cta']
+}) {
   if (!section.line1 && !section.line2) return null
 
-  return (
-    <section className="page-chrome flex min-h-[70vh] items-center border-t border-foreground/15 py-28 md:py-36">
-      <div className="max-w-[1100px]">
-        {section.line1 ? (
-          <LineReveal as="p" className="text-display font-semibold text-foreground">
-            {section.line1}
-          </LineReveal>
-        ) : null}
-        {section.line2 ? (
-          <LineReveal
-            as="p"
-            delay={0.2}
-            className="mt-8 max-w-[22ch] font-sans text-[clamp(1.5rem,3vw,3rem)] font-semibold leading-[1.05] tracking-[-0.02em] text-foreground/70"
-          >
-            {section.line2}
-          </LineReveal>
-        ) : null}
-      </div>
-    </section>
-  )
-}
+  // "Subtle. Essential. Transformative." → three stacked display lines
+  const displayLines = (section.line1 ?? '')
+    .split('.')
+    .map((part) => part.trim())
+    .filter(Boolean)
 
-function HomeFinalCta({
-  section,
-  bookingQuarter,
-}: {
-  section: SectionOf<'homeFinalCtaSection'>
-  bookingQuarter: string
-}) {
-  const ctaLabel = normalizeCtaLabel(section.ctaLabel)
-  const emailLine = section.emailLine?.trim()
+  const supportBase = section.line2?.trim() ?? ''
+  const closing = closingLine?.trim().replace(/\.$/, '') ?? ''
+  // e.g. "We draw out the good that's already there. One build at a time."
+  const support = [supportBase, closing ? `${closing}.` : null]
+    .filter(Boolean)
+    .join(supportBase.endsWith('.') ? ' ' : '. ')
+  const email = emailLine?.trim()
+  const ctaLabel = normalizeCtaLabel(cta?.buttonLabel)
+  const ctaHref = resolveCtaHref(cta)
 
   return (
-    <section className="page-chrome border-t border-foreground/15 py-24 md:py-32">
-      <div className="max-w-[720px]">
-        {section.headline ? (
-          <LineReveal as="h2" className="text-display font-semibold">
-            {section.headline}
-          </LineReveal>
+    <section
+      aria-label="Philosophy"
+      className="page-chrome flex min-h-[85vh] flex-col items-center justify-center border-t border-foreground/15 py-24 text-center md:min-h-screen md:py-32"
+    >
+      {displayLines.length > 0 ? (
+        <LineReveal as="h2" className="text-display font-semibold text-foreground">
+          {displayLines.map((line) => (
+            <span key={line} className="block">
+              {line}.
+            </span>
+          ))}
+        </LineReveal>
+      ) : null}
+
+      {support ? (
+        <LineReveal
+          as="p"
+          delay={0.22}
+          className="mt-8 max-w-[38ch] text-[clamp(1.125rem,2.1vw,1.5rem)] font-normal leading-snug tracking-[-0.01em] text-foreground/70 md:mt-10"
+        >
+          {support}
+        </LineReveal>
+      ) : null}
+
+      <div className="mt-10 flex flex-col items-center gap-3 md:mt-12">
+        <Link href={ctaHref} className="btn-solid">
+          {ctaLabel}
+          <ArrowUpRight aria-hidden className="h-3.5 w-3.5" strokeWidth={2.5} />
+        </Link>
+        {email ? (
+          <p className="max-w-[42ch] font-mono text-[12px] uppercase tracking-label text-foreground/40">
+            {email}
+          </p>
         ) : null}
-        {section.body ? (
-          <LineReveal
-            as="p"
-            delay={0.15}
-            className="mt-8 max-w-[55ch] text-lg leading-relaxed text-foreground/70"
-          >
-            {section.body}
-          </LineReveal>
-        ) : null}
-        <div className="mt-12 flex flex-col items-start gap-3">
-          <Link href={CONTACT_HREF} className="btn-solid">
-            {ctaLabel}
-            <ArrowUpRight aria-hidden className="h-3.5 w-3.5" strokeWidth={2.5} />
-          </Link>
-          {(bookingQuarter || emailLine) && (
-            <p className="max-w-[42ch] font-mono text-[12px] uppercase tracking-label text-foreground/40">
-              {[bookingQuarter ? `Currently booking ${bookingQuarter}` : null, emailLine]
-                .filter(Boolean)
-                .join(' · ')}
-            </p>
-          )}
-        </div>
       </div>
     </section>
   )

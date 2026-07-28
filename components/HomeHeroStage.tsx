@@ -25,16 +25,15 @@ const EDGE_BLEED = 1.06
 const MAX_END_SCALE = 1.2
 /** Floor so cards stay readable even at the cap (≈8 across). */
 const MIN_END_SCALE = 0.42
-/** Pin height — shorter = less scroll to finish the shrink. */
-const PIN_HEIGHT_CLASS = 'h-[140vh]'
 
 /**
  * Full-viewport hero: WordSwap up top, project strip on the bottom edge.
- * Scroll scrubs the track so the roster spans edge-to-edge. Scale is on the
+ * No pin — the stage scrolls away with the page. Scroll scrubs the track so
+ * the roster shrinks toward edge-to-edge as the hero leaves. Scale is on the
  * track (w-max), not a full-width wrapper.
  */
 export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps) {
-  const triggerRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const [autoplay, setAutoplay] = useState(true)
   const scrubPastRef = useRef(false)
@@ -76,13 +75,11 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
         return {fitX, endScale, setCenter}
       }
 
-      const sticky = triggerEl.querySelector('section')
-      if (sticky) gsap.set(sticky, {overflow: 'visible'})
-
+      // Scrub while the hero scrolls out of view — no sticky pin.
       const st = ScrollTrigger.create({
         trigger: triggerEl,
         start: 'top top',
-        end: 'bottom bottom',
+        end: 'bottom top',
         scrub: 0.35,
         invalidateOnRefresh: true,
         onRefresh: () => {
@@ -120,28 +117,28 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
 
       return () => {
         st.kill()
-        if (sticky) gsap.set(sticky, {clearProps: 'overflow'})
       }
     },
     {scope: triggerRef, dependencies: [setLen]},
   )
 
   return (
-    <div ref={triggerRef} className={`relative ${PIN_HEIGHT_CLASS}`}>
-      <section className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden bg-background">
-        <h1 className="mt-24 w-full shrink-0 px-3 font-sans text-[clamp(2.4rem,4.4vw,5.25rem)] font-bold uppercase leading-[0.9] tracking-[-0.03em] text-foreground sm:mt-28 sm:px-4">
-          <WordSwap primary={primary} secondary={secondary} />
-        </h1>
+    <section
+      ref={triggerRef}
+      className="relative flex h-[100dvh] min-h-[100dvh] flex-col overflow-visible bg-background"
+    >
+      <h1 className="mt-24 w-full min-w-0 shrink-0 px-3 font-sans text-[clamp(2.05rem,4.7vw,5.4rem)] font-bold uppercase leading-[0.92] tracking-[-0.03em] text-foreground sm:mt-28 sm:px-4">
+        <WordSwap primary={primary} secondary={secondary} />
+      </h1>
 
-        <div ref={stageRef} className="mt-auto w-full shrink-0 overflow-visible pb-4 md:pb-5">
-          <HomeProjectSlider
-            projects={roster}
-            autoplay={autoplay}
-            interactionLock={!autoplay}
-            bleed
-          />
-        </div>
-      </section>
-    </div>
+      <div ref={stageRef} className="mt-auto w-full shrink-0 overflow-visible pb-4 md:pb-5">
+        <HomeProjectSlider
+          projects={roster}
+          autoplay={autoplay}
+          interactionLock={!autoplay}
+          bleed
+        />
+      </div>
+    </section>
   )
 }

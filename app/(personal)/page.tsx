@@ -39,7 +39,7 @@ export default async function IndexRoute() {
   const description =
     data.seoDescription ??
     data.hiddenH1 ??
-    'AI assistants and refined websites for organizations with a mission.'
+    'Custom AI and websites for organizations with a mission.'
   const speakable = data.speakableSummary ?? undefined
   const speakableSelectors = speakable ? ['h1', '.speakable-summary'] : ['h1']
 

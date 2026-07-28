@@ -10,13 +10,25 @@
  */
 import gsap from 'gsap'
 import {Draggable} from 'gsap/Draggable'
+import {ExpoScaleEase} from 'gsap/EasePack'
 import {Flip} from 'gsap/Flip'
+import {InertiaPlugin} from 'gsap/InertiaPlugin'
+import {MorphSVGPlugin} from 'gsap/MorphSVGPlugin'
 import {ScrollTrigger} from 'gsap/ScrollTrigger'
 import {SplitText} from 'gsap/SplitText'
 import {TextPlugin} from 'gsap/TextPlugin'
 
 if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger, SplitText, Flip, TextPlugin, Draggable)
+  gsap.registerPlugin(
+    ScrollTrigger,
+    SplitText,
+    Flip,
+    ExpoScaleEase,
+    TextPlugin,
+    Draggable,
+    InertiaPlugin,
+    MorphSVGPlugin,
+  )
 }
 
 export const EASE = {
@@ -37,4 +49,14 @@ export function prefersReducedMotion(): boolean {
   )
 }
 
-export {Draggable, Flip, gsap, ScrollTrigger, SplitText, TextPlugin}
+export {
+  Draggable,
+  ExpoScaleEase,
+  Flip,
+  gsap,
+  InertiaPlugin,
+  MorphSVGPlugin,
+  ScrollTrigger,
+  SplitText,
+  TextPlugin,
+}

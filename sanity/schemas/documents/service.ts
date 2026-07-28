@@ -361,6 +361,23 @@ export default defineType({
         'What someone should do after reading this service — usually “Book a discovery call”. Leave empty for offerings that shouldn’t cold-CTA (e.g. Site care). Managed under Dynamic Content → CTAs.',
     }),
     defineField({
+      name: 'fitCheckLabel',
+      title: 'Fit-check button label',
+      type: 'string',
+      group: 'nextStep',
+      initialValue: 'See if this is for you',
+      description:
+        'Label for the secondary self-qualification button next to the main CTA — e.g. “See if this is for you”.',
+    }),
+    defineField({
+      name: 'fitCheckHref',
+      title: 'Fit-check link',
+      type: 'string',
+      group: 'nextStep',
+      description:
+        'Where the fit-check button goes (e.g. /quiz). Leave empty to hide the button until the quiz or audit is live.',
+    }),
+    defineField({
       name: 'routingLine',
       title: 'Routing line',
       type: 'text',

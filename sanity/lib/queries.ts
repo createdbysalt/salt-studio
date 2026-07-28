@@ -69,6 +69,8 @@ export const homePageQuery = defineQuery(`
               link,
               contactSubject
             },
+            fitCheckLabel,
+            fitCheckHref,
             routingLine
           }
         },
@@ -104,7 +106,16 @@ export const homePageQuery = defineQuery(`
       },
       _type == "homeProductSection" => { headline, body, ctaLabel },
       _type == "homePhilosophySection" => { line1, line2 },
-      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },
+      _type == "homeFinalCtaSection" => {
+        headline,
+        body,
+        emailLine,
+        cta->{
+          buttonLabel,
+          link,
+          contactSubject
+        }
+      },
     },
   }
 `)

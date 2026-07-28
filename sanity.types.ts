@@ -329,13 +329,20 @@ export type AboutOpeningSection = {
   body?: string
 }
 
+export type CallToActionReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'callToAction'
+}
+
 export type HomeFinalCtaSection = {
   _type: 'homeFinalCtaSection'
   enabled?: boolean
   internalName?: string
   headline?: string
   body?: string
-  ctaLabel?: string
+  cta?: CallToActionReference
   emailLine?: string
 }
 
@@ -759,13 +766,6 @@ export type TestimonialReference = {
   [internalGroqTypeReferenceTo]?: 'testimonial'
 }
 
-export type CallToActionReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'callToAction'
-}
-
 export type Service = {
   _id: string
   _type: 'service'
@@ -847,6 +847,8 @@ export type Service = {
   >
   proofAnchor?: string
   nextStep?: CallToActionReference
+  fitCheckLabel?: string
+  fitCheckHref?: string
   routingLine?: string
 }
 
@@ -1718,6 +1720,7 @@ export type AllSanitySchemaTypes =
   | AboutSmallnessSection
   | AboutStorySection
   | AboutOpeningSection
+  | CallToActionReference
   | HomeFinalCtaSection
   | HomePhilosophySection
   | HomeProductSection
@@ -1755,7 +1758,6 @@ export type AllSanitySchemaTypes =
   | Testimonial
   | CapabilityReference
   | TestimonialReference
-  | CallToActionReference
   | Service
   | SanityImageCrop
   | SanityImageHotspot
@@ -1790,7 +1792,7 @@ export type AllSanitySchemaTypes =
 
 // Source: sanity/lib/queries.ts
 // Variable: homePageQuery
-// Query: *[_id == "home"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    hiddenH1,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "homeHeroSection" => {        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter      },      _type == "homeProofSection" => {        label,        clients[]{ _key, ...@->{ _id, name, website } }      },      _type == "homeServicesSection" => {        label,        services[]{          _key,          ...@->{            _id,            title,            "slug": slug.current,            headline,            shortDescription,            priceLine,            timelineLine,            linkLabel,            timeline[]{ _key, label, duration, detail },            deliverables[]{ _key, title, detail },            capabilities[]->{ _id, name, kind },            idealFor,            notAFit,            detailEyebrow,            detailBody,            sceneLine,            stepsLabel,            steps[]{ _key, lead, text },            detailImage{ asset, alt, hotspot, crop },            backgroundImage{ asset, alt, hotspot, crop },            backgroundVideoUrl,            featuredProjects[]->{              _id,              title,              "slug": slug.current,              coverImage,              "client": client->name            },            testimonials[]->{              _id,              quote,              author,              role            },            clients[]->{ _id, name },            proofAnchor,            nextStep->{              _id,              subhead,              buttonLabel,              link,              contactSubject            },            routingLine          }        },        cards[]{          _key,          title,          body,          priceLine,          linkLabel,          detailEyebrow,          detailBody,          detailImage{ asset, alt, hotspot, crop },          hoverImage{ asset, alt, hotspot, crop },          backgroundVideoUrl,        }      },      _type == "homeWorkSection" => {        label,        projects[]{          _key,          ...@->{            _id,            title,            "slug": slug.current,            overview,            coverImage,            videoUrl,            year,            "client": client->name          }        },        linkLabel      },      _type == "homeProductSection" => { headline, body, ctaLabel },      _type == "homePhilosophySection" => { line1, line2 },      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },    },  }
+// Query: *[_id == "home"][0]{    _id,    _type,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    hiddenH1,    sections[]{      _key,      _type,      enabled,      internalName,      _type == "homeHeroSection" => {        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter      },      _type == "homeProofSection" => {        label,        clients[]{ _key, ...@->{ _id, name, website } }      },      _type == "homeServicesSection" => {        label,        services[]{          _key,          ...@->{            _id,            title,            "slug": slug.current,            headline,            shortDescription,            priceLine,            timelineLine,            linkLabel,            timeline[]{ _key, label, duration, detail },            deliverables[]{ _key, title, detail },            capabilities[]->{ _id, name, kind },            idealFor,            notAFit,            detailEyebrow,            detailBody,            sceneLine,            stepsLabel,            steps[]{ _key, lead, text },            detailImage{ asset, alt, hotspot, crop },            backgroundImage{ asset, alt, hotspot, crop },            backgroundVideoUrl,            featuredProjects[]->{              _id,              title,              "slug": slug.current,              coverImage,              "client": client->name            },            testimonials[]->{              _id,              quote,              author,              role            },            clients[]->{ _id, name },            proofAnchor,            nextStep->{              _id,              subhead,              buttonLabel,              link,              contactSubject            },            fitCheckLabel,            fitCheckHref,            routingLine          }        },        cards[]{          _key,          title,          body,          priceLine,          linkLabel,          detailEyebrow,          detailBody,          detailImage{ asset, alt, hotspot, crop },          hoverImage{ asset, alt, hotspot, crop },          backgroundVideoUrl,        }      },      _type == "homeWorkSection" => {        label,        projects[]{          _key,          ...@->{            _id,            title,            "slug": slug.current,            overview,            coverImage,            videoUrl,            year,            "client": client->name          }        },        linkLabel      },      _type == "homeProductSection" => { headline, body, ctaLabel },      _type == "homePhilosophySection" => { line1, line2 },      _type == "homeFinalCtaSection" => {        headline,        body,        emailLine,        cta->{          buttonLabel,          link,          contactSubject        }      },    },  }
 export type HomePageQueryResult =
   | {
       _id: 'home'
@@ -1973,8 +1975,12 @@ export type HomePageQueryResult =
             internalName: string | null
             headline: string | null
             body: string | null
-            ctaLabel: string | null
             emailLine: string | null
+            cta: {
+              buttonLabel: string | null
+              link: string | null
+              contactSubject: string | null
+            } | null
           }
         | {
             _key: string
@@ -2106,6 +2112,8 @@ export type HomePageQueryResult =
                 link: string | null
                 contactSubject: string | null
               } | null
+              fitCheckLabel: string | null
+              fitCheckHref: string | null
               routingLine: string | null
             }> | null
             cards: Array<{
@@ -4884,7 +4892,7 @@ export type ContactPageQueryResult =
 
 declare module '@sanity/client' {
   interface SanityQueries {
-    '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "homeHeroSection" => {\n        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter\n      },\n      _type == "homeProofSection" => {\n        label,\n        clients[]{ _key, ...@->{ _id, name, website } }\n      },\n      _type == "homeServicesSection" => {\n        label,\n        services[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            headline,\n            shortDescription,\n            priceLine,\n            timelineLine,\n            linkLabel,\n            timeline[]{ _key, label, duration, detail },\n            deliverables[]{ _key, title, detail },\n            capabilities[]->{ _id, name, kind },\n            idealFor,\n            notAFit,\n            detailEyebrow,\n            detailBody,\n            sceneLine,\n            stepsLabel,\n            steps[]{ _key, lead, text },\n            detailImage{ asset, alt, hotspot, crop },\n            backgroundImage{ asset, alt, hotspot, crop },\n            backgroundVideoUrl,\n            featuredProjects[]->{\n              _id,\n              title,\n              "slug": slug.current,\n              coverImage,\n              "client": client->name\n            },\n            testimonials[]->{\n              _id,\n              quote,\n              author,\n              role\n            },\n            clients[]->{ _id, name },\n            proofAnchor,\n            nextStep->{\n              _id,\n              subhead,\n              buttonLabel,\n              link,\n              contactSubject\n            },\n            routingLine\n          }\n        },\n        cards[]{\n          _key,\n          title,\n          body,\n          priceLine,\n          linkLabel,\n          detailEyebrow,\n          detailBody,\n          detailImage{ asset, alt, hotspot, crop },\n          hoverImage{ asset, alt, hotspot, crop },\n          backgroundVideoUrl,\n        }\n      },\n      _type == "homeWorkSection" => {\n        label,\n        projects[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            overview,\n            coverImage,\n            videoUrl,\n            year,\n            "client": client->name\n          }\n        },\n        linkLabel\n      },\n      _type == "homeProductSection" => { headline, body, ctaLabel },\n      _type == "homePhilosophySection" => { line1, line2 },\n      _type == "homeFinalCtaSection" => { headline, body, ctaLabel, emailLine },\n    },\n  }\n': HomePageQueryResult
+    '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "homeHeroSection" => {\n        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter\n      },\n      _type == "homeProofSection" => {\n        label,\n        clients[]{ _key, ...@->{ _id, name, website } }\n      },\n      _type == "homeServicesSection" => {\n        label,\n        services[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            headline,\n            shortDescription,\n            priceLine,\n            timelineLine,\n            linkLabel,\n            timeline[]{ _key, label, duration, detail },\n            deliverables[]{ _key, title, detail },\n            capabilities[]->{ _id, name, kind },\n            idealFor,\n            notAFit,\n            detailEyebrow,\n            detailBody,\n            sceneLine,\n            stepsLabel,\n            steps[]{ _key, lead, text },\n            detailImage{ asset, alt, hotspot, crop },\n            backgroundImage{ asset, alt, hotspot, crop },\n            backgroundVideoUrl,\n            featuredProjects[]->{\n              _id,\n              title,\n              "slug": slug.current,\n              coverImage,\n              "client": client->name\n            },\n            testimonials[]->{\n              _id,\n              quote,\n              author,\n              role\n            },\n            clients[]->{ _id, name },\n            proofAnchor,\n            nextStep->{\n              _id,\n              subhead,\n              buttonLabel,\n              link,\n              contactSubject\n            },\n            fitCheckLabel,\n            fitCheckHref,\n            routingLine\n          }\n        },\n        cards[]{\n          _key,\n          title,\n          body,\n          priceLine,\n          linkLabel,\n          detailEyebrow,\n          detailBody,\n          detailImage{ asset, alt, hotspot, crop },\n          hoverImage{ asset, alt, hotspot, crop },\n          backgroundVideoUrl,\n        }\n      },\n      _type == "homeWorkSection" => {\n        label,\n        projects[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            overview,\n            coverImage,\n            videoUrl,\n            year,\n            "client": client->name\n          }\n        },\n        linkLabel\n      },\n      _type == "homeProductSection" => { headline, body, ctaLabel },\n      _type == "homePhilosophySection" => { line1, line2 },\n      _type == "homeFinalCtaSection" => {\n        headline,\n        body,\n        emailLine,\n        cta->{\n          buttonLabel,\n          link,\n          contactSubject\n        }\n      },\n    },\n  }\n': HomePageQueryResult
     '\n  *[_id == "servicesPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "servicesHeroSection" => { headline, subheadline },\n      _type == "servicesListSection" => { serviceAi, serviceSite, serviceCare },\n      _type == "servicesFitSection" => {\n        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints\n      },\n      _type == "servicesProcessSection" => {\n        headline,\n        steps[]{ _key, lead, text },\n        recommendationDays,\n        ctaLabel\n      },\n      _type == "servicesFaqSection" => { faq },\n      _type == "servicesFinalCtaSection" => { headline, ctaLabel, microcopy },\n    },\n  }\n': ServicesPageQueryResult
     '\n  *[_id == "aboutPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "aboutOpeningSection" => { line1, line2, body },\n      _type == "aboutStorySection" => { body, offHoursLine, photo },\n      _type == "aboutSmallnessSection" => { headline, body },\n      _type == "aboutConvictionsSection" => { headline, lines, closingLine },\n      _type == "aboutProductSection" => { body, linkLabel },\n      _type == "aboutClosingSection" => { body, ctaLabel, microcopy },\n    },\n  }\n': AboutPageQueryResult
     '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    body[]{\n      ...,\n      _type == "ctaRef" => {\n        "cta": @->{subhead, buttonLabel, link, contactSubject}\n      }\n    },\n    overview,\n    title,\n    "slug": slug.current,\n  }\n': PagesBySlugQueryResult

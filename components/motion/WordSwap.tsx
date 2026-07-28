@@ -36,8 +36,8 @@ function Face({
       data-side={side}
       className={
         side === 'left'
-          ? 'flex flex-col items-end text-right md:items-start md:text-left'
-          : 'flex flex-col items-start text-left md:items-end md:text-right'
+          ? 'flex w-full min-w-0 flex-col items-end text-right md:w-1/2 md:items-start md:text-left'
+          : 'flex w-full min-w-0 flex-col items-start text-left md:w-1/2 md:items-end md:text-right'
       }
     >
       {lines.map((line) => (
@@ -51,7 +51,7 @@ function Face({
 
 function SplitRow({face}: {face: SwapFace}) {
   return (
-    <div className="flex w-full flex-col justify-between gap-2 md:flex-row md:items-end md:gap-6">
+    <div className="flex w-full min-w-0 flex-col justify-between gap-1.5 md:flex-row md:items-end md:gap-4">
       <Face face={face} side="left" />
       <Face face={face} side="right" />
     </div>
@@ -131,17 +131,25 @@ export function WordSwap({
   return (
     <span
       ref={scope}
-      className={`relative block w-full overflow-hidden ${className ?? ''}`}
+      className={`relative grid w-full overflow-hidden ${className ?? ''}`}
     >
       <span className="sr-only">{srText}</span>
 
-      <span data-swap-a className="relative block w-full will-change-transform" aria-hidden>
+      {/*
+        Stack both faces in one grid cell so the mask height is max(primary, secondary).
+        Absolute positioning clipped the taller poetic face (e.g. “overpower.”).
+      */}
+      <span
+        data-swap-a
+        className="col-start-1 row-start-1 block w-full will-change-transform"
+        aria-hidden
+      >
         <SplitRow face={primary} />
       </span>
       <span
         data-swap-b
         aria-hidden
-        className="absolute inset-x-0 top-0 block w-full will-change-transform motion-reduce:hidden"
+        className="col-start-1 row-start-1 block w-full will-change-transform motion-reduce:hidden"
       >
         <SplitRow face={secondary} />
       </span>

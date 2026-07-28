@@ -293,15 +293,17 @@ export const homePhilosophySection = defineType({
     sectionInternalNameField('Philosophy'),
     defineField({
       name: 'line1',
-      title: 'Line one',
+      title: 'Display line',
       type: 'string',
-      description: 'First line of the two-line interlude. No CTA here — the type does the work.',
+      description:
+        'Brand statement. Split on periods into stacked display lines — e.g. “Subtle. Essential. Transformative.”',
     }),
     defineField({
       name: 'line2',
-      title: 'Line two',
+      title: 'Support line',
       type: 'string',
-      description: 'Second line of the interlude.',
+      description:
+        'Quieter line under the display type. The closing CTA from the Final CTA section sits below this on the homepage.',
     }),
   ],
   preview: sectionPreview('line1', 'Philosophy'),
@@ -317,31 +319,36 @@ export const homeFinalCtaSection = defineType({
     sectionInternalNameField('Final CTA'),
     defineField({
       name: 'headline',
-      title: 'Headline',
+      title: 'Closing line',
       type: 'string',
-      description: 'Headline of the closing call-to-action section.',
+      description:
+        'Appended after the Philosophy support line on the homepage — e.g. “One build at a time.”',
     }),
     defineField({
       name: 'body',
       title: 'Body',
       type: 'text',
       rows: 3,
-      description: 'One or two sentences leading into the button.',
+      description:
+        'Optional longer lead-in. Not shown on the current homepage composition (Philosophy + button + email line).',
+      hidden: true,
     }),
     defineField({
-      name: 'ctaLabel',
-      title: 'CTA button label',
-      type: 'string',
-      initialValue: 'Book a discovery call',
-      description: 'Text on the closing button. It links to the contact page.',
-      validation: (rule) => rule.max(40).warning('Keep this short — it sits in a button'),
+      name: 'cta',
+      title: 'CTA',
+      type: 'reference',
+      to: [{type: 'callToAction'}],
+      description:
+        'Primary button under Philosophy — solid mono label with arrow. Pick from Dynamic Content → CTAs (usually “Primary — Book a discovery call”).',
+      validation: (rule) =>
+        rule.required().error('Link a CTA so the Philosophy section has a button'),
     }),
     defineField({
       name: 'emailLine',
       title: 'Email line',
       type: 'string',
       description:
-        'Microcopy under the button, e.g. “hello@createdbysalt.com if calls aren’t your thing.” The “Currently booking …” line is added automatically from the Hero section’s quarter field.',
+        'Quiet mono line under the button, e.g. “hello@createdbysalt.com if calls aren’t your thing.”',
     }),
   ],
   preview: sectionPreview('headline', 'Final CTA'),
