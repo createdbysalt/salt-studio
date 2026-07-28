@@ -1,7 +1,9 @@
 'use client'
 
+import {useAboutPanel} from '@/components/AboutPanel'
 import {DEFAULT_NAV, type NavChild, type NavItem} from '@/components/homeHero'
 import {SiteLogo} from '@/components/SiteLogo'
+import {isAboutHref} from '@/lib/aboutPanel'
 import type {SettingsQueryResult} from '@/sanity.types'
 import {studioUrl} from '@/sanity/lib/api'
 import {resolveMenu} from '@/sanity/lib/utils'
@@ -10,7 +12,7 @@ import {AnimatePresence, motion} from 'motion/react'
 import {createDataAttribute} from 'next-sanity'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
-import {useEffect, useState} from 'react'
+import {useEffect, useState, type MouseEvent} from 'react'
 
 interface NavbarProps {
   data: SettingsQueryResult
@@ -30,6 +32,7 @@ const BOOK_CTA_HREF = '/contact'
 export function Navbar({data}: NavbarProps) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
+  const {openAbout} = useAboutPanel()
   const onColor = useNavOnColorSurface(pathname)
 
   const resolved = resolveMenu(data?.menuItems)
@@ -62,10 +65,16 @@ export function Navbar({data}: NavbarProps) {
     ? 'pointer-events-auto inline-flex items-center justify-center px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-white/85 transition-colors duration-300 hover:text-white sm:px-4 sm:text-[14px] lg:hidden'
     : 'pointer-events-auto inline-flex items-center justify-center px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/70 transition-colors duration-300 hover:text-foreground sm:px-4 sm:text-[14px] lg:hidden'
 
+  const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!isAboutHref(href)) return
+    event.preventDefault()
+    openAbout()
+  }
+
   return (
     <>
       <header
-        className="pointer-events-none fixed top-0 z-[70] w-full bg-transparent transition-opacity duration-300 [[data-service-panel-open]_&]:pointer-events-none [[data-service-panel-open]_&]:opacity-0"
+        className="pointer-events-none fixed top-0 z-[70] w-full bg-transparent transition-opacity duration-300 [[data-service-panel-open]_&]:pointer-events-none [[data-service-panel-open]_&]:opacity-0 [[data-about-panel-open]_&]:pointer-events-none [[data-about-panel-open]_&]:opacity-0"
         data-site-nav
         data-sanity={dataAttribute?.('menuItems')}
         data-nav-on-color={onColor ? 'true' : 'false'}
@@ -99,6 +108,7 @@ export function Navbar({data}: NavbarProps) {
                   <Link
                     key={`${item.href}-${item.label}`}
                     href={item.href}
+                    onClick={(event) => handleNavClick(event, item.href)}
                     className={linkClass}
                   >
                     {item.label}
@@ -135,6 +145,7 @@ export function Navbar({data}: NavbarProps) {
             logo={data?.logo}
             siteName={data?.siteName}
             onClose={() => setMenuOpen(false)}
+            onAboutOpen={openAbout}
           />
         )}
       </AnimatePresence>
@@ -337,14 +348,26 @@ function MenuOverlay({
   logo,
   siteName,
   onClose,
+  onAboutOpen,
 }: {
   items: NavItem[]
   logo?: {asset?: {_ref: string} | null; alt?: string | null} | null
   siteName?: string | null
   onClose: () => void
+  onAboutOpen: () => void
 }) {
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const toggleSubmenu = (label: string) => setOpenSubmenu((prev) => (prev === label ? null : label))
+
+  const handleItemClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (isAboutHref(href)) {
+      event.preventDefault()
+      onClose()
+      onAboutOpen()
+      return
+    }
+    onClose()
+  }
 
   // Explicit px values — this project remaps Tailwind spacing (e.g. spacing-8 = 136px),
   // so scale utilities like h-8 / px-8 blow up the overlay vs the prototype.
@@ -425,7 +448,11 @@ function MenuOverlay({
                     />
                   </button>
                 ) : (
-                  <Link href={item.href} onClick={onClose} className={menuLinkClass}>
+                  <Link
+                    href={item.href}
+                    onClick={(event) => handleItemClick(event, item.href)}
+                    className={menuLinkClass}
+                  >
                     {item.label}
                   </Link>
                 )}
@@ -436,7 +463,7 @@ function MenuOverlay({
                       <Link
                         key={`${child.href}-${child.label}`}
                         href={child.href}
-                        onClick={onClose}
+                        onClick={(event) => handleItemClick(event, child.href)}
                         className={menuSubmenuChildClass}
                       >
                         {child.label}

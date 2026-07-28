@@ -1,15 +1,17 @@
 'use client'
 
+import {useAboutPanel} from '@/components/AboutPanel'
 import {DEFAULT_NAV} from '@/components/homeHero'
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {SaltWordmark} from '@/components/SaltWordmark'
+import {isAboutHref} from '@/lib/aboutPanel'
 import type {FooterLegalPagesQueryResult, SettingsQueryResult} from '@/sanity.types'
 import {resolveMenu} from '@/sanity/lib/utils'
 import {useGSAP} from '@gsap/react'
 import {stegaClean} from 'next-sanity'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
-import {useRef} from 'react'
+import {useRef, type MouseEvent} from 'react'
 
 /** Routes whose page stage is dark — footer flips to paper (inverse). */
 function pageIsDark(pathname: string): boolean {
@@ -84,12 +86,19 @@ const LEGAL_FALLBACKS = [
  */
 export function SiteFooter({settings, legalPages}: SiteFooterProps) {
   const pathname = usePathname()
+  const {openAbout} = useAboutPanel()
   const inverseLight = pageIsDark(pathname)
   const siteName = stegaClean(settings?.siteName ?? '') || 'Salt Studio'
   const year = new Date().getFullYear()
   const footerRef = useRef<HTMLElement>(null)
   const navRef = useRef<HTMLElement>(null)
   const markRef = useRef<HTMLDivElement>(null)
+
+  const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!isAboutHref(href)) return
+    event.preventDefault()
+    openAbout()
+  }
 
   useGSAP(
     () => {
@@ -205,6 +214,7 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
           <Link
             key={item.href}
             href={item.href}
+            onClick={(event) => handleNavClick(event, item.href)}
             className="font-sans text-[12px] font-semibold tracking-[-0.02em] text-foreground/45 transition-opacity hover:opacity-70 md:text-[13px]"
           >
             {item.label}
