@@ -9168,6 +9168,10 @@
                     },
                     {
                       "type": "string",
+                      "value": "whatsapp"
+                    },
+                    {
+                      "type": "string",
                       "value": "youtube"
                     },
                     {

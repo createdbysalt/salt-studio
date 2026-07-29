@@ -2,17 +2,15 @@
 
 import {HomeProjectSlider} from '@/components/HomeProjectSlider'
 import {gsap, prefersReducedMotion, ScrollTrigger} from '@/components/motion/gsap'
-import {WordSwap} from '@/components/motion/WordSwap'
+import {WordSwap, type SwapFace} from '@/components/motion/WordSwap'
 import type {WorkProjectCard} from '@/components/ProjectGrid'
 import {useGSAP} from '@gsap/react'
-import {useMemo, useRef, useState} from 'react'
-
-type Face = {left: string; right: string}
+import {useEffect, useMemo, useRef, useState} from 'react'
 
 type HomeHeroStageProps = {
   projects: WorkProjectCard[]
-  primary: Face
-  secondary: Face
+  primary: SwapFace
+  secondary: SwapFace
 }
 
 /**
@@ -27,16 +25,23 @@ const MAX_END_SCALE = 1.2
 const MIN_END_SCALE = 0.42
 
 /**
- * Full-viewport hero: WordSwap up top, project strip on the bottom edge.
- * No pin — the stage scrolls away with the page. Scroll scrubs the track so
- * the roster shrinks toward edge-to-edge as the hero leaves. Scale is on the
- * track (w-max), not a full-width wrapper.
+ * TinyWins-shaped hero: paper band with word-mask swap type up top, full-height
+ * project strip below. Scroll scrubs the track as the stage leaves — no pin.
  */
 export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps) {
   const triggerRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const [autoplay, setAutoplay] = useState(true)
+  const [coarsePointer, setCoarsePointer] = useState(false)
   const scrubPastRef = useRef(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(pointer: coarse)')
+    const sync = () => setCoarsePointer(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   const roster = useMemo(() => {
     const usable = projects.filter(
@@ -75,7 +80,6 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
         return {fitX, endScale, setCenter}
       }
 
-      // Scrub while the hero scrolls out of view — no sticky pin.
       const st = ScrollTrigger.create({
         trigger: triggerEl,
         start: 'top top',
@@ -86,7 +90,7 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
           frozenStartX = null
         },
         onUpdate: (self) => {
-          const past = self.progress > 0.04
+          const past = self.progress > 0.18
           if (past !== scrubPastRef.current) {
             scrubPastRef.current = past
             setAutoplay(!past)
@@ -125,18 +129,27 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
   return (
     <section
       ref={triggerRef}
-      className="relative flex h-[100dvh] min-h-[100dvh] flex-col overflow-visible bg-background"
+      className="relative flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden bg-background"
     >
-      <h1 className="mt-24 w-full min-w-0 shrink-0 px-3 font-sans text-[clamp(2.05rem,4.7vw,5.4rem)] font-bold uppercase leading-[0.92] tracking-[-0.03em] text-foreground sm:mt-28 sm:px-4">
-        <WordSwap primary={primary} secondary={secondary} />
-      </h1>
+      {/* Paper band — TinyWins per-word mask reveal + looping phrase swap */}
+      <div className="relative flex min-h-0 flex-1 flex-col px-3 pb-5 pt-[5.75rem] sm:px-4 sm:pb-6 sm:pt-[6.5rem]">
+        <h1 className="flex min-h-0 flex-1 flex-col font-sans text-[clamp(1.85rem,8vw,5.4rem)] font-bold uppercase leading-[0.9] tracking-[-0.03em] text-foreground sm:text-[clamp(2.05rem,4.7vw,5.4rem)]">
+          <WordSwap primary={primary} secondary={secondary} />
+        </h1>
+      </div>
 
-      <div ref={stageRef} className="mt-auto w-full shrink-0 overflow-visible pb-4 md:pb-5">
+      {/* Visual band — project strip fills the full height (no dark stage) */}
+      <div
+        ref={stageRef}
+        data-nav-surface="color"
+        className="relative h-[min(46dvh,32rem)] shrink-0 overflow-x-clip sm:h-[min(48dvh,36rem)]"
+      >
         <HomeProjectSlider
           projects={roster}
           autoplay={autoplay}
-          interactionLock={!autoplay}
+          interactionLock={!autoplay && !coarsePointer}
           bleed
+          fillHeight
         />
       </div>
     </section>

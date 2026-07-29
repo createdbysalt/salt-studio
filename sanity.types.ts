@@ -1508,7 +1508,16 @@ export type Settings = {
     } & NavItem
   >
   footerSocial?: Array<{
-    platform?: 'instagram' | 'vimeo' | 'email' | 'youtube' | 'x' | 'linkedin' | 'tiktok' | 'custom'
+    platform?:
+      | 'instagram'
+      | 'vimeo'
+      | 'email'
+      | 'whatsapp'
+      | 'youtube'
+      | 'x'
+      | 'linkedin'
+      | 'tiktok'
+      | 'custom'
     label?: string
     href?: string
     customIcon?: {
@@ -4138,6 +4147,7 @@ export type SettingsQueryResult = {
       | 'linkedin'
       | 'tiktok'
       | 'vimeo'
+      | 'whatsapp'
       | 'x'
       | 'youtube'
       | null

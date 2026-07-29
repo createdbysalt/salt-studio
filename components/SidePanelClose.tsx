@@ -64,15 +64,18 @@ export function SidePanelClose({
       const escBg = btn.querySelector<HTMLElement>('[data-close-esc-bg]')
       const cleanups: Array<() => void> = []
 
-      if (labelOut && labelIn && escOut && escIn) {
+      if (labelOut && labelIn) {
         gsap.set(labelIn, {yPercent: 110})
-        gsap.set(escIn, {yPercent: 110})
+        if (escIn) gsap.set(escIn, {yPercent: 110})
         const hoverTl = gsap.timeline({paused: true})
         hoverTl
           .to(labelOut, {yPercent: -110, duration: 0.38, ease: EASE.outQuint}, 0)
           .to(labelIn, {yPercent: 0, duration: 0.38, ease: EASE.outQuint}, 0)
-          .to(escOut, {yPercent: -110, duration: 0.34, ease: EASE.outQuint}, 0.02)
-          .to(escIn, {yPercent: 0, duration: 0.34, ease: EASE.outQuint}, 0.02)
+        if (escOut && escIn) {
+          hoverTl
+            .to(escOut, {yPercent: -110, duration: 0.34, ease: EASE.outQuint}, 0.02)
+            .to(escIn, {yPercent: 0, duration: 0.34, ease: EASE.outQuint}, 0.02)
+        }
         if (escBg) {
           hoverTl.to(
             escBg,
@@ -145,7 +148,7 @@ export function SidePanelClose({
           type="button"
           onClick={onClose}
           aria-label={ariaLabel}
-          className="relative isolate inline-flex items-center gap-2 overflow-hidden rounded-sm bg-[#08090a] py-1.5 pl-3.5 pr-1.5 font-mono text-[11px] uppercase tracking-label text-white"
+          className="relative isolate inline-flex items-center gap-2 overflow-hidden rounded-sm bg-[#08090a] py-1.5 pl-3.5 pr-3.5 font-mono text-[11px] uppercase tracking-label text-white lg:pr-1.5"
         >
           <span className="relative inline-block h-[1em] overflow-hidden leading-none">
             <span data-close-label="out" className="block">
@@ -157,7 +160,7 @@ export function SidePanelClose({
           </span>
           <span
             data-close-esc-bg
-            className="relative inline-block h-[1.65em] min-w-[2.1rem] overflow-hidden rounded-[3px] bg-white/15 px-1.5 text-center text-[10px] leading-[1.65em] tracking-[0.08em] text-white/75"
+            className="relative hidden h-[1.65em] min-w-[2.1rem] overflow-hidden rounded-[3px] bg-white/15 px-1.5 text-center text-[10px] leading-[1.65em] tracking-[0.08em] text-white/75 lg:inline-block"
           >
             <span data-close-esc="out" className="block">
               ESC

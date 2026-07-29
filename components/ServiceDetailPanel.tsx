@@ -270,10 +270,10 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
           data-lenis-prevent
           className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
         >
-          <div className="px-[28px] pb-[56px] pt-[40px]">
+          <div className="px-5 pb-[56px] pt-[40px] md:px-[28px]">
             <p
               data-panel-reveal
-              className="flex items-center gap-2 pr-[110px] font-sans text-[18px] font-semibold tracking-[-0.01em] text-[#08090a]/55"
+              className="flex items-center gap-2 pr-[88px] font-sans text-[18px] font-semibold tracking-[-0.01em] text-[#08090a]/55 md:pr-[110px]"
             >
               <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
               {eyebrow}
@@ -289,7 +289,7 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
 
             <div
               data-panel-reveal
-              className="mt-[28px] space-y-[22px] text-[22px] font-medium leading-[1.1] tracking-[-0.015em] text-[#08090a] md:text-[24px]"
+              className="mt-[28px] space-y-[22px] text-[18px] font-medium leading-[1.2] tracking-[-0.015em] text-[#08090a] md:text-[24px] md:leading-[1.1]"
             >
               {paragraphs.map((paragraph, i) => (
                 <p key={`${i}-${paragraph.slice(0, 24)}`}>{paragraph}</p>
@@ -338,11 +338,11 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
             {cached.meta || cached.timelineLine ? (
               <div
                 data-panel-reveal
-                className="mt-[40px] flex flex-col gap-[6px] font-mono text-[10px] uppercase tracking-[0.14em] text-[#08090a]/40 md:text-[11px]"
+                className="mt-[64px] flex flex-col gap-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[#08090a]/40 md:text-[11px]"
               >
-                {cached.meta ? <p className="leading-snug">{cached.meta}</p> : null}
+                {cached.meta ? <p className="leading-none">{cached.meta}</p> : null}
                 {cached.timelineLine ? (
-                  <p className="leading-snug text-[#08090a]/30">{cached.timelineLine}</p>
+                  <p className="leading-none text-[#08090a]/30">{cached.timelineLine}</p>
                 ) : null}
               </div>
             ) : null}

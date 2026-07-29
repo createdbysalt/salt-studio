@@ -1,6 +1,7 @@
 'use client'
 
 import {AboutPanelProvider} from '@/components/AboutPanel'
+import {ContactMenuProvider} from '@/components/ContactMenu'
 import {usePathname} from 'next/navigation'
 import type {ReactNode} from 'react'
 
@@ -30,16 +31,18 @@ export function SiteShell({navbar, footer, children}: SiteShellProps) {
 
   return (
     <AboutPanelProvider>
-      <div className="min-h-screen bg-background text-foreground">
-        {navbar}
-        <div
-          data-theme={dark ? 'dark' : undefined}
-          className="relative z-10 bg-background text-foreground"
-        >
-          {children}
+      <ContactMenuProvider>
+        <div className="min-h-screen bg-background text-foreground">
+          {navbar}
+          <div
+            data-theme={dark ? 'dark' : undefined}
+            className="relative z-10 bg-background text-foreground"
+          >
+            {children}
+          </div>
+          {footer}
         </div>
-        {footer}
-      </div>
+      </ContactMenuProvider>
     </AboutPanelProvider>
   )
 }

@@ -1,10 +1,12 @@
 'use client'
 
 import {useAboutPanel} from '@/components/AboutPanel'
+import {useContactMenu} from '@/components/ContactMenu'
 import {DEFAULT_NAV} from '@/components/homeHero'
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {SaltWordmark} from '@/components/SaltWordmark'
 import {isAboutHref} from '@/lib/aboutPanel'
+import {isContactHref} from '@/lib/contactMenu'
 import type {FooterLegalPagesQueryResult, SettingsQueryResult} from '@/sanity.types'
 import {resolveMenu} from '@/sanity/lib/utils'
 import {useGSAP} from '@gsap/react'
@@ -22,21 +24,31 @@ function pageIsDark(pathname: string): boolean {
   )
 }
 
-type FooterSocialPlatform = 'linkedin' | 'instagram' | 'x'
+type FooterSocialPlatform = 'linkedin' | 'instagram' | 'x' | 'email' | 'whatsapp'
 
-const SOCIAL_ORDER: FooterSocialPlatform[] = ['linkedin', 'instagram', 'x']
+const SOCIAL_ORDER: FooterSocialPlatform[] = [
+  'linkedin',
+  'instagram',
+  'x',
+  'email',
+  'whatsapp',
+]
 
 const SOCIAL_LABELS: Record<FooterSocialPlatform, string> = {
   linkedin: 'LinkedIn',
   instagram: 'Instagram',
   x: 'X',
+  email: 'Email',
+  whatsapp: 'WhatsApp',
 }
 
 /** Fallbacks when Settings → Footer social links omit a platform. */
-const SOCIAL_FALLBACKS: Record<FooterSocialPlatform, string> = {
+const SOCIAL_FALLBACKS: Partial<Record<FooterSocialPlatform, string>> = {
   linkedin: 'https://www.linkedin.com/company/createdbysalt/',
   instagram: 'https://www.instagram.com/createdbysalt/',
   x: 'https://x.com/saltstudio',
+  email: 'mailto:hello@createdbysalt.com',
+  whatsapp: 'https://wa.me/19712052186',
 }
 
 const iconClass = 'h-[14px] w-[14px] fill-current'
@@ -58,6 +70,22 @@ function SocialIcon({platform}: {platform: FooterSocialPlatform}) {
     )
   }
 
+  if (platform === 'email') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden className={iconClass} focusable="false">
+        <path d="M1.5 4.5A1.5 1.5 0 013 3h18a1.5 1.5 0 011.5 1.5v15A1.5 1.5 0 0121 21H3a1.5 1.5 0 01-1.5-1.5v-15zm2.03.5l8.22 6.165a.75.75 0 00.9 0L20.47 5H3.53zM21 6.882l-7.53 5.648a2.25 2.25 0 01-2.94 0L3 6.882V19.5h18V6.882z" />
+      </svg>
+    )
+  }
+
+  if (platform === 'whatsapp') {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden className={iconClass} focusable="false">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+      </svg>
+    )
+  }
+
   return (
     <svg viewBox="0 0 24 24" aria-hidden className={iconClass} focusable="false">
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
@@ -66,7 +94,17 @@ function SocialIcon({platform}: {platform: FooterSocialPlatform}) {
 }
 
 function isFooterSocialPlatform(value: string): value is FooterSocialPlatform {
-  return value === 'linkedin' || value === 'instagram' || value === 'x'
+  return (
+    value === 'linkedin' ||
+    value === 'instagram' ||
+    value === 'x' ||
+    value === 'email' ||
+    value === 'whatsapp'
+  )
+}
+
+function isExternalHref(href: string): boolean {
+  return href.startsWith('http://') || href.startsWith('https://')
 }
 
 type SiteFooterProps = {
@@ -87,6 +125,7 @@ const LEGAL_FALLBACKS = [
 export function SiteFooter({settings, legalPages}: SiteFooterProps) {
   const pathname = usePathname()
   const {openAbout} = useAboutPanel()
+  const {openContact} = useContactMenu()
   const inverseLight = pageIsDark(pathname)
   const siteName = stegaClean(settings?.siteName ?? '') || 'Salt Studio'
   const year = new Date().getFullYear()
@@ -95,9 +134,15 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
   const markRef = useRef<HTMLDivElement>(null)
 
   const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (!isAboutHref(href)) return
-    event.preventDefault()
-    openAbout()
+    if (isAboutHref(href)) {
+      event.preventDefault()
+      openAbout()
+      return
+    }
+    if (isContactHref(href)) {
+      event.preventDefault()
+      openContact()
+    }
   }
 
   useGSAP(
@@ -176,11 +221,11 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
     fromCms.set(platform, stegaClean(item.href))
   }
 
-  const socialLinks = SOCIAL_ORDER.map((platform) => ({
-    platform,
-    href: fromCms.get(platform) || SOCIAL_FALLBACKS[platform],
-    label: SOCIAL_LABELS[platform],
-  }))
+  const socialLinks = SOCIAL_ORDER.flatMap((platform) => {
+    const href = fromCms.get(platform) || SOCIAL_FALLBACKS[platform]
+    if (!href) return []
+    return [{platform, href, label: SOCIAL_LABELS[platform]}]
+  })
 
   const fromLegal = (legalPages ?? []).filter(
     (page): page is NonNullable<typeof page> =>
@@ -231,32 +276,39 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
         </div>
 
         <ul className="flex items-center gap-3.5">
-          {socialLinks.map((item) => (
-            <li key={item.platform}>
-              <a
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={item.label}
-                className="block text-foreground transition-opacity hover:opacity-55"
-              >
-                <SocialIcon platform={item.platform} />
-              </a>
-            </li>
-          ))}
+          {socialLinks.map((item) => {
+            const external = isExternalHref(item.href)
+            return (
+              <li key={item.platform}>
+                <a
+                  href={item.href}
+                  {...(external
+                    ? {target: '_blank', rel: 'noopener noreferrer'}
+                    : undefined)}
+                  aria-label={item.label}
+                  className="block text-foreground transition-opacity hover:opacity-55"
+                >
+                  <SocialIcon platform={item.platform} />
+                </a>
+              </li>
+            )
+          })}
         </ul>
       </div>
 
-      <div className="flex w-full flex-nowrap items-baseline justify-center gap-x-4 overflow-x-auto px-6 pb-5 pt-2 text-center font-sans text-[12px] font-medium leading-none text-foreground/45 whitespace-nowrap md:text-[13px]">
-        <span className="shrink-0">
+      <div className="flex w-full flex-col items-center gap-y-2 px-6 pb-5 pt-2 text-center font-sans text-[12px] font-medium leading-none text-foreground/45 md:flex-row md:flex-nowrap md:items-baseline md:justify-center md:gap-x-4 md:gap-y-0 md:text-[13px]">
+        <span className="whitespace-nowrap">
           © {year} {siteName}. All rights reserved.
         </span>
-        <nav aria-label="Legal" className="contents">
+        <nav
+          aria-label="Legal"
+          className="flex flex-wrap items-baseline justify-center gap-x-4"
+        >
           {legalLinks.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="shrink-0 text-inherit transition-opacity hover:opacity-70"
+              className="whitespace-nowrap text-inherit transition-opacity hover:opacity-70"
             >
               {item.title}
             </Link>

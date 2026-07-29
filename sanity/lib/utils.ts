@@ -37,7 +37,9 @@ export function resolveHref(documentType?: string, slug?: string | null): string
     case 'workPage':
       return '/work'
     case 'servicesPage':
-      return '/capabilities'
+      // No standalone page — the nav "Capabilities" link scrolls to the
+      // homepage "How we can help" band (see components/HashScroll.tsx).
+      return '/#how-we-can-help'
     case 'aboutPage':
       return '/about'
     case 'contactPage':

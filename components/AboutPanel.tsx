@@ -309,8 +309,10 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
             </div>
 
             <div data-about-reveal className="mt-[22px]">
-              <Link
+              <a
                 href={ABOUT_CTA.primaryHref}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={close}
                 className="group inline-flex items-center gap-[0.4em] font-sans text-[18px] font-medium tracking-[-0.015em] text-[#08090a]/75 transition-colors duration-300 hover:text-[#08090a] md:text-[20px]"
               >
@@ -321,7 +323,7 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
                 >
                   →
                 </span>
-              </Link>
+              </a>
             </div>
 
             <div

@@ -48,20 +48,20 @@ export function StatusPage({
             {eyebrow}
           </p>
 
-          <h1 className="mt-5 font-sans text-[clamp(2.75rem,7vw,5rem)] font-bold uppercase leading-[0.9] tracking-[-0.035em]">
+          <h1 className="mt-3 font-sans text-[clamp(2.75rem,7vw,5rem)] font-bold uppercase leading-[0.9] tracking-[-0.035em]">
             {headline}
           </h1>
 
-          <p className="mx-auto mt-6 max-w-[34ch] text-base leading-relaxed text-foreground/55 md:text-lg">
+          <p className="mx-auto mt-3 max-w-[34ch] text-base leading-relaxed text-foreground/55 md:text-lg">
             {message}
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <StatusAction control={primary} variant="solid" />
             {secondary ? <StatusAction control={secondary} variant="ghost" /> : null}
           </div>
 
-          {footer ? <div className="mt-14">{footer}</div> : null}
+          {footer ? <div className="mt-8">{footer}</div> : null}
         </div>
       </div>
     </main>

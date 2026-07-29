@@ -1,5 +1,6 @@
 import '../globals.css'
 import '@/styles/index.css'
+import {HashScroll} from '@/components/HashScroll'
 import {LenisProvider} from '@/components/motion/LenisProvider'
 import {PageTransition} from '@/components/motion/PageTransition'
 import {Navbar} from '@/components/Navbar'
@@ -63,6 +64,7 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
     <>
       <SiteStructuredData />
       <LenisProvider>
+        <HashScroll />
         <SiteShell
           navbar={<Navbar data={data} />}
           footer={<SiteFooter settings={data} legalPages={legalPages} />}

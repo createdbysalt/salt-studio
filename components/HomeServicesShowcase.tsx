@@ -1,7 +1,7 @@
 'use client'
 
 import {LineReveal} from '@/components/motion/LineReveal'
-import {gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {gsap, prefersReducedMotion, ScrollTrigger} from '@/components/motion/gsap'
 import {useGSAP} from '@gsap/react'
 import {ServiceDetailPanel} from '@/components/ServiceDetailPanel'
 import {isVimeoUrl, vimeoBackgroundSrc} from '@/lib/vimeo'
@@ -141,91 +141,93 @@ export function HomeServicesShowcase({
 }
 
 /**
- * GSAP curve-swipe ink wipe (MorphSVG), scrubbed by scroll instead of click.
- * Paths match https://demos.gsap.com/demo/curve-swipe/ — hidden → bulge → cover.
- */
-const CURVE_PATH_HIDDEN = 'M 0 100 V 100 Q 50 100 100 100 V 100 z'
-const CURVE_PATH_BULGE = 'M 0 100 V 50 Q 50 0 100 50 V 100 z'
-const CURVE_PATH_COVER = 'M 0 100 V 0 Q 50 0 100 0 V 100 z'
-
-/**
- * Pin the type beat. As the section settles into view, a curved ink swipe
- * morphs up from the fold and inverts the type via mix-blend.
+ * Pin the type beat. A CSS dome (not SVG/MorphSVG) rises on scrub — HTML
+ * transforms stay stable under Lenis; no mid-scroll backgroundColor snap.
  */
 function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
   const triggerRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLElement>(null)
-  const pathRef = useRef<SVGPathElement>(null)
+  const inkRef = useRef<HTMLDivElement>(null)
   const themeDarkRef = useRef(false)
 
   useGSAP(
     () => {
-      if (!triggerRef.current || !panelRef.current || !pathRef.current) return
+      if (!triggerRef.current || !panelRef.current || !inkRef.current) return
 
       const trigger = triggerRef.current
       const panel = panelRef.current
-      const path = pathRef.current
+      const ink = inkRef.current
 
-      if (prefersReducedMotion()) {
-        panel.setAttribute('data-theme', 'dark')
-        gsap.set(panel, {backgroundColor: INK})
-        gsap.set(path, {attr: {d: CURVE_PATH_COVER}})
-        return
+      const setCovered = (covered: boolean) => {
+        if (covered === themeDarkRef.current) return
+        themeDarkRef.current = covered
+        if (covered) {
+          panel.setAttribute('data-theme', 'dark')
+          // Solid ink once the dome owns the frame — prevents a white strip
+          // at the bottom while pinned and when the sticky section unpins.
+          gsap.set(panel, {backgroundColor: INK})
+        } else {
+          panel.removeAttribute('data-theme')
+          gsap.set(panel, {backgroundColor: PAPER})
+        }
       }
 
       gsap.set(panel, {backgroundColor: PAPER})
-      gsap.set(path, {attr: {d: CURVE_PATH_HIDDEN}})
-      themeDarkRef.current = false
-      panel.removeAttribute('data-theme')
 
-      const tl = gsap.timeline({
+      if (prefersReducedMotion()) {
+        setCovered(true)
+        gsap.set(ink, {y: '-45%'})
+        return
+      }
+
+      setCovered(false)
+      // Dome is 200% of panel height. y% is of the dome itself:
+      //   50%  → top at 100% panel (parked below the fold)
+      //  -45%  → bottom at 110% panel (full cover, no white foot)
+      gsap.set(ink, {y: '50%', force3D: true})
+
+      gsap.to(ink, {
+        y: '-45%',
+        ease: 'none',
+        force3D: true,
         scrollTrigger: {
           trigger,
-          // Begin while the type beat is filling the viewport — not after a
-          // full white pin + extra scroll at the bottom.
-          start: 'top 30%',
+          start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.35,
+          scrub: true,
+          invalidateOnRefresh: true,
           onUpdate: (self) => {
-            const dark = self.progress > 0.55
-            if (dark === themeDarkRef.current) return
-            themeDarkRef.current = dark
-            if (dark) panel.setAttribute('data-theme', 'dark')
-            else panel.removeAttribute('data-theme')
+            setCovered(self.progress > 0.9)
           },
         },
       })
 
-      // Same two-stage morph as the GSAP curve-swipe demo, scroll-scrubbed.
-      tl.to(path, {morphSVG: CURVE_PATH_BULGE, ease: 'power2.in', duration: 0.45}, 0).to(
-        path,
-        {morphSVG: CURVE_PATH_COVER, ease: 'power2.out', duration: 0.55},
-        0.45,
-      )
-
       return () => {
-        tl.scrollTrigger?.kill()
-        tl.kill()
         panel.removeAttribute('data-theme')
+        themeDarkRef.current = false
+        gsap.set(panel, {backgroundColor: PAPER})
       }
     },
     {scope: triggerRef},
   )
 
   return (
-    <div ref={triggerRef} className="relative h-[160vh]">
+    // Mobile: shorter scrub distance so the ink beat doesn’t linger.
+    <div ref={triggerRef} className="relative h-[125vh] md:h-[160vh] lg:h-[180vh]">
       <section
         ref={panelRef}
-        className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden bg-background px-3 pb-10 pt-28 text-center text-foreground sm:px-4 md:px-12 md:pb-14 md:pt-32"
+        className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden bg-background px-3 pb-8 pt-14 text-center text-foreground sm:px-4 md:px-12 md:pb-10 md:pt-20"
       >
-        <svg
+        {/* Wide ellipse dome — flatter arch on mobile, fuller curve from md up */}
+        <div
+          ref={inkRef}
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-        >
-          <path ref={pathRef} fill={INK} d={CURVE_PATH_HIDDEN} />
-        </svg>
+          className="pointer-events-none absolute inset-x-[-12%] top-0 z-0 will-change-transform md:inset-x-[-35%] max-md:[border-radius:100%_100%_0_0/14%_14%_0_0] md:[border-radius:50%_50%_0_0]"
+          style={{
+            height: '200%',
+            backgroundColor: INK,
+          }}
+        />
 
         <div className="relative z-10 w-full mix-blend-difference text-white">
           <LineReveal
@@ -242,7 +244,7 @@ function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
             delay={0.35}
             stagger={0.16}
             duration={1.05}
-            className="mx-auto mt-32 w-full max-w-[min(96vw,80rem)] font-sans text-[clamp(3.25rem,10vw,10rem)] font-bold uppercase leading-[0.88] tracking-[-0.04em] text-white md:mt-44"
+            className="mx-auto mt-3 w-full max-w-[min(96vw,80rem)] font-sans text-[clamp(2.15rem,8.5vw,10rem)] font-bold uppercase leading-[0.88] tracking-[-0.04em] text-white sm:mt-5 md:mt-8"
           >
             {headline}
           </LineReveal>
@@ -264,116 +266,210 @@ function WhatWeDoBand({
   setActive: (i: number | null) => void
 }) {
   const [panelIndex, setPanelIndex] = useState<number | null>(null)
+  /** Below lg: scroll drives which service is open. lg+: hover. */
+  const [scrollReveal, setScrollReveal] = useState(false)
+  const pinRef = useRef<HTMLDivElement>(null)
   const panelOpen = panelIndex !== null
   const panelCard = panelIndex !== null ? cards[panelIndex] : null
+  const count = cards.length
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1023px)')
+    const sync = () => setScrollReveal(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
+  useGSAP(
+    () => {
+      if (!scrollReveal || !pinRef.current || count < 1) return
+
+      if (prefersReducedMotion()) {
+        setActive(0)
+        return
+      }
+
+      const panel = pinRef.current
+      let last = -1
+      const go = (next: number) => {
+        if (next === last) return
+        last = next
+        setActive(next)
+      }
+      go(0)
+
+      // GSAP pin — CSS sticky dies under main's overflow-x-clip + Lenis.
+      // Mobile: shorter bands so ink doesn’t stretch forever between services.
+      const perServiceVh = window.matchMedia('(max-width: 767px)').matches
+        ? 140
+        : window.matchMedia('(max-width: 1023px)').matches
+          ? 180
+          : 250
+      const st = ScrollTrigger.create({
+        trigger: panel,
+        start: 'top top',
+        end: () => `+=${Math.max(count, 1) * perServiceVh}vh`,
+        pin: true,
+        pinSpacing: true,
+        scrub: 1.6,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          // Hold each service through most of its band; switch near the end.
+          const segment = 1 / count
+          const raw = self.progress / segment
+          const idx = Math.min(count - 1, Math.floor(raw))
+          go(idx)
+        },
+      })
+
+      requestAnimationFrame(() => ScrollTrigger.refresh())
+
+      return () => {
+        st.kill()
+      }
+    },
+    {dependencies: [scrollReveal, count, setActive]},
+  )
 
   return (
     <section
+      id="how-we-can-help"
       data-theme="dark"
-      className="relative flex min-h-[100dvh] flex-col justify-center overflow-hidden bg-background py-24 text-foreground md:py-28"
+      className={`relative scroll-mt-24 bg-background pt-0 pb-4 text-foreground sm:pb-5 md:pb-6 ${
+        // overflow-hidden breaks ScrollTrigger pin — only use it on desktop hover mode.
+        scrollReveal
+          ? ''
+          : 'flex min-h-[85dvh] flex-col justify-start overflow-hidden md:min-h-[100dvh]'
+      }`}
       style={{backgroundColor: INK}}
       onMouseLeave={() => {
-        if (!panelOpen) setActive(null)
+        if (!panelOpen && !scrollReveal) setActive(null)
       }}
     >
-      {/* Full-bleed media — each layer already darkened so nothing flashes bright */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        {cards.map((item, i) => (
-          <ServiceBackground
-            key={item._key}
-            card={item}
-            active={i === active}
-          />
-        ))}
-      </div>
+      <div
+        ref={pinRef}
+        className={`relative flex min-h-[85dvh] flex-col md:min-h-[100dvh] ${
+          scrollReveal ? 'justify-end' : 'justify-start'
+        }`}
+        style={{backgroundColor: INK}}
+      >
+        {/* Full-bleed media — each layer already darkened so nothing flashes bright */}
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          {cards.map((item, i) => (
+            <ServiceBackground
+              key={item._key}
+              card={item}
+              active={i === active}
+            />
+          ))}
+        </div>
 
-      <div className="page-chrome relative z-10 grid w-full items-start gap-6 md:grid-cols-[minmax(9rem,18vw)_minmax(0,1fr)] md:gap-12 lg:gap-16">
-        <p className="max-w-[14ch] text-[15px] leading-[0.95] text-foreground/70 md:text-base md:leading-[0.95]">
-          {label?.trim() || 'How we can help'}
-        </p>
+        <div
+          className={`page-chrome relative z-10 grid w-full items-start gap-6 md:grid-cols-[minmax(9rem,18vw)_minmax(0,1fr)] md:gap-12 lg:gap-16 ${
+            scrollReveal
+              ? 'pt-0 pb-[8vh] md:pb-[14vh] lg:pb-[18vh]'
+              : 'pt-12 md:pt-20 lg:pt-24'
+          }`}
+        >
+          <p className="max-w-[14ch] text-[15px] leading-[0.95] text-foreground/70 md:text-base md:leading-[0.95]">
+            {label?.trim() || 'How we can help'}
+          </p>
 
-        <ul className="flex min-w-0 flex-col" role="list">
-          {cards.map((item, i) => {
-            const isActive = i === active
-            const openPanel = () => {
-              setActive(i)
-              setPanelIndex(i)
-            }
+          <ul className="flex min-w-0 flex-col" role="list">
+            {cards.map((item, i) => {
+              const isActive = i === active
+              const openPanel = () => {
+                setActive(i)
+                setPanelIndex(i)
+              }
 
-            return (
-              <li key={item._key} onMouseEnter={() => setActive(i)}>
-                <div
-                  role="button"
-                  tabIndex={0}
-                  aria-expanded={isActive}
-                  aria-haspopup="dialog"
-                  onClick={openPanel}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault()
-                      openPanel()
-                    }
+              return (
+                <li
+                  key={item._key}
+                  onMouseEnter={() => {
+                    if (!scrollReveal) setActive(i)
                   }}
-                  onFocus={() => setActive(i)}
-                  className="group cursor-pointer outline-none focus-visible:outline-none"
                 >
-                  <p
-                    className={`font-sans text-[clamp(3.25rem,9.5vw,8rem)] font-bold uppercase leading-[0.95] tracking-[-0.045em] transition-colors duration-200 ${
-                      isActive || active === null
-                        ? 'text-foreground'
-                        : 'text-foreground/20'
-                    }`}
-                  >
-                    <span className="inline-flex items-baseline">
-                      {item.title}
-                      {isActive ? (
-                        <span
-                          aria-hidden
-                          className="ml-[0.18em] inline-block h-[0.14em] w-[0.14em] -translate-y-[0.55em] rounded-full bg-accent"
-                        />
-                      ) : null}
-                    </span>
-                  </p>
-
                   <div
-                    className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                      isActive ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-                    }`}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isActive}
+                    aria-haspopup="dialog"
+                    onClick={openPanel}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        openPanel()
+                      }
+                    }}
+                    onFocus={() => {
+                      if (!scrollReveal) setActive(i)
+                    }}
+                    className="group cursor-pointer outline-none focus-visible:outline-none"
                   >
-                    <div className="min-h-0 overflow-hidden">
-                      <div
-                        className={`flex items-start gap-3 pb-5 pt-3 md:gap-4 md:pb-7 md:pt-4 ${
-                          isActive ? 'opacity-100' : 'opacity-0'
-                        } transition-opacity duration-300`}
-                      >
-                        <ServiceElbowArrow className="mt-0.5 size-6 shrink-0 overflow-visible text-foreground md:mt-1 md:size-10" />
-                        <div className="min-w-0 max-w-[36ch]">
-                          <p className="text-[15px] leading-snug text-foreground/80 md:text-base">
-                            {item.body}
-                          </p>
-                          <span className="mt-4 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-foreground/70 transition-colors duration-300 group-hover:text-foreground">
-                            {item.linkLabel?.trim() || 'See how it works'}
-                            <ArrowUpRight
-                              aria-hidden
-                              size={12}
-                              strokeWidth={2.5}
-                              className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                            />
-                          </span>
+                    <p
+                      className={`font-sans text-[clamp(2.5rem,8.5vw,8rem)] font-bold uppercase leading-[0.95] tracking-[-0.045em] break-words transition-colors duration-200 ${
+                        isActive || (!scrollReveal && active === null)
+                          ? 'text-foreground'
+                          : 'text-foreground/20'
+                      }`}
+                    >
+                      <span className="inline-flex max-w-full items-baseline">
+                        {item.title}
+                        {isActive ? (
+                          <span
+                            aria-hidden
+                            className="ml-[0.18em] inline-block h-[0.14em] w-[0.14em] -translate-y-[0.55em] rounded-full bg-accent"
+                          />
+                        ) : null}
+                      </span>
+                    </p>
+
+                    <div
+                      className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                        isActive ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                      }`}
+                    >
+                      <div className="min-h-0 overflow-hidden">
+                        <div
+                          className={`flex items-start gap-3 pb-5 pt-3 md:gap-4 md:pb-7 md:pt-4 ${
+                            isActive ? 'opacity-100' : 'opacity-0'
+                          } transition-opacity duration-300`}
+                        >
+                          <ServiceElbowArrow className="mt-0.5 size-6 shrink-0 overflow-visible text-foreground md:mt-1 md:size-10" />
+                          <div className="min-w-0 max-w-[36ch]">
+                            <p className="text-[15px] leading-snug text-foreground/80 md:text-base">
+                              {item.body}
+                            </p>
+                            <span className="mt-4 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-foreground/70 transition-colors duration-300 group-hover:text-foreground">
+                              {item.linkLabel?.trim() || 'See how it works'}
+                              <ArrowUpRight
+                                aria-hidden
+                                size={12}
+                                strokeWidth={2.5}
+                                className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                              />
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
       </div>
 
       <ServiceDetailPanel
         open={panelOpen}
-        onClose={() => setPanelIndex(null)}
+        onClose={() => {
+          setPanelIndex(null)
+          if (!scrollReveal) setActive(null)
+        }}
         content={
           panelCard
             ? {

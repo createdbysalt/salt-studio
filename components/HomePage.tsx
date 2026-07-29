@@ -287,14 +287,14 @@ async function HomeProduct({section}: {section: SectionOf<'homeProductSection'>}
   if (items.length === 0 && !waitlistBody && !section.ctaLabel) return null
 
   return (
-    <div className="bg-accent text-white">
+    <div className="flex min-h-[145svh] flex-col bg-accent text-white md:h-[100dvh] md:min-h-[100dvh]">
       {items.length > 0 ? (
         <HomeCapabilitiesScrub items={items} label="What we work with" />
       ) : null}
 
-      {/* Thin waitlist strip — product CTA parked under the capabilities scrub */}
-      <section className="page-chrome border-t border-white/15 py-10 md:py-12">
-        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end md:gap-10">
+      {/* Waitlist strip — under the scrub; desktop locks into the 100dvh product block */}
+      <section className="page-chrome shrink-0 border-t border-white/15 py-5 md:py-12">
+        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end md:gap-10">
           <div className="min-w-0 max-w-[52ch]">
             <p className="font-mono text-[11px] uppercase tracking-label text-white/55">
               {section.headline?.trim() || 'What we’re building'}
@@ -352,7 +352,7 @@ function HomePhilosophy({
   return (
     <section
       aria-label="Philosophy"
-      className="page-chrome flex min-h-[85vh] flex-col items-center justify-center border-t border-foreground/15 py-24 text-center md:min-h-screen md:py-32"
+      className="page-chrome flex min-h-0 flex-col items-center justify-center border-t border-foreground/15 py-24 text-center sm:py-28 md:min-h-[85vh] md:py-32 lg:min-h-screen"
     >
       {displayLines.length > 0 ? (
         <LineReveal as="h2" className="text-display font-semibold text-foreground">
@@ -368,13 +368,13 @@ function HomePhilosophy({
         <LineReveal
           as="p"
           delay={0.22}
-          className="mt-8 max-w-[38ch] text-[clamp(1.125rem,2.1vw,1.5rem)] font-normal leading-snug tracking-[-0.01em] text-foreground/70 md:mt-10"
+          className="mt-[32px] max-w-[38ch] px-1 text-[clamp(1.05rem,2.1vw,1.5rem)] font-normal leading-snug tracking-[-0.01em] text-foreground/70 md:mt-[40px]"
         >
           {support}
         </LineReveal>
       ) : null}
 
-      <div className="mt-10 flex flex-col items-center gap-3 md:mt-12">
+      <div className="mt-[40px] flex flex-col items-center gap-3 md:mt-[48px]">
         <Link href={ctaHref} className="btn-solid">
           {ctaLabel}
           <ArrowUpRight aria-hidden className="h-3.5 w-3.5" strokeWidth={2.5} />

@@ -3,6 +3,8 @@
  * long-form /about page content is still in flux. Swap to CMS when ready.
  */
 
+import {CONTACT_BOOK_HREF} from '@/lib/contactMenu'
+
 export const ABOUT_VIDEO_SRC = '/about/studio.mp4'
 
 export const ABOUT_META_LINE = {
@@ -39,7 +41,7 @@ export const ABOUT_CTA = {
   eyebrow: 'Salt software',
   body: 'The studio runs on software we\'re building ourselves — Salt — so small teams can spend less time gathering and drafting, and more time on the work that matters.',
   primaryLabel: 'Book a discovery call',
-  primaryHref: '/contact',
+  primaryHref: CONTACT_BOOK_HREF,
   secondaryLabel: 'Join the waitlist',
   secondaryHref: '/contact?subject=Salt%20waitlist',
 } as const
