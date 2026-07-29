@@ -355,7 +355,10 @@ function HomePhilosophy({
       className="page-chrome flex min-h-0 flex-col items-center justify-center border-t border-foreground/15 py-24 text-center sm:py-28 md:min-h-[85vh] md:py-32 lg:min-h-screen"
     >
       {displayLines.length > 0 ? (
-        <LineReveal as="h2" className="text-display font-semibold text-foreground">
+        <LineReveal
+          as="h2"
+          className="text-display font-semibold text-foreground max-md:[font-size:clamp(2.05rem,8.2vw,2.5rem)]"
+        >
           {displayLines.map((line) => (
             <span key={line} className="block">
               {line}.

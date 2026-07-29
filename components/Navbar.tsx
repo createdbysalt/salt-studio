@@ -793,9 +793,16 @@ const ExpandingMenuBody = forwardRef<
       aria-modal="true"
       aria-label="Navigation menu"
     >
-      <div className="flex flex-col gap-3 px-3.5 pb-1 pt-3 sm:px-4 sm:pb-1 sm:pt-4">
+      <div className="flex flex-col gap-3 px-3.5 pb-0 pt-3 sm:px-4 sm:pb-0 sm:pt-4">
         <nav className="flex flex-col items-start gap-[2px] py-2 sm:py-2.5" aria-label="Main">
-          {items.map((item) => (
+          {/* Contact is covered by Book a call / WhatsApp CTAs below. */}
+          {items
+            .filter(
+              (item) =>
+                !isContactHref(item.href) &&
+                item.label.trim().toLowerCase() !== 'contact',
+            )
+            .map((item) => (
             <div
               key={`${item.href}-${item.label}`}
               data-menu-reveal
@@ -848,7 +855,7 @@ const ExpandingMenuBody = forwardRef<
 
         <div
           data-menu-reveal
-          className={`flex gap-2 border-t pt-4 ${
+          className={`flex gap-2 border-t pt-3 pb-0 ${
             onColor ? 'border-white/10' : 'border-foreground/10'
           }`}
         >
@@ -857,7 +864,7 @@ const ExpandingMenuBody = forwardRef<
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}
-            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-sm px-3 py-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
+            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-sm px-3 py-2 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
               onColor
                 ? 'bg-white/12 text-white hover:bg-white/18'
                 : 'bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.1]'
@@ -871,7 +878,7 @@ const ExpandingMenuBody = forwardRef<
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}
-            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
+            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-2 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
               onColor
                 ? 'bg-white/12 text-white hover:bg-white/18'
                 : 'bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.1]'

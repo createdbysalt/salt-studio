@@ -460,9 +460,9 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
           const r = ctx.rests[pillIndex]
           if (!r) return
 
-          const fall = 0.48 + rand(pillIndex, 20) * 0.28
-          const land = 0.28 + rand(pillIndex, 21) * 0.18
-          const at = sequence * (0.032 + rand(pillIndex, 22) * 0.022)
+          const fall = 0.78 + rand(pillIndex, 20) * 0.42
+          const land = 0.48 + rand(pillIndex, 21) * 0.28
+          const at = sequence * (0.055 + rand(pillIndex, 22) * 0.035)
           const preX = r.x + (rand(pillIndex, 23) * 2 - 1) * 10
           const preY = r.y - (4 + rand(pillIndex, 24) * 12)
           const preRot = r.rotation + (rand(pillIndex, 25) * 2 - 1) * 4
@@ -683,7 +683,7 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
           <li
             key={item._id}
             data-cap-pill
-            className="absolute left-0 top-0 w-max max-w-[min(90vw,20rem)] whitespace-nowrap rounded-full border border-[#08090A]/8 bg-white px-3 py-1.5 font-sans text-[11px] font-semibold uppercase tracking-[-0.01em] text-[#08090A] opacity-0 shadow-[0_4px_16px_rgba(0,0,0,0.14)] lg:pointer-events-none md:max-w-[min(90vw,21rem)] md:px-3.5 md:py-1.5 md:text-[12px] lg:max-w-[min(92vw,22rem)] lg:px-5 lg:py-2.5 lg:text-[14px]"
+            className="absolute left-0 top-0 w-max max-w-[min(90vw,20rem)] whitespace-nowrap rounded-full border border-[#08090A]/8 bg-white px-2.5 py-[0.3rem] font-sans text-[10.5px] font-semibold uppercase tracking-[-0.01em] text-[#08090A] opacity-0 shadow-[0_4px_16px_rgba(0,0,0,0.14)] lg:pointer-events-none md:max-w-[min(90vw,21rem)] md:px-3 md:py-1.5 md:text-[11.5px] lg:max-w-[min(92vw,22rem)] lg:px-5 lg:py-2.5 lg:text-[14px]"
           >
             {item.name}
           </li>

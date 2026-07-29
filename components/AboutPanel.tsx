@@ -288,7 +288,7 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
             {/* Header eyebrow — same top band as Close; scrolls away with content. */}
             <p
               data-about-reveal
-              className="flex items-center gap-2 pr-[110px] font-sans text-[18px] font-semibold tracking-[-0.01em] text-[#08090a]/55"
+              className="flex items-center gap-2 pr-[110px] font-sans text-[12px] font-semibold tracking-[-0.01em] text-[#08090a]/55 lg:text-[18px]"
             >
               <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
               About the studio
@@ -298,10 +298,10 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
               About Salt Studio
             </h2>
 
-            {/* Monolog-measured: 24px / 500 / -0.015em / 1.1 leading, ~32px under eyebrow */}
+            {/* Type scale: mobile/tablet 16 → desktop 24 (2/3). Same ratio on siblings below. */}
             <div
               data-about-reveal
-              className="mt-[32px] space-y-[22px] text-[22px] font-medium leading-[1.1] tracking-[-0.015em] text-[#08090a] md:text-[24px]"
+              className="mt-[32px] space-y-[16px] text-[16px] font-medium leading-[1.2] tracking-[-0.015em] text-[#08090a] lg:space-y-[22px] lg:text-[24px] lg:leading-[1.1]"
             >
               {ABOUT_BIO.map((paragraph) => (
                 <p key={paragraph.slice(0, 32)}>{paragraph}</p>
@@ -314,7 +314,7 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={close}
-                className="group inline-flex items-center gap-[0.4em] font-sans text-[18px] font-medium tracking-[-0.015em] text-[#08090a]/75 transition-colors duration-300 hover:text-[#08090a] md:text-[20px]"
+                className="group inline-flex items-center gap-[0.4em] font-sans text-[13px] font-medium tracking-[-0.015em] text-[#08090a]/75 transition-colors duration-300 hover:text-[#08090a] lg:text-[20px]"
               >
                 <span>{ABOUT_CTA.primaryLabel}</span>
                 <span
@@ -328,7 +328,7 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
 
             <div
               data-about-reveal
-              className="mt-[40px] flex items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[#08090a]/40 md:text-[11px]"
+              className="mt-[40px] flex items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[#08090a]/40 lg:text-[11px]"
             >
               <span>{ABOUT_META_LINE.established}</span>
               <span className="text-right">{ABOUT_META_LINE.location}</span>
@@ -350,19 +350,19 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
               />
             </div>
 
-            <section data-about-reveal className="mt-[56px] md:mt-[64px]">
+            <section data-about-reveal className="mt-[56px] lg:mt-[64px]">
               <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
-                <p className="flex items-center gap-2 self-start font-sans text-[18px] font-semibold tracking-[-0.01em] text-[#08090a]/55">
+                <p className="flex items-center gap-2 self-start font-sans text-[12px] font-semibold tracking-[-0.01em] text-[#08090a]/55 lg:text-[18px]">
                   <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
                   Our principles
                 </p>
-                <ul className="space-y-[28px] md:space-y-[32px]">
+                <ul className="space-y-[28px] lg:space-y-[32px]">
                   {ABOUT_PRINCIPLES.map((principle) => (
                     <li key={principle.title}>
-                      <p className="font-sans text-[20px] font-medium leading-[1.15] tracking-[-0.015em] text-[#08090a] md:text-[22px]">
+                      <p className="font-sans text-[15px] font-medium leading-[1.15] tracking-[-0.015em] text-[#08090a] lg:text-[22px]">
                         {principle.title}
                       </p>
-                      <p className="mt-[8px] text-[16px] font-medium leading-[1.25] tracking-[-0.01em] text-[#08090a]/65 md:text-[17px]">
+                      <p className="mt-[8px] text-[12px] font-medium leading-[1.25] tracking-[-0.01em] text-[#08090a]/65 lg:text-[17px]">
                         {principle.body}
                       </p>
                     </li>
@@ -373,15 +373,15 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
 
             <section
               data-about-reveal
-              className="mt-[56px] rounded-sm bg-[#08090a] px-[24px] py-[28px] text-[#f3f3f3] md:mt-[64px] md:px-[28px] md:py-[32px]"
+              className="mt-[56px] rounded-sm bg-[#08090a] px-[24px] py-[28px] text-[#f3f3f3] lg:mt-[64px] lg:px-[28px] lg:py-[32px]"
             >
               <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
-                <p className="flex items-center gap-2 self-start font-sans text-[18px] font-semibold tracking-[-0.01em] text-white/55">
+                <p className="flex items-center gap-2 self-start font-sans text-[12px] font-semibold tracking-[-0.01em] text-white/55 lg:text-[18px]">
                   <span aria-hidden className="inline-block size-1.5 rounded-full bg-white/40" />
                   {ABOUT_CTA.eyebrow}
                 </p>
                 <div>
-                  <p className="text-[20px] font-medium leading-[1.15] tracking-[-0.015em] text-white md:text-[22px]">
+                  <p className="text-[15px] font-medium leading-[1.15] tracking-[-0.015em] text-white lg:text-[22px]">
                     {ABOUT_CTA.body}
                   </p>
                   <div className="mt-[24px]">
