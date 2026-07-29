@@ -23,7 +23,7 @@ const WAITLIST_HREF = '/quiz'
 
 /** TinyWins-style edge-anchored splits. `\n` = intentional line break within a side. */
 const HERO_PRIMARY = {
-  left: 'Custom AI\nand websites',
+  left: 'Custom AI,\nsites + software',
   right: 'for organizations\nwith a mission.',
 } as const
 
@@ -162,6 +162,16 @@ function HomeServices({section}: {section: SectionOf<'homeServicesSection'>}) {
         deliverables: (item!.deliverables ?? [])
           .filter((row) => Boolean(row?.title))
           .map((row) => ({_key: row!._key, title: row!.title!, detail: row!.detail})),
+        plans: (item!.plans ?? [])
+          .filter((plan) => Boolean(plan?.name && plan?.price))
+          .map((plan) => ({
+            _key: plan!._key,
+            name: plan!.name!,
+            price: plan!.price!,
+            summary: plan!.summary,
+            features: (plan!.features ?? []).filter((f): f is string => Boolean(f?.trim())),
+            highlight: plan!.highlight ?? false,
+          })),
         capabilities: (item!.capabilities ?? [])
           .filter((cap) => Boolean(cap?._id && cap?.name))
           .map((cap) => ({_id: cap!._id, name: cap!.name!, kind: cap!.kind})),
@@ -178,10 +188,11 @@ function HomeServices({section}: {section: SectionOf<'homeServicesSection'>}) {
             title: project!.title!,
             slug: project!.slug,
             client: project!.client,
+            thought: project!.thought?.trim() || null,
             imageUrl: project!.coverImage?.asset?._ref
               ? urlForImage({asset: {_ref: project!.coverImage.asset._ref}})
-                  ?.width(800)
-                  .height(600)
+                  ?.width(1400)
+                  .height(875)
                   .fit('crop')
                   .url()
               : null,
@@ -208,7 +219,10 @@ function HomeServices({section}: {section: SectionOf<'homeServicesSection'>}) {
             : null,
         fitCheck:
           item!.fitCheckLabel?.trim() && item!.fitCheckHref?.trim()
-            ? {label: item!.fitCheckLabel!, href: item!.fitCheckHref!}
+            ? {
+                label: item!.fitCheckLabel!,
+                href: item!.fitCheckHref!,
+              }
             : null,
         routingLine: item!.routingLine ?? null,
       }
@@ -323,12 +337,14 @@ function HomePhilosophy({
     .map((part) => part.trim())
     .filter(Boolean)
 
-  const supportBase = section.line2?.trim() ?? ''
+  const supportBase = section.line2?.trim().replace(/\.$/, '') ?? ''
   const closing = closingLine?.trim().replace(/\.$/, '') ?? ''
-  // e.g. "We draw out the good that's already there. One build at a time."
-  const support = [supportBase, closing ? `${closing}.` : null]
-    .filter(Boolean)
-    .join(supportBase.endsWith('.') ? ' ' : '. ')
+  // e.g. "We draw out the good that's already there, one build at a time."
+  const support = closing
+    ? `${supportBase}, ${closing.charAt(0).toLowerCase()}${closing.slice(1)}.`
+    : supportBase
+      ? `${supportBase}.`
+      : ''
   const email = emailLine?.trim()
   const ctaLabel = normalizeCtaLabel(cta?.buttonLabel)
   const ctaHref = resolveCtaHref(cta)

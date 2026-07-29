@@ -2,7 +2,7 @@ import {WrenchIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
 /**
- * Service — one of Salt’s offerings (AI builds, The Salt site, Site care).
+ * Service — one of Salt’s offerings (Websites, AI Builds, Software).
  *
  * Source of truth for the homepage “How we can help” band and the service
  * detail panel: what it is, what you get, what we use, proof, and the next step.
@@ -193,6 +193,63 @@ export default defineType({
         rule.max(10).warning('Keep the list scannable — six clear deliverables beat twelve vague ones'),
     }),
     defineField({
+      name: 'plans',
+      title: 'Plans',
+      type: 'array',
+      group: 'offer',
+      description:
+        'Optional pricing tiers shown in the detail panel — e.g. “Steady” and “Priority” for a retainer. Leave empty for services with a single price.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'servicePlan',
+          title: 'Plan',
+          fields: [
+            defineField({
+              name: 'name',
+              title: 'Plan name',
+              type: 'string',
+              description: 'Short tier name, e.g. “Steady” or “Priority”.',
+              validation: (rule) => rule.required().error('Every plan needs a name'),
+            }),
+            defineField({
+              name: 'price',
+              title: 'Price',
+              type: 'string',
+              description: 'Exactly as it should read, e.g. “$600/mo”. Keep it true.',
+              validation: (rule) => rule.required().error('Every plan needs a price'),
+            }),
+            defineField({
+              name: 'summary',
+              title: 'Summary',
+              type: 'text',
+              rows: 2,
+              description: 'One line on who this plan is for or what makes it different.',
+            }),
+            defineField({
+              name: 'features',
+              title: 'What’s included',
+              type: 'array',
+              of: [defineArrayMember({type: 'string'})],
+              description: 'Short bullets — the few things that define this tier. Keep them scannable.',
+            }),
+            defineField({
+              name: 'highlight',
+              title: 'Highlight this plan',
+              type: 'boolean',
+              initialValue: false,
+              description: 'Give this tier a subtle accent to nudge it as the recommended choice.',
+            }),
+          ],
+          preview: {
+            select: {title: 'name', subtitle: 'price'},
+          },
+        }),
+      ],
+      validation: (rule) =>
+        rule.max(3).warning('Two or three plans reads clearer than a long menu'),
+    }),
+    defineField({
       name: 'capabilities',
       title: 'Capabilities',
       type: 'array',
@@ -362,20 +419,32 @@ export default defineType({
     }),
     defineField({
       name: 'fitCheckLabel',
-      title: 'Fit-check button label',
+      title: 'Quiz CTA label',
       type: 'string',
       group: 'nextStep',
-      initialValue: 'See if this is for you',
+      initialValue: 'See how much this could help',
       description:
-        'Label for the secondary self-qualification button next to the main CTA — e.g. “See if this is for you”.',
+        'Secondary CTA next to “Book a discovery call” — sends people to the Salt Score quiz to see how useful this service could be. Leave empty to hide it.',
+      validation: (rule) =>
+        rule.max(48).warning('Keep this short — it sits beside the discovery-call link'),
     }),
     defineField({
       name: 'fitCheckHref',
-      title: 'Fit-check link',
+      title: 'Quiz CTA link',
       type: 'string',
       group: 'nextStep',
+      initialValue: '/quiz',
       description:
-        'Where the fit-check button goes (e.g. /quiz). Leave empty to hide the button until the quiz or audit is live.',
+        'Where the quiz CTA goes. Use /quiz for the Salt Score quiz. Leave empty to hide the button even if a label is set.',
+      validation: (rule) =>
+        rule.custom((value) => {
+          if (!value?.trim()) return true
+          const href = value.trim()
+          if (href.startsWith('/') || href.startsWith('http://') || href.startsWith('https://')) {
+            return true
+          }
+          return 'Use a site path like /quiz, or a full https:// URL'
+        }),
     }),
     defineField({
       name: 'routingLine',

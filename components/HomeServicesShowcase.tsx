@@ -58,6 +58,14 @@ export type HomeServiceCard = {
   /** MP4 or Vimeo — muted looping background for this service. */
   backgroundVideoUrl?: string | null
   deliverables?: Array<{_key: string; title: string; detail?: string | null}> | null
+  plans?: Array<{
+    _key: string
+    name: string
+    price: string
+    summary?: string | null
+    features?: string[] | null
+    highlight?: boolean | null
+  }> | null
   capabilities?: Array<{_id: string; name: string; kind?: string | null}> | null
   idealFor?: string[] | null
   notAFit?: string[] | null
@@ -69,6 +77,8 @@ export type HomeServiceCard = {
     slug?: string | null
     client?: string | null
     imageUrl?: string | null
+    /** One-line outcome — the “key thought” under the featured work card. */
+    thought?: string | null
   }> | null
   testimonials?: Array<{
     _id: string
@@ -377,6 +387,7 @@ function WhatWeDoBand({
                 sceneLine: panelCard.sceneLine,
                 imageUrl: panelCard.detailImageUrl,
                 deliverables: panelCard.deliverables,
+                plans: panelCard.plans,
                 capabilities: panelCard.capabilities,
                 idealFor: panelCard.idealFor,
                 notAFit: panelCard.notAFit,

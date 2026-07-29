@@ -10,7 +10,6 @@
  */
 import gsap from 'gsap'
 import {Draggable} from 'gsap/Draggable'
-import {ExpoScaleEase} from 'gsap/EasePack'
 import {Flip} from 'gsap/Flip'
 import {InertiaPlugin} from 'gsap/InertiaPlugin'
 import {MorphSVGPlugin} from 'gsap/MorphSVGPlugin'
@@ -23,7 +22,6 @@ if (typeof window !== 'undefined') {
     ScrollTrigger,
     SplitText,
     Flip,
-    ExpoScaleEase,
     TextPlugin,
     Draggable,
     InertiaPlugin,
@@ -51,7 +49,6 @@ export function prefersReducedMotion(): boolean {
 
 export {
   Draggable,
-  ExpoScaleEase,
   Flip,
   gsap,
   InertiaPlugin,

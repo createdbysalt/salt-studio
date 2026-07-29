@@ -6,7 +6,8 @@ import {createPortal} from 'react-dom'
 import {useLenis} from 'lenis/react'
 import Link from 'next/link'
 
-import {EASE, gsap, prefersReducedMotion, SplitText} from '@/components/motion/gsap'
+import {SidePanelClose} from '@/components/SidePanelClose'
+import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 
 export type ServiceDetailPanelContent = {
   title: string
@@ -24,6 +25,14 @@ export type ServiceDetailPanelContent = {
   sceneLine?: string | null
   imageUrl?: string | null
   deliverables?: Array<{_key: string; title: string; detail?: string | null}> | null
+  plans?: Array<{
+    _key: string
+    name: string
+    price: string
+    summary?: string | null
+    features?: string[] | null
+    highlight?: boolean | null
+  }> | null
   capabilities?: Array<{_id: string; name: string; kind?: string | null}> | null
   idealFor?: string[] | null
   notAFit?: string[] | null
@@ -35,6 +44,8 @@ export type ServiceDetailPanelContent = {
     slug?: string | null
     client?: string | null
     imageUrl?: string | null
+    /** One-line outcome — the “key thought” under the featured work card. */
+    thought?: string | null
   }> | null
   testimonials?: Array<{
     _id: string
@@ -59,9 +70,12 @@ type ServiceDetailPanelProps = {
   content: ServiceDetailPanelContent | null
 }
 
+const sectionEyebrow =
+  'flex items-center gap-2 self-start font-sans text-[18px] font-semibold tracking-[-0.01em] text-[#08090a]/55'
+
 /**
- * Paper side drawer for a service’s “how it works” detail — GSAP slide with
- * a long expo ease (same floaty deceleration as Lenis scroll, pushed a notch).
+ * Paper side drawer for a service’s “how it works” detail — shell and type
+ * aligned with AboutPanel (Monolog-style gutters, dense body, pinned Close).
  */
 export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelProps) {
   const titleId = useId()
@@ -73,8 +87,6 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
   const rootRef = useRef<HTMLDivElement>(null)
   const backdropRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLElement>(null)
-  const titleRef = useRef<HTMLHeadingElement>(null)
-  const bodyRef = useRef<HTMLDivElement>(null)
   const openRef = useRef(open)
   const lenis = useLenis()
 
@@ -88,7 +100,6 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
     openRef.current = open
   }, [open])
 
-  // Keep content cached while open; mount the portal as soon as we open.
   useEffect(() => {
     if (open && content) {
       setCached(content)
@@ -96,7 +107,6 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
     }
   }, [open, content])
 
-  // Drawer + content choreography — same useGSAP / SplitText path as LineReveal.
   useGSAP(
     () => {
       if (!present) return
@@ -113,17 +123,13 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
         gsap.set(backdrop, {opacity: 0})
         setInteractive(true)
 
-        const titleEl = titleRef.current
-        const bodyEl = bodyRef.current
         const revealEls = gsap.utils.toArray<HTMLElement>('[data-panel-reveal]', panel)
-        const splits: Array<{revert: () => void}> = []
-
         const tl = gsap.timeline()
         tl.to(
           backdrop,
           {
             opacity: 1,
-            duration: reduced ? 0.01 : 0.85,
+            duration: reduced ? 0.01 : 0.55,
             ease: EASE.outCubic,
           },
           0,
@@ -140,90 +146,28 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
 
         if (reduced) {
           gsap.set(revealEls, {clearProps: 'opacity,transform'})
-          gsap.set(
-            gsap.utils.toArray<HTMLElement>(
-              '[data-timeline-rail], [data-timeline-phase]',
-              panel,
-            ),
-            {clearProps: 'opacity,transform'},
-          )
           return () => {
             tl.kill()
           }
         }
 
-        if (revealEls.length) gsap.set(revealEls, {opacity: 0, y: 22})
-
-        const lineTargets: Element[] = []
-        if (titleEl) {
-          const split = SplitText.create(titleEl, {type: 'lines', mask: 'lines'})
-          splits.push(split)
-          lineTargets.push(...split.lines)
-        }
-        if (bodyEl) {
-          const split = SplitText.create(bodyEl, {type: 'lines', mask: 'lines'})
-          splits.push(split)
-          lineTargets.push(...split.lines)
-        }
-
-        if (lineTargets.length) {
-          gsap.set(lineTargets, {yPercent: 140, opacity: 0})
-          tl.to(
-            lineTargets,
-            {
-              yPercent: 0,
-              opacity: 1,
-              duration: 0.85,
-              stagger: 0.045,
-              ease: EASE.outCubic,
-            },
-            0.18,
-          )
-        }
-
         if (revealEls.length) {
+          gsap.set(revealEls, {opacity: 0, y: 18})
           tl.to(
             revealEls,
             {
               opacity: 1,
               y: 0,
-              duration: 0.7,
-              stagger: 0.08,
+              duration: 0.65,
+              stagger: 0.07,
               ease: EASE.outCubic,
             },
-            0.42,
-          )
-        }
-
-        // Horizontal timeline: draw the rail, then stagger phases in.
-        const timelineRail = panel.querySelector<HTMLElement>('[data-timeline-rail]')
-        const timelinePhases = gsap.utils.toArray<HTMLElement>('[data-timeline-phase]', panel)
-        if (timelineRail) gsap.set(timelineRail, {scaleX: 0, transformOrigin: 'left center'})
-        if (timelinePhases.length) gsap.set(timelinePhases, {opacity: 0, y: 16})
-        if (timelineRail) {
-          tl.to(
-            timelineRail,
-            {scaleX: 1, duration: 0.75, ease: EASE.outQuint},
-            0.55,
-          )
-        }
-        if (timelinePhases.length) {
-          tl.to(
-            timelinePhases,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.55,
-              stagger: 0.1,
-              ease: EASE.outCubic,
-            },
-            0.7,
+            0.28,
           )
         }
 
         return () => {
           tl.kill()
-          splits.forEach((split) => split.revert())
         }
       }
 
@@ -246,7 +190,7 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
         backdrop,
         {
           opacity: 0,
-          duration: reduced ? 0.01 : 0.55,
+          duration: reduced ? 0.01 : 0.45,
           ease: EASE.outCubic,
         },
         0,
@@ -266,9 +210,7 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
     }
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    // Stop Lenis so wheel/trackpad only scrolls the panel, not the page behind.
     lenis?.stop()
-    // Hide glass nav while open — backdrop-filter would otherwise smear it white.
     document.documentElement.dataset.servicePanelOpen = ''
     window.addEventListener('keydown', onKeyDown)
     return () => {
@@ -285,19 +227,19 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
     .split(/\n+/)
     .map((line) => line.trim())
     .filter(Boolean)
-  const timeline = (cached.timeline ?? []).filter(
-    (phase) => phase.label?.trim() && phase.duration?.trim(),
-  )
   const deliverables = (cached.deliverables ?? []).filter((row) => row.title?.trim())
-  const capabilities = (cached.capabilities ?? []).filter((cap) => cap.name?.trim())
-  const idealFor = (cached.idealFor ?? []).filter((line) => line.trim())
-  const notAFit = (cached.notAFit ?? []).filter((line) => line.trim())
+  const plans = (cached.plans ?? []).filter((plan) => plan.name?.trim() && plan.price?.trim())
   const steps = (cached.steps ?? []).filter((step) => step.text?.trim())
   const projects = (cached.projects ?? []).filter((project) => project.title)
   const featuredProject = projects[0] ?? null
+  const featuredThought =
+    featuredProject?.thought?.trim() || featuredProject?.title || null
+  const featuredLabel =
+    featuredProject?.client?.trim() || featuredProject?.title || null
   const testimonials = (cached.testimonials ?? []).filter((item) => item.quote && item.author)
   const nextStep = cached.nextStep
   const displayTitle = cached.headline?.trim() || cached.title
+  const eyebrow = cached.eyebrow?.trim() || 'How it works'
 
   return createPortal(
     <div
@@ -309,10 +251,10 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
       <button
         ref={backdropRef}
         type="button"
-        aria-label="Close panel"
+        aria-label="Dismiss panel"
         tabIndex={interactive ? 0 : -1}
         onClick={close}
-        className="absolute inset-0 bg-black/55 opacity-0 backdrop-blur-[6px] supports-[backdrop-filter]:bg-black/40"
+        className="absolute inset-0 bg-black/70 opacity-0 backdrop-blur-[6px] supports-[backdrop-filter]:bg-black/55"
       />
 
       <aside
@@ -320,346 +262,330 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="absolute inset-y-0 right-0 flex w-full max-w-[min(100vw,48rem)] flex-col bg-[#f3f3f3] text-[#08090a] shadow-[-32px_0_100px_rgba(0,0,0,0.45)] will-change-transform"
+        className="absolute inset-y-0 right-0 flex w-full max-w-[min(100vw,45rem)] flex-col bg-[#f3f3f3] text-[#08090a] shadow-[-24px_0_80px_rgba(0,0,0,0.35)] will-change-transform"
       >
-        <div className="flex items-center justify-between gap-4 px-5 py-3 md:px-7 md:py-3.5">
-          <p className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-            <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
-            {cached.eyebrow?.trim() || 'How it works'}
-          </p>
-
-          <button
-            type="button"
-            onClick={close}
-            aria-label="Close panel"
-            className="group inline-flex items-center gap-2 rounded-sm bg-[#08090a] py-1.5 pl-3.5 pr-1.5 font-mono text-[11px] uppercase tracking-label text-white transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:opacity-90 active:scale-[0.98]"
-          >
-            <span>Close</span>
-            <span
-              aria-hidden
-              className="rounded-[3px] bg-white/15 px-1.5 py-[5px] text-[10px] tracking-[0.08em] text-white/75 transition-colors duration-300 group-hover:bg-white/20 group-hover:text-white/90"
-            >
-              ESC
-            </span>
-          </button>
-        </div>
+        <SidePanelClose open={open && present} onClose={close} ariaLabel="Close panel" />
 
         <div
           data-lenis-prevent
           className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
         >
-          <div className="px-5 pb-8 pt-0 md:px-7 md:pb-10">
+          <div className="px-[28px] pb-[56px] pt-[40px]">
+            <p
+              data-panel-reveal
+              className="flex items-center gap-2 pr-[110px] font-sans text-[18px] font-semibold tracking-[-0.01em] text-[#08090a]/55"
+            >
+              <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+              {eyebrow}
+            </p>
+
             <h2
-              ref={titleRef}
               id={titleId}
-              className="font-sans text-[clamp(2rem,4vw,3.25rem)] font-bold uppercase leading-[0.95] tracking-[-0.04em]"
+              data-panel-reveal
+              className="mt-[28px] font-sans text-[clamp(1.75rem,3.6vw,2.75rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-[#08090a]"
             >
               {displayTitle}
             </h2>
 
             <div
-              ref={bodyRef}
-              className="mt-4 space-y-3 text-base leading-[1.45] text-[#08090a]/75 md:mt-5 md:text-lg md:leading-[1.5]"
+              data-panel-reveal
+              className="mt-[28px] space-y-[22px] text-[22px] font-medium leading-[1.1] tracking-[-0.015em] text-[#08090a] md:text-[24px]"
             >
               {paragraphs.map((paragraph, i) => (
                 <p key={`${i}-${paragraph.slice(0, 24)}`}>{paragraph}</p>
               ))}
-              {cached.sceneLine?.trim() ? (
-                <p className="text-[#08090a]/70">{cached.sceneLine.trim()}</p>
-              ) : null}
+              {cached.sceneLine?.trim() ? <p>{cached.sceneLine.trim()}</p> : null}
             </div>
 
-            {cached.meta || cached.timelineLine || nextStep || cached.fitCheck ? (
-              <div data-panel-reveal className="mt-5 border-t border-[#08090a]/10 pt-5">
-                {cached.meta || cached.timelineLine ? (
-                  <div className="flex flex-col gap-2 font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                    {cached.meta ? <p>{cached.meta}</p> : null}
-                    {cached.timelineLine ? <p>{cached.timelineLine}</p> : null}
-                  </div>
-                ) : null}
-                {nextStep || cached.fitCheck ? (
-                  <div className="mt-5 flex flex-wrap items-center gap-3">
-                    {nextStep ? (
-                      <Link
-                        href={nextStep.href}
-                        onClick={close}
-                        className="inline-flex items-center rounded-sm bg-[#08090a] px-4 py-3 font-mono text-[11px] uppercase tracking-label text-white transition-opacity hover:opacity-85"
-                      >
-                        {nextStep.buttonLabel}
-                      </Link>
-                    ) : null}
-                    {cached.fitCheck ? (
-                      <Link
-                        href={cached.fitCheck.href}
-                        onClick={close}
-                        className="inline-flex items-center rounded-sm border border-[#08090a]/25 px-4 py-3 font-mono text-[11px] uppercase tracking-label text-[#08090a] transition-colors hover:border-[#08090a]/50"
-                      >
-                        {cached.fitCheck.label}
-                      </Link>
-                    ) : null}
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-
-            {capabilities.length > 0 ? (
-              <div data-panel-reveal className="mt-10">
-                <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                  Capabilities
-                </p>
-                <ul className="mt-4 flex flex-wrap gap-2">
-                  {capabilities.map((cap) => (
-                    <li
-                      key={cap._id}
-                      className="inline-flex items-center rounded-full border border-[#08090a]/12 bg-[#08090a]/5 px-3 py-1.5 font-mono text-[11px] uppercase tracking-label text-[#08090a]/70"
-                    >
-                      {cap.name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-
-            {idealFor.length > 0 || notAFit.length > 0 ? (
-              <div data-panel-reveal className="mt-12 grid gap-8 sm:grid-cols-2">
-                {idealFor.length > 0 ? (
-                  <div>
-                    <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                      Good fit if
-                    </p>
-                    <ul className="mt-4 space-y-2 text-[14px] leading-snug text-[#08090a]/75">
-                      {idealFor.map((line) => (
-                        <li key={line}>{line}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-                {notAFit.length > 0 ? (
-                  <div>
-                    <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                      Not a fit if
-                    </p>
-                    <ul className="mt-4 space-y-2 text-[14px] leading-snug text-[#08090a]/75">
-                      {notAFit.map((line) => (
-                        <li key={line}>{line}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
-              </div>
-            ) : null}
-
-            {timeline.length > 0 ? (
-              <div className="mt-12">
-                <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                  Timeline
-                </p>
-
-                <div className="relative mt-7">
-                  {/* Horizontal spine — sm+; GSAP draws it via scaleX */}
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute top-[5px] right-[calc(100%/6)] left-[calc(100%/6)] hidden h-px sm:block"
+            {nextStep || cached.fitCheck ? (
+              <div
+                data-panel-reveal
+                className="mt-[22px] flex flex-col items-start gap-[14px] sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-3"
+              >
+                {nextStep ? (
+                  <Link
+                    href={nextStep.href}
+                    onClick={close}
+                    className="group inline-flex items-center gap-[0.4em] border-b border-[#08090a]/35 pb-[2px] font-sans text-[18px] font-semibold tracking-[-0.015em] text-[#08090a] transition-[border-color] duration-300 hover:border-[#08090a] md:text-[20px]"
                   >
+                    <span>{nextStep.buttonLabel}</span>
                     <span
-                      data-timeline-rail
-                      className="block h-full origin-left bg-[#08090a]/18"
-                    />
-                  </div>
-
-                  <ol className="grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-4">
-                    {timeline.map((phase, index) => (
-                      <li
-                        key={phase._key}
-                        data-timeline-phase
-                        className="relative min-w-0"
-                      >
-                        <span
-                          aria-hidden
-                          className={`mb-4 block size-2.5 rounded-full ring-[5px] ring-[#f3f3f3] sm:mx-auto ${
-                            index === 0 ? 'bg-[#e42927]' : 'bg-[#08090a]/55'
-                          }`}
-                        />
-                        <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/45 sm:text-center">
-                          {phase.duration}
-                        </p>
-                        <p className="mt-1.5 font-sans text-[1.0625rem] font-semibold leading-tight tracking-[-0.02em] text-[#08090a] sm:text-center md:text-[1.125rem]">
-                          {phase.label}
-                        </p>
-                        {phase.detail?.trim() ? (
-                          <p className="mt-2 text-[13px] leading-relaxed text-[#08090a]/65 sm:text-center md:text-[14px]">
-                            {phase.detail.trim()}
-                          </p>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              </div>
-            ) : null}
-
-            {steps.length > 0 ? (
-              <div data-panel-reveal className="mt-12">
-                {cached.stepsLabel?.trim() ? (
-                  <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                    {cached.stepsLabel}
-                  </p>
-                ) : null}
-                <ol className="mt-5 space-y-5">
-                  {steps.map((step, index) => (
-                    <li
-                      key={step._key}
-                      className="flex gap-4 text-[15px] leading-relaxed md:text-base"
+                      aria-hidden
+                      className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[5px]"
                     >
-                      <span className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/40">
-                        {String(index + 1).padStart(2, '0')}
-                      </span>
-                      <p className="min-w-0 text-[#08090a]/75">
-                        {step.lead?.trim() ? (
-                          <span className="font-medium text-[#08090a]">{step.lead.trim()} </span>
-                        ) : null}
-                        {step.text}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
+                      →
+                    </span>
+                  </Link>
+                ) : null}
+                {cached.fitCheck ? (
+                  <Link
+                    href={cached.fitCheck.href}
+                    onClick={close}
+                    className="group inline-flex items-center gap-[0.4em] font-sans text-[16px] font-medium tracking-[-0.015em] text-[#08090a]/55 transition-colors hover:text-[#08090a] md:text-[17px]"
+                  >
+                    <span>{cached.fitCheck.label}</span>
+                    <span
+                      aria-hidden
+                      className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[4px]"
+                    >
+                      →
+                    </span>
+                  </Link>
+                ) : null}
               </div>
             ) : null}
 
-            {deliverables.length > 0 ? (
-              <div data-panel-reveal className="mt-12">
-                <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                  What you get
-                </p>
-                <ul className="mt-5 space-y-4">
-                  {deliverables.map((row) => (
-                    <li key={row._key}>
-                      <p className="text-[15px] font-medium leading-snug text-[#08090a] md:text-base">
-                        {row.title}
-                      </p>
-                      {row.detail?.trim() ? (
-                        <p className="mt-1 text-[14px] leading-relaxed text-[#08090a]/65">
-                          {row.detail.trim()}
-                        </p>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
+            {cached.meta || cached.timelineLine ? (
+              <div
+                data-panel-reveal
+                className="mt-[40px] flex flex-col gap-[6px] font-mono text-[10px] uppercase tracking-[0.14em] text-[#08090a]/40 md:text-[11px]"
+              >
+                {cached.meta ? <p className="leading-snug">{cached.meta}</p> : null}
+                {cached.timelineLine ? (
+                  <p className="leading-snug text-[#08090a]/30">{cached.timelineLine}</p>
+                ) : null}
               </div>
             ) : null}
 
             {featuredProject ? (
-              <div data-panel-reveal className="mt-12">
-                <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                  Selected work
-                </p>
-                <div className="mt-5">
-                  {featuredProject.slug ? (
-                    <Link
-                      href={`/projects/${featuredProject.slug}`}
-                      onClick={close}
-                      className="block transition-opacity hover:opacity-70"
-                    >
+              <div data-panel-reveal className="mt-[20px]">
+                {featuredProject.slug ? (
+                  <Link
+                    href={`/projects/${featuredProject.slug}`}
+                    onClick={close}
+                    className="group block"
+                  >
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#08090a]/08">
                       {featuredProject.imageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={featuredProject.imageUrl}
                           alt=""
-                          className="aspect-[16/10] w-full object-cover"
+                          className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02]"
                         />
-                      ) : (
-                        <span
-                          className="block aspect-[16/10] w-full bg-[#08090a]/08"
-                          aria-hidden
-                        />
-                      )}
-                      <span className="mt-4 block font-sans text-base font-semibold uppercase leading-tight tracking-[-0.02em] md:text-lg">
-                        {featuredProject.title}
-                      </span>
-                      {featuredProject.client ? (
-                        <span className="mt-1.5 block font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                          {featuredProject.client}
-                        </span>
-                      ) : null}
-                    </Link>
-                  ) : (
-                    <div>
-                      {featuredProject.imageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={featuredProject.imageUrl}
-                          alt=""
-                          className="aspect-[16/10] w-full object-cover"
-                        />
-                      ) : (
-                        <span
-                          className="block aspect-[16/10] w-full bg-[#08090a]/08"
-                          aria-hidden
-                        />
-                      )}
-                      <p className="mt-4 font-sans text-base font-semibold uppercase leading-tight tracking-[-0.02em] md:text-lg">
-                        {featuredProject.title}
-                      </p>
-                      {featuredProject.client ? (
-                        <p className="mt-1.5 font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                          {featuredProject.client}
-                        </p>
                       ) : null}
                     </div>
+                    {featuredThought ? (
+                      <p className="mt-[22px] font-sans text-[20px] font-medium leading-[1.15] tracking-[-0.015em] text-[#08090a] md:text-[22px]">
+                        {featuredThought}
+                      </p>
+                    ) : null}
+                  </Link>
+                ) : (
+                  <div>
+                    <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#08090a]/08">
+                      {featuredProject.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={featuredProject.imageUrl}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : null}
+                    </div>
+                    {featuredThought ? (
+                      <p className="mt-[22px] font-sans text-[20px] font-medium leading-[1.15] tracking-[-0.015em] text-[#08090a] md:text-[22px]">
+                        {featuredThought}
+                      </p>
+                    ) : null}
+                  </div>
+                )}
+
+                <div className="mt-[16px] flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+                  {featuredLabel ? (
+                    <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/40">
+                      {featuredLabel}
+                    </p>
+                  ) : (
+                    <span />
                   )}
                   <Link
-                    href="/work"
+                    href={
+                      featuredProject.slug
+                        ? `/projects/${featuredProject.slug}`
+                        : '/work'
+                    }
                     onClick={close}
-                    className="mt-6 inline-flex items-center rounded-sm border border-[#08090a]/25 px-4 py-3 font-mono text-[11px] uppercase tracking-label text-[#08090a] transition-colors hover:border-[#08090a]/50"
+                    className="group inline-flex items-center gap-[0.4em] font-sans text-[16px] font-medium tracking-[-0.015em] text-[#08090a]/75 transition-colors hover:text-[#08090a]"
                   >
-                    View more work
+                    <span>{featuredProject.slug ? 'View project' : 'View more work'}</span>
+                    <span
+                      aria-hidden
+                      className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[5px]"
+                    >
+                      →
+                    </span>
                   </Link>
                 </div>
               </div>
-            ) : null}
-
-            {testimonials.length > 0 ? (
-              <div data-panel-reveal className="mt-12 space-y-8">
-                <p className="font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                  From clients
-                </p>
-                {testimonials.map((item) => (
-                  <blockquote key={item._id}>
-                    <p className="text-[15px] leading-relaxed text-[#08090a]/80 md:text-base">
-                      “{item.quote}”
-                    </p>
-                    <footer className="mt-3 font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
-                      {item.author}
-                      {item.role ? ` — ${item.role}` : ''}
-                    </footer>
-                  </blockquote>
-                ))}
+            ) : cached.imageUrl ? (
+              <div
+                data-panel-reveal
+                className="relative mt-[20px] aspect-[16/11] w-full overflow-hidden bg-[#08090a]/08"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={cached.imageUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                />
               </div>
             ) : null}
 
-            {cached.proofAnchor?.trim() ? (
-              <p
+            {steps.length > 0 ? (
+              <section data-panel-reveal className="mt-[56px] md:mt-[64px]">
+                <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
+                  <p className={sectionEyebrow}>
+                    <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+                    {cached.stepsLabel?.trim() || 'How we work'}
+                  </p>
+                  <ul className="space-y-[28px] md:space-y-[32px]">
+                    {steps.map((step) => (
+                      <li key={step._key}>
+                        {step.lead?.trim() ? (
+                          <p className="font-sans text-[20px] font-medium leading-[1.15] tracking-[-0.015em] text-[#08090a] md:text-[22px]">
+                            {step.lead.trim()}
+                          </p>
+                        ) : null}
+                        <p
+                          className={`text-[16px] font-medium leading-[1.25] tracking-[-0.01em] text-[#08090a]/65 md:text-[17px] ${
+                            step.lead?.trim() ? 'mt-[8px]' : ''
+                          }`}
+                        >
+                          {step.text}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            ) : null}
+
+            {deliverables.length > 0 ? (
+              <section data-panel-reveal className="mt-[56px] md:mt-[64px]">
+                <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
+                  <p className={sectionEyebrow}>
+                    <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+                    What you get
+                  </p>
+                  <ul className="space-y-[28px] md:space-y-[32px]">
+                    {deliverables.map((row) => (
+                      <li key={row._key}>
+                        <p className="font-sans text-[20px] font-medium leading-[1.15] tracking-[-0.015em] text-[#08090a] md:text-[22px]">
+                          {row.title}
+                        </p>
+                        {row.detail?.trim() ? (
+                          <p className="mt-[8px] text-[16px] font-medium leading-[1.25] tracking-[-0.01em] text-[#08090a]/65 md:text-[17px]">
+                            {row.detail.trim()}
+                          </p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            ) : null}
+
+            {plans.length > 0 ? (
+              <section data-panel-reveal className="mt-[56px] md:mt-[64px]">
+                <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
+                  <p className={sectionEyebrow}>
+                    <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+                    Plans
+                  </p>
+                  <div className="grid gap-[16px] sm:grid-cols-2">
+                    {plans.map((plan) => (
+                      <div
+                        key={plan._key}
+                        className={`flex flex-col rounded-sm border p-[20px] ${
+                          plan.highlight
+                            ? 'border-[#e42927]/40 bg-[#e42927]/[0.04]'
+                            : 'border-[#08090a]/12'
+                        }`}
+                      >
+                        <p className="font-sans text-[20px] font-medium leading-[1.1] tracking-[-0.015em] text-[#08090a] md:text-[22px]">
+                          {plan.name}
+                        </p>
+                        <p className="mt-[6px] font-mono text-[12px] uppercase tracking-label text-[#08090a]/55">
+                          {plan.price}
+                        </p>
+                        {plan.summary?.trim() ? (
+                          <p className="mt-[12px] text-[15px] font-medium leading-[1.3] tracking-[-0.01em] text-[#08090a]/65">
+                            {plan.summary.trim()}
+                          </p>
+                        ) : null}
+                        {plan.features && plan.features.length > 0 ? (
+                          <ul className="mt-[16px] space-y-[8px] text-[14px] font-medium leading-[1.3] tracking-[-0.01em] text-[#08090a]/70">
+                            {plan.features.map((feature) => (
+                              <li key={feature} className="flex gap-[8px]">
+                                <span
+                                  aria-hidden
+                                  className="mt-[0.5em] inline-block size-[4px] shrink-0 rounded-full bg-[#08090a]/40"
+                                />
+                                <span>{feature}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
+            {testimonials.length > 0 ? (
+              <section data-panel-reveal className="mt-[56px] md:mt-[64px]">
+                <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
+                  <p className={sectionEyebrow}>
+                    <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+                    From clients
+                  </p>
+                  <div className="space-y-[28px]">
+                    {testimonials.map((item) => (
+                      <blockquote key={item._id}>
+                        <p className="text-[18px] font-medium leading-[1.2] tracking-[-0.015em] text-[#08090a] md:text-[20px]">
+                          “{item.quote}”
+                        </p>
+                        <footer className="mt-3 font-mono text-[11px] uppercase tracking-label text-[#08090a]/45">
+                          {item.author}
+                          {item.role ? ` — ${item.role}` : ''}
+                        </footer>
+                      </blockquote>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
+            {nextStep?.subhead?.trim() ? (
+              <section
                 data-panel-reveal
-                className="mt-12 text-[15px] leading-relaxed text-[#08090a]/75 md:text-base"
+                className="mt-[56px] rounded-sm bg-[#08090a] px-[24px] py-[28px] text-[#f3f3f3] md:mt-[64px] md:px-[28px] md:py-[32px]"
               >
-                {cached.proofAnchor.trim()}
-              </p>
+                <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
+                  <p className="flex items-center gap-2 self-start font-sans text-[18px] font-semibold tracking-[-0.01em] text-white/55">
+                    <span aria-hidden className="inline-block size-1.5 rounded-full bg-white/40" />
+                    Next step
+                  </p>
+                  <div>
+                    <p className="text-[20px] font-medium leading-[1.15] tracking-[-0.015em] text-white md:text-[22px]">
+                      {nextStep.subhead.trim()}
+                    </p>
+                    <div className="mt-[24px]">
+                      <Link
+                        href={nextStep.href}
+                        onClick={close}
+                        className="inline-flex items-center rounded-sm bg-[#f3f3f3] px-4 py-3 font-mono text-[11px] uppercase tracking-label text-[#08090a] transition-opacity hover:opacity-85"
+                      >
+                        {nextStep.buttonLabel}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </section>
             ) : null}
           </div>
-
-          {cached.imageUrl ? (
-            <div
-              data-panel-reveal
-              className="relative mt-auto aspect-[4/3] w-full shrink-0 overflow-hidden bg-[#08090a]/08 md:aspect-[16/11]"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={cached.imageUrl}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            </div>
-          ) : null}
         </div>
       </aside>
     </div>,

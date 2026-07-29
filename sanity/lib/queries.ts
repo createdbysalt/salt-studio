@@ -36,6 +36,7 @@ export const homePageQuery = defineQuery(`
             linkLabel,
             timeline[]{ _key, label, duration, detail },
             deliverables[]{ _key, title, detail },
+            plans[]{ _key, name, price, summary, features, highlight },
             capabilities[]->{ _id, name, kind },
             idealFor,
             notAFit,
@@ -52,7 +53,8 @@ export const homePageQuery = defineQuery(`
               title,
               "slug": slug.current,
               coverImage,
-              "client": client->name
+              "client": client->name,
+              "thought": pt::text(overview)
             },
             testimonials[]->{
               _id,

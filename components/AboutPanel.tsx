@@ -17,6 +17,7 @@ import {
 import {createPortal} from 'react-dom'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 
+import {SidePanelClose} from '@/components/SidePanelClose'
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {
   ABOUT_BIO,
@@ -101,9 +102,6 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
   const backdropRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const closeWrapRef = useRef<HTMLDivElement>(null)
-  const closeBtnRef = useRef<HTMLButtonElement>(null)
-  const closeMagnetRef = useRef<HTMLSpanElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const openRef = useRef(open)
   const lenis = useLenis()
@@ -128,26 +126,17 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
 
       const backdrop = backdropRef.current
       const panel = panelRef.current
-      const closeWrap = closeWrapRef.current
-      const closeBtn = closeBtnRef.current
-      const magnet = closeMagnetRef.current
       if (!backdrop || !panel) return
 
       const reduced = prefersReducedMotion()
-      gsap.killTweensOf([backdrop, panel, closeWrap, closeBtn, magnet])
+      gsap.killTweensOf([backdrop, panel])
 
       if (open) {
         gsap.set(panel, {xPercent: 100})
         gsap.set(backdrop, {opacity: 0})
-        if (closeWrap) gsap.set(closeWrap, {opacity: 0, y: -14, scale: 0.88})
         setInteractive(true)
 
         const revealEls = gsap.utils.toArray<HTMLElement>('[data-about-reveal]', panel)
-        const labelOut = closeBtn?.querySelector<HTMLElement>('[data-close-label="out"]')
-        const labelIn = closeBtn?.querySelector<HTMLElement>('[data-close-label="in"]')
-        const escOut = closeBtn?.querySelector<HTMLElement>('[data-close-esc="out"]')
-        const escIn = closeBtn?.querySelector<HTMLElement>('[data-close-esc="in"]')
-        const escBg = closeBtn?.querySelector<HTMLElement>('[data-close-esc-bg]')
 
         const tl = gsap.timeline()
         tl.to(
@@ -168,20 +157,6 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
           },
           0,
         )
-
-        if (closeWrap) {
-          tl.to(
-            closeWrap,
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: reduced ? 0.01 : 0.7,
-              ease: 'expo.out',
-            },
-            reduced ? 0 : 0.35,
-          )
-        }
 
         if (reduced) {
           gsap.set(revealEls, {clearProps: 'opacity,transform'})
@@ -205,80 +180,8 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
           )
         }
 
-        // Hover: dual-layer text swap + ESC flip.
-        const cleanups: Array<() => void> = []
-        if (closeBtn && labelOut && labelIn && escOut && escIn) {
-          gsap.set(labelIn, {yPercent: 110})
-          gsap.set(escIn, {yPercent: 110})
-
-          const hoverTl = gsap.timeline({paused: true})
-          hoverTl
-            .to(labelOut, {yPercent: -110, duration: 0.38, ease: EASE.outQuint}, 0)
-            .to(labelIn, {yPercent: 0, duration: 0.38, ease: EASE.outQuint}, 0)
-            .to(escOut, {yPercent: -110, duration: 0.34, ease: EASE.outQuint}, 0.02)
-            .to(escIn, {yPercent: 0, duration: 0.34, ease: EASE.outQuint}, 0.02)
-          if (escBg) {
-            hoverTl.to(
-              escBg,
-              {backgroundColor: 'rgba(255,255,255,0.28)', duration: 0.3, ease: EASE.outCubic},
-              0,
-            )
-          }
-
-          const onEnter = () => hoverTl.play()
-          const onLeave = () => hoverTl.reverse()
-          closeBtn.addEventListener('pointerenter', onEnter)
-          closeBtn.addEventListener('pointerleave', onLeave)
-          cleanups.push(() => {
-            closeBtn.removeEventListener('pointerenter', onEnter)
-            closeBtn.removeEventListener('pointerleave', onLeave)
-            hoverTl.kill()
-          })
-        }
-
-        // Magnetic pull toward the cursor — the “cool” bit.
-        if (closeBtn && magnet) {
-          const xTo = gsap.quickTo(magnet, 'x', {duration: 0.45, ease: EASE.outQuint})
-          const yTo = gsap.quickTo(magnet, 'y', {duration: 0.45, ease: EASE.outQuint})
-          const maxPull = 10
-
-          const onMove = (event: PointerEvent) => {
-            const rect = closeBtn.getBoundingClientRect()
-            const cx = rect.left + rect.width / 2
-            const cy = rect.top + rect.height / 2
-            const dx = (event.clientX - cx) / (rect.width / 2)
-            const dy = (event.clientY - cy) / (rect.height / 2)
-            xTo(gsap.utils.clamp(-1, 1, dx) * maxPull)
-            yTo(gsap.utils.clamp(-1, 1, dy) * maxPull)
-          }
-          const onLeaveMagnet = () => {
-            xTo(0)
-            yTo(0)
-          }
-          const onDown = () => {
-            gsap.to(magnet, {scale: 0.94, duration: 0.16, ease: EASE.outCubic})
-          }
-          const onUp = () => {
-            gsap.to(magnet, {scale: 1, duration: 0.35, ease: 'expo.out'})
-          }
-
-          magnet.addEventListener('pointermove', onMove)
-          magnet.addEventListener('pointerleave', onLeaveMagnet)
-          magnet.addEventListener('pointerdown', onDown)
-          magnet.addEventListener('pointerup', onUp)
-          magnet.addEventListener('pointercancel', onUp)
-          cleanups.push(() => {
-            magnet.removeEventListener('pointermove', onMove)
-            magnet.removeEventListener('pointerleave', onLeaveMagnet)
-            magnet.removeEventListener('pointerdown', onDown)
-            magnet.removeEventListener('pointerup', onUp)
-            magnet.removeEventListener('pointercancel', onUp)
-          })
-        }
-
         return () => {
           tl.kill()
-          cleanups.forEach((fn) => fn())
         }
       }
 
@@ -288,19 +191,6 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
           if (!openRef.current) setPresent(false)
         },
       })
-      if (closeWrap) {
-        tl.to(
-          closeWrap,
-          {
-            opacity: 0,
-            y: -10,
-            scale: 0.94,
-            duration: reduced ? 0.01 : 0.35,
-            ease: 'power2.in',
-          },
-          0,
-        )
-      }
       tl.to(
         panel,
         {
@@ -383,52 +273,11 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
         aria-labelledby={titleId}
         className="absolute inset-y-0 right-0 flex w-full max-w-[min(100vw,45rem)] flex-col bg-[#f3f3f3] text-[#08090a] shadow-[-24px_0_80px_rgba(0,0,0,0.35)] will-change-transform"
       >
-        {/* Close is pinned to the panel (not the scroll) so it never leaves — and never covers the eyebrow. */}
-        <div
-          ref={closeWrapRef}
-          className="pointer-events-none absolute top-[28px] right-[28px] z-20"
-        >
-          <span
-            ref={closeMagnetRef}
-            className="pointer-events-auto relative inline-flex will-change-transform"
-          >
-            <button
-              ref={closeBtnRef}
-              type="button"
-              onClick={close}
-              aria-label="Close about panel"
-              className="relative isolate inline-flex items-center gap-2 overflow-hidden rounded-sm bg-[#08090a] py-1.5 pl-3.5 pr-1.5 font-mono text-[11px] uppercase tracking-label text-white"
-            >
-              <span className="relative inline-block h-[1em] overflow-hidden leading-none">
-                <span data-close-label="out" className="block">
-                  Close
-                </span>
-                <span
-                  data-close-label="in"
-                  aria-hidden
-                  className="absolute inset-x-0 top-0 block"
-                >
-                  Close
-                </span>
-              </span>
-              <span
-                data-close-esc-bg
-                className="relative inline-block h-[1.65em] min-w-[2.1rem] overflow-hidden rounded-[3px] bg-white/15 px-1.5 text-center text-[10px] leading-[1.65em] tracking-[0.08em] text-white/75"
-              >
-                <span data-close-esc="out" className="block">
-                  ESC
-                </span>
-                <span
-                  data-close-esc="in"
-                  aria-hidden
-                  className="absolute inset-x-0 top-0 block"
-                >
-                  ESC
-                </span>
-              </span>
-            </button>
-          </span>
-        </div>
+        <SidePanelClose
+          open={open && present}
+          onClose={close}
+          ariaLabel="Close about panel"
+        />
 
         <div
           ref={scrollRef}
