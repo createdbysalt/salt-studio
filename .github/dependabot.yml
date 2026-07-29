@@ -1,0 +1,44 @@
+# Dependabot configuration for Salt Studio
+# Automatically opens PRs for dependency updates and security patches.
+# NOTE: this repo also runs Renovate (.github/renovate.json). Dependabot here is
+# kept primarily for GitHub-native security alerts + Actions pinning; if PR noise
+# on npm gets duplicative with Renovate, narrow the npm block or drop it.
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # npm dependencies (Next.js, Sanity, etc.)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "createdbysalt"
+    labels:
+      - "dependencies"
+      - "security"
+    # Group minor/patch updates together to reduce PR noise.
+    # Security updates always get their own separate, high-priority PR.
+    groups:
+      production-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    versioning-strategy: increase
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"

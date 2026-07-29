@@ -1,0 +1,28 @@
+name: "salt-studio-codeql"
+
+# Keep CodeQL focused on hand-written source (smaller SARIF, faster PR checks).
+paths:
+  - app
+  - components
+  - lib
+  - sanity
+  - scripts
+
+paths-ignore:
+  - node_modules
+  - .next
+  - out
+  - build
+  - dist
+  - public
+  # Generated Sanity artifacts — never hand-edited, not worth scanning.
+  - sanity.types.ts
+  - schema.json
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/*.stories.tsx"
+  - "**/__tests__/**"
+  - "**/tests/**"
+  - "**/e2e/**"

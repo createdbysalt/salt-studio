@@ -1,0 +1,28 @@
+name: Security Review
+
+permissions:
+  pull-requests: write # Needed for leaving PR comments
+  contents: read
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 2
+
+      - uses: anthropics/claude-code-security-review@main # no semver tag published; pin to a release SHA when available
+        with:
+          comment-pr: true
+          claude-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude-model: claude-opus-4-8
+          # Focus areas specific to this codebase: Sanity read/write token handling,
+          # the draft-mode enable route, GROQ query construction, any server actions
+          # or API routes that write to Sanity, and the analytics/consent code.
+          custom-security-scan-instructions: "Pay special attention to Sanity token handling (sanity/lib/token.ts and any write-token wrapper — tokens must never reach the client bundle, keep the `server-only` import), the draft-mode enable route (app/api/draft-mode/enable), GROQ query construction in sanity/lib/queries.ts (no unsanitized string interpolation — use $params), any API routes or server actions that write to Sanity, Stripe/webhook signature verification if present, and the analytics consent handling in lib/analytics."

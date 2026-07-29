@@ -9,6 +9,7 @@
     "dev": "next --turbopack -p 4000",
     "dev:fast": "next --turbopack -p 4000",
     "format": "npx prettier --write . --ignore-path .gitignore",
+    "format:check": "npx prettier --check . --ignore-path .gitignore",
     "generate:error-content": "node scripts/generate-error-content.mjs",
     "import:projects": "sanity exec scripts/import-projects-from-csv.mjs --with-user-token",
     "lint": "eslint .",

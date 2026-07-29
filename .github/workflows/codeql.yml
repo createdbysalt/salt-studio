@@ -1,0 +1,59 @@
+name: "CodeQL Security Scan"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run a weekly scan on Mondays at 6 AM UTC.
+    - cron: "0 6 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      # Required for all workflows
+      security-events: write
+      # Required for workflows in private repositories
+      contents: read
+      actions: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["javascript-typescript"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          # On PRs, keep the SARIF small so GitHub can process it reliably.
+          # On main/scheduled scans, also run the quality queries.
+          queries: ${{ github.event_name == 'pull_request' && 'security-extended' || 'security-extended,security-and-quality' }}
+          config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
+          # Code scanning (GitHub Advanced Security) is not enabled on this
+          # private repo, so SARIF uploads are rejected. Keep `upload: false`:
+          # the analysis still runs on every PR and gates merges, it just
+          # doesn't post to the Security tab. If you enable code scanning /
+          # GHAS later (Settings → Code security), flip this to `true` to get
+          # Security-tab results.
+          upload: false
