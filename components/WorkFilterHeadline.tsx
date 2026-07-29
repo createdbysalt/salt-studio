@@ -3,8 +3,8 @@ import Link from 'next/link'
 
 /**
  * The Work masthead — Glitch&Grit filter-as-headline on a light stage.
- * Full chrome width, flex-wrap centered so items sit on one line and wrap
- * as a sentence (not a stacked list). Displayed uppercase.
+ * Inline text so labels wrap mid-sentence (not one filter per line).
+ * Displayed uppercase.
  */
 export function WorkFilterHeadline({
   allLabel,
@@ -32,13 +32,13 @@ export function WorkFilterHeadline({
     <nav aria-label="Filter work by specialty" className="mx-auto w-full max-w-[90rem]">
       <ul
         role="list"
-        className="flex flex-wrap justify-center gap-x-0 gap-y-[0.08em] text-center font-sans text-[clamp(1.5rem,2.75vw,2.5rem)] font-bold uppercase leading-[1.15] tracking-[-0.035em]"
+        className="list-none text-center font-sans text-[clamp(1.2rem,2.2vw,2rem)] font-bold uppercase leading-[1.2] tracking-[-0.035em]"
       >
         {items.map((item, index) => {
           const active = item.slug === activeSlug
           const isLast = index === items.length - 1
           return (
-            <li key={item.key} className="inline-flex items-baseline whitespace-nowrap">
+            <li key={item.key} className="inline">
               {active ? (
                 <span aria-current="page" className="text-foreground">
                   {item.label}

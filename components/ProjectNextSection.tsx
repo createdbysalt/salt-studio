@@ -14,7 +14,7 @@ export function ProjectNextSection({projects}: {projects: WorkProjectCard[]}) {
   return (
     <section
       aria-label="Next project"
-      className="relative border-t border-foreground/10 px-5 pb-20 pt-24 md:px-6 md:pb-28 md:pt-32"
+      className="relative border-t border-foreground/10 px-5 pb-20 pt-36 md:px-6 md:pb-28 md:pt-44"
     >
       <div className="relative mx-auto w-full max-w-[100rem]">
         <h2 className="pointer-events-none text-center font-sans text-[clamp(5rem,16vw,13rem)] font-bold uppercase leading-[0.78] tracking-[-0.05em] text-foreground/90">
@@ -23,7 +23,8 @@ export function ProjectNextSection({projects}: {projects: WorkProjectCard[]}) {
           project
         </h2>
 
-        <ul className="relative z-10 -mt-6 grid grid-cols-1 gap-x-4 gap-y-10 sm:grid-cols-2 md:-mt-10 lg:grid-cols-3 lg:gap-x-5">
+        {/* Tablet: 2 cards, edge-to-edge. Desktop: 3 cards inside chrome. */}
+        <ul className="relative z-10 -mx-5 -mt-2 grid grid-cols-1 gap-x-hairline gap-y-10 max-sm:[&>li:nth-child(n+2)]:hidden sm:grid-cols-2 sm:max-lg:[&>li:nth-child(n+3)]:hidden md:-mx-6 md:-mt-3 lg:mx-0 lg:grid-cols-3 lg:gap-x-5">
           {projects.map((project, position) => {
             const title = project.title ? stegaClean(project.title).trim() : 'Untitled'
             const slug = project.slug ? stegaClean(project.slug).trim() : ''
@@ -42,7 +43,7 @@ export function ProjectNextSection({projects}: {projects: WorkProjectCard[]}) {
                       playback="autoplay"
                     />
                   </div>
-                  <div className="mt-2 flex items-baseline gap-2.5 md:mt-2.5 md:gap-3">
+                  <div className="mt-2 flex items-baseline gap-2.5 px-5 md:mt-2.5 md:gap-3 md:px-6 lg:px-0">
                     <span className="shrink-0 font-sans text-[15px] font-bold tabular-nums tracking-[-0.02em] text-foreground md:text-[16px]">
                       {indexMark}
                     </span>

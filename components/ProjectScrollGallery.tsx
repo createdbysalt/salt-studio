@@ -89,17 +89,9 @@ export function ProjectScrollGallery({frames}: {frames: ProjectScrollFrame[]}) {
   if (frames.length === 0) return null
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-0">
       {frames.map((frame, index) => {
         const isActive = reduceMotion || index === activeIndex
-        const caption =
-          frame.kind === 'photo'
-            ? frame.image.caption
-              ? stegaClean(frame.image.caption)
-              : null
-            : frame.kind === 'video' && frame.caption
-              ? stegaClean(frame.caption)
-              : null
 
         return (
           <figure
@@ -109,7 +101,9 @@ export function ProjectScrollGallery({frames}: {frames: ProjectScrollFrame[]}) {
             }}
             data-index={index}
             data-media={frame.kind === 'photo' ? 'photo' : 'video'}
-            className="relative m-0 aspect-video w-full overflow-hidden bg-foreground/6"
+            className={`relative m-0 aspect-video w-full overflow-hidden bg-foreground/6 ${
+              index > 0 ? '-mt-px' : ''
+            }`}
           >
             {/* Keep media at full opacity — dim via scrim only so video decode stays clean. */}
             <div className="absolute inset-0">
@@ -138,19 +132,12 @@ export function ProjectScrollGallery({frames}: {frames: ProjectScrollFrame[]}) {
                 <ProjectGalleryVideoCell
                   videoUrl={frame.videoUrl}
                   poster={frame.poster}
-                  caption={null}
                   title={frame.title}
                   aspectClass="absolute inset-0 h-full w-full !aspect-auto"
                   active={isActive}
                 />
               ) : null}
             </div>
-
-            {caption ? (
-              <p className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] bg-gradient-to-t from-black/80 to-transparent p-3 font-mono text-[10px] uppercase tracking-[0.08em] text-white/70">
-                {caption}
-              </p>
-            ) : null}
 
             <div
               aria-hidden

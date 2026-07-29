@@ -41,7 +41,6 @@ function GalleryCell({
     const image = item.image
     if (!image?.asset) return null
     const alt = image.alt ? stegaClean(image.alt) : ''
-    const caption = image.caption ? stegaClean(image.caption) : null
     return (
       <div className={`relative overflow-hidden bg-foreground/[0.06] ${aspectClass}`}>
         <ImageBox
@@ -49,23 +48,15 @@ function GalleryCell({
           alt={alt || 'Project still'}
           classesWrapper="absolute inset-0 !rounded-none bg-muted"
         />
-        {caption ? (
-          /* Caption ON media — white over a scrim, deliberately not themed. */
-          <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-3 font-mono text-[10px] uppercase tracking-[0.08em] text-white/70">
-            {caption}
-          </p>
-        ) : null}
       </div>
     )
   }
 
   if (item._type === 'projectGalleryVideo') {
-    const caption = item.caption ? stegaClean(item.caption) : null
     return (
       <ProjectGalleryVideoCell
         videoUrl={item.videoUrl}
         poster={item.poster}
-        caption={caption}
         title={title}
         aspectClass={aspectClass}
       />
