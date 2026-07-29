@@ -20,10 +20,6 @@ export const mainDocuments = defineDocuments([
     filter: `_type == "workCategory" && slug.current == $slug`,
   },
   {
-    route: '/capabilities',
-    filter: `_type == "servicesPage"`,
-  },
-  {
     route: '/about',
     filter: `_type == "aboutPage"`,
   },

@@ -305,7 +305,11 @@ const serviceDocs = [
         'A bounded assessment on your real content, with success criteria we agree on before we start. Enough for a board to approve without a leap of faith.',
         'Pilot first.',
       ),
-      serviceStep('ai-step-2', 'Fixed scope, milestone billing, a hard timeline.', 'Then the build.'),
+      serviceStep(
+        'ai-step-2',
+        'Fixed scope, milestone billing, a hard timeline.',
+        'Then the build.',
+      ),
       serviceStep('ai-step-3', 'Your data, your accounts, your tool.', 'Then it’s yours.'),
     ],
     deliverables: [

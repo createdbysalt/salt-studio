@@ -1,26 +1,46 @@
 'use client'
 
-function LoadingScan() {
+import {SaltWordmark} from '@/components/SaltWordmark'
+
+function LoadingScan({accent = false}: {accent?: boolean}) {
   return (
-    <div className="relative h-px w-full shrink-0 overflow-hidden bg-foreground/10" aria-hidden="true">
-      <div className="absolute inset-y-0 w-1/4 animate-salt-scan bg-foreground/35" />
+    <div
+      className="relative h-px w-full shrink-0 overflow-hidden bg-foreground/10"
+      aria-hidden="true"
+    >
+      <div
+        className={`absolute inset-y-0 w-1/3 animate-salt-scan ${
+          accent ? 'bg-accent' : 'bg-foreground/40'
+        }`}
+      />
     </div>
   )
 }
 
-function Block({className, style}: {className?: string; style?: React.CSSProperties}) {
+function Block({
+  className,
+  style,
+  delay = 0,
+}: {
+  className?: string
+  style?: React.CSSProperties
+  delay?: number
+}) {
   return (
     <div
       aria-hidden="true"
-      style={style}
-      className={`animate-salt-shimmer bg-foreground/6 ${className ?? ''}`}
+      style={{...style, animationDelay: delay ? `${delay}ms` : undefined}}
+      className={`animate-salt-shimmer bg-foreground/8 ${className ?? ''}`}
     />
   )
 }
 
 function LoadingStatus({label}: {label: string}) {
   return (
-    <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/35">{label}</p>
+    <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-foreground/40">
+      {label}
+      <span className="animate-salt-blink">_</span>
+    </p>
   )
 }
 
@@ -28,29 +48,37 @@ function LoadingShell({
   label,
   children,
   className,
+  dark = false,
 }: {
   label: string
   children: React.ReactNode
   className?: string
+  dark?: boolean
 }) {
   return (
     <div
       role="status"
       aria-label={`Loading ${label}`}
+      data-theme={dark ? 'dark' : undefined}
       className={`bg-background text-foreground ${className ?? ''}`}
     >
-      <LoadingScan />
+      <LoadingScan accent />
       {children}
     </div>
   )
 }
 
-/** Home — paper stage matching the hero. */
+/** Home — ink stage with wordmark, matching the session preloader language. */
 export function HomeLoading() {
   return (
-    <LoadingShell label="home" className="flex min-h-screen flex-col">
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6">
-        <Block className="h-4 w-28" />
+    <LoadingShell label="home" dark className="flex min-h-screen flex-col">
+      <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6">
+        <div className="animate-salt-mark-in overflow-hidden">
+          <SaltWordmark className="h-9 w-auto text-foreground md:h-10" />
+        </div>
+        <div className="relative h-px w-28 overflow-hidden bg-foreground/15">
+          <div className="absolute inset-y-0 w-full origin-left animate-salt-scan-fill bg-accent" />
+        </div>
         <LoadingStatus label="Loading" />
       </div>
     </LoadingShell>
@@ -60,29 +88,23 @@ export function HomeLoading() {
 /** Work index + category — filter masthead, search line, contact-sheet grid. */
 export function WorkLoading() {
   return (
-    <LoadingShell label="work" className="pb-24">
-      <header className="page-chrome pt-12 md:pt-20">
-        <Block className="h-3 w-20" />
-        <Block className="mt-[20px] h-10 w-full max-w-3xl md:h-14" />
-        <Block className="mt-2 h-10 w-3/4 max-w-xl md:h-14" />
-        <Block className="mt-[24px] h-3 w-full max-w-sm" />
+    <LoadingShell label="work" dark className="pb-24">
+      <header className="page-chrome pt-28 text-center md:pt-36">
+        <Block className="mx-auto h-8 w-[min(90%,28rem)] md:h-10" delay={40} />
+        <Block className="mx-auto mt-2 h-8 w-[min(70%,20rem)] md:h-10" delay={120} />
+        <Block className="mx-auto mt-3 h-3 w-40" delay={200} />
       </header>
 
-      <div className="page-chrome mt-10 md:mt-14">
-        <div className="md:ml-auto md:max-w-xs">
-          <LoadingStatus label="Search —" />
-          <Block className="mt-2 h-9 w-full border-b border-foreground/15 bg-transparent" />
-        </div>
-      </div>
-
-      <ul className="mt-12 grid grid-cols-1 gap-x-hairline gap-y-10 sm:grid-cols-2 md:mt-16 lg:grid-cols-3">
+      <ul className="media-bleed mt-12 grid grid-cols-1 gap-x-hairline gap-y-10 sm:grid-cols-2 md:mt-16 lg:grid-cols-3">
         {Array.from({length: 6}, (_, i) => (
-          <li key={i}>
-            <Block className="aspect-[16/9] w-full" />
-            <div className="mt-3 flex items-baseline gap-3 px-[16px] md:px-[20px]">
-              <Block className="h-3 w-6" />
-              <Block className="h-3 w-2/5" />
-              <Block className="ml-auto h-3 w-16" />
+          <li key={i} className="animate-salt-rise" style={{animationDelay: `${i * 70}ms`}}>
+            <Block className="aspect-video w-full" delay={i * 70} />
+            <div className="mt-2 flex items-baseline gap-2.5 px-[16px] md:mt-2.5 md:gap-3 md:px-[20px]">
+              <span className="shrink-0 font-sans text-[13px] font-bold tabular-nums tracking-[-0.02em] text-foreground/25 md:text-[17px]">
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <Block className="h-3 w-2/5 md:h-3.5" delay={i * 70 + 40} />
+              <Block className="ml-auto h-3 w-16 md:h-3.5" delay={i * 70 + 80} />
             </div>
           </li>
         ))}
@@ -91,44 +113,36 @@ export function WorkLoading() {
   )
 }
 
-/** Project detail — cinematic hero + spec sidebar layout, light chrome. */
+/** Project detail — title masthead + gallery stack + sidebar. */
 export function ProjectLoading() {
   return (
-    <LoadingShell label="project" className="pb-24">
-      <header className="relative">
-        <Block className="aspect-[16/10] w-full md:aspect-[21/9]" />
-        <div className="mx-auto max-w-6xl px-5 md:px-8">
-          <div className="mt-8 space-y-3 md:mt-10">
-            <Block className="h-3 w-40" />
-            <Block className="h-12 w-full max-w-2xl md:h-16" />
-          </div>
-        </div>
+    <LoadingShell label="project" dark className="pb-24">
+      <header className="px-5 pt-28 text-center md:px-6 md:pt-32">
+        <Block className="mx-auto h-3 w-28" delay={40} />
+        <Block className="mx-auto mt-1 h-3 w-24" delay={80} />
+        <Block className="mx-auto mt-4 h-14 w-[min(90%,16ch)] md:h-20" delay={140} />
       </header>
 
-      <div className="mx-auto max-w-6xl px-5 pt-12 pb-24 md:px-8 md:pt-16">
-        <div className="grid grid-cols-1 gap-x-12 gap-y-10 lg:grid-cols-[1fr_18rem]">
-          <div className="order-2 space-y-4 lg:order-1">
-            <Block className="h-4 w-full" />
-            <Block className="h-4 w-11/12" />
-            <Block className="h-4 w-4/5" />
-            <Block className="mt-8 h-48 w-full" />
-          </div>
-          <aside className="order-1 lg:order-2">
-            <LoadingStatus label="Spec" />
-            <div className="mt-4 space-y-0 border-t border-foreground/15">
-              {Array.from({length: 5}, (_, i) => (
-                <div
-                  key={i}
-                  className="grid grid-cols-[5.5rem_1fr] gap-4 border-t border-foreground/15 py-3"
-                >
-                  <Block className="h-3 w-full" />
-                  <Block className="h-3 w-3/4" />
-                </div>
-              ))}
-            </div>
-          </aside>
+      <section className="mt-4 grid grid-cols-1 gap-5 pb-16 md:mt-10 md:gap-6 lg:mt-16 lg:grid-cols-[minmax(20rem,28rem)_minmax(0,1fr)] lg:gap-x-10">
+        <div className="order-1 min-w-0 lg:order-2">
+          {Array.from({length: 3}, (_, i) => (
+            <Block key={i} className="aspect-video w-full" delay={180 + i * 90} />
+          ))}
         </div>
-      </div>
+        <aside className="order-2 space-y-5 px-5 md:space-y-6 md:px-6 lg:order-1 lg:px-0 lg:pl-[30px]">
+          <div>
+            <LoadingStatus label="Idea" />
+            <Block className="mt-2 h-4 w-full" delay={220} />
+            <Block className="mt-2 h-4 w-11/12" delay={260} />
+            <Block className="mt-2 h-4 w-4/5" delay={300} />
+          </div>
+          <div>
+            <LoadingStatus label="Insight" />
+            <Block className="mt-2 h-4 w-full" delay={340} />
+            <Block className="mt-2 h-4 w-5/6" delay={380} />
+          </div>
+        </aside>
+      </section>
     </LoadingShell>
   )
 }
@@ -141,23 +155,23 @@ export function EditorialLoading({width = 'wide'}: {width?: 'narrow' | 'wide'}) 
     <LoadingShell label="page" className="pb-24">
       <div className={`mx-auto ${maxWidth} px-6 py-16`}>
         <header className="mb-16 space-y-4">
-          <Block className="h-12 w-4/5 md:h-16" />
-          <Block className="h-4 w-full" />
-          <Block className="h-4 w-2/3" />
+          <Block className="h-12 w-4/5 md:h-16" delay={40} />
+          <Block className="h-4 w-full" delay={100} />
+          <Block className="h-4 w-2/3" delay={160} />
         </header>
 
         <section className="mb-16 space-y-3">
-          <Block className="h-6 w-1/3" />
-          <Block className="h-4 w-full" />
-          <Block className="h-4 w-11/12" />
-          <Block className="h-4 w-4/5" />
+          <Block className="h-6 w-1/3" delay={200} />
+          <Block className="h-4 w-full" delay={240} />
+          <Block className="h-4 w-11/12" delay={280} />
+          <Block className="h-4 w-4/5" delay={320} />
         </section>
 
         <section className="space-y-0 border-y border-foreground/15">
           {Array.from({length: 4}, (_, i) => (
             <div key={i} className="flex justify-between gap-6 border-t border-foreground/15 py-3">
-              <Block className="h-3 w-24" />
-              <Block className="h-3 w-32" />
+              <Block className="h-3 w-24" delay={360 + i * 60} />
+              <Block className="h-3 w-32" delay={400 + i * 60} />
             </div>
           ))}
         </section>
@@ -172,10 +186,15 @@ export function LegalLoading({article = false}: {article?: boolean}) {
     return (
       <LoadingShell label="legal page" className="pb-24">
         <div className="mx-auto max-w-3xl px-6 py-16">
-          <Block className="mb-8 h-10 w-2/3" />
+          <Block className="mb-8 h-10 w-2/3" delay={40} />
           <div className="space-y-3">
             {Array.from({length: 8}, (_, i) => (
-              <Block key={i} className="h-4 w-full" style={{width: `${100 - (i % 3) * 8}%`}} />
+              <Block
+                key={i}
+                className="h-4 w-full"
+                style={{width: `${100 - (i % 3) * 8}%`}}
+                delay={80 + i * 50}
+              />
             ))}
           </div>
         </div>
@@ -186,11 +205,11 @@ export function LegalLoading({article = false}: {article?: boolean}) {
   return (
     <LoadingShell label="legal" className="pb-24">
       <div className="mx-auto max-w-3xl px-6 py-16">
-        <Block className="mb-10 h-12 w-1/2" />
+        <Block className="mb-10 h-12 w-1/2" delay={40} />
         <ul className="space-y-4">
           {Array.from({length: 4}, (_, i) => (
             <li key={i} className="border-b border-foreground/15 pb-4">
-              <Block className="h-6 w-1/3" />
+              <Block className="h-6 w-1/3" delay={100 + i * 70} />
             </li>
           ))}
         </ul>

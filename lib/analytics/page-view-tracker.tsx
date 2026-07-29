@@ -1,7 +1,7 @@
 'use client'
 
-import {useEffect, useRef} from 'react'
 import {usePathname, useSearchParams} from 'next/navigation'
+import {useEffect, useRef} from 'react'
 import {trackPageView} from './events'
 
 /**
@@ -26,9 +26,7 @@ export function PageViewTracker() {
 
   useEffect(() => {
     // Build full URL
-    const url = searchParams.toString()
-      ? `${pathname}?${searchParams.toString()}`
-      : pathname
+    const url = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname
 
     // Avoid duplicate tracking
     if (url === lastTrackedUrl.current) return
@@ -54,7 +52,7 @@ export function PageViewTracker() {
 
 function firePageView(
   pathname: string,
-  searchParams: URLSearchParams | ReturnType<typeof useSearchParams>
+  searchParams: URLSearchParams | ReturnType<typeof useSearchParams>,
 ) {
   // Get UTM params if present
   const utmSource = searchParams.get('utm_source') || undefined
@@ -68,7 +66,7 @@ function firePageView(
     try {
       sessionStorage.setItem(
         'utm_params',
-        JSON.stringify({utmSource, utmMedium, utmCampaign, utmTerm, utmContent})
+        JSON.stringify({utmSource, utmMedium, utmCampaign, utmTerm, utmContent}),
       )
     } catch {
       // sessionStorage not available

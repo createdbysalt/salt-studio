@@ -38,16 +38,14 @@ export default defineType({
               options: {
                 accept: 'image/png,image/svg+xml,image/webp',
               },
-              validation: (rule) =>
-                rule.required().error('Each logo needs an image'),
+              validation: (rule) => rule.required().error('Each logo needs an image'),
             }),
             defineField({
               name: 'name',
               title: 'Company Name',
               type: 'string',
               description: 'Used for accessibility (alt text) and hover tooltips.',
-              validation: (rule) =>
-                rule.required().error('Add the company name for accessibility'),
+              validation: (rule) => rule.required().error('Add the company name for accessibility'),
             }),
             defineField({
               name: 'url',
@@ -70,8 +68,7 @@ export default defineType({
           },
         },
       ],
-      validation: (rule) =>
-        rule.min(2).error('Add at least 2 logos for a carousel'),
+      validation: (rule) => rule.min(2).error('Add at least 2 logos for a carousel'),
     }),
     defineField({
       name: 'style',

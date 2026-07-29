@@ -10,7 +10,10 @@ type Props = {
   params: Promise<{slug: string}>
 }
 
-export async function generateMetadata({params}: Props, parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata(
+  {params}: Props,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   const {data: page} = await sanityFetch({
     query: legalPageBySlugQuery,
     params,
@@ -72,10 +75,12 @@ export default async function LegalPageRoute({params}: Props) {
     notFound()
   }
 
-  const {title, introText, content, contentSource, policyUrl, effectiveDate, version, lastUpdated} = data ?? {}
+  const {title, introText, content, contentSource, policyUrl, effectiveDate, version, lastUpdated} =
+    data ?? {}
 
   // Fetch managed policy content if using that source
-  const policyHtml = contentSource === 'managed' ? await fetchPolicyContent(policyUrl || null) : null
+  const policyHtml =
+    contentSource === 'managed' ? await fetchPolicyContent(policyUrl || null) : null
 
   return (
     <article
@@ -141,10 +146,7 @@ export default async function LegalPageRoute({params}: Props) {
 
       {/* Managed policy content - rendered natively with site styling */}
       {contentSource === 'managed' && policyHtml && (
-        <div
-          className="prose prose-lg max-w-none"
-          dangerouslySetInnerHTML={{__html: policyHtml}}
-        />
+        <div className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{__html: policyHtml}} />
       )}
 
       {/* Custom content */}
@@ -175,10 +177,7 @@ export default async function LegalPageRoute({params}: Props) {
       )}
 
       {/* Footer divider */}
-      <div
-        className="mt-16 border-t pt-8"
-        style={{borderColor: 'var(--color-border)'}}
-      />
+      <div className="mt-16 border-t pt-8" style={{borderColor: 'var(--color-border)'}} />
     </article>
   )
 }

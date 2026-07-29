@@ -1,25 +1,19 @@
 'use client'
 
-import {useEffect, useRef, useState} from 'react'
-
 import {submitQuiz, type QuizSubmissionInput} from '@/app/actions/quiz'
-import {
-  trackQuizComplete,
-  trackQuizGate,
-  trackQuizStart,
-  trackQuizStep,
-} from '@/lib/analytics'
+import {QuizResults} from '@/components/QuizResults'
+import {trackQuizComplete, trackQuizGate, trackQuizStart, trackQuizStep} from '@/lib/analytics'
 import {
   OPENER_QUESTIONS,
-  QUIZ_CTAS,
-  WEBSITE_QUESTION,
   questionsForTrack,
+  QUIZ_CTAS,
   resolveTrack,
+  WEBSITE_QUESTION,
   type QuizQuestion,
 } from '@/lib/quiz/config'
 import {scoreQuiz, type QuizResult} from '@/lib/quiz/scoring'
-import {QuizResults} from '@/components/QuizResults'
 import Link from 'next/link'
+import {useEffect, useRef, useState} from 'react'
 
 const QUIZ_NAME = 'salt-score'
 
@@ -332,13 +326,20 @@ export function QuizFlow() {
                 {gateError}
               </p>
             )}
-            <button type="submit" disabled={submitting} className="btn-solid mt-6 min-h-12 disabled:opacity-50">
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn-solid mt-6 min-h-12 disabled:opacity-50"
+            >
               {submitting ? 'One second…' : 'Show my score'}
             </button>
             <p className="mt-5 text-xs leading-relaxed text-foreground/40">
               Your score shows instantly. The full breakdown comes from us personally — no drip
               campaigns, and your email never leaves the studio.{' '}
-              <Link href={QUIZ_CTAS.privacy} className="underline underline-offset-2 hover:text-foreground">
+              <Link
+                href={QUIZ_CTAS.privacy}
+                className="underline underline-offset-2 hover:text-foreground"
+              >
                 Privacy policy
               </Link>
             </p>

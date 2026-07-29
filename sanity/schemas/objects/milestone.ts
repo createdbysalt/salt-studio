@@ -10,8 +10,7 @@ export default defineType({
       name: 'title',
       title: 'Milestone Title',
       description: 'A short name for this milestone (e.g., "Project Launch", "Design Phase").',
-      validation: (rule) =>
-        rule.required().error('Each milestone needs a title'),
+      validation: (rule) => rule.required().error('Each milestone needs a title'),
     }),
     defineField({
       type: 'string',
@@ -41,7 +40,8 @@ export default defineType({
       name: 'tags',
       title: 'Tags',
       type: 'array',
-      description: 'Optional labels to categorize this milestone (e.g., "Research", "Development").',
+      description:
+        'Optional labels to categorize this milestone (e.g., "Research", "Development").',
       of: [{type: 'string'}],
       options: {
         layout: 'tags',
@@ -52,8 +52,7 @@ export default defineType({
       name: 'duration',
       title: 'Time Period',
       description: 'When did this milestone start and end?',
-      validation: (rule) =>
-        rule.required().error('Duration helps show the timeline'),
+      validation: (rule) => rule.required().error('Duration helps show the timeline'),
     }),
   ],
   preview: {

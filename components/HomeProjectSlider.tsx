@@ -1,8 +1,8 @@
 'use client'
 
+import {Draggable, DURATION, EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {ProjectCardMedia} from '@/components/ProjectCardMedia'
 import type {WorkProjectCard} from '@/components/ProjectGrid'
-import {Draggable, DURATION, EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {useGSAP} from '@gsap/react'
 import {ArrowUpRight} from 'lucide-react'
 import Link from 'next/link'
@@ -16,6 +16,8 @@ type HomeProjectSliderProps = {
   interactionLock?: boolean
   /** Keep overflow visible (hero edge-bleed). Don't toggle mid-scroll — that jitters. */
   bleed?: boolean
+  /** Stretch cards to the parent height; width follows 16/9 from that height. */
+  fillHeight?: boolean
 }
 
 const AUTOPLAY_MS = 4200
@@ -32,6 +34,7 @@ export function HomeProjectSlider({
   autoplay = true,
   interactionLock = false,
   bleed = false,
+  fillHeight = false,
 }: HomeProjectSliderProps) {
   const scope = useRef<HTMLDivElement>(null)
   const trackRef = useRef<HTMLUListElement>(null)
@@ -273,11 +276,16 @@ export function HomeProjectSlider({
       }
       track.addEventListener('click', onClickCapture, true)
 
+      // Hover-capable only — touch taps often never fire pointerleave, which
+      // would leave autoplay paused forever on phones.
+      const hoverMq = window.matchMedia('(hover: hover) and (pointer: fine)')
       const onPointerEnter = () => {
+        if (!hoverMq.matches) return
         paused = true
         stopAutoplay()
       }
       const onPointerLeave = () => {
+        if (!hoverMq.matches) return
         paused = false
         startAutoplay()
       }
@@ -334,21 +342,29 @@ export function HomeProjectSlider({
   return (
     <div
       ref={scope}
-      className={`relative w-full ${bleed ? 'overflow-visible' : 'overflow-hidden'}`}
+      className={`relative w-full ${fillHeight ? 'h-full' : ''} ${
+        bleed ? 'overflow-visible' : 'overflow-hidden'
+      }`}
     >
       <ul
         ref={trackRef}
         data-hero-track
-        className="relative flex w-max cursor-grab items-stretch will-change-transform motion-reduce:w-full motion-reduce:cursor-default motion-reduce:overflow-x-auto motion-reduce:px-3 active:cursor-grabbing sm:motion-reduce:px-4"
+        className={`relative flex w-max cursor-grab items-stretch will-change-transform motion-reduce:w-full motion-reduce:cursor-default motion-reduce:overflow-x-auto motion-reduce:px-3 active:cursor-grabbing sm:motion-reduce:px-4 ${
+          fillHeight ? 'h-full' : ''
+        }`}
         aria-label="Selected projects"
       >
         {loopItems.map(({project, index, key}) => (
           <li
             key={key}
             data-slider-card
-            className="w-[min(72vw,40rem)] shrink-0 px-1.5 will-change-transform sm:w-[min(58vw,38rem)] sm:px-2 lg:w-[min(48vw,40rem)]"
+            className={`shrink-0 will-change-transform ${
+              fillHeight
+                ? 'h-full px-1 sm:px-1.5'
+                : 'w-[min(72vw,40rem)] px-1.5 sm:w-[min(58vw,38rem)] sm:px-2 lg:w-[min(48vw,40rem)]'
+            }`}
           >
-            <ShowcaseCard project={project} index={index} />
+            <ShowcaseCard project={project} index={index} fillHeight={fillHeight} />
           </li>
         ))}
       </ul>
@@ -356,13 +372,25 @@ export function HomeProjectSlider({
   )
 }
 
-function ShowcaseCard({project, index}: {project: WorkProjectCard; index: number}) {
+function ShowcaseCard({
+  project,
+  index,
+  fillHeight = false,
+}: {
+  project: WorkProjectCard
+  index: number
+  fillHeight?: boolean
+}) {
   const comingSoon = Boolean(project.comingSoon)
   const href = project.slug ? `/projects/${project.slug}` : '/work'
   const indexMark = String(index + 1).padStart(2, '0')
 
   const inner = (
-    <div className="relative aspect-[16/9] overflow-hidden bg-foreground/6">
+    <div
+      className={`relative overflow-hidden bg-foreground/6 ${
+        fillHeight ? 'h-full aspect-[16/9]' : 'aspect-[16/9]'
+      }`}
+    >
       <div data-slider-media className="absolute inset-0 will-change-transform">
         <ProjectCardMedia
           title={project.title}
@@ -378,7 +406,7 @@ function ShowcaseCard({project, index}: {project: WorkProjectCard; index: number
           aria-hidden
           size={20}
           strokeWidth={2}
-          className="pointer-events-none absolute bottom-3.5 right-3.5 z-[2] origin-bottom-right scale-90 text-white opacity-0 drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)] transition-[opacity,transform] duration-300 ease-out group-hover:scale-125 group-hover:opacity-100 group-focus-visible:scale-125 group-focus-visible:opacity-100"
+          className="pointer-events-none absolute bottom-3.5 right-3.5 z-[2] origin-bottom-right scale-100 text-white opacity-80 drop-shadow-[0_1px_4px_rgba(0,0,0,0.45)] transition-[opacity,transform] duration-300 ease-out max-md:opacity-90 md:scale-90 md:opacity-0 md:group-hover:scale-125 md:group-hover:opacity-100 md:group-focus-visible:scale-125 md:group-focus-visible:opacity-100"
         />
       ) : null}
 
@@ -391,11 +419,11 @@ function ShowcaseCard({project, index}: {project: WorkProjectCard; index: number
   )
 
   if (comingSoon) {
-    return <div className="group block cursor-default">{inner}</div>
+    return <div className={`group block cursor-default ${fillHeight ? 'h-full' : ''}`}>{inner}</div>
   }
 
   return (
-    <Link href={href} className="group block" draggable={false}>
+    <Link href={href} className={`group block ${fillHeight ? 'h-full' : ''}`} draggable={false}>
       {inner}
     </Link>
   )

@@ -65,10 +65,7 @@ export default async function LegalIndexPage() {
                     {title}
                   </h2>
                   {page.overview && (
-                    <p
-                      className="mb-3 text-sm"
-                      style={{color: 'var(--color-muted-foreground)'}}
-                    >
+                    <p className="mb-3 text-sm" style={{color: 'var(--color-muted-foreground)'}}>
                       {page.overview}
                     </p>
                   )}

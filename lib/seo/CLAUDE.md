@@ -13,6 +13,7 @@ lib/seo/
 ```
 
 **Related files:**
+
 - `app/sitemap.ts` — Dynamic sitemap generation
 - `app/robots.ts` — Robots.txt configuration
 - `app/(personal)/layout.tsx` — Site-wide metadata + `<SiteStructuredData />`
@@ -43,7 +44,7 @@ Add structured data components to individual pages:
 
 ```tsx
 // app/(personal)/services/page.tsx
-import {ServiceStructuredData, BreadcrumbStructuredData} from '@/lib/seo'
+import {BreadcrumbStructuredData, ServiceStructuredData} from '@/lib/seo'
 
 export default function ServicesPage() {
   return (
@@ -71,21 +72,21 @@ export default function ServicesPage() {
 
 ### Core Schemas (Site-wide)
 
-| Component | Schema Type | Use Case |
-|-----------|-------------|----------|
+| Component                | Schema Type            | Use Case                    |
+| ------------------------ | ---------------------- | --------------------------- |
 | `<SiteStructuredData />` | Organization + WebSite | Root layout (already added) |
 
 ### Page-Level Schemas
 
-| Component | Schema Type | Use Case |
-|-----------|-------------|----------|
-| `<BreadcrumbStructuredData />` | BreadcrumbList | Any interior page |
-| `<ArticleStructuredData />` | Article | Blog posts, news |
-| `<FAQStructuredData />` | FAQPage | Pages with Q&A sections |
-| `<ServiceStructuredData />` | Service | Service/offering pages |
-| `<HowToStructuredData />` | HowTo | Tutorials, guides |
-| `<CreativeWorkStructuredData />` | CreativeWork | Portfolio, case studies |
-| `<SpeakableWebPage />` | WebPage + Speakable | AEO-optimized pages |
+| Component                        | Schema Type         | Use Case                |
+| -------------------------------- | ------------------- | ----------------------- |
+| `<BreadcrumbStructuredData />`   | BreadcrumbList      | Any interior page       |
+| `<ArticleStructuredData />`      | Article             | Blog posts, news        |
+| `<FAQStructuredData />`          | FAQPage             | Pages with Q&A sections |
+| `<ServiceStructuredData />`      | Service             | Service/offering pages  |
+| `<HowToStructuredData />`        | HowTo               | Tutorials, guides       |
+| `<CreativeWorkStructuredData />` | CreativeWork        | Portfolio, case studies |
+| `<SpeakableWebPage />`           | WebPage + Speakable | AEO-optimized pages     |
 
 ### Generator Functions
 
@@ -136,6 +137,7 @@ When adding a new page type (e.g., `/team`, `/case-studies/[slug]`):
    - Tutorial → `HowToStructuredData`
 
 2. **Add breadcrumbs** (always, for interior pages)
+
    ```tsx
    <BreadcrumbStructuredData
      items={[
@@ -149,6 +151,7 @@ When adding a new page type (e.g., `/team`, `/case-studies/[slug]`):
 3. **Add primary schema** with all available data
 
 4. **Add speakable** for key pages (homepage, about, services)
+
    ```tsx
    <SpeakableWebPage
      name="About Us"
@@ -166,9 +169,9 @@ When adding a new page type (e.g., `/team`, `/case-studies/[slug]`):
 ```tsx
 // app/(personal)/projects/[slug]/page.tsx
 import {
+  addSpeakable,
   BreadcrumbStructuredData,
   CreativeWorkStructuredData,
-  addSpeakable,
   generateCreativeWorkSchema,
   JsonLd,
 } from '@/lib/seo'
@@ -187,7 +190,7 @@ export default async function ProjectPage({params}) {
       client: project.client,
       datePublished: project.publishedAt,
     }),
-    ['h1', '.project-summary', '.results']
+    ['h1', '.project-summary', '.results'],
   )
 
   return (
@@ -224,29 +227,29 @@ Use CSS selectors to mark content AI should prioritize:
 ```tsx
 import {SpeakableWebPage} from '@/lib/seo'
 
-<SpeakableWebPage
+;<SpeakableWebPage
   name="Our Services"
   description="Digital services for modern businesses"
   url="/services"
   speakableSelectors={[
-    'h1',                    // Page title
-    '.hero-description',     // Main value prop
-    '.service-summary',      // Key offerings
-    '.pricing-overview',     // Pricing info (if applicable)
+    'h1', // Page title
+    '.hero-description', // Main value prop
+    '.service-summary', // Key offerings
+    '.pricing-overview', // Pricing info (if applicable)
   ]}
 />
 ```
 
 ### Best selectors for speakable
 
-| Content Type | Suggested Selectors |
-|--------------|---------------------|
-| Hero section | `h1`, `.hero-text`, `.tagline` |
-| Value proposition | `.value-prop`, `.benefits` |
-| Key facts | `.key-stats`, `.highlights` |
-| Summaries | `.summary`, `.tldr`, `.overview` |
-| Pricing | `.pricing`, `.price-summary` |
-| Contact | `.contact-info`, `.cta-text` |
+| Content Type      | Suggested Selectors              |
+| ----------------- | -------------------------------- |
+| Hero section      | `h1`, `.hero-text`, `.tagline`   |
+| Value proposition | `.value-prop`, `.benefits`       |
+| Key facts         | `.key-stats`, `.highlights`      |
+| Summaries         | `.summary`, `.tldr`, `.overview` |
+| Pricing           | `.pricing`, `.price-summary`     |
+| Contact           | `.contact-info`, `.cta-text`     |
 
 ### FAQ for AEO
 
@@ -256,12 +259,14 @@ FAQs are extremely valuable for AEO — AI assistants often pull answers directl
 <FAQStructuredData
   faqs={[
     {
-      question: "How much does web development cost?",
-      answer: "Our web development projects typically range from $5,000 to $50,000 depending on complexity, features, and timeline."
+      question: 'How much does web development cost?',
+      answer:
+        'Our web development projects typically range from $5,000 to $50,000 depending on complexity, features, and timeline.',
     },
     {
-      question: "How long does a website take to build?",
-      answer: "Most websites take 4-8 weeks from kickoff to launch, though complex projects may take 12+ weeks."
+      question: 'How long does a website take to build?',
+      answer:
+        'Most websites take 4-8 weeks from kickoff to launch, though complex projects may take 12+ weeks.',
     },
   ]}
 />
@@ -291,6 +296,7 @@ NEXT_PUBLIC_INSTAGRAM_URL=https://instagram.com/client
 ## Sitemap Configuration
 
 The sitemap at `app/sitemap.ts` automatically includes:
+
 - Homepage
 - All Sanity `page` documents
 - All Sanity `project` documents
@@ -308,7 +314,7 @@ const [pages, projects, legalPages, newType] = await Promise.all([
       _updatedAt
     }`,
     {},
-    {next: {revalidate: 3600}}
+    {next: {revalidate: 3600}},
   ),
 ])
 
@@ -362,9 +368,7 @@ Before launching a client site:
     url="/services"
     serviceType="Digital Marketing"
   />
-  <FAQStructuredData
-    faqs={serviceFaqs}
-  />
+  <FAQStructuredData faqs={serviceFaqs} />
 </>
 ```
 
@@ -415,6 +419,7 @@ const schema = generateLocalBusinessSchema({
 If you need a schema type not included:
 
 1. Add generator function in `structured-data.tsx`:
+
    ```tsx
    export function generateNewTypeSchema(data: {...}, config = seoConfig) {
      return {
@@ -426,6 +431,7 @@ If you need a schema type not included:
    ```
 
 2. Add component wrapper:
+
    ```tsx
    export function NewTypeStructuredData({...props}) {
      const schema = generateNewTypeSchema(props)

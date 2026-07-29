@@ -77,8 +77,8 @@
     var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
     Helvetica, Arial, system-ui, sans-serif;
   --font-mono:
-    var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
-    'Liberation Mono', monospace;
+    var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono',
+    monospace;
   --font-serif: Georgia, 'Times New Roman', Times, serif; /* legacy compat only */
 
   /* ---- Radius — brand rounded-rectangle shape language ---- */
@@ -190,6 +190,51 @@
   }
   100% {
     transform: translateX(350%);
+  }
+}
+
+@keyframes salt-scan-fill {
+  0% {
+    transform: scaleX(0);
+  }
+  55% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes salt-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes salt-mark-in {
+  0% {
+    opacity: 0;
+    transform: translateY(110%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes salt-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -544,8 +589,39 @@
     animation: salt-scan 1.4s ease-in-out infinite;
   }
 
+  .animate-salt-scan-fill {
+    animation: salt-scan-fill 1.6s var(--ease-out-quint) infinite;
+  }
+
+  .animate-salt-blink {
+    animation: salt-blink 1.1s steps(1, end) infinite;
+  }
+
+  .animate-salt-mark-in {
+    animation: salt-mark-in 0.7s var(--ease-out-quint) both;
+  }
+
+  .animate-salt-rise {
+    animation: salt-rise 0.55s var(--ease-out-cubic) both;
+  }
+
   /* ---- Reduced motion: collapse utility motion ---- */
   @media (prefers-reduced-motion: reduce) {
+    .animate-salt-shimmer,
+    .animate-salt-scan,
+    .animate-salt-scan-fill,
+    .animate-salt-blink,
+    .animate-salt-mark-in,
+    .animate-salt-rise {
+      animation: none !important;
+    }
+
+    .animate-salt-mark-in,
+    .animate-salt-rise {
+      opacity: 1;
+      transform: none;
+    }
+
     .work-card-media-zoom {
       transition: none;
     }

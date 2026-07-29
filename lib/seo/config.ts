@@ -68,11 +68,9 @@ export function getSEOConfig(): SEOConfig {
   return {
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4000',
     siteName: process.env.NEXT_PUBLIC_SITE_NAME || 'My Website',
-    siteDescription:
-      process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Welcome to our website',
+    siteDescription: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Welcome to our website',
 
-    businessType:
-      (process.env.NEXT_PUBLIC_BUSINESS_TYPE as BusinessType) || 'Organization',
+    businessType: (process.env.NEXT_PUBLIC_BUSINESS_TYPE as BusinessType) || 'Organization',
     businessName:
       process.env.NEXT_PUBLIC_SITE_NAME ||
       process.env.NEXT_PUBLIC_SANITY_PROJECT_TITLE ||

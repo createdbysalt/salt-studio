@@ -217,8 +217,7 @@ export const servicesFaqSection = defineType({
       name: 'faq',
       title: 'FAQ',
       type: 'faq',
-      description:
-        'Questions and answers. These also power FAQ structured data in search results.',
+      description: 'Questions and answers. These also power FAQ structured data in search results.',
     }),
   ],
   preview: {

@@ -100,7 +100,10 @@ export default function BrandPage() {
       </Section>
 
       {/* Brand Palette */}
-      <Section title="Brand Palette" description="The full set — ink on paper, one red accent (DESIGN.md)">
+      <Section
+        title="Brand Palette"
+        description="The full set — ink on paper, one red accent (DESIGN.md)"
+      >
         <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {[
             {label: 'ink', className: 'bg-ink'},

@@ -8,8 +8,8 @@
  *   npx sanity exec scripts/import-tile-labels.mjs --with-user-token
  *   COMMIT=1 npx sanity exec scripts/import-tile-labels.mjs --with-user-token
  */
-import {getCliClient} from 'sanity/cli'
 import {readFileSync} from 'node:fs'
+import {getCliClient} from 'sanity/cli'
 
 const COMMIT = process.env.COMMIT === '1'
 const FILE =
@@ -17,11 +17,29 @@ const FILE =
 const c = getCliClient({apiVersion: '2025-02-27'})
 
 const slugify = (s) =>
-  s.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').replace(/-+/g, '-')
+  s
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
 const slugFld = (name) => ({_type: 'slug', current: slugify(name)})
 
 // Nice display case with acronym + connector handling.
-const ACRONYMS = new Set(['LED', 'HMI', 'RGB', 'DMX', 'VO', 'DIT', 'MUAH', 'AC', 'SFX', 'VFX', '3D'])
+const ACRONYMS = new Set([
+  'LED',
+  'HMI',
+  'RGB',
+  'DMX',
+  'VO',
+  'DIT',
+  'MUAH',
+  'AC',
+  'SFX',
+  'VFX',
+  '3D',
+])
 const CONNECTORS = new Set(['AND', 'OF', 'THE'])
 const titleCase = (label) =>
   label
@@ -37,28 +55,45 @@ const titleCase = (label) =>
 
 function parseCsv(text) {
   const rows = []
-  let row = [], field = '', q = false
+  let row = [],
+    field = '',
+    q = false
   for (let i = 0; i < text.length; i++) {
     const ch = text[i]
     if (q) {
-      if (ch === '"') { if (text[i + 1] === '"') { field += '"'; i++ } else q = false } else field += ch
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          field += '"'
+          i++
+        } else q = false
+      } else field += ch
     } else if (ch === '"') q = true
-    else if (ch === ',') { row.push(field); field = '' }
-    else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(field); rows.push(row); row = []; field = '' }
-    else field += ch
+    else if (ch === ',') {
+      row.push(field)
+      field = ''
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++
+      row.push(field)
+      rows.push(row)
+      row = []
+      field = ''
+    } else field += ch
   }
-  if (field.length || row.length) { row.push(field); rows.push(row) }
+  if (field.length || row.length) {
+    row.push(field)
+    rows.push(row)
+  }
   return rows
 }
 
 const COLS = {
   'PRE-PRODUCTION': {type: 'service', department: 'pre-production'},
-  PRODUCTION: {type: 'service', department: 'production'},
-  POST: {type: 'service', department: 'post'},
-  CAMERA: {type: 'camera'},
-  LENS: {type: 'lens'},
-  LIGHTING: {type: 'light'},
-  RIGGING: {type: 'rigging'},
+  'PRODUCTION': {type: 'service', department: 'production'},
+  'POST': {type: 'service', department: 'post'},
+  'CAMERA': {type: 'camera'},
+  'LENS': {type: 'lens'},
+  'LIGHTING': {type: 'light'},
+  'RIGGING': {type: 'rigging'},
   'ART DEPARTMENT': {type: 'artDepartment'},
 }
 
@@ -79,11 +114,16 @@ for (let colIdx = 0; colIdx < headers.length; colIdx++) {
 
 // Existing docs by slug, per type.
 async function slugIds(type) {
-  const rows = await c.fetch(`*[_type==$type && defined(slug.current)]{_id, "slug": slug.current}`, {type})
+  const rows = await c.fetch(
+    `*[_type==$type && defined(slug.current)]{_id, "slug": slug.current}`,
+    {type},
+  )
   return new Map(rows.map((d) => [d.slug, d._id]))
 }
 const types = ['service', 'camera', 'lens', 'light', 'rigging', 'artDepartment']
-const existing = Object.fromEntries(await Promise.all(types.map(async (t) => [t, await slugIds(t)])))
+const existing = Object.fromEntries(
+  await Promise.all(types.map(async (t) => [t, await slugIds(t)])),
+)
 
 const tx = c.transaction()
 const summary = {}
@@ -100,19 +140,30 @@ for (const {name, type, department} of labels) {
       if (COMMIT) tx.patch(existingId, (p) => p.set({department}))
     } else {
       summary[key].create++
-      if (COMMIT) tx.createIfNotExists({_id: `service-${slug}`, _type: 'service', name, slug: slugFld(name), department, sortOrder: deptOrder++})
+      if (COMMIT)
+        tx.createIfNotExists({
+          _id: `service-${slug}`,
+          _type: 'service',
+          name,
+          slug: slugFld(name),
+          department,
+          sortOrder: deptOrder++,
+        })
     }
   } else {
     if (existingId) summary[key].reuse++
     else {
       summary[key].create++
-      if (COMMIT) tx.createIfNotExists({_id: `${type}-${slug}`, _type: type, name, slug: slugFld(name)})
+      if (COMMIT)
+        tx.createIfNotExists({_id: `${type}-${slug}`, _type: type, name, slug: slugFld(name)})
     }
   }
 }
 
 const bar = '─'.repeat(74)
-console.log(`\n${bar}\nTile labels  ·  ${COMMIT ? 'COMMIT' : 'DRY RUN'}  ·  ${labels.length} labels\n${bar}`)
+console.log(
+  `\n${bar}\nTile labels  ·  ${COMMIT ? 'COMMIT' : 'DRY RUN'}  ·  ${labels.length} labels\n${bar}`,
+)
 for (const [key, s] of Object.entries(summary)) {
   console.log(`${key.padEnd(20)} +${s.create} new, ${s.reuse} reused`)
   console.log(`   ${s.names.join(', ')}`)

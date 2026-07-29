@@ -53,6 +53,7 @@ The export contains JSON objects, one per line. Each object looks like:
 ```
 
 Key fields:
+
 - `_id` — unique identifier for this piece of content
 - `_type` — what kind of content it is (page, post, project, etc.)
 - Everything else — your actual content
@@ -66,6 +67,7 @@ Images are stored as separate asset objects with URLs pointing to Sanity's CDN.
 Popular alternatives include Contentful, Strapi, Payload, or Directus.
 
 **What's involved:**
+
 1. Set up the new CMS with similar content types
 2. Write a migration script to transform and import your content
 3. Update the website code to fetch from the new CMS
@@ -78,6 +80,7 @@ Popular alternatives include Contentful, Strapi, Payload, or Directus.
 If you want to manage content directly in a database (PostgreSQL, MySQL, etc.):
 
 **What's involved:**
+
 1. Design database tables based on your content types
 2. Import your content into the database
 3. Build an admin interface (or use something like Directus/Strapi)
@@ -90,6 +93,7 @@ If you want to manage content directly in a database (PostgreSQL, MySQL, etc.):
 For simpler sites, you might use Markdown/MDX files stored in the codebase:
 
 **What's involved:**
+
 1. Convert your content to Markdown files
 2. Update the website to read from files instead of Sanity
 3. Content editing happens by editing files (often via GitHub)
@@ -100,12 +104,12 @@ For simpler sites, you might use Markdown/MDX files stored in the codebase:
 
 The current website fetches content from Sanity using queries. When migrating:
 
-| Current (Sanity) | Needs Replacement |
-|------------------|-------------------|
-| Content queries | New data fetching logic |
-| Image optimization | New image handling |
-| Live preview | New preview system (if needed) |
-| Content studio (`/studio`) | New editing interface |
+| Current (Sanity)           | Needs Replacement              |
+| -------------------------- | ------------------------------ |
+| Content queries            | New data fetching logic        |
+| Image optimization         | New image handling             |
+| Live preview               | New preview system (if needed) |
+| Content studio (`/studio`) | New editing interface          |
 
 The visual design, styling, and overall structure of your website remain unchanged — only the content source changes.
 
@@ -135,4 +139,4 @@ We're happy to discuss options and provide a migration quote if needed.
 
 ---
 
-*Last updated: April 2026*
+_Last updated: April 2026_

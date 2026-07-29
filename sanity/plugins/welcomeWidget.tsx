@@ -1,19 +1,19 @@
-import {Card, Stack, Text, Flex, Box, Spinner} from '@sanity/ui'
-import {
-  DocumentIcon,
-  CogIcon,
-  ImageIcon,
-  EyeOpenIcon,
-  HomeIcon,
-  HelpCircleIcon,
-  EditIcon,
-  LaunchIcon,
-  ClockIcon,
-  CheckmarkCircleIcon,
-  DocumentsIcon,
-} from '@sanity/icons'
 import {DashboardWidget, LayoutConfig} from '@sanity/dashboard'
-import {useState, useEffect} from 'react'
+import {
+  CheckmarkCircleIcon,
+  ClockIcon,
+  CogIcon,
+  DocumentIcon,
+  DocumentsIcon,
+  EditIcon,
+  EyeOpenIcon,
+  HelpCircleIcon,
+  HomeIcon,
+  ImageIcon,
+  LaunchIcon,
+} from '@sanity/icons'
+import {Box, Card, Flex, Spinner, Stack, Text} from '@sanity/ui'
+import {useEffect, useState} from 'react'
 import {useClient} from 'sanity'
 
 interface RecentDocument {
@@ -60,8 +60,12 @@ function WelcomeWidgetComponent() {
         setRecentDocs(recent)
 
         // Fetch content stats
-        const publishedCount = await client.fetch<number>(`count(*[_type in ["page", "project"] && !(_id in path("drafts.**"))])`)
-        const draftsCount = await client.fetch<number>(`count(*[_type in ["page", "project"] && _id in path("drafts.**")])`)
+        const publishedCount = await client.fetch<number>(
+          `count(*[_type in ["page", "project"] && !(_id in path("drafts.**"))])`,
+        )
+        const draftsCount = await client.fetch<number>(
+          `count(*[_type in ["page", "project"] && _id in path("drafts.**")])`,
+        )
         setStats({published: publishedCount, drafts: draftsCount})
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error)
@@ -98,7 +102,9 @@ function WelcomeWidgetComponent() {
   }
 
   return (
-    <Box style={{background: '#F7F7F7', minHeight: '80vh', display: 'flex', flexDirection: 'column'}}>
+    <Box
+      style={{background: '#F7F7F7', minHeight: '80vh', display: 'flex', flexDirection: 'column'}}
+    >
       {/* Main Content Area - White */}
       <Box
         padding={5}

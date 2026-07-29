@@ -1,9 +1,8 @@
 'use client'
 
+import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {useGSAP} from '@gsap/react'
 import {useRef} from 'react'
-
-import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 
 type SidePanelCloseProps = {
   onClose: () => void
@@ -16,11 +15,7 @@ type SidePanelCloseProps = {
  * Pinned Close / ESC control shared by About + service detail drawers —
  * magnetic hover + dual-layer text swap.
  */
-export function SidePanelClose({
-  onClose,
-  open,
-  ariaLabel = 'Close panel',
-}: SidePanelCloseProps) {
+export function SidePanelClose({onClose, open, ariaLabel = 'Close panel'}: SidePanelCloseProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
   const magnetRef = useRef<HTMLSpanElement>(null)
@@ -64,15 +59,18 @@ export function SidePanelClose({
       const escBg = btn.querySelector<HTMLElement>('[data-close-esc-bg]')
       const cleanups: Array<() => void> = []
 
-      if (labelOut && labelIn && escOut && escIn) {
+      if (labelOut && labelIn) {
         gsap.set(labelIn, {yPercent: 110})
-        gsap.set(escIn, {yPercent: 110})
+        if (escIn) gsap.set(escIn, {yPercent: 110})
         const hoverTl = gsap.timeline({paused: true})
         hoverTl
           .to(labelOut, {yPercent: -110, duration: 0.38, ease: EASE.outQuint}, 0)
           .to(labelIn, {yPercent: 0, duration: 0.38, ease: EASE.outQuint}, 0)
-          .to(escOut, {yPercent: -110, duration: 0.34, ease: EASE.outQuint}, 0.02)
-          .to(escIn, {yPercent: 0, duration: 0.34, ease: EASE.outQuint}, 0.02)
+        if (escOut && escIn) {
+          hoverTl
+            .to(escOut, {yPercent: -110, duration: 0.34, ease: EASE.outQuint}, 0.02)
+            .to(escIn, {yPercent: 0, duration: 0.34, ease: EASE.outQuint}, 0.02)
+        }
         if (escBg) {
           hoverTl.to(
             escBg,
@@ -132,10 +130,7 @@ export function SidePanelClose({
   )
 
   return (
-    <div
-      ref={wrapRef}
-      className="pointer-events-none absolute top-[28px] right-[28px] z-20"
-    >
+    <div ref={wrapRef} className="pointer-events-none absolute top-[28px] right-[28px] z-20">
       <span
         ref={magnetRef}
         className="pointer-events-auto relative inline-flex will-change-transform"
@@ -145,7 +140,7 @@ export function SidePanelClose({
           type="button"
           onClick={onClose}
           aria-label={ariaLabel}
-          className="relative isolate inline-flex items-center gap-2 overflow-hidden rounded-sm bg-[#08090a] py-1.5 pl-3.5 pr-1.5 font-mono text-[11px] uppercase tracking-label text-white"
+          className="relative isolate inline-flex items-center gap-2 overflow-hidden rounded-sm bg-[#08090a] py-1.5 pl-3.5 pr-3.5 font-mono text-[11px] uppercase tracking-label text-white lg:pr-1.5"
         >
           <span className="relative inline-block h-[1em] overflow-hidden leading-none">
             <span data-close-label="out" className="block">
@@ -157,7 +152,7 @@ export function SidePanelClose({
           </span>
           <span
             data-close-esc-bg
-            className="relative inline-block h-[1.65em] min-w-[2.1rem] overflow-hidden rounded-[3px] bg-white/15 px-1.5 text-center text-[10px] leading-[1.65em] tracking-[0.08em] text-white/75"
+            className="relative hidden h-[1.65em] min-w-[2.1rem] overflow-hidden rounded-[3px] bg-white/15 px-1.5 text-center text-[10px] leading-[1.65em] tracking-[0.08em] text-white/75 lg:inline-block"
           >
             <span data-close-esc="out" className="block">
               ESC

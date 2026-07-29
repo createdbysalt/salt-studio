@@ -1,10 +1,7 @@
 import {withWorkPosters, type WorkProjectCard} from '@/components/ProjectGrid'
 import {formatProjectYearMark} from '@/components/ProjectHeroMeta'
 import {ProjectNextSection} from '@/components/ProjectNextSection'
-import {
-  ProjectScrollGallery,
-  type ProjectScrollFrame,
-} from '@/components/ProjectScrollGallery'
+import {ProjectScrollGallery, type ProjectScrollFrame} from '@/components/ProjectScrollGallery'
 import {ProjectTestimonialRotator} from '@/components/ProjectTestimonialRotator'
 import {ProjectWatchVideoButton} from '@/components/ProjectWatchVideoButton'
 import {fetchVimeoPoster, isVimeoUrl} from '@/lib/vimeo'
@@ -114,8 +111,7 @@ export async function ProjectDetail({data}: {data: Project | null}) {
 
   // Glitch&Grit Idea / Insight — case-study brief/approach first; context fills gaps.
   const ideaText = briefText || contextText
-  const insightText =
-    approachText || (briefText && contextText ? contextText : '') || btsNoteText
+  const insightText = approachText || (briefText && contextText ? contextText : '') || btsNoteText
 
   const galleryRows = project.gallery ?? []
   const btsRows = project.btsImages ?? []
@@ -198,10 +194,7 @@ export async function ProjectDetail({data}: {data: Project | null}) {
   return (
     <article className="bg-background text-foreground">
       {/* 1. Type hero — categories + massive title (Glitch&Grit masthead). */}
-      <header
-        aria-label="Project hero"
-        className="px-5 pt-28 text-center md:px-6 md:pt-32"
-      >
+      <header aria-label="Project hero" className="px-5 pt-28 text-center md:px-6 md:pt-32">
         {categoryItems.length > 0 ? (
           <ul className="flex flex-col items-center gap-0.5">
             {categoryItems.map((item) => (
@@ -220,7 +213,7 @@ export async function ProjectDetail({data}: {data: Project | null}) {
         )}
         <h1
           data-sanity={dataAttribute?.('title')}
-          className="mx-auto mt-3.5 max-w-[16ch] font-sans text-[clamp(4.5rem,14vw,11rem)] font-bold uppercase leading-[0.8] tracking-[-0.05em] text-foreground md:mt-4"
+          className="mx-auto mt-3.5 mb-6 w-full max-w-[16ch] font-sans text-[clamp(2.5rem,11vw,11rem)] font-bold uppercase leading-[0.85] tracking-[-0.05em] text-foreground md:mt-4 md:mb-0"
         >
           {title}
         </h1>
@@ -229,11 +222,12 @@ export async function ProjectDetail({data}: {data: Project | null}) {
       {/* 2. Sticky sidebar + right-edge-bleed media stack */}
       <section
         aria-label="Project details"
-        className="mt-12 grid grid-cols-1 items-start gap-12 pb-16 pl-5 pr-5 md:mt-16 md:pb-24 md:pl-6 md:pr-6 lg:grid-cols-[minmax(20rem,28rem)_minmax(0,1fr)] lg:gap-x-10 lg:pl-[30px] lg:pr-0 xl:grid-cols-[minmax(22rem,32rem)_minmax(0,1fr)] xl:gap-x-14"
+        className="mt-4 grid grid-cols-1 items-start gap-5 pb-16 pl-5 pr-5 md:mt-10 md:gap-6 md:pb-24 md:pl-6 md:pr-6 lg:mt-16 lg:grid-cols-[minmax(20rem,28rem)_minmax(0,1fr)] lg:gap-x-10 lg:gap-y-0 lg:pl-[30px] lg:pr-0 xl:grid-cols-[minmax(22rem,32rem)_minmax(0,1fr)] xl:gap-x-14"
       >
-        <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start lg:pb-8">
+        {/* Below lg: gallery first (order-1), then sidebar copy. At lg+: sidebar left, gallery right. */}
+        <aside className="order-2 min-w-0 lg:order-1 lg:sticky lg:top-28 lg:self-start lg:pb-8">
           {showSidebarCopy ? (
-            <div className="space-y-8 md:space-y-10">
+            <div className="space-y-5 md:space-y-6 lg:space-y-10">
               {ideaText ? (
                 <div>
                   <p className={SIDE_LABEL}>Idea</p>
@@ -268,7 +262,9 @@ export async function ProjectDetail({data}: {data: Project | null}) {
           ) : null}
 
           {showMeta ? (
-            <dl className={`${showSidebarCopy ? 'mt-10 md:mt-12' : ''} border-b border-foreground/15`}>
+            <dl
+              className={`${showSidebarCopy ? 'mt-10 md:mt-12' : ''} border-b border-foreground/15`}
+            >
               <MetaRow label="Client">
                 {clientName ? (
                   project.client?.website ? (
@@ -289,9 +285,7 @@ export async function ProjectDetail({data}: {data: Project | null}) {
               <MetaRow label="Role">{roleText || null}</MetaRow>
               <MetaRow label="Execution">
                 {categoryItems.length ? (
-                  <span className="inline-block max-w-[14rem]">
-                    {categoryItems.join(', ')}
-                  </span>
+                  <span className="inline-block max-w-[14rem]">{categoryItems.join(', ')}</span>
                 ) : null}
               </MetaRow>
               <MetaRow label="Built with">
@@ -302,29 +296,33 @@ export async function ProjectDetail({data}: {data: Project | null}) {
             </dl>
           ) : null}
 
-          {cleanVideo || cleanSite ? (
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              {cleanVideo ? (
-                <ProjectWatchVideoButton title={title} videoUrl={project.videoUrl} />
-              ) : null}
+          {cleanSite || cleanVideo ? (
+            <div className="mt-5 flex flex-wrap items-center gap-3 md:mt-6 lg:mt-8">
+              {/* Prefer live site; Watch film only when there is no site URL. */}
               {cleanSite ? (
                 <a
                   href={cleanSite}
                   target="_blank"
                   rel="noopener noreferrer"
                   data-sanity={dataAttribute?.('siteButtonLabel')}
-                  className="btn-ghost"
+                  className="btn-ghost w-full justify-center md:w-auto"
                 >
                   {siteButtonLabel}
                 </a>
-              ) : null}
+              ) : (
+                <ProjectWatchVideoButton
+                  title={title}
+                  videoUrl={project.videoUrl}
+                  className="w-full justify-center md:w-auto"
+                />
+              )}
             </div>
           ) : null}
         </aside>
 
-        <div className="min-w-0">
+        <div className="order-1 min-w-0 lg:order-2">
           {showScrollGallery ? (
-            <section aria-label="Project gallery">
+            <section aria-label="Project gallery" className="-mx-5 md:-mx-6 lg:mx-0">
               <ProjectScrollGallery frames={scrollFrames} />
             </section>
           ) : null}

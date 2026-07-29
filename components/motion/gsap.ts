@@ -47,13 +47,4 @@ export function prefersReducedMotion(): boolean {
   )
 }
 
-export {
-  Draggable,
-  Flip,
-  gsap,
-  InertiaPlugin,
-  MorphSVGPlugin,
-  ScrollTrigger,
-  SplitText,
-  TextPlugin,
-}
+export {Draggable, Flip, gsap, InertiaPlugin, MorphSVGPlugin, ScrollTrigger, SplitText, TextPlugin}

@@ -10,17 +10,17 @@ If you're reading this to understand where to make a change, the shortest versio
 
 ## The cast of characters
 
-| File | Role |
-|---|---|
-| `sanity/lib/api.ts` | Exports `projectId`, `dataset`, `apiVersion`, `studioUrl`. Throws at startup if env vars are missing. |
-| `sanity/lib/client.ts` | Creates the Sanity client with `perspective: 'published'` and stega enabled. |
-| `sanity/lib/token.ts` | Exports the read token with a `server-only` guard; throws if missing. |
-| `sanity/lib/live.ts` | Calls `defineLive({client, serverToken, browserToken})` and re-exports `SanityLive` + `sanityFetch`. |
-| `sanity/lib/queries.ts` | All GROQ queries, each wrapped in `defineQuery()` so types flow into `sanity.types.ts`. |
-| `app/(personal)/layout.tsx` | Renders `<SanityLive />`, and conditionally `<VisualEditing />` + `<DraftModeToast />` when draft mode is on. |
-| `app/(personal)/**/page.tsx` | Calls `sanityFetch({query, params})` and renders components with the data. |
-| `app/api/draft-mode/enable/route.ts` | The endpoint the Presentation tool hits to enable draft mode. |
-| `components/*` | Render the data. `CustomPortableText` is the extension point for rich content. |
+| File                                 | Role                                                                                                          |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `sanity/lib/api.ts`                  | Exports `projectId`, `dataset`, `apiVersion`, `studioUrl`. Throws at startup if env vars are missing.         |
+| `sanity/lib/client.ts`               | Creates the Sanity client with `perspective: 'published'` and stega enabled.                                  |
+| `sanity/lib/token.ts`                | Exports the read token with a `server-only` guard; throws if missing.                                         |
+| `sanity/lib/live.ts`                 | Calls `defineLive({client, serverToken, browserToken})` and re-exports `SanityLive` + `sanityFetch`.          |
+| `sanity/lib/queries.ts`              | All GROQ queries, each wrapped in `defineQuery()` so types flow into `sanity.types.ts`.                       |
+| `app/(personal)/layout.tsx`          | Renders `<SanityLive />`, and conditionally `<VisualEditing />` + `<DraftModeToast />` when draft mode is on. |
+| `app/(personal)/**/page.tsx`         | Calls `sanityFetch({query, params})` and renders components with the data.                                    |
+| `app/api/draft-mode/enable/route.ts` | The endpoint the Presentation tool hits to enable draft mode.                                                 |
+| `components/*`                       | Render the data. `CustomPortableText` is the extension point for rich content.                                |
 
 ## Mode 1: Published request (the normal path)
 
@@ -70,6 +70,7 @@ export const {SanityLive, sanityFetch} = defineLive({
 On the server, it uses the Sanity client to call `client.fetch(query, params)`. It also registers the fetch with the live system so that when `<SanityLive />` on the client gets a change notification for this query, the page re-renders.
 
 **5. The Sanity client call.** `sanity/lib/client.ts` creates the client with:
+
 - `useCdn: true` — reads go through Sanity's CDN for performance
 - `perspective: 'published'` — only published documents are returned (no drafts)
 - `stega: { studioUrl, filter: ... }` — embeds editing markers in string fields for the Presentation overlay
@@ -195,6 +196,7 @@ This is why the read token, `server-only`, and the `perspective: 'published'` co
 3. **The API route that enables draft mode validates a secret** — `defineEnableDraftMode` won't toggle `draftMode()` unless the URL carries a valid preview token.
 
 When adding new data-fetching code, don't break any of these rails:
+
 - Don't read `process.env.SANITY_API_READ_TOKEN` directly — import from `@/sanity/lib/token`.
 - Don't switch the client's default perspective to `drafts` — use `draftMode()` + `sanityFetch` cooperation instead.
 - Don't create a new draft mode enable endpoint that skips `defineEnableDraftMode`'s token check.
@@ -224,24 +226,24 @@ If you find that a string field isn't clickable in the Presentation tool and you
 
 If you want to...
 
-| ...change the | ...edit |
-|---|---|
-| GROQ query for a page | `sanity/lib/queries.ts` — then `npm run typegen` |
-| Markup of a rendered component | `components/*.tsx` |
-| How portable text blocks render | `components/CustomPortableText.tsx` |
-| What fields are inline-editable in Presentation | `sanity/lib/client.ts` stega filter + per-component `createDataAttribute` calls |
-| How a document URL resolves | `sanity/lib/utils.ts` `resolveHref` + `sanity/plugins/resolve.ts` |
-| Draft mode enable endpoint URL | `app/api/draft-mode/enable/route.ts` AND `sanity.config.ts` `previewUrl` |
-| Studio mount path | `sanity/lib/api.ts` `studioUrl` constant (used by both the Studio route and the client stega config) |
+| ...change the                                   | ...edit                                                                                              |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| GROQ query for a page                           | `sanity/lib/queries.ts` — then `npm run typegen`                                                     |
+| Markup of a rendered component                  | `components/*.tsx`                                                                                   |
+| How portable text blocks render                 | `components/CustomPortableText.tsx`                                                                  |
+| What fields are inline-editable in Presentation | `sanity/lib/client.ts` stega filter + per-component `createDataAttribute` calls                      |
+| How a document URL resolves                     | `sanity/lib/utils.ts` `resolveHref` + `sanity/plugins/resolve.ts`                                    |
+| Draft mode enable endpoint URL                  | `app/api/draft-mode/enable/route.ts` AND `sanity.config.ts` `previewUrl`                             |
+| Studio mount path                               | `sanity/lib/api.ts` `studioUrl` constant (used by both the Studio route and the client stega config) |
 
 ## What could go wrong and how to notice
 
-| Symptom | Most likely cause |
-|---|---|
-| Page renders published content but new edits don't show up live | `<SanityLive />` isn't rendered in the current layout, or a query bypassed `sanityFetch` |
-| 404 in draft mode when creating new content | The route handler is `notFound()`-ing unconditionally; add the draft-mode escape hatch |
-| Stega markers visible as garbled text in rendered output | A library that parses strings (e.g. `new Date(...)`) is seeing the raw string; wrap with `stegaClean` first |
-| Meta tag descriptions look garbled on social shares | The metadata fetch forgot `stega: false` |
-| `SANITY_API_READ_TOKEN` error at startup | Missing env var — check `.env.local` or your deployment's env config |
-| "CORS error" toast on a fresh deploy | New deploy URL not added to Sanity project CORS allowlist |
-| Types out of sync with schema | `npm run typegen` wasn't run after a schema change; `predev` catches dev, but build/test need it manually |
+| Symptom                                                         | Most likely cause                                                                                           |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Page renders published content but new edits don't show up live | `<SanityLive />` isn't rendered in the current layout, or a query bypassed `sanityFetch`                    |
+| 404 in draft mode when creating new content                     | The route handler is `notFound()`-ing unconditionally; add the draft-mode escape hatch                      |
+| Stega markers visible as garbled text in rendered output        | A library that parses strings (e.g. `new Date(...)`) is seeing the raw string; wrap with `stegaClean` first |
+| Meta tag descriptions look garbled on social shares             | The metadata fetch forgot `stega: false`                                                                    |
+| `SANITY_API_READ_TOKEN` error at startup                        | Missing env var — check `.env.local` or your deployment's env config                                        |
+| "CORS error" toast on a fresh deploy                            | New deploy URL not added to Sanity project CORS allowlist                                                   |
+| Types out of sync with schema                                   | `npm run typegen` wasn't run after a schema change; `predev` catches dev, but build/test need it manually   |

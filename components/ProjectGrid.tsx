@@ -145,24 +145,24 @@ export function ProjectGrid({
             </div>
             {/* Glitch&Grit caption: bold sans index + title left, FULL PROJECT right. */}
             <div className="mt-2 flex items-baseline gap-2.5 px-[16px] md:mt-2.5 md:gap-3 md:px-[20px]">
-              <span className="shrink-0 font-sans text-[16px] font-bold tabular-nums tracking-[-0.02em] text-foreground md:text-[17px]">
+              <span className="shrink-0 font-sans text-[13px] font-bold leading-[1.15] tabular-nums tracking-[-0.02em] text-foreground md:text-[17px]">
                 {indexMark}
               </span>
-              <h3 className="min-w-0 truncate font-sans text-[16px] font-bold uppercase tracking-[-0.02em] text-foreground md:text-[17px]">
+              <h3 className="min-w-0 line-clamp-2 font-sans text-[13px] font-bold uppercase leading-[1.15] tracking-[-0.02em] text-foreground md:text-[17px]">
                 {project.title}
               </h3>
               {comingSoon ? (
-                <span className="ml-auto inline-flex shrink-0 items-center font-sans text-[13px] font-bold uppercase tracking-[-0.01em] text-foreground/40 md:text-[14px]">
+                <span className="ml-auto shrink-0 font-sans text-[11px] font-bold uppercase leading-[1.15] tracking-[-0.01em] text-foreground/40 md:text-[14px]">
                   Coming soon
                 </span>
               ) : (
-                <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-sans text-[13px] font-bold uppercase tracking-[-0.01em] text-foreground/55 transition-colors duration-300 group-hover:text-foreground md:text-[14px]">
+                <span className="ml-auto inline-flex shrink-0 items-center gap-1 font-sans text-[11px] font-bold uppercase leading-[1.15] tracking-[-0.01em] text-foreground/55 transition-colors duration-300 group-hover:text-foreground md:text-[14px]">
                   Full project
                   <ArrowUpRight
                     aria-hidden
                     strokeWidth={2.75}
                     absoluteStrokeWidth
-                    className="h-[16px] w-[16px] transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 md:h-[17px] md:w-[17px]"
+                    className="h-[13px] w-[13px] transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:translate-x-0.5 md:h-[17px] md:w-[17px]"
                   />
                 </span>
               )}

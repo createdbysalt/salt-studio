@@ -24,10 +24,10 @@ export function generateOrganizationSchema(config: SEOConfig = seoConfig) {
   return {
     '@context': 'https://schema.org',
     '@type': config.businessType,
-    name: config.businessName,
-    url: config.siteUrl,
-    logo: config.logo ? `${config.siteUrl}${config.logo}` : undefined,
-    sameAs: sameAs.length > 0 ? sameAs : undefined,
+    'name': config.businessName,
+    'url': config.siteUrl,
+    'logo': config.logo ? `${config.siteUrl}${config.logo}` : undefined,
+    'sameAs': sameAs.length > 0 ? sameAs : undefined,
   }
 }
 
@@ -39,12 +39,12 @@ export function generateWebSiteSchema(config: SEOConfig = seoConfig) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: config.siteName,
-    url: config.siteUrl,
-    description: config.siteDescription,
-    publisher: {
+    'name': config.siteName,
+    'url': config.siteUrl,
+    'description': config.siteDescription,
+    'publisher': {
       '@type': config.businessType,
-      name: config.businessName,
+      'name': config.businessName,
     },
   }
 }
@@ -55,16 +55,16 @@ export function generateWebSiteSchema(config: SEOConfig = seoConfig) {
  */
 export function generateBreadcrumbSchema(
   items: {name: string; url: string}[],
-  config: SEOConfig = seoConfig
+  config: SEOConfig = seoConfig,
 ) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: items.map((item, index) => ({
+    'itemListElement': items.map((item, index) => ({
       '@type': 'ListItem',
-      position: index + 1,
-      name: item.name,
-      item: item.url.startsWith('http') ? item.url : `${config.siteUrl}${item.url}`,
+      'position': index + 1,
+      'name': item.name,
+      'item': item.url.startsWith('http') ? item.url : `${config.siteUrl}${item.url}`,
     })),
   }
 }
@@ -82,30 +82,28 @@ export function generateArticleSchema(
     dateModified?: string
     authorName?: string
   },
-  config: SEOConfig = seoConfig
+  config: SEOConfig = seoConfig,
 ) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: article.title,
-    description: article.description,
-    url: article.url.startsWith('http')
-      ? article.url
-      : `${config.siteUrl}${article.url}`,
-    image: article.image,
-    datePublished: article.datePublished,
-    dateModified: article.dateModified || article.datePublished,
-    author: {
+    'headline': article.title,
+    'description': article.description,
+    'url': article.url.startsWith('http') ? article.url : `${config.siteUrl}${article.url}`,
+    'image': article.image,
+    'datePublished': article.datePublished,
+    'dateModified': article.dateModified || article.datePublished,
+    'author': {
       '@type': config.businessType === 'Person' ? 'Person' : 'Organization',
-      name: article.authorName || config.businessName,
+      'name': article.authorName || config.businessName,
     },
-    publisher: {
+    'publisher': {
       '@type': 'Organization',
-      name: config.businessName,
-      logo: config.logo
+      'name': config.businessName,
+      'logo': config.logo
         ? {
             '@type': 'ImageObject',
-            url: `${config.siteUrl}${config.logo}`,
+            'url': `${config.siteUrl}${config.logo}`,
           }
         : undefined,
     },
@@ -116,18 +114,16 @@ export function generateArticleSchema(
  * FAQPage schema - used on pages with FAQ sections.
  * Can trigger rich results in Google.
  */
-export function generateFAQSchema(
-  faqs: {question: string; answer: string}[]
-) {
+export function generateFAQSchema(faqs: {question: string; answer: string}[]) {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: faqs.map((faq) => ({
+    'mainEntity': faqs.map((faq) => ({
       '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
+      'name': faq.question,
+      'acceptedAnswer': {
         '@type': 'Answer',
-        text: faq.answer,
+        'text': faq.answer,
       },
     })),
   }
@@ -147,24 +143,22 @@ export function generateServiceSchema(
     areaServed?: string | string[]
     serviceType?: string
   },
-  config: SEOConfig = seoConfig
+  config: SEOConfig = seoConfig,
 ) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    name: service.name,
-    description: service.description,
-    url: service.url.startsWith('http')
-      ? service.url
-      : `${config.siteUrl}${service.url}`,
-    image: service.image,
-    provider: {
+    'name': service.name,
+    'description': service.description,
+    'url': service.url.startsWith('http') ? service.url : `${config.siteUrl}${service.url}`,
+    'image': service.image,
+    'provider': {
       '@type': config.businessType,
-      name: service.provider || config.businessName,
-      url: config.siteUrl,
+      'name': service.provider || config.businessName,
+      'url': config.siteUrl,
     },
-    areaServed: service.areaServed,
-    serviceType: service.serviceType,
+    'areaServed': service.areaServed,
+    'serviceType': service.serviceType,
   }
 }
 
@@ -186,29 +180,29 @@ export function generateHowToSchema(
       url?: string
     }[]
   },
-  config: SEOConfig = seoConfig
+  config: SEOConfig = seoConfig,
 ) {
   return {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
-    name: howTo.name,
-    description: howTo.description,
-    image: howTo.image,
-    totalTime: howTo.totalTime,
-    estimatedCost: howTo.estimatedCost
+    'name': howTo.name,
+    'description': howTo.description,
+    'image': howTo.image,
+    'totalTime': howTo.totalTime,
+    'estimatedCost': howTo.estimatedCost
       ? {
           '@type': 'MonetaryAmount',
-          currency: howTo.estimatedCost.currency,
-          value: howTo.estimatedCost.value,
+          'currency': howTo.estimatedCost.currency,
+          'value': howTo.estimatedCost.value,
         }
       : undefined,
-    step: howTo.steps.map((step, index) => ({
+    'step': howTo.steps.map((step, index) => ({
       '@type': 'HowToStep',
-      position: index + 1,
-      name: step.name,
-      text: step.text,
-      image: step.image,
-      url: step.url,
+      'position': index + 1,
+      'name': step.name,
+      'text': step.text,
+      'image': step.image,
+      'url': step.url,
     })),
   }
 }
@@ -227,23 +221,21 @@ export function generateProductSchema(
     category?: string
     datePublished?: string
   },
-  config: SEOConfig = seoConfig
+  config: SEOConfig = seoConfig,
 ) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: product.name,
-    description: product.description,
-    url: product.url.startsWith('http')
-      ? product.url
-      : `${config.siteUrl}${product.url}`,
-    image: product.image,
-    brand: {
+    'name': product.name,
+    'description': product.description,
+    'url': product.url.startsWith('http') ? product.url : `${config.siteUrl}${product.url}`,
+    'image': product.image,
+    'brand': {
       '@type': config.businessType,
-      name: product.brand || config.businessName,
+      'name': product.brand || config.businessName,
     },
-    category: product.category,
-    datePublished: product.datePublished,
+    'category': product.category,
+    'datePublished': product.datePublished,
   }
 }
 
@@ -262,30 +254,30 @@ export function generateCreativeWorkSchema(
     client?: string
     keywords?: string[]
   },
-  config: SEOConfig = seoConfig
+  config: SEOConfig = seoConfig,
 ) {
   return {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
-    name: work.name,
-    description: work.description,
-    url: work.url.startsWith('http') ? work.url : `${config.siteUrl}${work.url}`,
-    image: work.image,
-    dateCreated: work.dateCreated,
-    datePublished: work.datePublished,
-    creator: {
+    'name': work.name,
+    'description': work.description,
+    'url': work.url.startsWith('http') ? work.url : `${config.siteUrl}${work.url}`,
+    'image': work.image,
+    'dateCreated': work.dateCreated,
+    'datePublished': work.datePublished,
+    'creator': {
       '@type': config.businessType,
-      name: config.businessName,
-      url: config.siteUrl,
+      'name': config.businessName,
+      'url': config.siteUrl,
     },
     // Client as "about" entity
-    about: work.client
+    'about': work.client
       ? {
           '@type': 'Organization',
-          name: work.client,
+          'name': work.client,
         }
       : undefined,
-    keywords: work.keywords?.join(', '),
+    'keywords': work.keywords?.join(', '),
   }
 }
 
@@ -308,31 +300,31 @@ export function generateLocalBusinessSchema(
     openingHours?: string[] // e.g., ["Mo-Fr 09:00-17:00"]
     priceRange?: string // e.g., "$$"
   },
-  config: SEOConfig = seoConfig
+  config: SEOConfig = seoConfig,
 ) {
   const sameAs = Object.values(config.socialLinks).filter(Boolean)
 
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    name: business.name,
-    description: business.description,
-    url: config.siteUrl,
-    telephone: business.phone,
-    email: business.email,
-    address: business.address
+    'name': business.name,
+    'description': business.description,
+    'url': config.siteUrl,
+    'telephone': business.phone,
+    'email': business.email,
+    'address': business.address
       ? {
           '@type': 'PostalAddress',
-          streetAddress: business.address.street,
-          addressLocality: business.address.city,
-          addressRegion: business.address.region,
-          postalCode: business.address.postalCode,
-          addressCountry: business.address.country,
+          'streetAddress': business.address.street,
+          'addressLocality': business.address.city,
+          'addressRegion': business.address.region,
+          'postalCode': business.address.postalCode,
+          'addressCountry': business.address.country,
         }
       : undefined,
-    openingHoursSpecification: business.openingHours,
-    priceRange: business.priceRange,
-    sameAs: sameAs.length > 0 ? sameAs : undefined,
+    'openingHoursSpecification': business.openingHours,
+    'priceRange': business.priceRange,
+    'sameAs': sameAs.length > 0 ? sameAs : undefined,
   }
 }
 
@@ -349,10 +341,7 @@ export function generateLocalBusinessSchema(
  */
 export function JsonLd({data}: {data: Record<string, unknown>}) {
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{__html: JSON.stringify(data)}}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify(data)}} />
   )
 }
 
@@ -404,11 +393,7 @@ export function SiteStructuredData() {
  *   ]}
  * />
  */
-export function BreadcrumbStructuredData({
-  items,
-}: {
-  items: {name: string; url: string}[]
-}) {
+export function BreadcrumbStructuredData({items}: {items: {name: string; url: string}[]}) {
   const schema = generateBreadcrumbSchema(items)
   return <JsonLd data={schema} />
 }
@@ -464,11 +449,7 @@ export function ArticleStructuredData({
  *   ]}
  * />
  */
-export function FAQStructuredData({
-  faqs,
-}: {
-  faqs: {question: string; answer: string}[]
-}) {
+export function FAQStructuredData({faqs}: {faqs: {question: string; answer: string}[]}) {
   const schema = generateFAQSchema(faqs)
   return <JsonLd data={schema} />
 }
@@ -610,13 +591,13 @@ export function CreativeWorkStructuredData({
  */
 export function addSpeakable(
   schema: Record<string, unknown>,
-  cssSelectors: string[]
+  cssSelectors: string[],
 ): Record<string, unknown> {
   return {
     ...schema,
     speakable: {
       '@type': 'SpeakableSpecification',
-      cssSelector: cssSelectors,
+      'cssSelector': cssSelectors,
     },
   }
 }
@@ -626,13 +607,13 @@ export function addSpeakable(
  */
 export function addSpeakableXPath(
   schema: Record<string, unknown>,
-  xpaths: string[]
+  xpaths: string[],
 ): Record<string, unknown> {
   return {
     ...schema,
     speakable: {
       '@type': 'SpeakableSpecification',
-      xpath: xpaths,
+      'xpath': xpaths,
     },
   }
 }
@@ -650,24 +631,24 @@ export function generateSpeakableWebPageSchema(
     datePublished?: string
     dateModified?: string
   },
-  config: SEOConfig = seoConfig
+  config: SEOConfig = seoConfig,
 ) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    name: page.name,
-    description: page.description,
-    url: page.url.startsWith('http') ? page.url : `${config.siteUrl}${page.url}`,
-    datePublished: page.datePublished,
-    dateModified: page.dateModified,
-    speakable: {
+    'name': page.name,
+    'description': page.description,
+    'url': page.url.startsWith('http') ? page.url : `${config.siteUrl}${page.url}`,
+    'datePublished': page.datePublished,
+    'dateModified': page.dateModified,
+    'speakable': {
       '@type': 'SpeakableSpecification',
-      cssSelector: page.speakableSelectors,
+      'cssSelector': page.speakableSelectors,
     },
-    isPartOf: {
+    'isPartOf': {
       '@type': 'WebSite',
-      name: config.siteName,
-      url: config.siteUrl,
+      'name': config.siteName,
+      'url': config.siteUrl,
     },
   }
 }

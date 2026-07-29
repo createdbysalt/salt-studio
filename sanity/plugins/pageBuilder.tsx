@@ -1,5 +1,5 @@
-import {Box, Card, Flex, Stack, Text, Button, Grid} from '@sanity/ui'
-import {AddIcon, DragHandleIcon, TrashIcon, EditIcon, EyeOpenIcon} from '@sanity/icons'
+import {AddIcon, DragHandleIcon, EditIcon, EyeOpenIcon, TrashIcon} from '@sanity/icons'
+import {Box, Button, Card, Flex, Grid, Stack, Text} from '@sanity/ui'
 import {ComponentType} from 'react'
 
 /**
@@ -103,12 +103,7 @@ export function PageBuilderTool() {
             </Text>
           </Stack>
           <Flex gap={2}>
-            <Button
-              icon={EyeOpenIcon}
-              text="Preview"
-              mode="ghost"
-              style={{color: '#F5F0E8'}}
-            />
+            <Button icon={EyeOpenIcon} text="Preview" mode="ghost" style={{color: '#F5F0E8'}} />
             <Button
               icon={EditIcon}
               text="Publish"
@@ -232,7 +227,7 @@ export function PageBuilderTool() {
   )
 }
 
-function ComponentCard({component}: {component: typeof COMPONENT_LIBRARY[0]}) {
+function ComponentCard({component}: {component: (typeof COMPONENT_LIBRARY)[0]}) {
   return (
     <Card
       padding={3}
@@ -315,18 +310,8 @@ function PlacedComponent({
           </Text>
         </Flex>
         <Flex gap={1}>
-          <Button
-            icon={EditIcon}
-            mode="bleed"
-            padding={2}
-            style={{color: '#737370'}}
-          />
-          <Button
-            icon={TrashIcon}
-            mode="bleed"
-            padding={2}
-            style={{color: '#DC2626'}}
-          />
+          <Button icon={EditIcon} mode="bleed" padding={2} style={{color: '#737370'}} />
+          <Button icon={TrashIcon} mode="bleed" padding={2} style={{color: '#DC2626'}} />
         </Flex>
       </Flex>
 

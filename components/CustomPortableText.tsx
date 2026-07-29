@@ -121,7 +121,9 @@ export function CustomPortableText({
         const href = stegaClean(cta.link) || '/contact'
         return (
           <section className="mt-16 border-t border-foreground/15 pt-10">
-            {cta.subhead ? <p className="text-xl font-medium text-foreground">{cta.subhead}</p> : null}
+            {cta.subhead ? (
+              <p className="text-xl font-medium text-foreground">{cta.subhead}</p>
+            ) : null}
             <Link href={href} className="btn-solid mt-6">
               {cta.buttonLabel}
             </Link>

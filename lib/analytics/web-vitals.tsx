@@ -1,8 +1,8 @@
 'use client'
 
 import {useReportWebVitals} from 'next/web-vitals'
-import {pushToDataLayer} from './gtm'
 import {hasConsentFor} from './consent'
+import {pushToDataLayer} from './gtm'
 
 /**
  * Web Vitals Reporter

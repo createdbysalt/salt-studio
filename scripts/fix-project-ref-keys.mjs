@@ -50,7 +50,9 @@ for (const p of projects) {
 }
 
 const bar = '─'.repeat(64)
-console.log(`\n${bar}\nFix ref keys  ·  ${COMMIT ? 'COMMIT' : 'DRY RUN'}  ·  ${changed}/${projects.length} projects need fixes\n${bar}`)
+console.log(
+  `\n${bar}\nFix ref keys  ·  ${COMMIT ? 'COMMIT' : 'DRY RUN'}  ·  ${changed}/${projects.length} projects need fixes\n${bar}`,
+)
 console.log(report.join('\n') || '  (none)')
 console.log(bar)
 

@@ -5,6 +5,7 @@ const FOOTER_SOCIAL_PLATFORMS = [
   {title: 'Instagram', value: 'instagram'},
   {title: 'Vimeo', value: 'vimeo'},
   {title: 'Email', value: 'email'},
+  {title: 'WhatsApp', value: 'whatsapp'},
   {title: 'YouTube', value: 'youtube'},
   {title: 'X / Twitter', value: 'x'},
   {title: 'LinkedIn', value: 'linkedin'},
@@ -170,7 +171,7 @@ export default defineType({
       type: 'array',
       group: 'footer',
       description:
-        'Icons under the logo. Pick a platform for a built-in icon, or choose Custom and upload an SVG/PNG. For email, set URL to mailto:hello@createdbysalt.com. Drag to reorder.',
+        'Icons under the logo. Pick a platform for a built-in icon, or choose Custom and upload an SVG/PNG. For email use mailto:hello@createdbysalt.com; for WhatsApp use https://wa.me/<number>. Drag to reorder.',
       of: [
         defineArrayMember({
           type: 'object',
@@ -207,7 +208,7 @@ export default defineType({
               title: 'URL',
               type: 'string',
               description:
-                'Full link — e.g. https://www.instagram.com/… or mailto:hello@createdbysalt.com for email.',
+                'Full link — e.g. https://www.instagram.com/…, mailto:hello@createdbysalt.com for email, or https://wa.me/15551234567 for WhatsApp.',
               validation: (rule) =>
                 rule.required().custom((value) => {
                   const v = typeof value === 'string' ? value.trim() : ''

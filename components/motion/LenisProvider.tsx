@@ -24,6 +24,17 @@ export function LenisProvider({children}: {children: React.ReactNode}) {
   }, [])
 
   useEffect(() => {
+    // Browser "auto" restoration + Lenis/GSAP pins fight on reload — you'd land
+    // mid-page (often on the type-beat). Manual + explicit top unless a hash.
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual'
+    }
+    if (!window.location.hash) {
+      window.scrollTo(0, 0)
+    }
+  }, [])
+
+  useEffect(() => {
     if (reducedMotion) return
 
     const lenis = lenisRef.current?.lenis
@@ -36,6 +47,10 @@ export function LenisProvider({children}: {children: React.ReactNode}) {
     lenis?.on('scroll', ScrollTrigger.update)
     gsap.ticker.add(update)
     gsap.ticker.lagSmoothing(0)
+
+    if (!window.location.hash) {
+      lenis?.scrollTo(0, {immediate: true})
+    }
 
     return () => {
       gsap.ticker.remove(update)

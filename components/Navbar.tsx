@@ -1,39 +1,113 @@
 'use client'
 
 import {useAboutPanel} from '@/components/AboutPanel'
+import {useContactMenu} from '@/components/ContactMenu'
 import {DEFAULT_NAV, type NavChild, type NavItem} from '@/components/homeHero'
+import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {SiteLogo} from '@/components/SiteLogo'
 import {isAboutHref} from '@/lib/aboutPanel'
+import {CONTACT_BOOK_HREF, CONTACT_WHATSAPP_HREF, isContactHref} from '@/lib/contactMenu'
 import type {SettingsQueryResult} from '@/sanity.types'
 import {studioUrl} from '@/sanity/lib/api'
 import {resolveMenu} from '@/sanity/lib/utils'
+import {useGSAP} from '@gsap/react'
 import {ChevronDown} from 'lucide-react'
 import {AnimatePresence, motion} from 'motion/react'
 import {createDataAttribute} from 'next-sanity'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
-import {useEffect, useState, type MouseEvent} from 'react'
+import {forwardRef, useEffect, useRef, useState, type MouseEvent} from 'react'
 
 interface NavbarProps {
   data: SettingsQueryResult
 }
 
-// TinyWins glass pills — measured on light + colored surfaces.
-const pillBase =
-  'flex h-10 shrink-0 items-center overflow-hidden rounded-sm backdrop-blur-[42px] sm:h-12'
+// Glass pills — black/6 on paper; white/10 frost on dark/media when collapsed.
+// Expanded mobile sheet on dark uses opaque ink — white/10 + blur reads as a
+// milky white panel over large areas.
+const pillBase = 'flex shrink-0 overflow-hidden rounded-sm backdrop-blur-[42px]'
+const pillRowBase = 'flex h-10 w-full shrink-0 items-center sm:h-12'
 const pillFillPaper =
   'bg-[rgba(0,0,0,0.06)] hover:bg-[rgba(0,0,0,0.10)] transition-colors duration-300'
 const pillFillColor =
   'bg-[rgba(255,255,255,0.10)] hover:bg-[rgba(255,255,255,0.16)] transition-colors duration-300'
+const pillFillColorMenu =
+  'bg-[rgba(8,9,10,0.94)] hover:bg-[rgba(8,9,10,0.96)] transition-colors duration-300'
 
-const BOOK_CTA_LABEL = 'Book a discovery call'
-const BOOK_CTA_HREF = '/contact'
+const BOOK_CTA_LABEL = 'Book Discovery Call'
+
+function BookDiscoveryCta({className, onClick}: {className: string; onClick?: () => void}) {
+  const rootRef = useRef<HTMLAnchorElement>(null)
+
+  useGSAP(
+    () => {
+      const root = rootRef.current
+      if (!root || prefersReducedMotion()) return
+
+      const dot = root.querySelector<HTMLElement>('[data-book-cta-dot]')
+      const label = root.querySelector<HTMLElement>('[data-book-cta-label]')
+      if (!dot || !label) return
+
+      gsap.set(dot, {scale: 1})
+      gsap.set(label, {x: 0})
+
+      const hoverTl = gsap.timeline({paused: true})
+      hoverTl
+        .to(dot, {scale: 1.35, duration: 0.34, ease: EASE.outQuint}, 0)
+        .to(label, {x: 2, duration: 0.38, ease: EASE.outQuint}, 0)
+
+      const onEnter = () => hoverTl.play()
+      const onLeave = () => hoverTl.reverse()
+      root.addEventListener('pointerenter', onEnter)
+      root.addEventListener('pointerleave', onLeave)
+
+      return () => {
+        root.removeEventListener('pointerenter', onEnter)
+        root.removeEventListener('pointerleave', onLeave)
+        hoverTl.kill()
+      }
+    },
+    {scope: rootRef},
+  )
+
+  return (
+    <a
+      ref={rootRef}
+      href={CONTACT_BOOK_HREF}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={onClick}
+      className={className}
+    >
+      <span
+        aria-hidden
+        data-book-cta-dot
+        className="inline-block size-[6px] shrink-0 rounded-full bg-accent will-change-transform"
+      />
+      <span data-book-cta-label className="inline-block will-change-transform">
+        {BOOK_CTA_LABEL}
+      </span>
+    </a>
+  )
+}
 
 export function Navbar({data}: NavbarProps) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [menuPresent, setMenuPresent] = useState(false)
   const {openAbout} = useAboutPanel()
-  const onColor = useNavOnColorSurface(pathname)
+  const {open, openContact, closeContact} = useContactMenu()
+  const onColor = useNavOnColorSurface(pathname, menuPresent)
+
+  const pillRef = useRef<HTMLElement>(null)
+  const menuBodyRef = useRef<HTMLDivElement>(null)
+  const backdropRef = useRef<HTMLButtonElement>(null)
+  const bookWrapRef = useRef<HTMLDivElement>(null)
+  const menuTlRef = useRef<gsap.core.Timeline | null>(null)
+  const menuOpenRef = useRef(menuOpen)
+  const collapsedPillRef = useRef({width: 99, height: 40})
+
+  menuOpenRef.current = menuOpen
 
   const resolved = resolveMenu(data?.menuItems)
   const items: NavItem[] = resolved.length ? resolved : DEFAULT_NAV
@@ -47,7 +121,7 @@ export function Navbar({data}: NavbarProps) {
         })
       : null
 
-  const pillFill = onColor ? pillFillColor : pillFillPaper
+  const pillFill = onColor ? (menuPresent ? pillFillColorMenu : pillFillColor) : pillFillPaper
 
   const linkClass = onColor
     ? 'font-sans text-[13px] font-medium tracking-[-0.01em] text-white/85 transition-colors duration-300 hover:text-white sm:text-[14px]'
@@ -58,106 +132,409 @@ export function Navbar({data}: NavbarProps) {
     : 'whitespace-nowrap font-sans text-[12px] font-medium tracking-[-0.01em] text-foreground/50 transition-colors duration-300 hover:text-foreground sm:text-[13px]'
 
   const ctaClass = onColor
-    ? 'pointer-events-auto inline-flex items-center justify-center whitespace-nowrap px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-white/90 transition-colors duration-300 hover:text-white sm:px-4 sm:text-[14px]'
-    : 'pointer-events-auto inline-flex items-center justify-center whitespace-nowrap px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/80 transition-colors duration-300 hover:text-foreground sm:px-4 sm:text-[14px]'
+    ? 'pointer-events-auto inline-flex h-10 items-center justify-center whitespace-nowrap px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-white/90 transition-colors duration-300 hover:text-white sm:h-12 sm:px-4 sm:text-[14px]'
+    : 'pointer-events-auto inline-flex h-10 items-center justify-center whitespace-nowrap px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/80 transition-colors duration-300 hover:text-foreground sm:h-12 sm:px-4 sm:text-[14px]'
 
-  const menuTriggerClass = onColor
-    ? 'pointer-events-auto inline-flex items-center justify-center px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-white/85 transition-colors duration-300 hover:text-white sm:px-4 sm:text-[14px] lg:hidden'
-    : 'pointer-events-auto inline-flex items-center justify-center px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/70 transition-colors duration-300 hover:text-foreground sm:px-4 sm:text-[14px] lg:hidden'
+  const hamburgerClass = onColor
+    ? 'ml-auto flex h-6 w-3.5 shrink-0 items-center justify-center text-white/85 transition-opacity hover:opacity-100 lg:ml-0 lg:hidden'
+    : 'ml-auto flex h-6 w-3.5 shrink-0 items-center justify-center text-foreground/70 transition-opacity hover:opacity-100 lg:ml-0 lg:hidden'
 
   const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (!isAboutHref(href)) return
-    event.preventDefault()
-    openAbout()
+    if (isAboutHref(href)) {
+      event.preventDefault()
+      openAbout()
+      return
+    }
+    if (isContactHref(href)) {
+      event.preventDefault()
+      if (open) closeContact()
+      else openContact()
+    }
   }
+
+  useEffect(() => {
+    if (!menuOpen) return
+    const pill = pillRef.current
+    if (pill) {
+      const rect = pill.getBoundingClientRect()
+      collapsedPillRef.current = {width: rect.width, height: rect.height}
+    }
+    setMenuPresent(true)
+  }, [menuOpen])
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const onChange = () => {
+      if (mq.matches) setMenuOpen(false)
+    }
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  useEffect(() => {
+    if (!menuPresent) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [menuPresent])
+
+  useEffect(() => {
+    if (!menuPresent) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [menuPresent])
+
+  // Expand the left glass pill itself — continuation, not a separate popup.
+  useGSAP(
+    () => {
+      if (!menuPresent) return
+
+      const pill = pillRef.current
+      const body = menuBodyRef.current
+      const backdrop = backdropRef.current
+      const book = bookWrapRef.current
+      if (!pill || !body || !backdrop) return
+
+      const reduced = prefersReducedMotion()
+      const {width: collapsedW, height: collapsedH} = collapsedPillRef.current
+      const revealEls = gsap.utils.toArray<HTMLElement>('[data-menu-reveal]', body)
+      const barTop = pill.querySelector<SVGLineElement>('[data-menu-bar="top"]')
+      const barBot = pill.querySelector<SVGLineElement>('[data-menu-bar="bot"]')
+
+      // Use the real header shell padding — this project remaps spacing-4 to 20px,
+      // so a hard-coded 32px gutter left the sheet short on the right.
+      const shell = pill.parentElement
+      const shellStyle = shell ? getComputedStyle(shell) : null
+      const gutter =
+        (parseFloat(shellStyle?.paddingLeft || '0') || 0) +
+        (parseFloat(shellStyle?.paddingRight || '0') || 0)
+      const expandedW = Math.max(collapsedW, (shell?.clientWidth ?? window.innerWidth) - gutter)
+      gsap.set(body, {height: 'auto', autoAlpha: 1, overflow: 'hidden'})
+      const bodyH = body.scrollHeight
+      const expandedH = collapsedH + bodyH
+
+      gsap.set(backdrop, {opacity: 0})
+      gsap.set(body, {height: 0, autoAlpha: 0})
+      gsap.set(pill, {
+        width: collapsedW,
+        height: collapsedH,
+        willChange: 'width, height',
+      })
+      if (book) gsap.set(book, {autoAlpha: 1})
+      if (barTop)
+        gsap.set(barTop, {attr: {x1: 2, y1: 5, x2: 14, y2: 5}, transformOrigin: '50% 50%'})
+      if (barBot)
+        gsap.set(barBot, {attr: {x1: 2, y1: 11, x2: 14, y2: 11}, transformOrigin: '50% 50%'})
+
+      const releaseBookLayout = () => {
+        if (!book) return
+        book.style.position = ''
+        book.style.width = ''
+        book.style.overflow = ''
+        book.style.pointerEvents = ''
+      }
+
+      const collapseBookLayout = () => {
+        if (!book) return
+        book.style.position = 'absolute'
+        book.style.width = '0'
+        book.style.overflow = 'hidden'
+        book.style.pointerEvents = 'none'
+      }
+
+      const settleClosed = () => {
+        if (menuOpenRef.current) return
+        // Keep pixel size locked while the menu body unmounts, then release to auto.
+        gsap.set(pill, {width: collapsedW, height: collapsedH})
+        gsap.set(body, {height: 0, autoAlpha: 0})
+        if (book) gsap.set(book, {autoAlpha: 1})
+        releaseBookLayout()
+        setMenuPresent(false)
+        requestAnimationFrame(() => {
+          gsap.set(pill, {clearProps: 'width,height,willChange'})
+          if (book) gsap.set(book, {clearProps: 'opacity,visibility'})
+        })
+      }
+
+      const tl = gsap.timeline({
+        paused: true,
+        onReverseComplete: settleClosed,
+      })
+
+      // Fade Book CTA and pull it out of flex flow — visibility:hidden still
+      // occupies width, which made the expanded sheet tighter on the right.
+      if (book) {
+        collapseBookLayout()
+        tl.to(
+          book,
+          {
+            autoAlpha: 0,
+            duration: reduced ? 0.01 : 0.22,
+            ease: 'power2.out',
+            easeReverse: 'power2.inOut',
+            onReverseComplete: releaseBookLayout,
+          },
+          0,
+        )
+      }
+
+      tl.to(
+        backdrop,
+        {
+          opacity: 1,
+          duration: reduced ? 0.01 : 0.28,
+          ease: 'power2.out',
+          easeReverse: true,
+        },
+        0,
+      )
+
+      // power3 (not back) — reverse stays smooth without overshoot snap.
+      tl.to(
+        pill,
+        {
+          width: expandedW,
+          height: expandedH,
+          duration: reduced ? 0.01 : 0.62,
+          ease: 'power3.out',
+          easeReverse: 'power3.inOut',
+        },
+        0,
+      )
+
+      tl.to(
+        body,
+        {
+          height: bodyH,
+          autoAlpha: 1,
+          duration: reduced ? 0.01 : 0.62,
+          ease: 'power3.out',
+          easeReverse: 'power3.inOut',
+        },
+        0,
+      )
+
+      // Two-line hamburger → X
+      if (barTop) {
+        tl.to(
+          barTop,
+          {
+            attr: {x1: 3, y1: 3, x2: 13, y2: 13},
+            duration: reduced ? 0.01 : 0.28,
+            ease: 'power3.inOut',
+          },
+          0,
+        )
+      }
+      if (barBot) {
+        tl.to(
+          barBot,
+          {
+            attr: {x1: 13, y1: 3, x2: 3, y2: 13},
+            duration: reduced ? 0.01 : 0.28,
+            ease: 'power3.inOut',
+          },
+          0,
+        )
+      }
+
+      if (revealEls.length) {
+        tl.from(
+          revealEls,
+          {
+            opacity: 0,
+            y: 8,
+            duration: reduced ? 0.01 : 0.32,
+            ease: 'power2.out',
+            easeReverse: true,
+            stagger: 0.045,
+          },
+          0.2,
+        )
+      }
+
+      menuTlRef.current = tl
+
+      return () => {
+        tl.kill()
+        menuTlRef.current = null
+        if (barTop) gsap.set(barTop, {attr: {x1: 2, y1: 5, x2: 14, y2: 5}})
+        if (barBot) gsap.set(barBot, {attr: {x1: 2, y1: 11, x2: 14, y2: 11}})
+      }
+    },
+    {dependencies: [menuPresent]},
+  )
+
+  useEffect(() => {
+    if (!menuPresent) return
+    const tl = menuTlRef.current
+    if (!tl) return
+
+    if (menuOpen) {
+      if (prefersReducedMotion()) tl.progress(1)
+      else tl.timeScale(1).play()
+    } else if (prefersReducedMotion()) {
+      gsap.set(pillRef.current, {
+        width: collapsedPillRef.current.width,
+        height: collapsedPillRef.current.height,
+      })
+      const book = bookWrapRef.current
+      if (book) {
+        gsap.set(book, {autoAlpha: 1})
+        book.style.position = ''
+        book.style.width = ''
+        book.style.overflow = ''
+        book.style.pointerEvents = ''
+      }
+      setMenuPresent(false)
+      requestAnimationFrame(() => {
+        gsap.set(pillRef.current, {clearProps: 'width,height,willChange'})
+        gsap.set(bookWrapRef.current, {clearProps: 'opacity,visibility'})
+      })
+    } else {
+      tl.timeScale(1).reverse()
+    }
+  }, [menuOpen, menuPresent])
 
   return (
     <>
+      {menuPresent && (
+        <button
+          ref={backdropRef}
+          type="button"
+          aria-label="Close menu"
+          onClick={() => setMenuOpen(false)}
+          className="pointer-events-auto fixed inset-0 z-[85] bg-[rgba(14,16,15,0.28)] opacity-0 backdrop-blur-[2px] lg:hidden"
+        />
+      )}
+
       <header
-        className="pointer-events-none fixed top-0 z-[70] w-full bg-transparent transition-opacity duration-300 [[data-service-panel-open]_&]:pointer-events-none [[data-service-panel-open]_&]:opacity-0 [[data-about-panel-open]_&]:pointer-events-none [[data-about-panel-open]_&]:opacity-0"
+        className={`pointer-events-none fixed top-0 w-full bg-transparent transition-opacity duration-300 [[data-service-panel-open]_&]:pointer-events-none [[data-service-panel-open]_&]:opacity-0 [[data-about-panel-open]_&]:pointer-events-none [[data-about-panel-open]_&]:opacity-0 ${
+          menuPresent ? 'z-[90]' : 'z-[70]'
+        }`}
         data-site-nav
         data-sanity={dataAttribute?.('menuItems')}
         data-nav-on-color={onColor ? 'true' : 'false'}
       >
         <div className="flex w-full items-start justify-between gap-2 px-3 pt-3 sm:px-4 sm:pt-4">
           <nav
-            className={`pointer-events-auto min-w-0 ${pillBase} gap-3 py-2 pl-2.5 pr-3 sm:gap-7 sm:py-[9px] sm:pl-[10px] sm:pr-[18px] ${pillFill}`}
+            ref={pillRef}
+            className={`pointer-events-auto min-w-0 flex-col ${pillBase} ${pillFill} ${
+              menuPresent ? '' : 'lg:flex-row lg:items-center'
+            }`}
             aria-label="Main navigation"
             data-global-nav-left-pill="true"
           >
-            <SiteLogo
-              variant={onColor ? 'light' : 'dark'}
-              className="shrink-0"
-              logo={data?.logo}
-              siteName={data?.siteName}
-              markClassName="h-[18px] w-auto sm:h-[22px]"
-            />
+            <div
+              className={`${pillRowBase} gap-5 px-3.5 sm:gap-6 sm:px-4 lg:gap-7 ${
+                menuPresent ? 'px-3.5 sm:px-4' : 'lg:px-[10px] lg:pr-[18px]'
+              }`}
+            >
+              <SiteLogo
+                variant={onColor ? 'light' : 'dark'}
+                className="shrink-0"
+                logo={data?.logo}
+                siteName={data?.siteName}
+                markClassName="h-[18px] w-auto sm:h-[22px]"
+              />
 
-            <div className="hidden items-center gap-3 sm:gap-6 lg:flex">
-              {items.map((item) =>
-                item.children?.length ? (
-                  <NavDropdown
-                    key={`${item.href}-${item.label}`}
-                    item={item as NavItem & {children: NavChild[]}}
-                    linkClass={linkClass}
-                    childLinkClass={childLinkClass}
-                    onColor={onColor}
-                    pillFill={pillFill}
+              <button
+                type="button"
+                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                aria-controls="global-nav-mobile-drawer"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen((prev) => !prev)}
+                className={hamburgerClass}
+                data-menu-toggle
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  aria-hidden="true"
+                  className="overflow-visible"
+                >
+                  <line
+                    data-menu-bar="top"
+                    x1="2"
+                    y1="5"
+                    x2="14"
+                    y2="5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
                   />
-                ) : (
-                  <Link
-                    key={`${item.href}-${item.label}`}
-                    href={item.href}
-                    onClick={(event) => handleNavClick(event, item.href)}
-                    className={linkClass}
-                  >
-                    {item.label}
-                  </Link>
-                ),
-              )}
+                  <line
+                    data-menu-bar="bot"
+                    x1="2"
+                    y1="11"
+                    x2="14"
+                    y2="11"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+
+              <div className="hidden items-center gap-3 sm:gap-6 lg:flex">
+                {items.map((item) =>
+                  item.children?.length ? (
+                    <NavDropdown
+                      key={`${item.href}-${item.label}`}
+                      item={item as NavItem & {children: NavChild[]}}
+                      linkClass={linkClass}
+                      childLinkClass={childLinkClass}
+                      onColor={onColor}
+                      pillFill={pillFill}
+                    />
+                  ) : (
+                    <Link
+                      key={`${item.href}-${item.label}`}
+                      href={item.href}
+                      onClick={(event) => handleNavClick(event, item.href)}
+                      className={linkClass}
+                    >
+                      {item.label}
+                    </Link>
+                  ),
+                )}
+              </div>
             </div>
+
+            {menuPresent && (
+              <ExpandingMenuBody
+                ref={menuBodyRef}
+                items={items}
+                onColor={onColor}
+                onClose={() => setMenuOpen(false)}
+                onAboutOpen={openAbout}
+                onContactOpen={openContact}
+              />
+            )}
           </nav>
 
-          <div className="pointer-events-auto flex shrink-0 items-start gap-2">
-            <Link
-              href={BOOK_CTA_HREF}
-              className={`${pillBase} ${pillFill} ${ctaClass}`}
-            >
-              {BOOK_CTA_LABEL}
-            </Link>
-
-            <button
-              type="button"
-              aria-label="Open menu"
-              onClick={() => setMenuOpen(true)}
-              className={`${menuTriggerClass} ${pillBase} ${pillFill}`}
-            >
-              Menu
-            </button>
+          <div ref={bookWrapRef} className="pointer-events-auto flex shrink-0 items-start gap-2">
+            <BookDiscoveryCta className={`${pillBase} ${pillFill} ${ctaClass} gap-2`} />
           </div>
         </div>
       </header>
-
-      <AnimatePresence>
-        {menuOpen && (
-          <MenuOverlay
-            items={items}
-            logo={data?.logo}
-            siteName={data?.siteName}
-            onClose={() => setMenuOpen(false)}
-            onAboutOpen={openAbout}
-          />
-        )}
-      </AnimatePresence>
     </>
   )
 }
 
 /**
- * TinyWins swaps black/6 glass on paper for white/10 glass on saturated or dark
- * surfaces. Sample under the left pill; media/images count as color surfaces.
+ * Paper → black/6 glass + dark type. Dark/media → white/10 frost + light type.
+ * Sample under the left pill; freeze while the mobile menu is open so the
+ * expanded sheet doesn’t re-sample itself as a light surface.
  */
-function useNavOnColorSurface(pathname: string): boolean {
+function useNavOnColorSurface(pathname: string, menuPresent: boolean): boolean {
   // Media-hero routes start on color even before the first sample.
   const routeHint =
     pathname === '/contact' ||
@@ -167,15 +544,23 @@ function useNavOnColorSurface(pathname: string): boolean {
     pathname.startsWith('/work/')
 
   const [onColor, setOnColor] = useState(routeHint)
+  const latestRef = useRef(routeHint)
 
   useEffect(() => {
-    setOnColor(routeHint)
+    // Freeze the last good sample while the sheet is open — don't re-hit-test
+    // through the expanded pill / backdrop.
+    if (menuPresent) {
+      setOnColor(latestRef.current)
+      return
+    }
 
     let frame = 0
     const sample = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(() => {
-        setOnColor(isColorSurfaceUnderNav() || routeHint)
+        const next = isColorSurfaceUnderNav() || routeHint
+        latestRef.current = next
+        setOnColor(next)
       })
     }
 
@@ -187,7 +572,7 @@ function useNavOnColorSurface(pathname: string): boolean {
       window.removeEventListener('scroll', sample)
       window.removeEventListener('resize', sample)
     }
-  }, [pathname, routeHint])
+  }, [pathname, routeHint, menuPresent])
 
   return onColor
 }
@@ -231,9 +616,7 @@ function isColorSurfaceUnderNav(): boolean {
   return false
 }
 
-function parseCssColor(
-  value: string,
-): {r: number; g: number; b: number; a: number} | null {
+function parseCssColor(value: string): {r: number; g: number; b: number; a: number} | null {
   const match = value.match(
     /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i,
   )
@@ -343,19 +726,16 @@ function NavDropdown({
   )
 }
 
-function MenuOverlay({
-  items,
-  logo,
-  siteName,
-  onClose,
-  onAboutOpen,
-}: {
-  items: NavItem[]
-  logo?: {asset?: {_ref: string} | null; alt?: string | null} | null
-  siteName?: string | null
-  onClose: () => void
-  onAboutOpen: () => void
-}) {
+const ExpandingMenuBody = forwardRef<
+  HTMLDivElement,
+  {
+    items: NavItem[]
+    onColor: boolean
+    onClose: () => void
+    onAboutOpen: () => void
+    onContactOpen: () => void
+  }
+>(function ExpandingMenuBody({items, onColor, onClose, onAboutOpen, onContactOpen}, ref) {
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null)
   const toggleSubmenu = (label: string) => setOpenSubmenu((prev) => (prev === label ? null : label))
 
@@ -366,85 +746,61 @@ function MenuOverlay({
       onAboutOpen()
       return
     }
+    if (isContactHref(href)) {
+      event.preventDefault()
+      onClose()
+      onContactOpen()
+      return
+    }
     onClose()
   }
 
-  // Explicit px values — this project remaps Tailwind spacing (e.g. spacing-8 = 136px),
-  // so scale utilities like h-8 / px-8 blow up the overlay vs the prototype.
-  const menuLinkClass =
-    'font-sans text-[56px] font-light leading-[0.95] tracking-[-0.02em] text-foreground/80 transition-colors duration-200 hover:text-foreground md:text-[72px] md:tracking-[-0.03em]'
+  // Explicit px — project remaps Tailwind spacing (spacing-8 = 136px).
+  const menuLinkClass = onColor
+    ? 'font-sans text-[24px] font-medium leading-[1.1] tracking-[-0.02em] text-white transition-opacity duration-200 hover:opacity-70 sm:text-[28px]'
+    : 'font-sans text-[24px] font-medium leading-[1.1] tracking-[-0.02em] text-foreground transition-opacity duration-200 hover:opacity-70 sm:text-[28px]'
 
-  const menuSubmenuChildClass =
-    'font-sans text-[20px] font-light leading-tight tracking-[-0.01em] text-foreground/45 transition-colors duration-200 hover:text-foreground/80 md:text-[24px]'
+  const menuSubmenuChildClass = onColor
+    ? 'font-sans text-[15px] font-medium leading-tight tracking-[-0.01em] text-white/45 transition-opacity duration-200 hover:opacity-80'
+    : 'font-sans text-[15px] font-medium leading-tight tracking-[-0.01em] text-foreground/45 transition-opacity duration-200 hover:opacity-80'
 
   return (
-    <motion.div
-      initial={{opacity: 0}}
-      animate={{opacity: 1}}
-      exit={{opacity: 0}}
-      transition={{duration: 0.25}}
-      className="pointer-events-auto fixed inset-0 z-[80] flex h-[100dvh] flex-col overflow-hidden bg-background text-foreground lg:hidden"
+    <div
+      ref={ref}
+      id="global-nav-mobile-drawer"
+      className={`lg:hidden ${onColor ? 'text-white' : 'text-foreground'}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Navigation menu"
     >
-      {/* Match the fixed glass chrome so Close sits where Menu was. */}
-      <div className="flex shrink-0 items-start justify-between gap-2 px-3 pt-3 sm:px-4 sm:pt-4">
-        <div
-          className={`${pillBase} ${pillFillPaper} pointer-events-auto gap-3 px-2.5 sm:px-[10px]`}
-        >
-          <SiteLogo
-            variant="dark"
-            className="shrink-0"
-            onClick={onClose}
-            logo={logo}
-            siteName={siteName}
-            markClassName="h-[18px] w-auto sm:h-[22px]"
-          />
-        </div>
-        <div className="flex items-start gap-2">
-          <Link
-            href={BOOK_CTA_HREF}
-            onClick={onClose}
-            className={`${pillBase} ${pillFillPaper} inline-flex items-center justify-center whitespace-nowrap px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/80 sm:px-4 sm:text-[14px]`}
-          >
-            {BOOK_CTA_LABEL}
-          </Link>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close menu"
-            className={`pointer-events-auto inline-flex items-center justify-center px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/70 transition-colors duration-300 hover:text-foreground sm:px-4 sm:text-[14px] ${pillBase} ${pillFillPaper}`}
-          >
-            Close
-          </button>
-        </div>
-      </div>
-
-      <div className="relative flex min-h-0 flex-1 flex-col overflow-y-auto px-[20px] pb-[16px] md:px-[32px]">
-        <div className="flex flex-1 items-start justify-end pt-[80px] md:pt-[112px]">
-          <nav
-            className="flex flex-col items-end gap-[8px] text-right md:gap-[12px]"
-            aria-label="Main"
-          >
-            {items.map((item) => (
-              <div key={`${item.href}-${item.label}`} className="flex flex-col items-end">
+      <div className="flex flex-col gap-3 px-3.5 pb-0 pt-3 sm:px-4 sm:pb-0 sm:pt-4">
+        <nav className="flex flex-col items-start gap-[2px] py-2 sm:py-2.5" aria-label="Main">
+          {/* Contact is covered by Book a call / WhatsApp CTAs below. */}
+          {items
+            .filter(
+              (item) => !isContactHref(item.href) && item.label.trim().toLowerCase() !== 'contact',
+            )
+            .map((item) => (
+              <div
+                key={`${item.href}-${item.label}`}
+                data-menu-reveal
+                className="flex flex-col items-start"
+              >
                 {item.children?.length ? (
                   <button
                     type="button"
                     onClick={() => toggleSubmenu(item.label)}
                     aria-expanded={openSubmenu === item.label}
-                    className={`inline-flex items-center gap-[8px] transition-colors duration-200 md:gap-[12px] ${
-                      openSubmenu === item.label
-                        ? 'text-foreground'
-                        : 'text-foreground/80 hover:text-foreground'
-                    }`}
+                    className="inline-flex items-center gap-[6px]"
                   >
                     <span className={menuLinkClass}>{item.label}</span>
                     <ChevronDown
                       aria-hidden="true"
                       strokeWidth={1.5}
                       absoluteStrokeWidth
-                      className={`h-[20px] w-[20px] shrink-0 transition-transform duration-200 md:h-[32px] md:w-[32px] ${
+                      className={`h-[14px] w-[14px] shrink-0 transition-transform duration-200 ${
                         openSubmenu === item.label ? 'rotate-180' : ''
-                      }`}
+                      } ${onColor ? 'text-white/55' : 'text-foreground/45'}`}
                     />
                   </button>
                 ) : (
@@ -458,7 +814,7 @@ function MenuOverlay({
                 )}
 
                 {item.children && openSubmenu === item.label && (
-                  <div className="mt-[4px] mb-[8px] flex flex-col items-end gap-[8px] py-[4px] md:mt-[8px] md:gap-[10px] md:py-[6px]">
+                  <div className="mt-[2px] mb-[4px] flex flex-col items-start gap-[4px] py-[2px]">
                     {item.children.map((child) => (
                       <Link
                         key={`${child.href}-${child.label}`}
@@ -473,9 +829,43 @@ function MenuOverlay({
                 )}
               </div>
             ))}
-          </nav>
+        </nav>
+
+        <div
+          data-menu-reveal
+          className={`flex gap-2 border-t pt-3 pb-0 ${
+            onColor ? 'border-white/10' : 'border-foreground/10'
+          }`}
+        >
+          <a
+            href={CONTACT_BOOK_HREF}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-sm px-3 py-2 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
+              onColor
+                ? 'bg-white/12 text-white hover:bg-white/18'
+                : 'bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.1]'
+            }`}
+          >
+            <span aria-hidden className="size-[6px] shrink-0 rounded-full bg-accent" />
+            Book a call
+          </a>
+          <a
+            href={CONTACT_WHATSAPP_HREF}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={onClose}
+            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-2 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
+              onColor
+                ? 'bg-white/12 text-white hover:bg-white/18'
+                : 'bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.1]'
+            }`}
+          >
+            Chat via WhatsApp
+          </a>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
-}
+})
