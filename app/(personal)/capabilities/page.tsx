@@ -1,6 +1,4 @@
-import {CapabilitiesBentoHero} from '@/components/CapabilitiesBentoHero'
 import {Reveal} from '@/components/Reveal'
-import {CAPABILITIES_BENTO_SHOTS} from '@/lib/capabilitiesBentoShots'
 import {CorePageSchema, ogImageUrl} from '@/lib/seo'
 import type {ServicesPageQueryResult} from '@/sanity.types'
 import {sanityFetch} from '@/sanity/lib/live'
@@ -135,17 +133,24 @@ export default async function CapabilitiesRoute() {
         speakableSelectors={['h1']}
       />
 
-      <CapabilitiesBentoHero
-        headline={hero?.headline ?? 'Capabilities'}
-        subheadline={hero?.subheadline}
-        items={CAPABILITIES_BENTO_SHOTS}
-      />
-
-      <div className="page-chrome pt-16 md:pt-24">
+      <div className="page-chrome pt-28 md:pt-36">
         {sections.map((section) => {
           switch (section._type) {
             case 'servicesHeroSection':
-              return null
+              return (
+                <header key={section._key} className="pb-16 md:pb-24">
+                  <Reveal immediate>
+                    <h1 className="text-display max-w-[1100px] font-semibold">
+                      {section.headline}
+                    </h1>
+                    {section.subheadline ? (
+                      <p className="mt-8 max-w-[560px] text-lg leading-snug text-foreground/70">
+                        {section.subheadline}
+                      </p>
+                    ) : null}
+                  </Reveal>
+                </header>
+              )
             case 'servicesListSection':
               return (
                 <section key={section._key}>
