@@ -30,10 +30,7 @@ function WordRows({text}: {text: string}) {
   return (
     <>
       {toRows(text).map((row) => (
-        <span
-          key={row.join('-')}
-          className="flex gap-x-[0.28em] overflow-hidden leading-none"
-        >
+        <span key={row.join('-')} className="flex gap-x-[0.28em] overflow-hidden leading-none">
           {row.map((word) => (
             <span
               key={word}
@@ -86,14 +83,8 @@ export function WordSwap({primary, secondary, className}: WordSwapProps) {
 
       const wordsA = gsap.utils.toArray<HTMLElement>('[data-word]', phraseA)
       const wordsB = gsap.utils.toArray<HTMLElement>('[data-word]', phraseB)
-      const leftA = gsap.utils.toArray<HTMLElement>(
-        '[data-side="left"] [data-word]',
-        phraseA,
-      )
-      const rightA = gsap.utils.toArray<HTMLElement>(
-        '[data-side="right"] [data-word]',
-        phraseA,
-      )
+      const leftA = gsap.utils.toArray<HTMLElement>('[data-side="left"] [data-word]', phraseA)
+      const rightA = gsap.utils.toArray<HTMLElement>('[data-side="right"] [data-word]', phraseA)
 
       if (!wordsA.length || !wordsB.length) return
 
@@ -126,16 +117,8 @@ export function WordSwap({primary, secondary, className}: WordSwapProps) {
       // Intro — left then right, matching TinyWins stagger offsets
       const intro = gsap.timeline()
       intro
-        .to(
-          leftA,
-          {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'},
-          0.3,
-        )
-        .to(
-          rightA,
-          {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'},
-          0.4,
-        )
+        .to(leftA, {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'}, 0.3)
+        .to(rightA, {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'}, 0.4)
 
       // Loop — A ↔ B with ~3s pause between cycles (TinyWins repeatDelay)
       const cycleHold = 5.1
@@ -149,12 +132,7 @@ export function WordSwap({primary, secondary, className}: WordSwapProps) {
         .to(wordsA, {...exit, ...withWillChange(wordsA)}, 0)
         .fromTo(wordsB, {yPercent: 105}, {...enter, ...withWillChange(wordsB)}, 0.7)
         .to(wordsB, {...exit, ...withWillChange(wordsB)}, cycleHold)
-        .fromTo(
-          wordsA,
-          {yPercent: 105},
-          {...enter, ...withWillChange(wordsA)},
-          cycleHold + 0.7,
-        )
+        .fromTo(wordsA, {yPercent: 105}, {...enter, ...withWillChange(wordsA)}, cycleHold + 0.7)
 
       intro.eventCallback('onComplete', () => {
         loop.play()
@@ -169,10 +147,7 @@ export function WordSwap({primary, secondary, className}: WordSwapProps) {
   )
 
   return (
-    <span
-      ref={scope}
-      className={`relative grid h-full min-h-0 w-full ${className ?? ''}`}
-    >
+    <span ref={scope} className={`relative grid h-full min-h-0 w-full ${className ?? ''}`}>
       <span className="sr-only">{srText}</span>
 
       <span

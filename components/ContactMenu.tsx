@@ -108,9 +108,7 @@ function ContactMenu({open, onClose}: ContactMenuProps) {
     // Desktop: lock to the left nav pill (TinyWins). Mobile pill is logo-only,
     // so keep left edge but give the card a usable width.
     const width =
-      rect.width < 240
-        ? Math.min(window.innerWidth - rect.left - 12, 22.5 * 16)
-        : rect.width
+      rect.width < 240 ? Math.min(window.innerWidth - rect.left - 12, 22.5 * 16) : rect.width
     setBox({
       left: rect.left,
       top: rect.bottom + 8,

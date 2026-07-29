@@ -15,9 +15,9 @@
  *   node scripts/generate-error-content.mjs
  */
 
-import {createClient} from '@sanity/client'
 import {existsSync, readFileSync, writeFileSync} from 'node:fs'
 import {join} from 'node:path'
+import {createClient} from '@sanity/client'
 
 const ROOT = process.cwd()
 
@@ -67,9 +67,7 @@ async function fetchContent() {
     perspective: 'published',
   })
 
-  return client.fetch(
-    `*[_type == "errorPage"][0]{${FIELDS.join(', ')}}`,
-  )
+  return client.fetch(`*[_type == "errorPage"][0]{${FIELDS.join(', ')}}`)
 }
 
 try {

@@ -1,16 +1,15 @@
 'use server'
 
-import {createClient} from 'next-sanity'
-import {Resend} from 'resend'
-
-import {apiVersion, dataset, projectId} from '@/sanity/lib/api'
 import {
   OPENER_QUESTIONS,
-  WEBSITE_QUESTION,
   questionsForTrack,
   resolveTrack,
+  WEBSITE_QUESTION,
 } from '@/lib/quiz/config'
 import {scoreQuiz} from '@/lib/quiz/scoring'
+import {apiVersion, dataset, projectId} from '@/sanity/lib/api'
+import {createClient} from 'next-sanity'
+import {Resend} from 'resend'
 
 /**
  * Salt Score quiz submission — stores the lead in Sanity and emails it to the

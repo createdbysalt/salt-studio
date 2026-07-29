@@ -1,10 +1,9 @@
 'use client'
 
-import Link from 'next/link'
-
 import {trackCTAClick} from '@/lib/analytics'
 import {QUIZ_CTAS} from '@/lib/quiz/config'
 import type {QuizResult} from '@/lib/quiz/scoring'
+import Link from 'next/link'
 
 type QuizResultsProps = {
   result: QuizResult

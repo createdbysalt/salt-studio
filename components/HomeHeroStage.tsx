@@ -44,9 +44,7 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
   }, [])
 
   const roster = useMemo(() => {
-    const usable = projects.filter(
-      (p) => p._id && (p.coverImage?.asset?._ref || p.videoUrl),
-    )
+    const usable = projects.filter((p) => p._id && (p.coverImage?.asset?._ref || p.videoUrl))
     return usable.slice(0, MAX_HERO_PROJECTS)
   }, [projects])
 

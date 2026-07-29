@@ -11,7 +11,12 @@ type AmbientVideoProps = {
 }
 
 /** Muted looping ambient background video. Honors prefers-reduced-motion. */
-export function AmbientVideo({src, className = '', blend = 'normal', opacity = 0.55}: AmbientVideoProps) {
+export function AmbientVideo({
+  src,
+  className = '',
+  blend = 'normal',
+  opacity = 0.55,
+}: AmbientVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {

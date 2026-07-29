@@ -39,12 +39,12 @@ npm run lint:fix   # Format + lint fix
 
 **Sanity secrets source of truth:** 1Password vault `salt-studio-development`, item `salt-studio-sanity`.
 
-| 1Password field | Env var |
-| --------------- | ------- |
-| `project-id` | `NEXT_PUBLIC_SANITY_PROJECT_ID` |
-| `dataset` | `NEXT_PUBLIC_SANITY_DATASET` |
-| `read-token` | `SANITY_API_READ_TOKEN` |
-| `write-token` | `SANITY_API_WRITE_TOKEN` |
+| 1Password field | Env var                         |
+| --------------- | ------------------------------- |
+| `project-id`    | `NEXT_PUBLIC_SANITY_PROJECT_ID` |
+| `dataset`       | `NEXT_PUBLIC_SANITY_DATASET`    |
+| `read-token`    | `SANITY_API_READ_TOKEN`         |
+| `write-token`   | `SANITY_API_WRITE_TOKEN`        |
 
 Site/SEO/Resend/social/agent keys can be added to the same item over time; until then keep them in `.env.local` / Vercel. Never store Photon’s `25ywlhce` tokens here.
 

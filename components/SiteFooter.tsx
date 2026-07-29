@@ -17,22 +17,12 @@ import {useRef, type MouseEvent} from 'react'
 
 /** Routes whose page stage is dark — footer flips to paper (inverse). */
 function pageIsDark(pathname: string): boolean {
-  return (
-    pathname.startsWith('/projects/') ||
-    pathname === '/work' ||
-    pathname.startsWith('/work/')
-  )
+  return pathname.startsWith('/projects/') || pathname === '/work' || pathname.startsWith('/work/')
 }
 
 type FooterSocialPlatform = 'linkedin' | 'instagram' | 'x' | 'email' | 'whatsapp'
 
-const SOCIAL_ORDER: FooterSocialPlatform[] = [
-  'linkedin',
-  'instagram',
-  'x',
-  'email',
-  'whatsapp',
-]
+const SOCIAL_ORDER: FooterSocialPlatform[] = ['linkedin', 'instagram', 'x', 'email', 'whatsapp']
 
 const SOCIAL_LABELS: Record<FooterSocialPlatform, string> = {
   linkedin: 'LinkedIn',
@@ -208,10 +198,7 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
   const menuItems = resolvedNav.length
     ? resolvedNav
     : DEFAULT_NAV.map((item) => ({label: item.label, href: item.href}))
-  const navItems = [
-    {label: 'Home', href: '/'},
-    ...menuItems.filter((item) => item.href !== '/'),
-  ]
+  const navItems = [{label: 'Home', href: '/'}, ...menuItems.filter((item) => item.href !== '/')]
 
   const fromCms = new Map<FooterSocialPlatform, string>()
   for (const item of settings?.footerSocial ?? []) {
@@ -282,9 +269,7 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
               <li key={item.platform}>
                 <a
                   href={item.href}
-                  {...(external
-                    ? {target: '_blank', rel: 'noopener noreferrer'}
-                    : undefined)}
+                  {...(external ? {target: '_blank', rel: 'noopener noreferrer'} : undefined)}
                   aria-label={item.label}
                   className="block text-foreground transition-opacity hover:opacity-55"
                 >
@@ -300,10 +285,7 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
         <span className="whitespace-nowrap">
           © {year} {siteName}. All rights reserved.
         </span>
-        <nav
-          aria-label="Legal"
-          className="flex flex-wrap items-baseline justify-center gap-x-4"
-        >
+        <nav aria-label="Legal" className="flex flex-wrap items-baseline justify-center gap-x-4">
           {legalLinks.map((item) => (
             <Link
               key={item.href}

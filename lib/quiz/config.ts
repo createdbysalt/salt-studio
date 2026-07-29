@@ -51,7 +51,11 @@ export const OPENER_QUESTIONS: QuizQuestion[] = [
     kind: 'choice',
     weight: 0,
     options: [
-      {value: 'solo-service', label: 'Solo service business — design, coaching, consulting, creative', points: 0},
+      {
+        value: 'solo-service',
+        label: 'Solo service business — design, coaching, consulting, creative',
+        points: 0,
+      },
       {value: 'small-team', label: 'Small studio or team', points: 0},
       {value: 'nonprofit', label: 'Nonprofit, church, or community organization', points: 0},
       {value: 'institution', label: 'School, university, or larger institution', points: 0},

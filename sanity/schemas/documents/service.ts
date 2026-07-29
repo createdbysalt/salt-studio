@@ -190,7 +190,9 @@ export default defineType({
         }),
       ],
       validation: (rule) =>
-        rule.max(10).warning('Keep the list scannable — six clear deliverables beat twelve vague ones'),
+        rule
+          .max(10)
+          .warning('Keep the list scannable — six clear deliverables beat twelve vague ones'),
     }),
     defineField({
       name: 'plans',
@@ -231,7 +233,8 @@ export default defineType({
               title: 'What’s included',
               type: 'array',
               of: [defineArrayMember({type: 'string'})],
-              description: 'Short bullets — the few things that define this tier. Keep them scannable.',
+              description:
+                'Short bullets — the few things that define this tier. Keep them scannable.',
             }),
             defineField({
               name: 'highlight',
@@ -395,7 +398,8 @@ export default defineType({
       group: 'proof',
       description: 'Optional. Clients associated with this service for a quiet proof strip.',
       of: [defineArrayMember({type: 'reference', to: [{type: 'client'}]})],
-      validation: (rule) => rule.max(8).warning('A short roster reads stronger than a wall of names'),
+      validation: (rule) =>
+        rule.max(8).warning('A short roster reads stronger than a wall of names'),
     }),
     defineField({
       name: 'proofAnchor',

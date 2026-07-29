@@ -33,13 +33,13 @@ export const ABOUT_PRINCIPLES = [
   },
   {
     title: 'Yours to keep',
-    body: 'Your accounts, your data, your site, your tools. If you ever want to leave, you take everything with you, free. Things built to last shouldn\'t need a hostage clause.',
+    body: "Your accounts, your data, your site, your tools. If you ever want to leave, you take everything with you, free. Things built to last shouldn't need a hostage clause.",
   },
 ] as const
 
 export const ABOUT_CTA = {
   eyebrow: 'Salt software',
-  body: 'The studio runs on software we\'re building ourselves — Salt — so small teams can spend less time gathering and drafting, and more time on the work that matters.',
+  body: "The studio runs on software we're building ourselves — Salt — so small teams can spend less time gathering and drafting, and more time on the work that matters.",
   primaryLabel: 'Book a discovery call',
   primaryHref: CONTACT_BOOK_HREF,
   secondaryLabel: 'Join the waitlist',
@@ -49,7 +49,9 @@ export const ABOUT_CTA = {
 export function isAboutHref(href: string | null | undefined): boolean {
   if (!href) return false
   try {
-    const path = href.startsWith('http') ? new URL(href).pathname : href.split('?')[0]?.split('#')[0]
+    const path = href.startsWith('http')
+      ? new URL(href).pathname
+      : href.split('?')[0]?.split('#')[0]
     return path === '/about'
   } catch {
     return href === '/about'

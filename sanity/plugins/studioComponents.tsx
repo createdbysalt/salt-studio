@@ -97,11 +97,7 @@ export function SaltStudioBadge() {
  * Adds a "Powered by Salt Studio" badge and help link.
  */
 export function StudioNavbar(props: {renderDefault: (props: unknown) => ReactNode}) {
-  return (
-    <Stack>
-      {props.renderDefault(props)}
-    </Stack>
-  )
+  return <Stack>{props.renderDefault(props)}</Stack>
 }
 
 /**

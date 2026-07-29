@@ -1,10 +1,7 @@
 import {withWorkPosters, type WorkProjectCard} from '@/components/ProjectGrid'
 import {formatProjectYearMark} from '@/components/ProjectHeroMeta'
 import {ProjectNextSection} from '@/components/ProjectNextSection'
-import {
-  ProjectScrollGallery,
-  type ProjectScrollFrame,
-} from '@/components/ProjectScrollGallery'
+import {ProjectScrollGallery, type ProjectScrollFrame} from '@/components/ProjectScrollGallery'
 import {ProjectTestimonialRotator} from '@/components/ProjectTestimonialRotator'
 import {ProjectWatchVideoButton} from '@/components/ProjectWatchVideoButton'
 import {fetchVimeoPoster, isVimeoUrl} from '@/lib/vimeo'
@@ -114,8 +111,7 @@ export async function ProjectDetail({data}: {data: Project | null}) {
 
   // Glitch&Grit Idea / Insight — case-study brief/approach first; context fills gaps.
   const ideaText = briefText || contextText
-  const insightText =
-    approachText || (briefText && contextText ? contextText : '') || btsNoteText
+  const insightText = approachText || (briefText && contextText ? contextText : '') || btsNoteText
 
   const galleryRows = project.gallery ?? []
   const btsRows = project.btsImages ?? []
@@ -198,10 +194,7 @@ export async function ProjectDetail({data}: {data: Project | null}) {
   return (
     <article className="bg-background text-foreground">
       {/* 1. Type hero — categories + massive title (Glitch&Grit masthead). */}
-      <header
-        aria-label="Project hero"
-        className="px-5 pt-28 text-center md:px-6 md:pt-32"
-      >
+      <header aria-label="Project hero" className="px-5 pt-28 text-center md:px-6 md:pt-32">
         {categoryItems.length > 0 ? (
           <ul className="flex flex-col items-center gap-0.5">
             {categoryItems.map((item) => (
@@ -269,7 +262,9 @@ export async function ProjectDetail({data}: {data: Project | null}) {
           ) : null}
 
           {showMeta ? (
-            <dl className={`${showSidebarCopy ? 'mt-10 md:mt-12' : ''} border-b border-foreground/15`}>
+            <dl
+              className={`${showSidebarCopy ? 'mt-10 md:mt-12' : ''} border-b border-foreground/15`}
+            >
               <MetaRow label="Client">
                 {clientName ? (
                   project.client?.website ? (
@@ -290,9 +285,7 @@ export async function ProjectDetail({data}: {data: Project | null}) {
               <MetaRow label="Role">{roleText || null}</MetaRow>
               <MetaRow label="Execution">
                 {categoryItems.length ? (
-                  <span className="inline-block max-w-[14rem]">
-                    {categoryItems.join(', ')}
-                  </span>
+                  <span className="inline-block max-w-[14rem]">{categoryItems.join(', ')}</span>
                 ) : null}
               </MetaRow>
               <MetaRow label="Built with">
@@ -329,10 +322,7 @@ export async function ProjectDetail({data}: {data: Project | null}) {
 
         <div className="order-1 min-w-0 lg:order-2">
           {showScrollGallery ? (
-            <section
-              aria-label="Project gallery"
-              className="-mx-5 md:-mx-6 lg:mx-0"
-            >
+            <section aria-label="Project gallery" className="-mx-5 md:-mx-6 lg:mx-0">
               <ProjectScrollGallery frames={scrollFrames} />
             </section>
           ) : null}

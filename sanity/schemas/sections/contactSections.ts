@@ -115,7 +115,8 @@ export const contactCallDetailsSection = defineType({
               name: 'lead',
               title: 'Bold opener',
               type: 'string',
-              description: 'Short bold phrase, e.g. “30 minutes, with the person who’d do the work.”',
+              description:
+                'Short bold phrase, e.g. “30 minutes, with the person who’d do the work.”',
             }),
             defineField({
               name: 'text',

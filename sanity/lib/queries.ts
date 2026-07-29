@@ -603,4 +603,3 @@ export const contactPageQuery = defineQuery(`
     },
   }
 `)
-

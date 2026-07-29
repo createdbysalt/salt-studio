@@ -1,13 +1,12 @@
 'use client'
 
+import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {SidePanelClose} from '@/components/SidePanelClose'
 import {useGSAP} from '@gsap/react'
-import {useCallback, useEffect, useId, useRef, useState} from 'react'
-import {createPortal} from 'react-dom'
 import {useLenis} from 'lenis/react'
 import Link from 'next/link'
-
-import {SidePanelClose} from '@/components/SidePanelClose'
-import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {useCallback, useEffect, useId, useRef, useState} from 'react'
+import {createPortal} from 'react-dom'
 
 export type ServiceDetailPanelContent = {
   title: string
@@ -232,10 +231,8 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
   const steps = (cached.steps ?? []).filter((step) => step.text?.trim())
   const projects = (cached.projects ?? []).filter((project) => project.title)
   const featuredProject = projects[0] ?? null
-  const featuredThought =
-    featuredProject?.thought?.trim() || featuredProject?.title || null
-  const featuredLabel =
-    featuredProject?.client?.trim() || featuredProject?.title || null
+  const featuredThought = featuredProject?.thought?.trim() || featuredProject?.title || null
+  const featuredLabel = featuredProject?.client?.trim() || featuredProject?.title || null
   const testimonials = (cached.testimonials ?? []).filter((item) => item.quote && item.author)
   const nextStep = cached.nextStep
   const displayTitle = cached.headline?.trim() || cached.title
@@ -400,11 +397,7 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
                     <span />
                   )}
                   <Link
-                    href={
-                      featuredProject.slug
-                        ? `/projects/${featuredProject.slug}`
-                        : '/work'
-                    }
+                    href={featuredProject.slug ? `/projects/${featuredProject.slug}` : '/work'}
                     onClick={close}
                     className="group inline-flex items-center gap-[0.4em] font-sans text-[16px] font-medium tracking-[-0.015em] text-[#08090a]/75 transition-colors hover:text-[#08090a]"
                   >
@@ -424,11 +417,7 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
                 className="relative mt-[20px] aspect-[16/11] w-full overflow-hidden bg-[#08090a]/08"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={cached.imageUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
+                <img src={cached.imageUrl} alt="" className="h-full w-full object-cover" />
               </div>
             ) : null}
 
@@ -436,7 +425,10 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
               <section data-panel-reveal className="mt-[56px] md:mt-[64px]">
                 <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
                   <p className={sectionEyebrow}>
-                    <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+                    <span
+                      aria-hidden
+                      className="inline-block size-1.5 rounded-full bg-[#08090a]/35"
+                    />
                     {cached.stepsLabel?.trim() || 'How we work'}
                   </p>
                   <ul className="space-y-[28px] md:space-y-[32px]">
@@ -465,7 +457,10 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
               <section data-panel-reveal className="mt-[56px] md:mt-[64px]">
                 <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
                   <p className={sectionEyebrow}>
-                    <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+                    <span
+                      aria-hidden
+                      className="inline-block size-1.5 rounded-full bg-[#08090a]/35"
+                    />
                     What you get
                   </p>
                   <ul className="space-y-[28px] md:space-y-[32px]">
@@ -490,7 +485,10 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
               <section data-panel-reveal className="mt-[56px] md:mt-[64px]">
                 <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
                   <p className={sectionEyebrow}>
-                    <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+                    <span
+                      aria-hidden
+                      className="inline-block size-1.5 rounded-full bg-[#08090a]/35"
+                    />
                     Plans
                   </p>
                   <div className="grid gap-[16px] sm:grid-cols-2">
@@ -538,7 +536,10 @@ export function ServiceDetailPanel({open, onClose, content}: ServiceDetailPanelP
               <section data-panel-reveal className="mt-[56px] md:mt-[64px]">
                 <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
                   <p className={sectionEyebrow}>
-                    <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+                    <span
+                      aria-hidden
+                      className="inline-block size-1.5 rounded-full bg-[#08090a]/35"
+                    />
                     From clients
                   </p>
                   <div className="space-y-[28px]">

@@ -32,7 +32,11 @@ export function ProjectGalleryVideoCell({
   const {cleanVideo, mp4Src, hasVideo} = resolveProjectVideoSources(videoUrl)
   const vimeoBg = cleanVideo && isVimeoUrl(cleanVideo) ? vimeoBackgroundSrc(cleanVideo) : null
   const posterSrc = poster?.asset?._ref
-    ? urlForImage({asset: {_ref: poster.asset._ref}})?.width(1600).height(900).fit('crop').url()
+    ? urlForImage({asset: {_ref: poster.asset._ref}})
+        ?.width(1600)
+        .height(900)
+        .fit('crop')
+        .url()
     : undefined
 
   useEffect(() => {

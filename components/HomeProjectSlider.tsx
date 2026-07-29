@@ -1,8 +1,8 @@
 'use client'
 
+import {Draggable, DURATION, EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {ProjectCardMedia} from '@/components/ProjectCardMedia'
 import type {WorkProjectCard} from '@/components/ProjectGrid'
-import {Draggable, DURATION, EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {useGSAP} from '@gsap/react'
 import {ArrowUpRight} from 'lucide-react'
 import Link from 'next/link'
@@ -419,19 +419,11 @@ function ShowcaseCard({
   )
 
   if (comingSoon) {
-    return (
-      <div className={`group block cursor-default ${fillHeight ? 'h-full' : ''}`}>
-        {inner}
-      </div>
-    )
+    return <div className={`group block cursor-default ${fillHeight ? 'h-full' : ''}`}>{inner}</div>
   }
 
   return (
-    <Link
-      href={href}
-      className={`group block ${fillHeight ? 'h-full' : ''}`}
-      draggable={false}
-    >
+    <Link href={href} className={`group block ${fillHeight ? 'h-full' : ''}`} draggable={false}>
       {inner}
     </Link>
   )

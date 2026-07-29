@@ -1,8 +1,18 @@
 'use client'
 
+import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {SidePanelClose} from '@/components/SidePanelClose'
+import {
+  ABOUT_BIO,
+  ABOUT_CTA,
+  ABOUT_META_LINE,
+  ABOUT_PRINCIPLES,
+  ABOUT_VIDEO_SRC,
+} from '@/lib/aboutPanel'
 import {useGSAP} from '@gsap/react'
 import {useLenis} from 'lenis/react'
 import Link from 'next/link'
+import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import {
   createContext,
   Suspense,
@@ -15,17 +25,6 @@ import {
   type ReactNode,
 } from 'react'
 import {createPortal} from 'react-dom'
-import {usePathname, useRouter, useSearchParams} from 'next/navigation'
-
-import {SidePanelClose} from '@/components/SidePanelClose'
-import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
-import {
-  ABOUT_BIO,
-  ABOUT_CTA,
-  ABOUT_META_LINE,
-  ABOUT_PRINCIPLES,
-  ABOUT_VIDEO_SRC,
-} from '@/lib/aboutPanel'
 
 type AboutPanelContextValue = {
   open: boolean
@@ -273,11 +272,7 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
         aria-labelledby={titleId}
         className="absolute inset-y-0 right-0 flex w-full max-w-[min(100vw,45rem)] flex-col bg-[#f3f3f3] text-[#08090a] shadow-[-24px_0_80px_rgba(0,0,0,0.35)] will-change-transform"
       >
-        <SidePanelClose
-          open={open && present}
-          onClose={close}
-          ariaLabel="Close about panel"
-        />
+        <SidePanelClose open={open && present} onClose={close} ariaLabel="Close about panel" />
 
         <div
           ref={scrollRef}
@@ -353,7 +348,10 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
             <section data-about-reveal className="mt-[56px] lg:mt-[64px]">
               <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
                 <p className="flex items-center gap-2 self-start font-sans text-[12px] font-semibold tracking-[-0.01em] text-[#08090a]/55 lg:text-[18px]">
-                  <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+                  <span
+                    aria-hidden
+                    className="inline-block size-1.5 rounded-full bg-[#08090a]/35"
+                  />
                   Our principles
                 </p>
                 <ul className="space-y-[28px] lg:space-y-[32px]">

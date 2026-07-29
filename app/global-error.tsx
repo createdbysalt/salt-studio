@@ -36,8 +36,7 @@ export default function GlobalError({
           padding: 0,
           backgroundColor: '#FFFFFF',
           color: '#08090A',
-          fontFamily:
-            '"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          fontFamily: '"Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         }}
       >
         <main

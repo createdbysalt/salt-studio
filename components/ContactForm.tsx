@@ -1,8 +1,8 @@
 'use client'
 
 import {submitContactForm} from '@/app/actions/contact'
-import {Reveal} from '@/components/Reveal'
 import {ContactSelect} from '@/components/ContactSelect'
+import {Reveal} from '@/components/Reveal'
 import {trackFormError, trackFormStart, trackFormSubmit} from '@/lib/analytics'
 import {useActionState, useEffect, useMemo, useRef, useState} from 'react'
 

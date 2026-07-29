@@ -77,8 +77,8 @@
     var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
     Helvetica, Arial, system-ui, sans-serif;
   --font-mono:
-    var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
-    'Liberation Mono', monospace;
+    var(--font-mono), ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono',
+    monospace;
   --font-serif: Georgia, 'Times New Roman', Times, serif; /* legacy compat only */
 
   /* ---- Radius — brand rounded-rectangle shape language ---- */

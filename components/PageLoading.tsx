@@ -120,20 +120,13 @@ export function ProjectLoading() {
       <header className="px-5 pt-28 text-center md:px-6 md:pt-32">
         <Block className="mx-auto h-3 w-28" delay={40} />
         <Block className="mx-auto mt-1 h-3 w-24" delay={80} />
-        <Block
-          className="mx-auto mt-4 h-14 w-[min(90%,16ch)] md:h-20"
-          delay={140}
-        />
+        <Block className="mx-auto mt-4 h-14 w-[min(90%,16ch)] md:h-20" delay={140} />
       </header>
 
       <section className="mt-4 grid grid-cols-1 gap-5 pb-16 md:mt-10 md:gap-6 lg:mt-16 lg:grid-cols-[minmax(20rem,28rem)_minmax(0,1fr)] lg:gap-x-10">
         <div className="order-1 min-w-0 lg:order-2">
           {Array.from({length: 3}, (_, i) => (
-            <Block
-              key={i}
-              className="aspect-video w-full"
-              delay={180 + i * 90}
-            />
+            <Block key={i} className="aspect-video w-full" delay={180 + i * 90} />
           ))}
         </div>
         <aside className="order-2 space-y-5 px-5 md:space-y-6 md:px-6 lg:order-1 lg:px-0 lg:pl-[30px]">
@@ -176,10 +169,7 @@ export function EditorialLoading({width = 'wide'}: {width?: 'narrow' | 'wide'}) 
 
         <section className="space-y-0 border-y border-foreground/15">
           {Array.from({length: 4}, (_, i) => (
-            <div
-              key={i}
-              className="flex justify-between gap-6 border-t border-foreground/15 py-3"
-            >
+            <div key={i} className="flex justify-between gap-6 border-t border-foreground/15 py-3">
               <Block className="h-3 w-24" delay={360 + i * 60} />
               <Block className="h-3 w-32" delay={400 + i * 60} />
             </div>

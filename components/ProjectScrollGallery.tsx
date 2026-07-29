@@ -1,9 +1,9 @@
 'use client'
 
 import ImageBox from '@/components/ImageBox'
+import {prefersReducedMotion} from '@/components/motion/gsap'
 import {ProjectCardMedia} from '@/components/ProjectCardMedia'
 import {ProjectGalleryVideoCell} from '@/components/ProjectGalleryVideoCell'
-import {prefersReducedMotion} from '@/components/motion/gsap'
 import {stegaClean} from 'next-sanity'
 import {useEffect, useRef, useState} from 'react'
 
@@ -121,9 +121,7 @@ export function ProjectScrollGallery({frames}: {frames: ProjectScrollFrame[]}) {
               {frame.kind === 'photo' ? (
                 <ImageBox
                   image={frame.image as never}
-                  alt={
-                    (frame.image.alt ? stegaClean(frame.image.alt) : '') || 'Project still'
-                  }
+                  alt={(frame.image.alt ? stegaClean(frame.image.alt) : '') || 'Project still'}
                   classesWrapper="absolute inset-0 !rounded-none bg-muted"
                 />
               ) : null}

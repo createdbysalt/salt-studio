@@ -2,7 +2,7 @@ See **`AGENTS.md`** for the Next.js 16 warning and the AI-assistant index (Curso
 
 # Salt Studio
 
-A Next.js 16 + Sanity 5 website for **Salt Studio** (`createdbysalt.com`). Tagline: *Subtle. Essential. Transformative.* Content lives in Sanity project `jkqf2ng5`, the Studio is mounted at `/edit`, and the public site lives under the `(personal)` route group.
+A Next.js 16 + Sanity 5 website for **Salt Studio** (`createdbysalt.com`). Tagline: _Subtle. Essential. Transformative._ Content lives in Sanity project `jkqf2ng5`, the Studio is mounted at `/edit`, and the public site lives under the `(personal)` route group.
 
 **Do not write to Photon’s Sanity project (`25ywlhce`).** Env secrets live in 1Password vault `salt-studio-development`, item `salt-studio-sanity` — see `.env.example`.
 
@@ -33,15 +33,15 @@ Visit `/brand` to see and customize the visual design tokens.
 
 ## Tech stack (exact versions pinned)
 
-| Thing        | Version            | Notes                                                                     |
-| ------------ | ------------------ | ------------------------------------------------------------------------- |
-| Next.js      | 16.2.2             | App Router, Turbopack for both dev and build                              |
-| React        | 19.2.4             | React Compiler **enabled** (`reactCompiler: true` in `next.config.ts`)    |
-| Sanity       | 5.19.0             | Studio mounted at `/edit` via `app/edit/[[...index]]/page.tsx`            |
-| next-sanity  | 12.2.1             | Provides `defineQuery`, `defineLive`, `defineEnableDraftMode`             |
-| Tailwind CSS | 4.2                | CSS-based config in `app/globals.css`; includes `@tailwindcss/typography` |
-| TypeScript   | 5.9.3              | `strict: false` but `strictNullChecks: true`                              |
-| Turbopack    | built-in           | Used in both `dev` and `build` scripts                                    |
+| Thing        | Version            | Notes                                                                         |
+| ------------ | ------------------ | ----------------------------------------------------------------------------- |
+| Next.js      | 16.2.2             | App Router, Turbopack for both dev and build                                  |
+| React        | 19.2.4             | React Compiler **enabled** (`reactCompiler: true` in `next.config.ts`)        |
+| Sanity       | 5.19.0             | Studio mounted at `/edit` via `app/edit/[[...index]]/page.tsx`                |
+| next-sanity  | 12.2.1             | Provides `defineQuery`, `defineLive`, `defineEnableDraftMode`                 |
+| Tailwind CSS | 4.2                | CSS-based config in `app/globals.css`; includes `@tailwindcss/typography`     |
+| TypeScript   | 5.9.3              | `strict: false` but `strictNullChecks: true`                                  |
+| Turbopack    | built-in           | Used in both `dev` and `build` scripts                                        |
 | Fonts        | `next/font/google` | Geist (`--font-sans`) + Geist Mono (`--font-mono`) loaded in `app/layout.tsx` |
 
 Don't assume patterns from older Next.js versions work here. When writing Next-specific code, verify against the installed version first.

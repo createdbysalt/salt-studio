@@ -98,7 +98,8 @@ export const projectScopeSection = defineType({
               name: 'detail',
               title: 'Detail',
               type: 'string',
-              description: 'Optional one-line specific, e.g. “login-gated, ten resource categories”.',
+              description:
+                'Optional one-line specific, e.g. “login-gated, ten resource categories”.',
             }),
           ],
           preview: {select: {title: 'title', subtitle: 'detail'}},

@@ -207,7 +207,8 @@ export const aboutClosingSection = defineType({
       name: 'body',
       title: 'Lead line',
       type: 'string',
-      description: 'The soft lead-in, e.g. “If this sounds like your kind of partner — let’s talk.”',
+      description:
+        'The soft lead-in, e.g. “If this sounds like your kind of partner — let’s talk.”',
     }),
     defineField({
       name: 'ctaLabel',

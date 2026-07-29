@@ -1,6 +1,5 @@
-import type {Metadata} from 'next'
-
 import {QuizFlow} from '@/components/QuizFlow'
+import type {Metadata} from 'next'
 
 /**
  * The Salt Score — automation-potential quiz.

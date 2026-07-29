@@ -6,8 +6,7 @@ import {resolveHref} from '@/sanity/lib/utils'
 import {toPlainText} from 'next-sanity'
 import Link from 'next/link'
 
-const FALLBACK_MESSAGE =
-  "That page isn't here — it may have moved, or the link is out of date."
+const FALLBACK_MESSAGE = "That page isn't here — it may have moved, or the link is out of date."
 
 /**
  * 404 Not Found page.

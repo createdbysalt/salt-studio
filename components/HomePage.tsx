@@ -288,9 +288,7 @@ async function HomeProduct({section}: {section: SectionOf<'homeProductSection'>}
 
   return (
     <div className="flex min-h-[145svh] flex-col bg-accent text-white md:h-[100dvh] md:min-h-[100dvh]">
-      {items.length > 0 ? (
-        <HomeCapabilitiesScrub items={items} label="What we work with" />
-      ) : null}
+      {items.length > 0 ? <HomeCapabilitiesScrub items={items} label="What we work with" /> : null}
 
       {/* Waitlist strip — under the scrub; desktop locks into the 100dvh product block */}
       <section className="page-chrome shrink-0 border-t border-white/15 py-5 md:py-12">
@@ -300,9 +298,7 @@ async function HomeProduct({section}: {section: SectionOf<'homeProductSection'>}
               {section.headline?.trim() || 'What we’re building'}
             </p>
             {waitlistBody ? (
-              <p className="mt-2 text-base leading-relaxed text-white/85">
-                {waitlistBody}
-              </p>
+              <p className="mt-2 text-base leading-relaxed text-white/85">{waitlistBody}</p>
             ) : null}
           </div>
           <Link

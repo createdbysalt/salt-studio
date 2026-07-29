@@ -44,16 +44,14 @@ export default defineType({
               type: 'text',
               rows: 4,
               description: 'What the client said about your work.',
-              validation: (rule) =>
-                rule.required().error('Every testimonial needs a quote'),
+              validation: (rule) => rule.required().error('Every testimonial needs a quote'),
             }),
             defineField({
               name: 'author',
               title: 'Author Name',
               type: 'string',
               description: 'The name of the person giving the testimonial.',
-              validation: (rule) =>
-                rule.required().error('Include the author\'s name'),
+              validation: (rule) => rule.required().error("Include the author's name"),
             }),
             defineField({
               name: 'role',
@@ -111,8 +109,7 @@ export default defineType({
           },
         },
       ],
-      validation: (rule) =>
-        rule.min(1).error('Add at least one testimonial'),
+      validation: (rule) => rule.min(1).error('Add at least one testimonial'),
     }),
     defineField({
       name: 'style',
@@ -133,7 +130,7 @@ export default defineType({
       name: 'showRatings',
       title: 'Show Star Ratings',
       type: 'boolean',
-      description: 'Display star ratings if they\'ve been set on testimonials.',
+      description: "Display star ratings if they've been set on testimonials.",
       initialValue: true,
     }),
   ],

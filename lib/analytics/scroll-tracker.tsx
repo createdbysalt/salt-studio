@@ -1,7 +1,7 @@
 'use client'
 
-import {useEffect, useRef} from 'react'
 import {usePathname} from 'next/navigation'
+import {useEffect, useRef} from 'react'
 import {trackScrollDepth} from './events'
 
 type ScrollMilestone = 25 | 50 | 75 | 90 | 100

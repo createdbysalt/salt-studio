@@ -20,7 +20,13 @@ type RevealProps = {
  * Quiet enter animation — fade + short rise.
  * Honors prefers-reduced-motion.
  */
-export function Reveal({children, className = '', delay = 0, y = 14, immediate = false}: RevealProps) {
+export function Reveal({
+  children,
+  className = '',
+  delay = 0,
+  y = 14,
+  immediate = false,
+}: RevealProps) {
   const reduce = useReducedMotion()
 
   if (reduce) {

@@ -140,8 +140,7 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
         // Dense pack band: size from total pill area, not the full viewport height.
         const usableW = Math.max(1, frameW - gutter * 2)
         const totalArea = measured.reduce((s, m) => s + m.w * m.h, 0)
-        const avgH =
-          measured.reduce((s, m) => s + m.h, 0) / Math.max(1, measured.length)
+        const avgH = measured.reduce((s, m) => s + m.h, 0) / Math.max(1, measured.length)
         const fullH = Math.max(1, stageH - labelPad - bottomPad)
         // ~72% coverage → tight cloud; clamp so it never blows past the stage.
         const packH = Math.min(fullH, Math.max(avgH * 4.8, totalArea / usableW / 0.72))
@@ -251,8 +250,7 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
           }
 
           rests[item.index] = found
-          aboveY[item.index] =
-            -(stageTop + found.y + pillTravel(item.h, item.index))
+          aboveY[item.index] = -(stageTop + found.y + pillTravel(item.h, item.index))
         }
 
         // Higher in the pile draws on top (settled stack reading).
@@ -543,9 +541,7 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
         })
         ctx.suckTl = tl
 
-        const byTop = [...ctx.order].sort(
-          (a, b) => (ctx.rests[a]?.y ?? 0) - (ctx.rests[b]?.y ?? 0),
-        )
+        const byTop = [...ctx.order].sort((a, b) => (ctx.rests[a]?.y ?? 0) - (ctx.rests[b]?.y ?? 0))
 
         byTop.forEach((pillIndex, i) => {
           const pill = pills[pillIndex]

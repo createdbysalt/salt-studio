@@ -8,6 +8,15 @@ public/studio/static
 out
 dist
 node_modules
+coverage
+.vercel
+.playwright-mcp
 
-# Archived Photon scripts — dead code, not worth formatting
+# Archived / reference material — not worth formatting in CI
 scripts/archive/
+public/archive/
+
+# Local / tooling noise
+.claude
+000
+*.tsbuildinfo

@@ -6,11 +6,7 @@ import {DEFAULT_NAV, type NavChild, type NavItem} from '@/components/homeHero'
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {SiteLogo} from '@/components/SiteLogo'
 import {isAboutHref} from '@/lib/aboutPanel'
-import {
-  CONTACT_BOOK_HREF,
-  CONTACT_WHATSAPP_HREF,
-  isContactHref,
-} from '@/lib/contactMenu'
+import {CONTACT_BOOK_HREF, CONTACT_WHATSAPP_HREF, isContactHref} from '@/lib/contactMenu'
 import type {SettingsQueryResult} from '@/sanity.types'
 import {studioUrl} from '@/sanity/lib/api'
 import {resolveMenu} from '@/sanity/lib/utils'
@@ -29,10 +25,8 @@ interface NavbarProps {
 // Glass pills — black/6 on paper; white/10 frost on dark/media when collapsed.
 // Expanded mobile sheet on dark uses opaque ink — white/10 + blur reads as a
 // milky white panel over large areas.
-const pillBase =
-  'flex shrink-0 overflow-hidden rounded-sm backdrop-blur-[42px]'
-const pillRowBase =
-  'flex h-10 w-full shrink-0 items-center sm:h-12'
+const pillBase = 'flex shrink-0 overflow-hidden rounded-sm backdrop-blur-[42px]'
+const pillRowBase = 'flex h-10 w-full shrink-0 items-center sm:h-12'
 const pillFillPaper =
   'bg-[rgba(0,0,0,0.06)] hover:bg-[rgba(0,0,0,0.10)] transition-colors duration-300'
 const pillFillColor =
@@ -42,13 +36,7 @@ const pillFillColorMenu =
 
 const BOOK_CTA_LABEL = 'Book Discovery Call'
 
-function BookDiscoveryCta({
-  className,
-  onClick,
-}: {
-  className: string
-  onClick?: () => void
-}) {
+function BookDiscoveryCta({className, onClick}: {className: string; onClick?: () => void}) {
   const rootRef = useRef<HTMLAnchorElement>(null)
 
   useGSAP(
@@ -111,7 +99,7 @@ export function Navbar({data}: NavbarProps) {
   const {open, openContact, closeContact} = useContactMenu()
   const onColor = useNavOnColorSurface(pathname, menuPresent)
 
-  const pillRef = useRef<HTMLNavElement>(null)
+  const pillRef = useRef<HTMLElement>(null)
   const menuBodyRef = useRef<HTMLDivElement>(null)
   const backdropRef = useRef<HTMLButtonElement>(null)
   const bookWrapRef = useRef<HTMLDivElement>(null)
@@ -133,11 +121,7 @@ export function Navbar({data}: NavbarProps) {
         })
       : null
 
-  const pillFill = onColor
-    ? menuPresent
-      ? pillFillColorMenu
-      : pillFillColor
-    : pillFillPaper
+  const pillFill = onColor ? (menuPresent ? pillFillColorMenu : pillFillColor) : pillFillPaper
 
   const linkClass = onColor
     ? 'font-sans text-[13px] font-medium tracking-[-0.01em] text-white/85 transition-colors duration-300 hover:text-white sm:text-[14px]'
@@ -229,10 +213,7 @@ export function Navbar({data}: NavbarProps) {
       const gutter =
         (parseFloat(shellStyle?.paddingLeft || '0') || 0) +
         (parseFloat(shellStyle?.paddingRight || '0') || 0)
-      const expandedW = Math.max(
-        collapsedW,
-        (shell?.clientWidth ?? window.innerWidth) - gutter,
-      )
+      const expandedW = Math.max(collapsedW, (shell?.clientWidth ?? window.innerWidth) - gutter)
       gsap.set(body, {height: 'auto', autoAlpha: 1, overflow: 'hidden'})
       const bodyH = body.scrollHeight
       const expandedH = collapsedH + bodyH
@@ -245,8 +226,10 @@ export function Navbar({data}: NavbarProps) {
         willChange: 'width, height',
       })
       if (book) gsap.set(book, {autoAlpha: 1})
-      if (barTop) gsap.set(barTop, {attr: {x1: 2, y1: 5, x2: 14, y2: 5}, transformOrigin: '50% 50%'})
-      if (barBot) gsap.set(barBot, {attr: {x1: 2, y1: 11, x2: 14, y2: 11}, transformOrigin: '50% 50%'})
+      if (barTop)
+        gsap.set(barTop, {attr: {x1: 2, y1: 5, x2: 14, y2: 5}, transformOrigin: '50% 50%'})
+      if (barBot)
+        gsap.set(barBot, {attr: {x1: 2, y1: 11, x2: 14, y2: 11}, transformOrigin: '50% 50%'})
 
       const releaseBookLayout = () => {
         if (!book) return
@@ -396,7 +379,10 @@ export function Navbar({data}: NavbarProps) {
       if (prefersReducedMotion()) tl.progress(1)
       else tl.timeScale(1).play()
     } else if (prefersReducedMotion()) {
-      gsap.set(pillRef.current, {width: collapsedPillRef.current.width, height: collapsedPillRef.current.height})
+      gsap.set(pillRef.current, {
+        width: collapsedPillRef.current.width,
+        height: collapsedPillRef.current.height,
+      })
       const book = bookWrapRef.current
       if (book) {
         gsap.set(book, {autoAlpha: 1})
@@ -534,10 +520,7 @@ export function Navbar({data}: NavbarProps) {
             )}
           </nav>
 
-          <div
-            ref={bookWrapRef}
-            className="pointer-events-auto flex shrink-0 items-start gap-2"
-          >
+          <div ref={bookWrapRef} className="pointer-events-auto flex shrink-0 items-start gap-2">
             <BookDiscoveryCta className={`${pillBase} ${pillFill} ${ctaClass} gap-2`} />
           </div>
         </div>
@@ -633,9 +616,7 @@ function isColorSurfaceUnderNav(): boolean {
   return false
 }
 
-function parseCssColor(
-  value: string,
-): {r: number; g: number; b: number; a: number} | null {
+function parseCssColor(value: string): {r: number; g: number; b: number; a: number} | null {
   const match = value.match(
     /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i,
   )
@@ -745,7 +726,6 @@ function NavDropdown({
   )
 }
 
-
 const ExpandingMenuBody = forwardRef<
   HTMLDivElement,
   {
@@ -798,59 +778,57 @@ const ExpandingMenuBody = forwardRef<
           {/* Contact is covered by Book a call / WhatsApp CTAs below. */}
           {items
             .filter(
-              (item) =>
-                !isContactHref(item.href) &&
-                item.label.trim().toLowerCase() !== 'contact',
+              (item) => !isContactHref(item.href) && item.label.trim().toLowerCase() !== 'contact',
             )
             .map((item) => (
-            <div
-              key={`${item.href}-${item.label}`}
-              data-menu-reveal
-              className="flex flex-col items-start"
-            >
-              {item.children?.length ? (
-                <button
-                  type="button"
-                  onClick={() => toggleSubmenu(item.label)}
-                  aria-expanded={openSubmenu === item.label}
-                  className="inline-flex items-center gap-[6px]"
-                >
-                  <span className={menuLinkClass}>{item.label}</span>
-                  <ChevronDown
-                    aria-hidden="true"
-                    strokeWidth={1.5}
-                    absoluteStrokeWidth
-                    className={`h-[14px] w-[14px] shrink-0 transition-transform duration-200 ${
-                      openSubmenu === item.label ? 'rotate-180' : ''
-                    } ${onColor ? 'text-white/55' : 'text-foreground/45'}`}
-                  />
-                </button>
-              ) : (
-                <Link
-                  href={item.href}
-                  onClick={(event) => handleItemClick(event, item.href)}
-                  className={menuLinkClass}
-                >
-                  {item.label}
-                </Link>
-              )}
+              <div
+                key={`${item.href}-${item.label}`}
+                data-menu-reveal
+                className="flex flex-col items-start"
+              >
+                {item.children?.length ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleSubmenu(item.label)}
+                    aria-expanded={openSubmenu === item.label}
+                    className="inline-flex items-center gap-[6px]"
+                  >
+                    <span className={menuLinkClass}>{item.label}</span>
+                    <ChevronDown
+                      aria-hidden="true"
+                      strokeWidth={1.5}
+                      absoluteStrokeWidth
+                      className={`h-[14px] w-[14px] shrink-0 transition-transform duration-200 ${
+                        openSubmenu === item.label ? 'rotate-180' : ''
+                      } ${onColor ? 'text-white/55' : 'text-foreground/45'}`}
+                    />
+                  </button>
+                ) : (
+                  <Link
+                    href={item.href}
+                    onClick={(event) => handleItemClick(event, item.href)}
+                    className={menuLinkClass}
+                  >
+                    {item.label}
+                  </Link>
+                )}
 
-              {item.children && openSubmenu === item.label && (
-                <div className="mt-[2px] mb-[4px] flex flex-col items-start gap-[4px] py-[2px]">
-                  {item.children.map((child) => (
-                    <Link
-                      key={`${child.href}-${child.label}`}
-                      href={child.href}
-                      onClick={(event) => handleItemClick(event, child.href)}
-                      className={menuSubmenuChildClass}
-                    >
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+                {item.children && openSubmenu === item.label && (
+                  <div className="mt-[2px] mb-[4px] flex flex-col items-start gap-[4px] py-[2px]">
+                    {item.children.map((child) => (
+                      <Link
+                        key={`${child.href}-${child.label}`}
+                        href={child.href}
+                        onClick={(event) => handleItemClick(event, child.href)}
+                        className={menuSubmenuChildClass}
+                      >
+                        {child.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
         </nav>
 
         <div

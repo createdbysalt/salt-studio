@@ -68,13 +68,7 @@ export function StatusPage({
   )
 }
 
-function StatusAction({
-  control,
-  variant,
-}: {
-  control: StatusAction
-  variant: 'solid' | 'ghost'
-}) {
+function StatusAction({control, variant}: {control: StatusAction; variant: 'solid' | 'ghost'}) {
   const className = variant === 'solid' ? 'btn-solid' : 'btn-ghost'
 
   if (control.kind === 'button') {

@@ -1,10 +1,10 @@
 'use client'
 
-import {LineReveal} from '@/components/motion/LineReveal'
 import {gsap, prefersReducedMotion, ScrollTrigger} from '@/components/motion/gsap'
-import {useGSAP} from '@gsap/react'
+import {LineReveal} from '@/components/motion/LineReveal'
 import {ServiceDetailPanel} from '@/components/ServiceDetailPanel'
 import {isVimeoUrl, vimeoBackgroundSrc} from '@/lib/vimeo'
+import {useGSAP} from '@gsap/react'
 import {ArrowUpRight} from 'lucide-react'
 import {stegaClean} from 'next-sanity'
 import {useEffect, useRef, useState} from 'react'
@@ -12,13 +12,7 @@ import {useEffect, useRef, useState} from 'react'
 /** TinyWins-style elbow arrow (exact path geometry). */
 function ServiceElbowArrow({className}: {className?: string}) {
   return (
-    <svg
-      viewBox="0 0 64 65.7933"
-      fill="none"
-      className={className}
-      aria-hidden
-      focusable="false"
-    >
+    <svg viewBox="0 0 64 65.7933" fill="none" className={className} aria-hidden focusable="false">
       <path
         d="M34 13.7227L57 36.2227L34 58.7227"
         stroke="currentColor"
@@ -130,12 +124,7 @@ export function HomeServicesShowcase({
   return (
     <>
       <TypeBeatBridge lead={leadText} headline={headlineText} />
-      <WhatWeDoBand
-        label={label}
-        cards={cards}
-        active={active}
-        setActive={setActive}
-      />
+      <WhatWeDoBand label={label} cards={cards} active={active} setActive={setActive} />
     </>
   )
 }
@@ -361,19 +350,13 @@ function WhatWeDoBand({
         {/* Full-bleed media — each layer already darkened so nothing flashes bright */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
           {cards.map((item, i) => (
-            <ServiceBackground
-              key={item._key}
-              card={item}
-              active={i === active}
-            />
+            <ServiceBackground key={item._key} card={item} active={i === active} />
           ))}
         </div>
 
         <div
           className={`page-chrome relative z-10 grid w-full items-start gap-6 md:grid-cols-[minmax(9rem,18vw)_minmax(0,1fr)] md:gap-12 lg:gap-16 ${
-            scrollReveal
-              ? 'pt-0 pb-[8vh] md:pb-[14vh] lg:pb-[18vh]'
-              : 'pt-12 md:pt-20 lg:pt-24'
+            scrollReveal ? 'pt-0 pb-[8vh] md:pb-[14vh] lg:pb-[18vh]' : 'pt-12 md:pt-20 lg:pt-24'
           }`}
         >
           <p className="max-w-[14ch] text-[15px] leading-[0.95] text-foreground/70 md:text-base md:leading-[0.95]">
@@ -507,17 +490,9 @@ function WhatWeDoBand({
   )
 }
 
-function ServiceBackground({
-  card,
-  active,
-}: {
-  card: HomeServiceCard
-  active: boolean
-}) {
+function ServiceBackground({card, active}: {card: HomeServiceCard; active: boolean}) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const videoUrl = card.backgroundVideoUrl
-    ? stegaClean(card.backgroundVideoUrl).trim()
-    : ''
+  const videoUrl = card.backgroundVideoUrl ? stegaClean(card.backgroundVideoUrl).trim() : ''
   const vimeoSrc = videoUrl && isVimeoUrl(videoUrl) ? vimeoBackgroundSrc(videoUrl) : null
   const mp4Src = videoUrl && !isVimeoUrl(videoUrl) ? videoUrl : null
   const hasMedia = Boolean(card.backgroundImageUrl || vimeoSrc || mp4Src)

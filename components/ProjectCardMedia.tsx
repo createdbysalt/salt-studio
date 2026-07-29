@@ -139,9 +139,7 @@ export function ProjectCardMedia({
 
   const mountPlayer = Boolean(cleanUrl) && (playerMountedRef.current || nearViewport)
   const revealVideo =
-    mountPlayer &&
-    !paused &&
-    (mode === 'hover' ? hovered : inViewport || readyRef.current)
+    mountPlayer && !paused && (mode === 'hover' ? hovered : inViewport || readyRef.current)
 
   // Once a player has booted, never flash the poster again on scroll.
   // After mount starts, only show poster while actively in view and still loading.

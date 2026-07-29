@@ -5,9 +5,9 @@
  */
 import {dataset, projectId, studioUrl} from '@/sanity/lib/api'
 import {
+  plusCreateIconPlugin,
   saltDeskStructure,
   saltSingletonTypes,
-  plusCreateIconPlugin,
 } from '@/sanity/plugins/deskStructure'
 import {helpTool, viewSiteTool} from '@/sanity/plugins/navbarActions'
 import {pageBuilderTool} from '@/sanity/plugins/pageBuilder'
@@ -39,9 +39,9 @@ import {
   projectGalleryRowTwo,
   projectGalleryVideo,
 } from '@/sanity/schemas/objects/projectGallery'
+import serviceBlock from '@/sanity/schemas/objects/serviceBlock'
 import testimonials from '@/sanity/schemas/objects/testimonials'
 import timeline from '@/sanity/schemas/objects/timeline'
-import serviceBlock from '@/sanity/schemas/objects/serviceBlock'
 import {
   aboutClosingSection,
   aboutConvictionsSection,
@@ -59,14 +59,6 @@ import {
   contactHeroSection,
 } from '@/sanity/schemas/sections/contactSections'
 import {
-  projectCreditsSection,
-  projectMediaSection,
-  projectQuoteSection,
-  projectScopeSection,
-  projectStatementSection,
-  projectStatsSection,
-} from '@/sanity/schemas/sections/projectSections'
-import {
   homeFinalCtaSection,
   homeHeroSection,
   homePhilosophySection,
@@ -75,6 +67,14 @@ import {
   homeServicesSection,
   homeWorkSection,
 } from '@/sanity/schemas/sections/homeSections'
+import {
+  projectCreditsSection,
+  projectMediaSection,
+  projectQuoteSection,
+  projectScopeSection,
+  projectStatementSection,
+  projectStatsSection,
+} from '@/sanity/schemas/sections/projectSections'
 import {
   servicesFaqSection,
   servicesFinalCtaSection,
@@ -85,11 +85,11 @@ import {
 } from '@/sanity/schemas/sections/servicesSections'
 import aboutPage from '@/sanity/schemas/singletons/aboutPage'
 import contactPage from '@/sanity/schemas/singletons/contactPage'
-import servicesPage from '@/sanity/schemas/singletons/servicesPage'
 import developerSettings from '@/sanity/schemas/singletons/developerSettings'
 import errorPage from '@/sanity/schemas/singletons/errorPage'
 import home from '@/sanity/schemas/singletons/home'
 import notFoundPage from '@/sanity/schemas/singletons/notFoundPage'
+import servicesPage from '@/sanity/schemas/singletons/servicesPage'
 import settings from '@/sanity/schemas/singletons/settings'
 import workPage from '@/sanity/schemas/singletons/workPage'
 import {defineConfig} from 'sanity'

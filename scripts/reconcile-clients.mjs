@@ -16,7 +16,13 @@ import {getCliClient} from 'sanity/cli'
 const COMMIT = process.env.COMMIT === '1'
 const c = getCliClient({apiVersion: '2025-02-27'})
 const slugify = (s) =>
-  s.toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').replace(/-+/g, '-')
+  s
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
 const slugField = (name) => ({_type: 'slug', current: slugify(name)})
 
 const RENAMES = {Google: 'Google Pixel', Sounders: 'Seattle Sounders'}
@@ -36,10 +42,28 @@ const ADD = [
 
 // Primary roster order → featured + sortOrder (Timbers/Thorns split into two).
 const PRIMARY_ORDER = [
-  'Sorel', 'Nike', 'Jordan', 'Under Armour', 'Adidas', 'Amazfit', 'Google Pixel',
-  'Capital One', 'Starbucks', 'Teavana', 'Triumph', 'Flexfit', 'Oura', 'Hyperice',
-  'Vans', 'Seattle Sounders', 'Portland Timbers', 'Portland Thorns', 'JBL',
-  'Taylor Farms', 'GQ', 'Rawlings',
+  'Sorel',
+  'Nike',
+  'Jordan',
+  'Under Armour',
+  'Adidas',
+  'Amazfit',
+  'Google Pixel',
+  'Capital One',
+  'Starbucks',
+  'Teavana',
+  'Triumph',
+  'Flexfit',
+  'Oura',
+  'Hyperice',
+  'Vans',
+  'Seattle Sounders',
+  'Portland Timbers',
+  'Portland Thorns',
+  'JBL',
+  'Taylor Farms',
+  'GQ',
+  'Rawlings',
 ]
 
 const clients = await c.fetch(`*[_type=="client"]{_id, name, slug, featured, sortOrder}`)
@@ -62,7 +86,14 @@ for (const {name} of ADD) {
   if (!byName.get(name)) {
     const _id = `client-${slugify(name)}`
     plan.adds.push(name)
-    tx.createIfNotExists({_id, _type: 'client', name, slug: slugField(name), featured: false, sortOrder: 0})
+    tx.createIfNotExists({
+      _id,
+      _type: 'client',
+      name,
+      slug: slugField(name),
+      featured: false,
+      sortOrder: 0,
+    })
     byName.set(name, {_id, name})
   }
 }
@@ -71,14 +102,19 @@ for (const {name} of ADD) {
 const uajbl = byName.get('UA/JBL')
 if (uajbl) {
   const ua = byName.get('Under Armour') || {_id: `client-${slugify('Under Armour')}`}
-  const projs = await c.fetch(`*[_type=="project" && client._ref==$id]{_id, title}`, {id: uajbl._id})
+  const projs = await c.fetch(`*[_type=="project" && client._ref==$id]{_id, title}`, {
+    id: uajbl._id,
+  })
   plan.split = {count: projs.length, titles: projs.map((p) => p.title), to: 'Under Armour'}
-  for (const pr of projs) tx.patch(pr._id, (p) => p.set({client: {_type: 'reference', _ref: ua._id}}))
+  for (const pr of projs)
+    tx.patch(pr._id, (p) => p.set({client: {_type: 'reference', _ref: ua._id}}))
   tx.delete(uajbl._id)
 }
 
 // 4. featured + sortOrder for primary roster; unfeature everyone else
-for (const cl of clients.concat([...byName.values()].filter((v) => !clients.find((c) => c._id === v._id)))) {
+for (const cl of clients.concat(
+  [...byName.values()].filter((v) => !clients.find((c) => c._id === v._id)),
+)) {
   const name = RENAMES[cl.name] || cl.name
   if (name === 'UA/JBL') continue // being deleted
   const order = PRIMARY_ORDER.indexOf(name)
@@ -94,7 +130,9 @@ const bar = '─'.repeat(70)
 console.log(`\n${bar}\nClient reconcile  ·  ${COMMIT ? 'COMMIT' : 'DRY RUN'}\n${bar}`)
 console.log(`Renames (${plan.renames.length}): ${plan.renames.join(', ')}`)
 console.log(`Add roster clients (${plan.adds.length}): ${plan.adds.join(', ')}`)
-console.log(`Split UA/JBL: ${plan.split ? `${plan.split.count} projects → Under Armour [${plan.split.titles.join(', ')}], delete UA/JBL client` : 'not found'}`)
+console.log(
+  `Split UA/JBL: ${plan.split ? `${plan.split.count} projects → Under Armour [${plan.split.titles.join(', ')}], delete UA/JBL client` : 'not found'}`,
+)
 console.log(`Featured (primary roster, ${plan.featured.length}): ${plan.featured.join(', ')}`)
 console.log(bar)
 

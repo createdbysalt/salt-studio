@@ -1,9 +1,8 @@
 'use client'
 
+import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {useGSAP} from '@gsap/react'
 import {useRef} from 'react'
-
-import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 
 type SidePanelCloseProps = {
   onClose: () => void
@@ -16,11 +15,7 @@ type SidePanelCloseProps = {
  * Pinned Close / ESC control shared by About + service detail drawers —
  * magnetic hover + dual-layer text swap.
  */
-export function SidePanelClose({
-  onClose,
-  open,
-  ariaLabel = 'Close panel',
-}: SidePanelCloseProps) {
+export function SidePanelClose({onClose, open, ariaLabel = 'Close panel'}: SidePanelCloseProps) {
   const wrapRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
   const magnetRef = useRef<HTMLSpanElement>(null)
@@ -135,10 +130,7 @@ export function SidePanelClose({
   )
 
   return (
-    <div
-      ref={wrapRef}
-      className="pointer-events-none absolute top-[28px] right-[28px] z-20"
-    >
+    <div ref={wrapRef} className="pointer-events-none absolute top-[28px] right-[28px] z-20">
       <span
         ref={magnetRef}
         className="pointer-events-auto relative inline-flex will-change-transform"

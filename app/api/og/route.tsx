@@ -51,7 +51,9 @@ export function GET(request: Request) {
     >
       {/* Top: wordmark + site */}
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        <div style={{display: 'flex', fontSize: 26, fontWeight: 700, letterSpacing: 8}}>SALT STUDIO</div>
+        <div style={{display: 'flex', fontSize: 26, fontWeight: 700, letterSpacing: 8}}>
+          SALT STUDIO
+        </div>
         <div
           style={{
             display: 'flex',
