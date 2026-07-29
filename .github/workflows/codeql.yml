@@ -50,8 +50,10 @@ jobs:
         uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
-          # This repo does NOT use CodeQL "Default setup" (Settings → Code
-          # security → CodeQL analysis), so this advanced workflow owns the
-          # Security-tab uploads. If you ever enable default setup, GitHub will
-          # reject these uploads — flip this to `false` at that point.
-          upload: true
+          # Code scanning (GitHub Advanced Security) is not enabled on this
+          # private repo, so SARIF uploads are rejected. Keep `upload: false`:
+          # the analysis still runs on every PR and gates merges, it just
+          # doesn't post to the Security tab. If you enable code scanning /
+          # GHAS later (Settings → Code security), flip this to `true` to get
+          # Security-tab results.
+          upload: false
