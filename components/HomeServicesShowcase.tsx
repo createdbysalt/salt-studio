@@ -141,8 +141,8 @@ export function HomeServicesShowcase({
 }
 
 /**
- * Pin the type beat. A CSS dome (not SVG/MorphSVG) rises on scrub — HTML
- * transforms stay stable under Lenis; no mid-scroll backgroundColor snap.
+ * Pin the type beat on paper. A wide CSS dome rises on scrub until ink owns
+ * the frame — wider than the old 50%-radius circle so corner wedges stay off-screen.
  */
 function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
   const triggerRef = useRef<HTMLDivElement>(null)
@@ -199,6 +199,8 @@ function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
           onUpdate: (self) => {
             setCovered(self.progress > 0.9)
           },
+          onLeave: () => setCovered(true),
+          onLeaveBack: () => setCovered(false),
         },
       })
 
@@ -216,13 +218,14 @@ function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
     <div ref={triggerRef} className="relative h-[125vh] md:h-[160vh] lg:h-[180vh]">
       <section
         ref={panelRef}
-        className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden bg-background px-3 pb-8 pt-14 text-center text-foreground sm:px-4 md:px-12 md:pb-10 md:pt-20"
+        className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-3 pb-8 pt-14 text-center text-foreground sm:px-4 md:px-12 md:pb-10 md:pt-20"
+        style={{backgroundColor: PAPER}}
       >
-        {/* Wide ellipse dome — flatter arch on mobile, fuller curve from md up */}
+        {/* Wide dome — rises from below on scrub; oversized so arch corners stay off-screen. */}
         <div
           ref={inkRef}
           aria-hidden
-          className="pointer-events-none absolute inset-x-[-12%] top-0 z-0 will-change-transform md:inset-x-[-35%] max-md:[border-radius:100%_100%_0_0/14%_14%_0_0] md:[border-radius:50%_50%_0_0]"
+          className="pointer-events-none absolute inset-x-[-55%] top-0 z-0 will-change-transform [border-radius:100%_100%_0_0/22%_22%_0_0] md:inset-x-[-75%] md:[border-radius:100%_100%_0_0/28%_28%_0_0]"
           style={{
             height: '200%',
             backgroundColor: INK,
