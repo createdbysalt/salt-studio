@@ -581,10 +581,20 @@ function useNavOnColorSurface(pathname: string, menuPresent: boolean): boolean {
     }
 
     sample()
+    // Heroes mount GSAP after the first layout pass — resample a couple frames
+    // later so frost chrome doesn't stick from a pre-transform ink dome.
+    const settleA = requestAnimationFrame(() => {
+      sample()
+      requestAnimationFrame(sample)
+    })
+    const settleB = window.setTimeout(sample, 120)
+
     window.addEventListener('scroll', sample, {passive: true})
     window.addEventListener('resize', sample)
     return () => {
       cancelAnimationFrame(frame)
+      cancelAnimationFrame(settleA)
+      window.clearTimeout(settleB)
       window.removeEventListener('scroll', sample)
       window.removeEventListener('resize', sample)
     }
@@ -620,6 +630,13 @@ function isColorSurfaceUnderNav(): boolean {
       }
 
       const style = getComputedStyle(node)
+
+      // Ink scrub domes / decorative layers are pe:none but still appear in
+      // elementsFromPoint — their dark fill must not steal the paper reading.
+      if (style.pointerEvents === 'none') {
+        node = node.parentElement
+        continue
+      }
 
       // Opaque paint wins over ancestor data-theme — a white hero panel sits
       // above the dark /legal shell and must keep ink chrome, not frost.

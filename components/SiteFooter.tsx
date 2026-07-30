@@ -6,6 +6,7 @@ import {DEFAULT_NAV} from '@/components/homeHero'
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {SaltWordmark} from '@/components/SaltWordmark'
 import {isAboutHref} from '@/lib/aboutPanel'
+import {ucShowSecondLayer} from '@/lib/analytics'
 import {isContactHref} from '@/lib/contactMenu'
 import type {FooterLegalPagesQueryResult, SettingsQueryResult} from '@/sanity.types'
 import {resolveMenu} from '@/sanity/lib/utils'
@@ -229,8 +230,8 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
     return [{platform, href, label: SOCIAL_LABELS[platform]}]
   })
 
-  const fromLegal = (legalPages ?? []).filter(
-    (page): page is NonNullable<typeof page> => Boolean(page?.slug),
+  const fromLegal = (legalPages ?? []).filter((page): page is NonNullable<typeof page> =>
+    Boolean(page?.slug),
   )
   const legalLinks =
     fromLegal.length > 0
@@ -238,7 +239,9 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
           const pageType = stegaClean(page.pageType ?? '') || 'custom'
           return {
             title:
-              stegaClean(page.title ?? '') || LEGAL_TYPE_LABELS[pageType] || LEGAL_TYPE_LABELS.custom,
+              stegaClean(page.title ?? '') ||
+              LEGAL_TYPE_LABELS[pageType] ||
+              LEGAL_TYPE_LABELS.custom,
             href: `/legal/${stegaClean(page.slug ?? '')}`,
           }
         })
@@ -311,6 +314,13 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
               {item.title}
             </Link>
           ))}
+          <button
+            type="button"
+            onClick={() => ucShowSecondLayer()}
+            className="whitespace-nowrap text-inherit transition-opacity hover:opacity-70"
+          >
+            Privacy Settings
+          </button>
         </nav>
       </div>
     </footer>

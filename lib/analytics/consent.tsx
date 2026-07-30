@@ -3,6 +3,7 @@
 import {createContext, ReactNode, useCallback, useContext, useEffect, useState} from 'react'
 import {updateGoogleConsent} from './gtm'
 import type {ConsentLevel, ConsentState} from './types'
+import {ucAcceptAll, ucDenyAll, ucReadConsentLevels} from './usercentrics'
 
 const CONSENT_STORAGE_KEY = 'analytics_consent'
 const CONSENT_VERSION = 1 // Bump this to re-prompt users after policy changes
@@ -118,11 +119,36 @@ export function ConsentProvider({children}: ConsentProviderProps) {
   }, [])
 
   const acceptAll = useCallback(() => {
+    ucAcceptAll() // record with the Usercentrics CMP (compliance log)
     saveConsent({necessary: true, analytics: true, marketing: true, timestamp: 0})
   }, [saveConsent])
 
   const acceptNecessary = useCallback(() => {
+    ucDenyAll()
     saveConsent({necessary: true, analytics: false, marketing: false, timestamp: 0})
+  }, [saveConsent])
+
+  // Mirror choices made inside the Usercentrics second layer (granular
+  // per-service settings, opened from the footer's "Privacy settings").
+  useEffect(() => {
+    const onUcEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{type?: string}>).detail
+      if (!detail?.type) return
+
+      if (detail.type === 'ACCEPT_ALL') {
+        saveConsent({necessary: true, analytics: true, marketing: true, timestamp: 0})
+      } else if (detail.type === 'DENY_ALL') {
+        saveConsent({necessary: true, analytics: false, marketing: false, timestamp: 0})
+      } else if (detail.type === 'SAVE') {
+        const levels = ucReadConsentLevels()
+        if (levels) {
+          saveConsent({necessary: true, ...levels, timestamp: 0})
+        }
+      }
+    }
+
+    window.addEventListener('UC_UI_CMP_EVENT', onUcEvent)
+    return () => window.removeEventListener('UC_UI_CMP_EVENT', onUcEvent)
   }, [saveConsent])
 
   const updateConsent = useCallback(

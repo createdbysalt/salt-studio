@@ -106,6 +106,8 @@ export function LegalHero({title}: {title: string}) {
           style={{
             height: '200%',
             backgroundColor: INK,
+            // Match GSAP's start pose so first paint isn't a full-bleed dark hit target.
+            transform: 'translate3d(0, 50%, 0)',
           }}
         />
 

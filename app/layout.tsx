@@ -8,6 +8,7 @@ import {
   GoogleTagManagerScript,
   PageViewTracker,
   ScrollTracker,
+  UsercentricsScripts,
   WebVitalsReporter,
 } from '@/lib/analytics'
 import {ogImageUrl, seoConfig} from '@/lib/seo'
@@ -63,6 +64,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         <Script id="salt-intro-boot" strategy="beforeInteractive">
           {`(function(){try{if(location.pathname!=="/")return;if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;try{sessionStorage.removeItem("salt-intro")}catch(e){}window.__SALT_INTRO__=true;var s=document.createElement("style");s.id="salt-intro-boot-style";s.textContent="html,body{background:#08090a!important}[data-intro-hide]{opacity:0!important;pointer-events:none!important}[data-home-hero] [data-phrase-a],[data-home-hero] [data-phrase-b]{opacity:0!important}";(document.head||document.documentElement).appendChild(s);var d=document.createElement("div");d.id="salt-intro-boot";d.setAttribute("aria-hidden","true");d.style.cssText="position:fixed;inset:0;z-index:199;background:#08090a;pointer-events:none";(document.body||document.documentElement).appendChild(d);}catch(e){}})();`}
         </Script>
+        <UsercentricsScripts />
         <GoogleTagManagerScript />
         <ClientGoogleAnalyticsScript measurementId={devSettings?.clientGoogleAnalyticsId} />
       </head>
