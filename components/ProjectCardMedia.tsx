@@ -70,8 +70,7 @@ export function ProjectCardMedia({
   const cleanUrl = videoUrl ? stegaClean(videoUrl).trim() || null : null
   const youtubeSrc = cleanUrl && isYouTubeUrl(cleanUrl) ? youtubeBackgroundSrc(cleanUrl) : null
   const vimeoSrc = cleanUrl && isVimeoUrl(cleanUrl) ? vimeoBackgroundSrc(cleanUrl) : null
-  const mp4Src =
-    cleanUrl && !isVimeoUrl(cleanUrl) && !isYouTubeUrl(cleanUrl) ? cleanUrl : null
+  const mp4Src = cleanUrl && !isVimeoUrl(cleanUrl) && !isYouTubeUrl(cleanUrl) ? cleanUrl : null
 
   const coverSrc =
     posterUrl ||
@@ -142,8 +141,7 @@ export function ProjectCardMedia({
       setHovered(false)
       return
     }
-    const card =
-      rootRef.current?.closest<HTMLElement>('a[href], [data-work-card]') ?? null
+    const card = rootRef.current?.closest<HTMLElement>('a[href], [data-work-card]') ?? null
     if (!card) return
 
     const enter = () => setHovered(true)

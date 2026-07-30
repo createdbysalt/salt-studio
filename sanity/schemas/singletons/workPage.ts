@@ -49,7 +49,7 @@ export default defineType({
         'Auto modes show every project that has a slug. Pick manually to hand-choose the exact projects and drag them into the order you want.',
       options: {
         list: [
-          {title: 'Automatically — featured first, then newest', value: 'featured'},
+          {title: 'Automatically — featured first, then by year', value: 'featured'},
           {title: 'Automatically — newest first', value: 'newest'},
           {title: 'Automatically — A–Z by title', value: 'az'},
           {title: 'Pick manually & hand-order', value: 'manual'},

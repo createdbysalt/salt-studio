@@ -86,8 +86,7 @@ function buildOverlay(): Overlay {
   root.id = INTRO_OVERLAY_ID
   root.setAttribute('aria-hidden', 'true')
   root.setAttribute('data-site-intro', '')
-  root.style.cssText =
-    'position:fixed;inset:0;z-index:200;pointer-events:none;overflow:hidden'
+  root.style.cssText = 'position:fixed;inset:0;z-index:200;pointer-events:none;overflow:hidden'
 
   const black = document.createElement('div')
   black.style.cssText = 'position:absolute;inset:0;background:#08090a'
@@ -97,8 +96,7 @@ function buildOverlay(): Overlay {
 
   const mark = document.createElement('div')
   mark.setAttribute('data-intro-mark', '')
-  mark.style.cssText =
-    'position:absolute;left:50%;top:50%;will-change:transform;color:#eaeaea'
+  mark.style.cssText = 'position:absolute;left:50%;top:50%;will-change:transform;color:#eaeaea'
 
   const markDark = document.createElement('div')
   markDark.setAttribute('aria-hidden', 'true')
@@ -147,9 +145,7 @@ function runIntro(overlay: Overlay) {
 
   const navLogo = document.querySelector<HTMLElement>('[data-site-logo]')
   const navPill = document.querySelector<HTMLElement>('[data-nav-pill]')
-  const navLinks = gsap.utils.toArray<HTMLElement>(
-    '[data-nav-links] a, [data-nav-links] button',
-  )
+  const navLinks = gsap.utils.toArray<HTMLElement>('[data-nav-links] a, [data-nav-links] button')
   const navToggle = document.querySelector<HTMLElement>('[data-menu-toggle]')
   const navCta = document.querySelector<HTMLElement>('[data-nav-cta]')
 

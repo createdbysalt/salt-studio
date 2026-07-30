@@ -4,6 +4,7 @@ import {WorkCatalog} from '@/components/WorkCatalog'
 import {WorkFilterHeadline} from '@/components/WorkFilterHeadline'
 import {CorePageSchema, generateServiceSchema, ogImageUrl} from '@/lib/seo'
 import {resolveWorkPills} from '@/lib/work-pills'
+import {compareFeaturedThenRecent} from '@/lib/work-sort'
 import {sanityFetch} from '@/sanity/lib/live'
 import {
   projectsByCategoryQuery,
@@ -113,7 +114,9 @@ export default async function WorkCategoryRoute({params}: Props) {
       </header>
 
       <WorkCatalog
-        projects={await withWorkPosters(filterProjectsWithVideo(projects ?? []))}
+        projects={await withWorkPosters(
+          filterProjectsWithVideo([...(projects ?? [])].sort(compareFeaturedThenRecent)),
+        )}
         emptyState={page?.emptyState}
         videoPlayback={page?.videoPlayback}
       />

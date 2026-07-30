@@ -31,9 +31,7 @@ export function extractYouTubeId(url: string): string | null {
       const fromQuery = parsed.searchParams.get('v')
       if (fromQuery) return fromQuery
 
-      const pathMatch = parsed.pathname.match(
-        /\/(?:embed|shorts|live|v)\/([A-Za-z0-9_-]{6,})/,
-      )
+      const pathMatch = parsed.pathname.match(/\/(?:embed|shorts|live|v)\/([A-Za-z0-9_-]{6,})/)
       return pathMatch?.[1] ?? null
     }
 

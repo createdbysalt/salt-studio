@@ -163,9 +163,7 @@ export function HomeServicesSection({
 
   if (cards.length === 0) return null
 
-  return (
-    <HomeServicesShowcase label={section.label} cards={cards} showBridge={showBridge} />
-  )
+  return <HomeServicesShowcase label={section.label} cards={cards} showBridge={showBridge} />
 }
 
 export async function HomeProductSection({

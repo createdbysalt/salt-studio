@@ -1,17 +1,13 @@
-import {
-  filterProjectsWithVideo,
-  withWorkPosters,
-  type WorkProjectCard,
-} from '@/components/ProjectGrid'
+import {withWorkPosters} from '@/components/ProjectGrid'
 import {Reveal} from '@/components/Reveal'
 import {WorkCatalog} from '@/components/WorkCatalog'
 import {WorkFilterHeadline} from '@/components/WorkFilterHeadline'
 import {CorePageSchema, ogImageUrl} from '@/lib/seo'
 import {resolveWorkPills} from '@/lib/work-pills'
+import {resolveWorkProjects} from '@/lib/work-sort'
 import {sanityFetch} from '@/sanity/lib/live'
 import {allProjectsQuery, workCategoriesQuery, workPageQuery} from '@/sanity/lib/queries'
 import type {Metadata} from 'next'
-import {stegaClean} from 'next-sanity'
 
 export async function generateMetadata(): Promise<Metadata> {
   const {data} = await sanityFetch({query: workPageQuery, stega: false})
@@ -30,65 +26,6 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-function compareByCreatedThenYear(a: WorkProjectCard, b: WorkProjectCard) {
-  const createdA = a._createdAt ? Date.parse(a._createdAt) : 0
-  const createdB = b._createdAt ? Date.parse(b._createdAt) : 0
-  if (createdB !== createdA) return createdB - createdA
-
-  const yearA = Number.parseInt(stegaClean(a.year) || '', 10)
-  const yearB = Number.parseInt(stegaClean(b.year) || '', 10)
-  const safeYearA = Number.isFinite(yearA) ? yearA : -1
-  const safeYearB = Number.isFinite(yearB) ? yearB : -1
-  if (safeYearB !== safeYearA) return safeYearB - safeYearA
-
-  return (stegaClean(a.title) ?? '').localeCompare(stegaClean(b.title) ?? '')
-}
-
-/** Featured first, then most recently created within each group. */
-function compareFeaturedThenRecent(a: WorkProjectCard, b: WorkProjectCard) {
-  const featuredDelta = Number(Boolean(b.featured)) - Number(Boolean(a.featured))
-  if (featuredDelta !== 0) return featuredDelta
-  return compareByCreatedThenYear(a, b)
-}
-
-function compareNewest(a: WorkProjectCard, b: WorkProjectCard) {
-  return compareByCreatedThenYear(a, b)
-}
-
-/**
- * Resolve the grid order from the workPage `projectSource` control. "manual"
- * uses the hand-picked list; auto modes reorder the full catalog.
- * Default / unset → featured first, then most recent.
- */
-function resolveProjects(
-  projectSource: string | null | undefined,
-  curated: Array<WorkProjectCard | null> | null | undefined,
-  all: WorkProjectCard[],
-): WorkProjectCard[] {
-  const visibleCurated = (curated ?? []).filter(
-    (project): project is WorkProjectCard =>
-      Boolean(project?._id) &&
-      project?.hidden !== true &&
-      (Boolean(project?.coverImage?.asset) || Boolean(project?.videoUrl)),
-  )
-
-  switch (projectSource) {
-    case 'manual':
-      return filterProjectsWithVideo(visibleCurated)
-    case 'newest':
-      return filterProjectsWithVideo([...all].sort(compareNewest))
-    case 'az':
-      return filterProjectsWithVideo(
-        [...all].sort((a, b) =>
-          (stegaClean(a.title) ?? '').localeCompare(stegaClean(b.title) ?? ''),
-        ),
-      )
-    case 'featured':
-    default:
-      return filterProjectsWithVideo([...all].sort(compareFeaturedThenRecent))
-  }
-}
-
 export default async function WorkIndexRoute() {
   const [{data: page}, {data: allProjects}, {data: categories}] = await Promise.all([
     sanityFetch({query: workPageQuery}),
@@ -102,7 +39,7 @@ export default async function WorkIndexRoute() {
   const speakableSelectors = speakable ? ['h1', '.speakable-summary'] : ['h1']
 
   const projects = await withWorkPosters(
-    resolveProjects(page?.projectSource, page?.curatedProjects, allProjects ?? []),
+    resolveWorkProjects(page?.projectSource, page?.curatedProjects, allProjects ?? []),
   )
   const pills = resolveWorkPills(page?.pillSource, page?.categoryPills, categories ?? [])
 

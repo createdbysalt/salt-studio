@@ -180,10 +180,7 @@ export const projectStatsSection = defineType({
       description:
         'Centered under the project title: big number on top, short label underneath (uppercase on the site). Real measured numbers only — leave this section out until you have them. Max 3 so they stay on one line.',
       validation: (rule) =>
-        rule
-          .min(1)
-          .max(3)
-          .error('Add 1–3 results. More than three breaks the under-title row.'),
+        rule.min(1).max(3).error('Add 1–3 results. More than three breaks the under-title row.'),
       of: [
         defineArrayMember({
           type: 'object',

@@ -6,11 +6,11 @@ import {
   ProjectCaseMedia,
   ProjectCaseSidebar,
 } from '@/components/ProjectCaseSections'
-import {ProjectStatsReveal} from '@/components/ProjectStatsReveal'
 import {withWorkPosters, type WorkProjectCard} from '@/components/ProjectGrid'
 import {formatProjectYearMark} from '@/components/ProjectHeroMeta'
 import {ProjectNextSection} from '@/components/ProjectNextSection'
 import {ProjectScrollGallery, type ProjectScrollFrame} from '@/components/ProjectScrollGallery'
+import {ProjectStatsReveal} from '@/components/ProjectStatsReveal'
 import {ProjectTestimonialRotator} from '@/components/ProjectTestimonialRotator'
 import {ProjectWatchVideoButton} from '@/components/ProjectWatchVideoButton'
 import {fetchVimeoPoster, isVimeoUrl} from '@/lib/vimeo'

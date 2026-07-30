@@ -33,8 +33,7 @@ export function ProjectGalleryVideoCell({
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoReady, setVideoReady] = useState(false)
   const {cleanVideo, mp4Src, hasVideo} = resolveProjectVideoSources(videoUrl, videoFileUrl)
-  const youtubeBg =
-    cleanVideo && isYouTubeUrl(cleanVideo) ? youtubeBackgroundSrc(cleanVideo) : null
+  const youtubeBg = cleanVideo && isYouTubeUrl(cleanVideo) ? youtubeBackgroundSrc(cleanVideo) : null
   const vimeoBg = cleanVideo && isVimeoUrl(cleanVideo) ? vimeoBackgroundSrc(cleanVideo) : null
   const posterSrc = poster?.asset?._ref
     ? urlForImage({asset: {_ref: poster.asset._ref}})

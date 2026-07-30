@@ -485,10 +485,7 @@ export function Navbar({data}: NavbarProps) {
                 </svg>
               </button>
 
-              <div
-                className="hidden items-center gap-3 sm:gap-6 lg:flex"
-                data-nav-links
-              >
+              <div className="hidden items-center gap-3 sm:gap-6 lg:flex" data-nav-links>
                 {items.map((item) =>
                   item.children?.length ? (
                     <NavDropdown

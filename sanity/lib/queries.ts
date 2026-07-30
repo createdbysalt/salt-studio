@@ -343,7 +343,7 @@ export const nextProjectsQuery = defineQuery(`
 // Card shape shared by the Work grid and category pages. A project appears
 // once it has a cover image OR a video; video is optional hover flair.
 export const allProjectsQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(featured desc, _createdAt desc, year desc, title asc){
+  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(featured desc, year desc, _createdAt desc, title asc){
     _id,
     projectType,
     featured,
@@ -362,7 +362,7 @@ export const allProjectsQuery = defineQuery(`
 
 // Projects in one category, by the category's slug (for /work/[slug]).
 export const projectsByCategoryQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(featured desc, _createdAt desc, year desc, title asc){
+  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(featured desc, year desc, _createdAt desc, title asc){
     _id,
     projectType,
     featured,

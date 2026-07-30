@@ -7,9 +7,9 @@
  *   node scripts/upload-viva-videos.mjs
  * Reads SANITY_API_WRITE_TOKEN from .env.local.
  */
-import {createClient} from '@sanity/client'
 import {readFileSync} from 'node:fs'
 import path from 'node:path'
+import {createClient} from '@sanity/client'
 
 const env = Object.fromEntries(
   readFileSync(new URL('../.env.local', import.meta.url), 'utf8')
@@ -17,7 +17,13 @@ const env = Object.fromEntries(
     .filter((l) => l.includes('=') && !l.trim().startsWith('#'))
     .map((l) => {
       const i = l.indexOf('=')
-      return [l.slice(0, i).trim(), l.slice(i + 1).trim().replace(/^["']|["']$/g, '')]
+      return [
+        l.slice(0, i).trim(),
+        l
+          .slice(i + 1)
+          .trim()
+          .replace(/^["']|["']$/g, ''),
+      ]
     }),
 )
 

@@ -71,10 +71,12 @@ export const projectGalleryVideo = defineType({
       initialValue: 'youtube',
       validation: (rule) =>
         rule.custom((value, context) => {
-          const parent = context.parent as {
-            videoUrl?: string
-            videoFile?: {_type?: string}
-          } | undefined
+          const parent = context.parent as
+            | {
+                videoUrl?: string
+                videoFile?: {_type?: string}
+              }
+            | undefined
           // Legacy cells may only have a URL — don't block publish until re-saved.
           if (!value && (parent?.videoUrl || parent?.videoFile)) return true
           if (!value) return 'Pick where this video comes from'
@@ -109,10 +111,12 @@ export const projectGalleryVideo = defineType({
       hidden: ({parent}) => parent?.source === 'upload',
       validation: (rule) =>
         rule.custom((value, context) => {
-          const parent = context.parent as {
-            source?: string
-            videoFile?: {_type?: string}
-          } | undefined
+          const parent = context.parent as
+            | {
+                source?: string
+                videoFile?: {_type?: string}
+              }
+            | undefined
           const source = parent?.source ?? (value ? 'link' : undefined)
           if (source === 'upload') return true
           if (!value) {

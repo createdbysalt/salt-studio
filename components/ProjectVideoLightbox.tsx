@@ -16,14 +16,10 @@ type ProjectVideoLightboxProps = {
   dialogId?: string
 }
 
-export function resolveProjectVideoSources(
-  videoUrl?: string | null,
-  videoFileUrl?: string | null,
-) {
+export function resolveProjectVideoSources(videoUrl?: string | null, videoFileUrl?: string | null) {
   const cleanFile = videoFileUrl ? stegaClean(videoFileUrl).trim() || null : null
   const cleanVideo = videoUrl ? stegaClean(videoUrl).trim() || null : null
-  const youtubePlayer =
-    cleanVideo && isYouTubeUrl(cleanVideo) ? youtubePlayerSrc(cleanVideo) : null
+  const youtubePlayer = cleanVideo && isYouTubeUrl(cleanVideo) ? youtubePlayerSrc(cleanVideo) : null
   const vimeoPlayer = cleanVideo && isVimeoUrl(cleanVideo) ? vimeoPlayerSrc(cleanVideo) : null
   const mp4Src =
     cleanFile ||
