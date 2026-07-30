@@ -32,7 +32,7 @@ export function WorkFilterHeadline({
     <nav aria-label="Filter work by specialty" className="mx-auto w-full max-w-[90rem]">
       <ul
         role="list"
-        className="list-none text-center font-sans text-[clamp(1.25rem,3.5vw,3.25rem)] font-bold uppercase leading-[1.15] tracking-[-0.035em]"
+        className="list-none text-center font-sans text-[clamp(1.35rem,4.2vw,4rem)] font-bold uppercase leading-[1.1] tracking-[-0.035em]"
       >
         {items.map((item, index) => {
           const active = item.slug === activeSlug

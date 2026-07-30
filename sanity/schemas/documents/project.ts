@@ -271,13 +271,13 @@ export default defineType({
         {type: 'projectScopeSection', title: 'Scope'},
         {type: 'projectMediaSection', title: 'Media'},
         {type: 'projectQuoteSection', title: 'Quote'},
-        {type: 'projectStatsSection', title: 'Stats'},
+        {type: 'projectStatsSection', title: 'Results'},
         {type: 'projectCreditsSection', title: 'Credits'},
       ],
       {
         uniqueTypes: false,
         description:
-          'The case-study body, top to bottom. Mix and repeat freely — the conversion shape is: a few labeled Statements telling the story, Scope listing exactly what was delivered, Media doing the showing, real Quotes and Stats only when they exist. Drag to reorder; toggle to hide. The closing “book a call” CTA renders automatically on every project.',
+          'The case-study body, top to bottom. Mix and repeat freely — the conversion shape is: a few labeled Statements telling the story, Scope listing exactly what was delivered, Media doing the showing, real Quotes and Results (under-title stats) only when they exist. Drag to reorder; toggle to hide. The closing “book a call” CTA renders automatically on every project.',
       },
     ),
     defineField({

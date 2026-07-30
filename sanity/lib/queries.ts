@@ -15,7 +15,8 @@ export const homePageQuery = defineQuery(`
       enabled,
       internalName,
       _type == "homeHeroSection" => {
-        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter
+        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter,
+        splitPrimaryLeft, splitPrimaryRight, splitSecondaryLeft, splitSecondaryRight
       },
       _type == "homeProofSection" => {
         label,
@@ -131,6 +132,7 @@ export const servicesPageQuery = defineQuery(`
   *[_id == "servicesPage"][0]{
     _id,
     _type,
+    capabilitiesHeadline,
     seoTitle,
     seoDescription,
     ogImage,
@@ -341,7 +343,7 @@ export const nextProjectsQuery = defineQuery(`
 // Card shape shared by the Work grid and category pages. A project appears
 // once it has a cover image OR a video; video is optional hover flair.
 export const allProjectsQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(year desc, title asc){
+  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(featured desc, _createdAt desc, year desc, title asc){
     _id,
     projectType,
     featured,
@@ -352,6 +354,7 @@ export const allProjectsQuery = defineQuery(`
     coverImage,
     videoUrl,
     year,
+    _createdAt,
     "client": client->name,
     categories[]->{ _id, filterLabel, "slug": slug.current },
   }
@@ -359,7 +362,7 @@ export const allProjectsQuery = defineQuery(`
 
 // Projects in one category, by the category's slug (for /work/[slug]).
 export const projectsByCategoryQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(year desc, title asc){
+  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(featured desc, _createdAt desc, year desc, title asc){
     _id,
     projectType,
     featured,
@@ -370,6 +373,7 @@ export const projectsByCategoryQuery = defineQuery(`
     coverImage,
     videoUrl,
     year,
+    _createdAt,
     "client": client->name,
     categories[]->{ _id, filterLabel, "slug": slug.current },
   }
@@ -600,6 +604,7 @@ export const workPageQuery = defineQuery(`
       coverImage,
       videoUrl,
       year,
+      _createdAt,
       "client": client->name,
       categories[]->{ _id, filterLabel, "slug": slug.current },
     },

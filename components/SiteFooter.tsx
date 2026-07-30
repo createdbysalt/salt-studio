@@ -17,7 +17,13 @@ import {useRef, type MouseEvent} from 'react'
 
 /** Routes whose page stage is dark — footer flips to paper (inverse). */
 function pageIsDark(pathname: string): boolean {
-  return pathname.startsWith('/projects/') || pathname === '/work' || pathname.startsWith('/work/')
+  return (
+    pathname.startsWith('/projects/') ||
+    pathname === '/work' ||
+    pathname.startsWith('/work/') ||
+    pathname === '/legal' ||
+    pathname.startsWith('/legal/')
+  )
 }
 
 type FooterSocialPlatform = 'linkedin' | 'instagram' | 'x' | 'email' | 'whatsapp'
@@ -36,7 +42,7 @@ const SOCIAL_LABELS: Record<FooterSocialPlatform, string> = {
 const SOCIAL_FALLBACKS: Partial<Record<FooterSocialPlatform, string>> = {
   linkedin: 'https://www.linkedin.com/company/createdbysalt/',
   instagram: 'https://www.instagram.com/createdbysalt/',
-  x: 'https://x.com/saltstudio',
+  x: 'https://x.com/saltstudiohq',
   email: 'mailto:hello@createdbysalt.com',
   whatsapp: 'https://wa.me/19712052186',
 }
@@ -102,9 +108,18 @@ type SiteFooterProps = {
   legalPages?: FooterLegalPagesQueryResult | null
 }
 
+const LEGAL_TYPE_LABELS: Record<string, string> = {
+  privacy: 'Privacy Policy',
+  terms: 'Terms of Service',
+  cookies: 'Cookie Policy',
+  accessibility: 'Accessibility',
+  disclaimer: 'Disclaimer',
+  custom: 'Legal',
+}
+
 const LEGAL_FALLBACKS = [
-  {title: 'Privacy Policy', slug: 'privacy-policy', pageType: 'privacy'},
-  {title: 'Terms of Service', slug: 'terms-of-service', pageType: 'terms'},
+  {title: 'Privacy Policy', slug: 'privacy-policy'},
+  {title: 'Terms of Service', slug: 'terms-of-service'},
 ] as const
 
 /**
@@ -215,17 +230,18 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
   })
 
   const fromLegal = (legalPages ?? []).filter(
-    (page): page is NonNullable<typeof page> =>
-      Boolean(page?.slug) && (page.pageType === 'privacy' || page.pageType === 'terms'),
+    (page): page is NonNullable<typeof page> => Boolean(page?.slug),
   )
   const legalLinks =
     fromLegal.length > 0
-      ? fromLegal.map((page) => ({
-          title:
-            stegaClean(page.title ?? '') ||
-            (page.pageType === 'privacy' ? 'Privacy Policy' : 'Terms of Service'),
-          href: `/legal/${stegaClean(page.slug ?? '')}`,
-        }))
+      ? fromLegal.map((page) => {
+          const pageType = stegaClean(page.pageType ?? '') || 'custom'
+          return {
+            title:
+              stegaClean(page.title ?? '') || LEGAL_TYPE_LABELS[pageType] || LEGAL_TYPE_LABELS.custom,
+            href: `/legal/${stegaClean(page.slug ?? '')}`,
+          }
+        })
       : LEGAL_FALLBACKS.map((page) => ({
           title: page.title,
           href: `/legal/${page.slug}`,

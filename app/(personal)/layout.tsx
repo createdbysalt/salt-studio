@@ -10,7 +10,6 @@ import {SiteShell} from '@/components/SiteShell'
 import {ogImageUrl, SiteStructuredData} from '@/lib/seo'
 import {sanityFetch, SanityLive} from '@/sanity/lib/live'
 import {footerLegalPagesQuery, homePageQuery, settingsQuery} from '@/sanity/lib/queries'
-import {urlForOpenGraphImage} from '@/sanity/lib/utils'
 import {SpeedInsights} from '@vercel/speed-insights/next'
 import type {Metadata, Viewport} from 'next'
 import {VisualEditing} from 'next-sanity/visual-editing'
@@ -29,10 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteName = settings?.siteName || homePage?.seoTitle || 'Salt Studio'
   const siteDescription = settings?.siteDescription || homePage?.seoDescription
 
-  // Uploaded settings image wins; otherwise the auto-generated branded card.
-  // Site-name titles ("Salt Studio") use the wordmark + tagline composition.
-  const ogImage =
-    urlForOpenGraphImage(settings?.ogImage) ?? ogImageUrl({title: siteName})
+  // Same branded social card on every page.
+  const ogImage = ogImageUrl()
 
   return {
     title: {

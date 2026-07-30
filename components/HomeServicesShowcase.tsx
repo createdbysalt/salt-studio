@@ -96,6 +96,8 @@ type HomeServicesShowcaseProps = {
   lead?: string | null
   headline?: string | null
   cards: HomeServiceCard[]
+  /** Homepage type-beat bridge. Off on /capabilities (hero owns the ink swipe). */
+  showBridge?: boolean
 }
 
 const FALLBACK_LEAD = 'We bring the flavor of innovation.'
@@ -114,6 +116,7 @@ export function HomeServicesShowcase({
   lead,
   headline,
   cards,
+  showBridge = true,
 }: HomeServicesShowcaseProps) {
   // First service open by default (mobile tap mode + desktop idle).
   const [active, setActive] = useState<number | null>(0)
@@ -124,7 +127,7 @@ export function HomeServicesShowcase({
 
   return (
     <>
-      <TypeBeatBridge lead={leadText} headline={headlineText} />
+      {showBridge ? <TypeBeatBridge lead={leadText} headline={headlineText} /> : null}
       <WhatWeDoBand label={label} cards={cards} active={active} setActive={setActive} />
     </>
   )

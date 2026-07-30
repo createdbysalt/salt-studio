@@ -180,16 +180,22 @@ export function EditorialLoading({width = 'wide'}: {width?: 'narrow' | 'wide'}) 
 export function LegalLoading({article = false}: {article?: boolean}) {
   if (article) {
     return (
-      <LoadingShell label="legal page" className="pb-24">
-        <div className="mx-auto max-w-3xl px-6 py-16">
-          <Block className="mb-8 h-10 w-2/3" delay={40} />
+      <LoadingShell label="legal page" dark className="pb-24">
+        <div className="relative h-[40vh] md:h-[50vh]">
+          <div className="flex h-full flex-col items-center justify-center px-4">
+            <Block className="h-16 w-[min(90%,36rem)] md:h-24" delay={40} />
+            <Block className="mt-3 h-16 w-[min(70%,28rem)] md:h-24" delay={120} />
+          </div>
+        </div>
+        <div className="mx-auto max-w-3xl px-6 pb-16">
+          <Block className="mb-8 h-3 w-40" delay={200} />
           <div className="space-y-3">
             {Array.from({length: 8}, (_, i) => (
               <Block
                 key={i}
-                className="h-4 w-full"
+                className="h-3 w-full"
                 style={{width: `${100 - (i % 3) * 8}%`}}
-                delay={80 + i * 50}
+                delay={240 + i * 40}
               />
             ))}
           </div>
@@ -199,7 +205,7 @@ export function LegalLoading({article = false}: {article?: boolean}) {
   }
 
   return (
-    <LoadingShell label="legal" className="pb-24">
+    <LoadingShell label="legal" dark className="pb-24">
       <div className="mx-auto max-w-3xl px-6 py-16">
         <Block className="mb-10 h-12 w-1/2" delay={40} />
         <ul className="space-y-4">

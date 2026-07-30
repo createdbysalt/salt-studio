@@ -30,6 +30,8 @@ export type WorkProjectCard = {
   comingSoon?: boolean | null
   /** Studio “Hide from website” — filtered out of public grids when true. */
   hidden?: boolean | null
+  /** Used for “most recent” ordering when year is missing. */
+  _createdAt?: string | null
   /** Resolved on the server for cards that need a still before video boots. */
   posterUrl?: string | null
   /** Catalog position ("01"), attached before client-side search filtering. */

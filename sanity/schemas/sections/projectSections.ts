@@ -167,45 +167,74 @@ export const projectQuoteSection = defineType({
 
 export const projectStatsSection = defineType({
   name: 'projectStatsSection',
-  title: 'Stats',
+  title: 'Results',
   type: 'object',
   icon: TrendUpwardIcon,
   fields: [
     enabledField,
-    sectionInternalNameField('Stats'),
+    sectionInternalNameField('Results'),
     defineField({
       name: 'items',
-      title: 'Stats',
+      title: 'Results',
       type: 'array',
       description:
-        'Real, measured numbers only — never estimates or invented metrics. Leave this section out until real numbers exist.',
+        'Centered under the project title: big number on top, short label underneath (uppercase on the site). Real measured numbers only — leave this section out until you have them. Max 3 so they stay on one line.',
+      validation: (rule) =>
+        rule
+          .min(1)
+          .max(3)
+          .error('Add 1–3 results. More than three breaks the under-title row.'),
       of: [
         defineArrayMember({
           type: 'object',
           name: 'statItem',
-          title: 'Stat',
+          title: 'Result',
           fields: [
             defineField({
               name: 'value',
-              title: 'Value',
+              title: 'Number',
               type: 'string',
-              description: 'The number as it should read, e.g. “+214%” or “3 weeks”.',
-              validation: (rule) => rule.required().error('Every stat needs a value'),
+              description:
+                'The big figure visitors see first — keep it short. Examples: “+415%”, “4x”, “95%”, “3 weeks”.',
+              placeholder: '+415%',
+              validation: (rule) =>
+                rule
+                  .required()
+                  .error('Every result needs a number')
+                  .max(12)
+                  .warning('Keep the number short (about 12 characters) so the row stays even.'),
             }),
             defineField({
               name: 'label',
-              title: 'Label',
+              title: 'What it measures',
               type: 'string',
-              description: 'What it measures, e.g. “organic search impressions”.',
-              validation: (rule) => rule.required().error('Every stat needs a label'),
+              description:
+                'Quiet line under the number. Aim for 2–5 words (e.g. “web-based user acquisition”). The site shows it in small uppercase — don’t type in ALL CAPS.',
+              placeholder: 'web-based user acquisition',
+              validation: (rule) =>
+                rule
+                  .required()
+                  .error('Every result needs a short label')
+                  .max(36)
+                  .error(
+                    'Keep labels under ~36 characters so they stay readable in the under-title row.',
+                  ),
             }),
           ],
-          preview: {select: {title: 'value', subtitle: 'label'}},
+          preview: {
+            select: {title: 'value', subtitle: 'label'},
+            prepare({title, subtitle}) {
+              return {
+                title: title || 'Missing number',
+                subtitle: subtitle || 'Missing label',
+              }
+            },
+          },
         }),
       ],
     }),
   ],
-  preview: sectionPreview('internalName', 'Stats'),
+  preview: sectionPreview('internalName', 'Results'),
 })
 
 export const projectCreditsSection = defineType({

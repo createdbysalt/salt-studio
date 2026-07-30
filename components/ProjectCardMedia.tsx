@@ -193,7 +193,7 @@ export function ProjectCardMedia({
       <div
         className={`work-card-media-zoom absolute inset-0 ${
           inColor ? 'grayscale-0' : 'grayscale'
-        } transition-[filter] duration-500 ease-out motion-reduce:transition-none`}
+        } transition-[filter] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[filter] motion-reduce:transition-none motion-reduce:will-change-auto`}
       >
         {coverSrc ? (
           <img

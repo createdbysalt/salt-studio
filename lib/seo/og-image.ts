@@ -1,33 +1,25 @@
 import {seoConfig} from './config'
 
+/** Cache-bust when the branded card design changes. */
+const OG_VERSION = 'bw-11'
+
 /**
- * Build the URL for the dynamic Open Graph card served by `app/api/og`.
+ * Salt social share card (`/api/og`).
  *
- * The page's content is encoded in the query string, so the image updates
- * automatically whenever that content changes — and each unique card is
- * cached by the CDN.
+ * With no args: the site-wide statement card (wordmark, statement, tagline, domain).
+ * With `title` (and optional `eyebrow`): a project card — the eyebrow sits above the
+ * project title in place of the statement.
  *
- * In `generateMetadata`, prefer a manually-uploaded Sanity `ogImage` when set,
- * and fall back to this auto-generated card:
- *
- *   const og = page.ogImage
- *     ? urlForOpenGraphImage(page.ogImage)
- *     : ogImageUrl({title: page.seoTitle ?? page.headline, subtitle: page.seoDescription})
+ *   openGraph: { images: [{url: ogImageUrl({title, eyebrow}), width: 1200, height: 630}] }
  */
-export function ogImageUrl({
-  title,
-  eyebrow,
-  subtitle,
-}: {
+export function ogImageUrl(opts?: {
   title?: string | null
   eyebrow?: string | null
   subtitle?: string | null
 }): string {
-  const params = new URLSearchParams()
-  if (title) params.set('title', title)
-  if (eyebrow) params.set('eyebrow', eyebrow)
-  if (subtitle) params.set('subtitle', subtitle)
-
+  const params = new URLSearchParams({v: OG_VERSION})
+  if (opts?.title) params.set('title', opts.title)
+  if (opts?.eyebrow) params.set('eyebrow', opts.eyebrow)
   const base = seoConfig.siteUrl.replace(/\/$/, '')
   return `${base}/api/og?${params.toString()}`
 }

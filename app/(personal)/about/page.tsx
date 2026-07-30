@@ -14,9 +14,7 @@ export const metadata: Metadata = {
     title: 'About | Salt Studio',
     description:
       'Salt Studio — a Portland design and software studio. Subtle. Essential. Transformative.',
-    images: [
-      {url: ogImageUrl({title: 'About', subtitle: 'Salt Studio'}), width: 1200, height: 630},
-    ],
+    images: [{url: ogImageUrl(), width: 1200, height: 630}],
   },
 }
 

@@ -1,5 +1,6 @@
 import {CustomPortableText} from '@/components/CustomPortableText'
 import {Header} from '@/components/Header'
+import {BreadcrumbStructuredData, ogImageUrl} from '@/lib/seo'
 import {sanityFetch} from '@/sanity/lib/live'
 import {pagesBySlugQuery, slugsByTypeQuery} from '@/sanity/lib/queries'
 import type {Metadata, ResolvingMetadata} from 'next'
@@ -21,9 +22,15 @@ export async function generateMetadata(
     stega: false,
   })
 
+  const {slug} = await params
+  const ogImage = ogImageUrl()
+
   return {
     title: page?.title,
     description: page?.overview ? toPlainText(page.overview) : (await parent).description,
+    alternates: {canonical: `/${slug}`},
+    openGraph: {images: [{url: ogImage, width: 1200, height: 630}]},
+    twitter: {card: 'summary_large_image', images: [ogImage]},
   }
 }
 
@@ -46,9 +53,18 @@ export default async function PageSlugRoute({params}: Props) {
   }
 
   const {body, overview, title} = data ?? {}
+  const {slug} = await params
 
   return (
     <div>
+      {data?._id ? (
+        <BreadcrumbStructuredData
+          items={[
+            {name: 'Home', url: '/'},
+            {name: title || 'Page', url: `/${slug}`},
+          ]}
+        />
+      ) : null}
       <div className="mb-14">
         {/* Header */}
         <Header

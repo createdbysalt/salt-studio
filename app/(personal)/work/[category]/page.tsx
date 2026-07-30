@@ -38,11 +38,12 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   if (!data) return {}
 
   const title = data.headline ?? data.filterLabel ?? 'Work'
-  const ogImage = ogImageUrl({title: data.seoTitle ?? title, subtitle: data.seoDescription})
+  const ogImage = ogImageUrl()
 
   return {
     title: data.seoTitle ? {absolute: data.seoTitle} : title,
     description: data.seoDescription ?? undefined,
+    alternates: {canonical: `/work/${category}`},
     openGraph: {
       title: data.seoTitle ?? title,
       description: data.seoDescription ?? undefined,

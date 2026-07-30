@@ -14,10 +14,10 @@ export function ProjectNextSection({projects}: {projects: WorkProjectCard[]}) {
   return (
     <section
       aria-label="Next project"
-      className="relative border-t border-foreground/10 px-5 pb-20 pt-36 md:px-6 md:pb-28 md:pt-44"
+      className="relative overflow-x-clip border-t border-foreground/10 px-5 pb-20 pt-36 md:px-6 md:pb-28 md:pt-44"
     >
       <div className="relative mx-auto w-full max-w-[100rem]">
-        <h2 className="pointer-events-none text-center font-sans text-[clamp(5rem,16vw,13rem)] font-bold uppercase leading-[0.78] tracking-[-0.05em] text-foreground/90">
+        <h2 className="pointer-events-none mx-auto w-full text-center font-sans text-[clamp(2.6rem,17vw,13rem)] font-bold uppercase leading-[0.78] tracking-[-0.05em] text-foreground/90">
           Next
           <br />
           project

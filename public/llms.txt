@@ -1,33 +1,44 @@
-# Photon
+# Salt Studio
 
-> Modular Production for the Future of Content
+> Custom AI, sites + software for organizations with a mission. Subtle. Essential. Transformative.
 
 ## About
 
-Photon is Modular Production for the Future of Content.
+Salt Studio is a small, deliberate studio based in Portland, Oregon. We build custom AI automations, websites, and software for organizations with a mission — churches, ministries, nonprofits, and small teams carrying something that matters. We take one build at a time, with fixed scopes, visible prices, and one point of contact.
 
 ## What We Offer
 
-- [Add your main offerings here]
-- [Add another offering]
-- [Add another offering]
+- **Websites** (from $2,500) — A complete website: brand, copy, design, build. Made to sell, and simple enough that your team keeps it current without a developer. Built for search engines and AI answers alike.
+- **AI Automations** (blueprint from $1,500 · retainer from $1,000/mo) — We map how your business runs, hand you a prioritized blueprint of what to automate, then build and maintain the automations month to month. Custom builds by quote.
+- **Custom Software** (from $25,000) — Platforms built from the ground up around how you actually work: roles, accounts, data. Built in milestones you can see, and yours to own.
 
 ## Who We Help
 
-We work with [describe your ideal customers].
+Organizations with a mission and one person who can say yes: churches, ministries, nonprofits, and small teams that want fixed scope, a visible price, and a partner who stays close after launch.
+
+## How It Starts
+
+A 30-minute discovery call — you bring the problem, no spec needed. Then a written recommendation: what we'd build, what it costs, how long it takes. Sometimes the recommendation is "don't hire us." That's free.
 
 ## Contact
 
-- Website: https://photon.studio/
-- Email: [your email]
+- Website: https://createdbysalt.com
+- Email: hello@createdbysalt.com
+- Book a discovery call: https://cal.com/createdbysalt/discovery
 
 ## Key Pages
 
-- Home: https://photon.studio/
-- About: https://photon.studio//about
-- Services: https://photon.studio//services
-- Contact: https://photon.studio//contact
+- Home: https://createdbysalt.com/
+- Work: https://createdbysalt.com/work
+- Capabilities: https://createdbysalt.com/capabilities
+- Contact: https://createdbysalt.com/contact
+
+## Social
+
+- LinkedIn: https://www.linkedin.com/company/createdbysalt/
+- Instagram: https://www.instagram.com/createdbysalt/
+- X: https://x.com/saltstudiohq
 
 ---
 
-*This file helps AI assistants understand our website. Last updated: 2026-04-09*
+*This file helps AI assistants understand our website. Last updated: 2026-07-30*

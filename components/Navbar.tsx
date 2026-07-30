@@ -16,7 +16,7 @@ import {AnimatePresence, motion} from 'motion/react'
 import {createDataAttribute} from 'next-sanity'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
-import {forwardRef, useEffect, useRef, useState, type MouseEvent} from 'react'
+import {forwardRef, useEffect, useLayoutEffect, useRef, useState, type MouseEvent} from 'react'
 
 interface NavbarProps {
   data: SettingsQueryResult
@@ -556,13 +556,19 @@ function useNavOnColorSurface(pathname: string, menuPresent: boolean): boolean {
   const [onColor, setOnColor] = useState(routeHint)
   const latestRef = useRef(routeHint)
 
-  useEffect(() => {
+  // Layout effect so route changes drop stale frost/paper chrome before paint.
+  useLayoutEffect(() => {
     // Freeze the last good sample while the sheet is open — don't re-hit-test
     // through the expanded pill / backdrop.
     if (menuPresent) {
       setOnColor(latestRef.current)
       return
     }
+
+    // Navbar lives in the layout — reset the route hint immediately so a dark
+    // page's frost chrome doesn't flash over a paper hero (legal, capabilities).
+    latestRef.current = routeHint
+    setOnColor(routeHint)
 
     let frame = 0
     const sample = () => {
@@ -608,18 +614,26 @@ function isColorSurfaceUnderNav(): boolean {
 
     let node: HTMLElement | null = el
     while (node && node !== document.documentElement) {
-      if (node.dataset.theme === 'dark' || node.dataset.navSurface === 'color') {
-        return true
+      // Explicit paper surface (sticky legal/capabilities masthead over a dark shell).
+      if (node.dataset.navSurface === 'paper') {
+        return false
       }
 
       const style = getComputedStyle(node)
+
+      // Opaque paint wins over ancestor data-theme — a white hero panel sits
+      // above the dark /legal shell and must keep ink chrome, not frost.
+      const parsed = parseCssColor(style.backgroundColor)
+      if (parsed && parsed.a >= 0.45) {
+        return relativeLuminance(parsed) < 0.62
+      }
+
       if (style.backgroundImage && style.backgroundImage !== 'none') {
         return true
       }
 
-      const parsed = parseCssColor(style.backgroundColor)
-      if (parsed && parsed.a >= 0.45) {
-        return relativeLuminance(parsed) < 0.62
+      if (node.dataset.theme === 'dark' || node.dataset.navSurface === 'color') {
+        return true
       }
 
       node = node.parentElement
@@ -630,16 +644,54 @@ function isColorSurfaceUnderNav(): boolean {
 }
 
 function parseCssColor(value: string): {r: number; g: number; b: number; a: number} | null {
-  const match = value.match(
-    /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)/i,
-  )
-  if (!match) return null
-  return {
-    r: Number(match[1]),
-    g: Number(match[2]),
-    b: Number(match[3]),
-    a: match[4] === undefined ? 1 : Number(match[4]),
+  const trimmed = value.trim()
+  if (!trimmed || trimmed === 'transparent') return null
+
+  const hex = trimmed.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i)
+  if (hex) {
+    const h = hex[1]
+    const full =
+      h.length === 3
+        ? h
+            .split('')
+            .map((c) => c + c)
+            .join('')
+        : h
+    return {
+      r: Number.parseInt(full.slice(0, 2), 16),
+      g: Number.parseInt(full.slice(2, 4), 16),
+      b: Number.parseInt(full.slice(4, 6), 16),
+      a: 1,
+    }
   }
+
+  // rgb(255, 255, 255) | rgba(255, 255, 255, 0.5)
+  const comma = trimmed.match(
+    /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/i,
+  )
+  if (comma) {
+    return {
+      r: Number(comma[1]),
+      g: Number(comma[2]),
+      b: Number(comma[3]),
+      a: comma[4] === undefined ? 1 : Number(comma[4]),
+    }
+  }
+
+  // rgb(255 255 255) | rgb(255 255 255 / 0.5)
+  const space = trimmed.match(
+    /^rgba?\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+%?))?\s*\)$/i,
+  )
+  if (space) {
+    const alphaRaw = space[4]
+    let a = 1
+    if (alphaRaw !== undefined) {
+      a = alphaRaw.endsWith('%') ? Number(alphaRaw.slice(0, -1)) / 100 : Number(alphaRaw)
+    }
+    return {r: Number(space[1]), g: Number(space[2]), b: Number(space[3]), a}
+  }
+
+  return null
 }
 
 function relativeLuminance({r, g, b}: {r: number; g: number; b: number}): number {

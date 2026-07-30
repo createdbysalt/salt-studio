@@ -22,9 +22,7 @@ import {Suspense} from 'react'
 // Interior pages set their own and override this; it's the fallback for pages
 // that don't (notably the 404 and error boundaries, which live outside the
 // (personal) group and can't declare their own metadata).
-const defaultOgImage = ogImageUrl({
-  title: seoConfig.siteName || 'Salt Studio',
-})
+const defaultOgImage = ogImageUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(seoConfig.siteUrl),

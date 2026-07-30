@@ -10,33 +10,55 @@ import {CorePageSchema, ogImageUrl} from '@/lib/seo'
 import {resolveWorkPills} from '@/lib/work-pills'
 import {sanityFetch} from '@/sanity/lib/live'
 import {allProjectsQuery, workCategoriesQuery, workPageQuery} from '@/sanity/lib/queries'
-import {urlForOpenGraphImage} from '@/sanity/lib/utils'
 import type {Metadata} from 'next'
 import {stegaClean} from 'next-sanity'
 
 export async function generateMetadata(): Promise<Metadata> {
   const {data} = await sanityFetch({query: workPageQuery, stega: false})
-
-  const ogImage = data?.ogImage
-    ? urlForOpenGraphImage(data.ogImage)
-    : ogImageUrl({title: data?.headline ?? 'Work', subtitle: data?.seoDescription})
+  const ogImage = ogImageUrl()
 
   return {
     title: data?.seoTitle ? {absolute: data.seoTitle} : 'Work',
     description: data?.seoDescription ?? undefined,
+    alternates: {canonical: '/work'},
     openGraph: {
       title: data?.seoTitle ?? data?.headline ?? 'Work',
       description: data?.seoDescription ?? undefined,
-      images: ogImage ? [{url: ogImage, width: 1200, height: 630}] : [],
+      images: [{url: ogImage, width: 1200, height: 630}],
     },
-    twitter: {card: 'summary_large_image', images: ogImage ? [ogImage] : []},
+    twitter: {card: 'summary_large_image', images: [ogImage]},
   }
+}
+
+function compareByCreatedThenYear(a: WorkProjectCard, b: WorkProjectCard) {
+  const createdA = a._createdAt ? Date.parse(a._createdAt) : 0
+  const createdB = b._createdAt ? Date.parse(b._createdAt) : 0
+  if (createdB !== createdA) return createdB - createdA
+
+  const yearA = Number.parseInt(stegaClean(a.year) || '', 10)
+  const yearB = Number.parseInt(stegaClean(b.year) || '', 10)
+  const safeYearA = Number.isFinite(yearA) ? yearA : -1
+  const safeYearB = Number.isFinite(yearB) ? yearB : -1
+  if (safeYearB !== safeYearA) return safeYearB - safeYearA
+
+  return (stegaClean(a.title) ?? '').localeCompare(stegaClean(b.title) ?? '')
+}
+
+/** Featured first, then most recently created within each group. */
+function compareFeaturedThenRecent(a: WorkProjectCard, b: WorkProjectCard) {
+  const featuredDelta = Number(Boolean(b.featured)) - Number(Boolean(a.featured))
+  if (featuredDelta !== 0) return featuredDelta
+  return compareByCreatedThenYear(a, b)
+}
+
+function compareNewest(a: WorkProjectCard, b: WorkProjectCard) {
+  return compareByCreatedThenYear(a, b)
 }
 
 /**
  * Resolve the grid order from the workPage `projectSource` control. "manual"
- * uses the hand-picked list; the auto modes reorder the full catalog (which the
- * query already returns newest-first).
+ * uses the hand-picked list; auto modes reorder the full catalog.
+ * Default / unset → featured first, then most recent.
  */
 function resolveProjects(
   projectSource: string | null | undefined,
@@ -53,19 +75,17 @@ function resolveProjects(
   switch (projectSource) {
     case 'manual':
       return filterProjectsWithVideo(visibleCurated)
-    case 'featured':
-      // Stable sort keeps the newest-first order within each group.
-      return filterProjectsWithVideo(
-        [...all].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured))),
-      )
+    case 'newest':
+      return filterProjectsWithVideo([...all].sort(compareNewest))
     case 'az':
       return filterProjectsWithVideo(
         [...all].sort((a, b) =>
           (stegaClean(a.title) ?? '').localeCompare(stegaClean(b.title) ?? ''),
         ),
       )
+    case 'featured':
     default:
-      return filterProjectsWithVideo(all)
+      return filterProjectsWithVideo([...all].sort(compareFeaturedThenRecent))
   }
 }
 

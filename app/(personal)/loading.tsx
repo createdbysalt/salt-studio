@@ -22,6 +22,5 @@ export default function Loading() {
   if (pathname === '/legal') return <LegalLoading />
   if (pathname.startsWith('/legal/')) return <LegalLoading article />
   if (pathname === '/contact') return <EditorialLoading width="narrow" />
-
   return <EditorialLoading width="wide" />
 }
