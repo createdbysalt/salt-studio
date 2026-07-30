@@ -43,9 +43,16 @@ function resolveProjects(
   curated: Array<WorkProjectCard | null> | null | undefined,
   all: WorkProjectCard[],
 ): WorkProjectCard[] {
+  const visibleCurated = (curated ?? []).filter(
+    (project): project is WorkProjectCard =>
+      Boolean(project?._id) &&
+      project?.hidden !== true &&
+      (Boolean(project?.coverImage?.asset) || Boolean(project?.videoUrl)),
+  )
+
   switch (projectSource) {
     case 'manual':
-      return filterProjectsWithVideo(curated ?? [])
+      return filterProjectsWithVideo(visibleCurated)
     case 'featured':
       // Stable sort keeps the newest-first order within each group.
       return filterProjectsWithVideo(

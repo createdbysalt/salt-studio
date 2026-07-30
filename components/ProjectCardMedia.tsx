@@ -1,17 +1,23 @@
 'use client'
 
 import {isVimeoUrl, vimeoBackgroundSrc} from '@/lib/vimeo'
+import {isYouTubeUrl, youtubeBackgroundSrc} from '@/lib/youtube'
 import {urlForImage} from '@/sanity/lib/utils'
 import {stegaClean} from 'next-sanity'
 import {useEffect, useRef, useState} from 'react'
 
 export type WorkVideoPlayback = 'autoplay' | 'hover'
 
+/** Desktop breakpoint — matches Tailwind `lg`. */
+const DESKTOP_MQ = '(min-width: 1024px)'
+
 /** Normalize CMS / stega-encoded workPage.videoPlayback to a playback mode. */
 export function resolveWorkVideoPlayback(
   value: WorkVideoPlayback | string | null | undefined,
 ): WorkVideoPlayback {
-  return stegaClean(value ?? '') === 'hover' ? 'hover' : 'autoplay'
+  // Default to hover (desktop greyscale→color on hover). Explicit `autoplay`
+  // keeps full color at rest on every screen size.
+  return stegaClean(value ?? '') === 'autoplay' ? 'autoplay' : 'hover'
 }
 
 type ProjectCardMediaProps = {
@@ -20,16 +26,20 @@ type ProjectCardMediaProps = {
   videoUrl?: string | null
   /** Pre-resolved poster (Sanity cover or Vimeo oEmbed) from the server. */
   posterUrl?: string | null
-  /** From workPage.videoPlayback — defaults to autoplay. */
+  /**
+   * From workPage.videoPlayback.
+   * `hover` = all cards autoplay; desktop is greyscale until hover (full color).
+   * `autoplay` = muted loops in full color on every screen size.
+   */
   playback?: WorkVideoPlayback | null
   /** Force-pause (e.g. scroll-gallery neighbor frames). */
   paused?: boolean
 }
 
 /**
- * Work-grid card media. Autoplay mode mounts a muted looping preview when the
- * card is near the viewport. Hover mode keeps the poster/still until the card
- * is hovered (or keyboard-focused), then plays.
+ * Work-grid card media. Muted looping previews mount near the viewport.
+ * In hover mode on desktop, every card plays in greyscale and snaps to
+ * full color on hover/focus. Phones and tablets stay full-color autoplay.
  */
 export function ProjectCardMedia({
   title,
@@ -48,11 +58,20 @@ export function ProjectCardMedia({
   const [inViewport, setInViewport] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [videoReady, setVideoReady] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia(DESKTOP_MQ).matches : true,
+  )
 
   const mode = resolveWorkVideoPlayback(playback)
+  // Desktop + hover mode → greyscale at rest, color on pointer/focus.
+  const colorOnHover = mode === 'hover' && isDesktop
+  const inColor = !colorOnHover || hovered
+
   const cleanUrl = videoUrl ? stegaClean(videoUrl).trim() || null : null
+  const youtubeSrc = cleanUrl && isYouTubeUrl(cleanUrl) ? youtubeBackgroundSrc(cleanUrl) : null
   const vimeoSrc = cleanUrl && isVimeoUrl(cleanUrl) ? vimeoBackgroundSrc(cleanUrl) : null
-  const mp4Src = cleanUrl && !isVimeoUrl(cleanUrl) ? cleanUrl : null
+  const mp4Src =
+    cleanUrl && !isVimeoUrl(cleanUrl) && !isYouTubeUrl(cleanUrl) ? cleanUrl : null
 
   const coverSrc =
     posterUrl ||
@@ -70,7 +89,14 @@ export function ProjectCardMedia({
     setVideoReady(true)
   }
 
-  // Reset when the CMS mode flips so cards don't inherit stale flags.
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP_MQ)
+    const sync = () => setIsDesktop(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
   useEffect(() => {
     playerMountedRef.current = false
     readyRef.current = false
@@ -80,7 +106,6 @@ export function ProjectCardMedia({
     setVideoReady(false)
   }, [mode])
 
-  // Track viewport proximity continuously — mount once near, never tear down.
   useEffect(() => {
     const node = rootRef.current
     if (!node || !cleanUrl) return
@@ -111,10 +136,14 @@ export function ProjectCardMedia({
     return () => observer.disconnect()
   }, [cleanUrl, mode])
 
-  // Hover mode: listen on the parent card link so the text overlay still counts.
+  // Color restore on hover — card shell (link or coming-soon wrapper).
   useEffect(() => {
-    if (mode !== 'hover') return
-    const card = rootRef.current?.closest('a')
+    if (!colorOnHover) {
+      setHovered(false)
+      return
+    }
+    const card =
+      rootRef.current?.closest<HTMLElement>('a[href], [data-work-card]') ?? null
     if (!card) return
 
     const enter = () => setHovered(true)
@@ -123,50 +152,49 @@ export function ProjectCardMedia({
     card.addEventListener('pointerleave', leave)
     card.addEventListener('focusin', enter)
     card.addEventListener('focusout', leave)
-    card.addEventListener('touchstart', enter, {passive: true})
-    card.addEventListener('touchend', leave, {passive: true})
-    card.addEventListener('touchcancel', leave, {passive: true})
     return () => {
       card.removeEventListener('pointerenter', enter)
       card.removeEventListener('pointerleave', leave)
       card.removeEventListener('focusin', enter)
       card.removeEventListener('focusout', leave)
-      card.removeEventListener('touchstart', enter)
-      card.removeEventListener('touchend', leave)
-      card.removeEventListener('touchcancel', leave)
     }
-  }, [mode])
+  }, [colorOnHover])
 
   const mountPlayer = Boolean(cleanUrl) && (playerMountedRef.current || nearViewport)
-  const revealVideo =
-    mountPlayer && !paused && (mode === 'hover' ? hovered : inViewport || readyRef.current)
+  const revealVideo = mountPlayer && !paused && (inViewport || readyRef.current)
 
-  // Once a player has booted, never flash the poster again on scroll.
-  // After mount starts, only show poster while actively in view and still loading.
   const showPoster =
     !readyRef.current &&
     Boolean(coverSrc) &&
     (!playerMountedRef.current || (revealVideo && !videoReady))
 
+  const showVideoLayer = revealVideo || readyRef.current
+
   useEffect(() => {
     setVideoReady(false)
     readyRef.current = false
-  }, [vimeoSrc, mp4Src])
+  }, [youtubeSrc, vimeoSrc, mp4Src])
 
   useEffect(() => {
     const el = videoRef.current
     if (!el || !mp4Src) return
     if (revealVideo) {
       el.play().catch(() => {})
-    } else if (!readyRef.current) {
-      el.pause()
+      return
+    }
+    el.pause()
+    if (!readyRef.current) {
       el.currentTime = 0
     }
   }, [revealVideo, mp4Src])
 
   return (
     <div ref={rootRef} className="absolute inset-0 overflow-hidden bg-foreground/6">
-      <div className="work-card-media-zoom absolute inset-0">
+      <div
+        className={`work-card-media-zoom absolute inset-0 ${
+          inColor ? 'grayscale-0' : 'grayscale'
+        } transition-[filter] duration-500 ease-out motion-reduce:transition-none`}
+      >
         {coverSrc ? (
           <img
             src={coverSrc}
@@ -178,6 +206,18 @@ export function ProjectCardMedia({
           />
         ) : null}
 
+        {mountPlayer && youtubeSrc ? (
+          <iframe
+            src={youtubeSrc}
+            title={title ? `${title} preview` : 'Project preview'}
+            allow="autoplay; fullscreen; picture-in-picture"
+            onLoad={markReady}
+            className={`pointer-events-none absolute inset-0 z-0 h-full w-full border-0 ${
+              showVideoLayer ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+        ) : null}
+
         {mountPlayer && vimeoSrc ? (
           <iframe
             src={vimeoSrc}
@@ -185,7 +225,7 @@ export function ProjectCardMedia({
             allow="autoplay; fullscreen; picture-in-picture"
             onLoad={markReady}
             className={`pointer-events-none absolute left-1/2 top-1/2 z-0 h-full min-h-full w-[177.78%] min-w-full -translate-x-1/2 -translate-y-1/2 border-0 ${
-              revealVideo || readyRef.current ? 'opacity-100' : 'opacity-0'
+              showVideoLayer ? 'opacity-100' : 'opacity-0'
             }`}
           />
         ) : null}
@@ -201,7 +241,7 @@ export function ProjectCardMedia({
             onPlaying={markReady}
             onCanPlay={markReady}
             className={`absolute inset-0 z-0 h-full w-full object-cover ${
-              revealVideo || readyRef.current ? 'opacity-100' : 'opacity-0'
+              showVideoLayer ? 'opacity-100' : 'opacity-0'
             }`}
           >
             <source src={mp4Src} type="video/mp4" />

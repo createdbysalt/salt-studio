@@ -47,6 +47,43 @@ async function resolveLeadPoster(project: Project): Promise<string | null> {
   return null
 }
 
+type GalleryMediaItem =
+  | {
+      _key: string
+      _type: 'projectGalleryPhoto'
+      image?: Extract<ProjectScrollFrame, {kind: 'photo'}>['image']
+    }
+  | {
+      _key: string
+      _type: 'projectGalleryVideo'
+      videoUrl?: string | null
+      videoFileUrl?: string | null
+      poster?: Extract<ProjectScrollFrame, {kind: 'video'}>['poster']
+      caption?: string | null
+    }
+
+/** Flat Photo/Video items, or legacy 1-/2-column rows — normalize for the scroll stack. */
+function flattenProjectGallery(
+  entries: Project['gallery'] | Project['btsImages'],
+): GalleryMediaItem[] {
+  const out: GalleryMediaItem[] = []
+  for (const entry of entries ?? []) {
+    if (!entry) continue
+    if (entry._type === 'projectGalleryPhoto' || entry._type === 'projectGalleryVideo') {
+      out.push(entry as GalleryMediaItem)
+      continue
+    }
+    const items = 'items' in entry ? entry.items : null
+    for (const item of items ?? []) {
+      if (!item) continue
+      if (item._type === 'projectGalleryPhoto' || item._type === 'projectGalleryVideo') {
+        out.push(item as GalleryMediaItem)
+      }
+    }
+  }
+  return out
+}
+
 function toWorkCards(
   projects: Array<{
     _id: string
@@ -113,8 +150,8 @@ export async function ProjectDetail({data}: {data: Project | null}) {
   const ideaText = briefText || contextText
   const insightText = approachText || (briefText && contextText ? contextText : '') || btsNoteText
 
-  const galleryRows = project.gallery ?? []
-  const btsRows = project.btsImages ?? []
+  const galleryItems = flattenProjectGallery(project.gallery)
+  const btsItems = flattenProjectGallery(project.btsImages)
 
   const scrollFrames: ProjectScrollFrame[] = []
   if (hasLeadMedia) {
@@ -127,27 +164,26 @@ export async function ProjectDetail({data}: {data: Project | null}) {
       posterUrl: leadPosterUrl,
     })
   }
-  for (const row of [...galleryRows, ...btsRows]) {
-    for (const item of row?.items ?? []) {
-      if (!item) continue
-      if (item._type === 'projectGalleryPhoto' && item.image?.asset) {
-        scrollFrames.push({
-          key: item._key,
-          kind: 'photo',
-          image: item.image,
-        })
-      } else if (item._type === 'projectGalleryVideo') {
-        const url = item.videoUrl ? stegaClean(item.videoUrl).trim() : ''
-        if (!url) continue
-        scrollFrames.push({
-          key: item._key,
-          kind: 'video',
-          title,
-          videoUrl: item.videoUrl,
-          poster: item.poster,
-          caption: item.caption,
-        })
-      }
+  for (const item of [...galleryItems, ...btsItems]) {
+    if (item._type === 'projectGalleryPhoto' && item.image?.asset) {
+      scrollFrames.push({
+        key: item._key,
+        kind: 'photo',
+        image: item.image,
+      })
+    } else if (item._type === 'projectGalleryVideo') {
+      const url = item.videoUrl ? stegaClean(item.videoUrl).trim() : ''
+      const fileUrl = item.videoFileUrl ? stegaClean(item.videoFileUrl).trim() : ''
+      if (!url && !fileUrl) continue
+      scrollFrames.push({
+        key: item._key,
+        kind: 'video',
+        title,
+        videoUrl: item.videoUrl,
+        videoFileUrl: item.videoFileUrl,
+        poster: item.poster,
+        caption: item.caption,
+      })
     }
   }
   const showScrollGallery = scrollFrames.length > 0
@@ -161,7 +197,9 @@ export async function ProjectDetail({data}: {data: Project | null}) {
       : []
   const showTestimonials = isCaseStudy && testimonials.length > 0
 
-  const relatedFromDoc = toWorkCards(project.relatedProjects ?? [])
+  const relatedFromDoc = toWorkCards(
+    (project.relatedProjects ?? []).filter((p) => p?.hidden !== true),
+  )
   const relatedIds = new Set(relatedFromDoc.map((p) => p._id))
   let nextSource = relatedFromDoc
   if (nextSource.length < 3 && project.slug) {

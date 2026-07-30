@@ -3,6 +3,7 @@
 import {useGSAP} from '@gsap/react'
 import {useRef} from 'react'
 import {gsap, prefersReducedMotion} from './gsap'
+import {isIntroBlocking, waitForIntroPhase} from './intro'
 
 export type SwapFace = {
   left: string
@@ -111,36 +112,67 @@ export function WordSwap({primary, secondary, className}: WordSwapProps) {
         immediateRender: false,
       }
 
+      // Park both faces below the mask before revealing the layer.
       gsap.set(wordsA, {yPercent: 105})
       gsap.set(wordsB, {yPercent: 105})
+      gsap.set(phraseB, {autoAlpha: 0})
+      gsap.set(phraseA, {autoAlpha: 1})
+      const hero = scope.current.closest<HTMLElement>('[data-home-hero]')
+      if (hero) hero.dataset.wordswap = 'ready'
 
-      // Intro — left then right, matching TinyWins stagger offsets
-      const intro = gsap.timeline()
-      intro
-        .to(leftA, {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'}, 0.3)
-        .to(rightA, {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'}, 0.4)
+      let intro: gsap.core.Timeline | null = null
+      let loop: gsap.core.Timeline | null = null
+      let cancelled = false
 
-      // Loop — A ↔ B with ~3s pause between cycles (TinyWins repeatDelay)
-      const cycleHold = 5.1
-      const loop = gsap.timeline({
-        paused: true,
-        repeat: -1,
-        repeatDelay: 3,
-      })
+      const play = () => {
+        if (cancelled || !scope.current) return
 
-      loop
-        .to(wordsA, {...exit, ...withWillChange(wordsA)}, 0)
-        .fromTo(wordsB, {yPercent: 105}, {...enter, ...withWillChange(wordsB)}, 0.7)
-        .to(wordsB, {...exit, ...withWillChange(wordsB)}, cycleHold)
-        .fromTo(wordsA, {yPercent: 105}, {...enter, ...withWillChange(wordsA)}, cycleHold + 0.7)
+        // Re-apply after any useGSAP context revert (Strict Mode remount).
+        gsap.set(wordsA, {yPercent: 105})
+        gsap.set(wordsB, {yPercent: 105})
+        gsap.set(phraseB, {autoAlpha: 0})
+        gsap.set(phraseA, {autoAlpha: 1})
+        const heroEl = scope.current.closest<HTMLElement>('[data-home-hero]')
+        if (heroEl) heroEl.dataset.wordswap = 'ready'
 
-      intro.eventCallback('onComplete', () => {
-        loop.play()
-      })
+        // Intro — left then right, matching TinyWins stagger offsets
+        intro = gsap.timeline()
+        intro
+          .to(leftA, {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'}, 0.15)
+          .to(rightA, {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'}, 0.25)
+
+        // Loop — A ↔ B with ~3s pause between cycles (TinyWins repeatDelay)
+        const cycleHold = 5.1
+        loop = gsap.timeline({
+          paused: true,
+          repeat: -1,
+          repeatDelay: 3,
+        })
+
+        loop
+          .set(phraseB, {autoAlpha: 1}, 0)
+          .to(wordsA, {...exit, ...withWillChange(wordsA)}, 0)
+          .fromTo(wordsB, {yPercent: 105}, {...enter, ...withWillChange(wordsB)}, 0.7)
+          .to(wordsB, {...exit, ...withWillChange(wordsB)}, cycleHold)
+          .set(phraseA, {autoAlpha: 1}, cycleHold)
+          .fromTo(wordsA, {yPercent: 105}, {...enter, ...withWillChange(wordsA)}, cycleHold + 0.7)
+          .set(phraseB, {autoAlpha: 0}, cycleHold + 1.7)
+
+        intro.eventCallback('onComplete', () => {
+          loop?.play()
+        })
+      }
+
+      if (isIntroBlocking()) {
+        waitForIntroPhase('hero').then(play)
+      } else {
+        play()
+      }
 
       return () => {
-        intro.kill()
-        loop.kill()
+        cancelled = true
+        intro?.kill()
+        loop?.kill()
       }
     },
     {scope, dependencies: [primary.left, primary.right, secondary.left, secondary.right]},

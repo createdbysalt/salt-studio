@@ -15,6 +15,7 @@ import {sanityFetch} from '@/sanity/lib/live'
 import {developerSettingsQuery} from '@/sanity/lib/queries'
 import type {Metadata} from 'next'
 import {Geist, Geist_Mono} from 'next/font/google'
+import Script from 'next/script'
 import {Suspense} from 'react'
 
 // Site-wide default social share card: the auto-generated /api/og branded card.
@@ -22,8 +23,7 @@ import {Suspense} from 'react'
 // that don't (notably the 404 and error boundaries, which live outside the
 // (personal) group and can't declare their own metadata).
 const defaultOgImage = ogImageUrl({
-  title: seoConfig.siteName,
-  subtitle: seoConfig.siteDescription,
+  title: seoConfig.siteName || 'Salt Studio',
 })
 
 export const metadata: Metadata = {
@@ -61,6 +61,10 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <head>
+        {/* Ink cover before hydration — does not mutate React-owned html attrs. */}
+        <Script id="salt-intro-boot" strategy="beforeInteractive">
+          {`(function(){try{if(location.pathname!=="/")return;if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;try{sessionStorage.removeItem("salt-intro")}catch(e){}window.__SALT_INTRO__=true;var s=document.createElement("style");s.id="salt-intro-boot-style";s.textContent="html,body{background:#08090a!important}[data-intro-hide]{opacity:0!important;pointer-events:none!important}[data-home-hero] [data-phrase-a],[data-home-hero] [data-phrase-b]{opacity:0!important}";(document.head||document.documentElement).appendChild(s);var d=document.createElement("div");d.id="salt-intro-boot";d.setAttribute("aria-hidden","true");d.style.cssText="position:fixed;inset:0;z-index:199;background:#08090a;pointer-events:none";(document.body||document.documentElement).appendChild(d);}catch(e){}})();`}
+        </Script>
         <GoogleTagManagerScript />
         <ClientGoogleAnalyticsScript measurementId={devSettings?.clientGoogleAnalyticsId} />
       </head>

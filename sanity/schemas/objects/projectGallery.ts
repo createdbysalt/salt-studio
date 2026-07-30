@@ -12,7 +12,8 @@ export const projectGalleryPhoto = defineType({
       name: 'image',
       title: 'Photo',
       type: 'image',
-      description: 'Still for this gallery cell.',
+      description:
+        'Still for the project page gallery. Use high-res — 2400px wide or larger (16:9 works best).',
       options: {
         hotspot: true,
         accept: 'image/png,image/jpeg,image/webp,image/gif',
@@ -23,6 +24,7 @@ export const projectGalleryPhoto = defineType({
           type: 'string',
           title: 'Alt text',
           description: 'Describe the image for screen readers.',
+          validation: (rule) => rule.warning('Alt text improves accessibility and SEO'),
         }),
         defineField({
           name: 'caption',
@@ -54,22 +56,94 @@ export const projectGalleryVideo = defineType({
   icon: PlayIcon,
   fields: [
     defineField({
+      name: 'source',
+      title: 'Video source',
+      type: 'string',
+      description: 'Upload a file, or paste a YouTube / Vimeo / MP4 link.',
+      options: {
+        list: [
+          {title: 'Upload', value: 'upload'},
+          {title: 'YouTube', value: 'youtube'},
+          {title: 'Link (Vimeo / MP4)', value: 'link'},
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'youtube',
+      validation: (rule) =>
+        rule.custom((value, context) => {
+          const parent = context.parent as {
+            videoUrl?: string
+            videoFile?: {_type?: string}
+          } | undefined
+          // Legacy cells may only have a URL — don't block publish until re-saved.
+          if (!value && (parent?.videoUrl || parent?.videoFile)) return true
+          if (!value) return 'Pick where this video comes from'
+          return true
+        }),
+    }),
+    defineField({
+      name: 'videoFile',
+      title: 'Video file',
+      type: 'file',
+      description:
+        'Upload an MP4 (preferred), WebM, or MOV. Use a high-res file — 1080p or higher.',
+      options: {
+        accept: 'video/mp4,video/webm,video/quicktime',
+      },
+      hidden: ({parent}) => (parent?.source ?? 'link') !== 'upload',
+      validation: (rule) =>
+        rule.custom((value, context) => {
+          const parent = context.parent as {source?: string} | undefined
+          if (parent?.source === 'upload' && !value) {
+            return 'Upload a video file'
+          }
+          return true
+        }),
+    }),
+    defineField({
       name: 'videoUrl',
       title: 'Video URL',
       type: 'url',
-      description: 'Vimeo page URL (e.g. https://vimeo.com/123) or a direct HTTPS MP4 link.',
+      description:
+        'YouTube: watch / youtu.be link. Link source: Vimeo page URL or a direct HTTPS MP4.',
+      hidden: ({parent}) => parent?.source === 'upload',
       validation: (rule) =>
-        rule
-          .required()
-          .error('Add a video URL')
-          .uri({allowRelative: false, scheme: ['https']})
-          .warning('Use an HTTPS video URL'),
+        rule.custom((value, context) => {
+          const parent = context.parent as {
+            source?: string
+            videoFile?: {_type?: string}
+          } | undefined
+          const source = parent?.source ?? (value ? 'link' : undefined)
+          if (source === 'upload') return true
+          if (!value) {
+            if (parent?.videoFile) return true
+            return source === 'youtube' ? 'Add a YouTube URL' : 'Add a video URL'
+          }
+          try {
+            const parsed = new URL(value)
+            if (parsed.protocol !== 'https:') return 'Use an HTTPS video URL'
+            if (source === 'youtube') {
+              const host = parsed.hostname.replace(/^www\./, '')
+              if (
+                host !== 'youtube.com' &&
+                host !== 'm.youtube.com' &&
+                host !== 'youtu.be' &&
+                host !== 'youtube-nocookie.com'
+              ) {
+                return 'Use a YouTube URL (youtube.com or youtu.be)'
+              }
+            }
+          } catch {
+            return 'Enter a valid URL'
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'poster',
       title: 'Poster image',
       type: 'image',
-      description: 'Optional still shown before the video plays. Recommended for MP4s.',
+      description: 'Optional still shown before the video plays. Recommended for uploads and MP4s.',
       options: {
         hotspot: true,
         accept: 'image/png,image/jpeg,image/webp,image/gif',
@@ -90,11 +164,23 @@ export const projectGalleryVideo = defineType({
     }),
   ],
   preview: {
-    select: {url: 'videoUrl', caption: 'caption', media: 'poster'},
-    prepare({url, caption, media}) {
+    select: {
+      source: 'source',
+      url: 'videoUrl',
+      caption: 'caption',
+      media: 'poster',
+      filename: 'videoFile.asset.originalFilename',
+    },
+    prepare({source, url, caption, media, filename}) {
+      const subtitle =
+        source === 'upload'
+          ? `Video · Upload${filename ? ` · ${filename}` : ''}`
+          : source === 'youtube'
+            ? 'Video · YouTube'
+            : 'Video · Link'
       return {
-        title: caption || url || 'Video',
-        subtitle: 'Video',
+        title: caption || filename || url || 'Video',
+        subtitle,
         media: media || PlayIcon,
       }
     },

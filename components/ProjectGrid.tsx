@@ -28,6 +28,8 @@ export type WorkProjectCard = {
   featured?: boolean | null
   /** Teaser card — shown on the grid but not clickable, no detail page yet. */
   comingSoon?: boolean | null
+  /** Studio “Hide from website” — filtered out of public grids when true. */
+  hidden?: boolean | null
   /** Resolved on the server for cards that need a still before video boots. */
   posterUrl?: string | null
   /** Catalog position ("01"), attached before client-side search filtering. */
@@ -101,7 +103,7 @@ export async function withWorkPosters(
 export function ProjectGrid({
   projects,
   emptyState,
-  videoPlayback = 'autoplay',
+  videoPlayback = 'hover',
 }: {
   projects: Array<WorkProjectCard | null>
   emptyState?: WorkEmptyState
@@ -172,9 +174,11 @@ export function ProjectGrid({
         return (
           <li key={project._id}>
             {comingSoon ? (
-              <div className="block cursor-default">{card}</div>
+              <div data-work-card className="block cursor-default">
+                {card}
+              </div>
             ) : (
-              <Link href={`/projects/${project.slug}`} className="group block">
+              <Link href={`/projects/${project.slug}`} data-work-card className="group block">
                 {card}
               </Link>
             )}

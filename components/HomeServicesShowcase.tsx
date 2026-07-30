@@ -1,6 +1,6 @@
 'use client'
 
-import {gsap, prefersReducedMotion, ScrollTrigger} from '@/components/motion/gsap'
+import {gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {LineReveal} from '@/components/motion/LineReveal'
 import {ServiceDetailPanel} from '@/components/ServiceDetailPanel'
 import {isVimeoUrl, vimeoBackgroundSrc} from '@/lib/vimeo'
@@ -115,7 +115,8 @@ export function HomeServicesShowcase({
   headline,
   cards,
 }: HomeServicesShowcaseProps) {
-  const [active, setActive] = useState<number | null>(null)
+  // First service open by default (mobile tap mode + desktop idle).
+  const [active, setActive] = useState<number | null>(0)
   if (cards.length === 0) return null
 
   const leadText = lead?.trim() || FALLBACK_LEAD
@@ -258,93 +259,51 @@ function WhatWeDoBand({
   setActive: (i: number | null) => void
 }) {
   const [panelIndex, setPanelIndex] = useState<number | null>(null)
-  /** Below lg: scroll drives which service is open. lg+: hover. */
-  const [scrollReveal, setScrollReveal] = useState(false)
-  const pinRef = useRef<HTMLDivElement>(null)
+  /** Below lg: tap to expand, second tap (or CTA) opens panel. lg+: hover + click. */
+  const [tapMode, setTapMode] = useState(false)
   const panelOpen = panelIndex !== null
   const panelCard = panelIndex !== null ? cards[panelIndex] : null
-  const count = cards.length
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 1023px)')
-    const sync = () => setScrollReveal(mq.matches)
+    const sync = () => setTapMode(mq.matches)
     sync()
     mq.addEventListener('change', sync)
     return () => mq.removeEventListener('change', sync)
   }, [])
 
-  useGSAP(
-    () => {
-      if (!scrollReveal || !pinRef.current || count < 1) return
+  // Tap mode always keeps one service expanded.
+  useEffect(() => {
+    if (tapMode && active === null) setActive(0)
+  }, [tapMode, active, setActive])
 
-      if (prefersReducedMotion()) {
-        setActive(0)
-        return
-      }
+  const openPanel = (i: number) => {
+    setActive(i)
+    setPanelIndex(i)
+  }
 
-      const panel = pinRef.current
-      let last = -1
-      const go = (next: number) => {
-        if (next === last) return
-        last = next
-        setActive(next)
-      }
-      go(0)
-
-      // GSAP pin — CSS sticky dies under main's overflow-x-clip + Lenis.
-      // Mobile: shorter bands so ink doesn’t stretch forever between services.
-      const perServiceVh = window.matchMedia('(max-width: 767px)').matches
-        ? 140
-        : window.matchMedia('(max-width: 1023px)').matches
-          ? 180
-          : 250
-      const st = ScrollTrigger.create({
-        trigger: panel,
-        start: 'top top',
-        end: () => `+=${Math.max(count, 1) * perServiceVh}vh`,
-        pin: true,
-        pinSpacing: true,
-        scrub: 1.6,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          // Hold each service through most of its band; switch near the end.
-          const segment = 1 / count
-          const raw = self.progress / segment
-          const idx = Math.min(count - 1, Math.floor(raw))
-          go(idx)
-        },
-      })
-
-      requestAnimationFrame(() => ScrollTrigger.refresh())
-
-      return () => {
-        st.kill()
-      }
-    },
-    {dependencies: [scrollReveal, count, setActive]},
-  )
+  /** Tap: expand first, panel on second tap. Desktop: click opens panel. */
+  const onServiceActivate = (i: number) => {
+    if (tapMode) {
+      if (active === i) openPanel(i)
+      else setActive(i)
+      return
+    }
+    openPanel(i)
+  }
 
   return (
     <section
       id="how-we-can-help"
       data-theme="dark"
-      className={`relative scroll-mt-24 bg-background pt-0 pb-4 text-foreground sm:pb-5 md:pb-6 ${
-        // overflow-hidden breaks ScrollTrigger pin — only use it on desktop hover mode.
-        scrollReveal
-          ? ''
-          : 'flex min-h-[85dvh] flex-col justify-start overflow-hidden md:min-h-[100dvh]'
-      }`}
+      className="relative flex min-h-[85dvh] scroll-mt-24 flex-col justify-center overflow-hidden bg-background pt-0 pb-4 text-foreground sm:pb-5 md:min-h-[100dvh] md:pb-6"
       style={{backgroundColor: INK}}
       onMouseLeave={() => {
-        if (!panelOpen && !scrollReveal) setActive(null)
+        if (!panelOpen && !tapMode) setActive(null)
       }}
     >
       <div
-        ref={pinRef}
-        className={`relative flex min-h-[85dvh] flex-col md:min-h-[100dvh] ${
-          scrollReveal ? 'justify-end' : 'justify-start'
-        }`}
+        className="relative flex min-h-[85dvh] flex-col justify-center md:min-h-[100dvh]"
         style={{backgroundColor: INK}}
       >
         {/* Full-bleed media — each layer already darkened so nothing flashes bright */}
@@ -354,11 +313,7 @@ function WhatWeDoBand({
           ))}
         </div>
 
-        <div
-          className={`page-chrome relative z-10 grid w-full items-start gap-6 md:grid-cols-[minmax(9rem,18vw)_minmax(0,1fr)] md:gap-12 lg:gap-16 ${
-            scrollReveal ? 'pt-0 pb-[8vh] md:pb-[14vh] lg:pb-[18vh]' : 'pt-12 md:pt-20 lg:pt-24'
-          }`}
-        >
+        <div className="page-chrome relative z-10 grid w-full items-start gap-6 py-10 md:grid-cols-[minmax(9rem,18vw)_minmax(0,1fr)] md:gap-12 md:py-16 lg:gap-16 lg:py-20">
           <p className="max-w-[14ch] text-[15px] leading-[0.95] text-foreground/70 md:text-base md:leading-[0.95]">
             {label?.trim() || 'How we can help'}
           </p>
@@ -366,16 +321,12 @@ function WhatWeDoBand({
           <ul className="flex min-w-0 flex-col" role="list">
             {cards.map((item, i) => {
               const isActive = i === active
-              const openPanel = () => {
-                setActive(i)
-                setPanelIndex(i)
-              }
 
               return (
                 <li
                   key={item._key}
                   onMouseEnter={() => {
-                    if (!scrollReveal) setActive(i)
+                    if (!tapMode) setActive(i)
                   }}
                 >
                   <div
@@ -383,21 +334,21 @@ function WhatWeDoBand({
                     tabIndex={0}
                     aria-expanded={isActive}
                     aria-haspopup="dialog"
-                    onClick={openPanel}
+                    onClick={() => onServiceActivate(i)}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault()
-                        openPanel()
+                        onServiceActivate(i)
                       }
                     }}
                     onFocus={() => {
-                      if (!scrollReveal) setActive(i)
+                      if (!tapMode) setActive(i)
                     }}
                     className="group cursor-pointer outline-none focus-visible:outline-none"
                   >
                     <p
                       className={`font-sans text-[clamp(2.5rem,8.5vw,8rem)] font-bold uppercase leading-[0.95] tracking-[-0.045em] break-words transition-colors duration-200 ${
-                        isActive || (!scrollReveal && active === null)
+                        isActive || (!tapMode && active === null)
                           ? 'text-foreground'
                           : 'text-foreground/20'
                       }`}
@@ -429,7 +380,14 @@ function WhatWeDoBand({
                             <p className="text-[15px] leading-snug text-foreground/80 md:text-base">
                               {item.body}
                             </p>
-                            <span className="mt-4 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-foreground/70 transition-colors duration-300 group-hover:text-foreground">
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation()
+                                openPanel(i)
+                              }}
+                              className="mt-4 inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label text-foreground/70 transition-colors duration-300 group-hover:text-foreground"
+                            >
                               {item.linkLabel?.trim() || 'See how it works'}
                               <ArrowUpRight
                                 aria-hidden
@@ -437,7 +395,7 @@ function WhatWeDoBand({
                                 strokeWidth={2.5}
                                 className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                               />
-                            </span>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -454,7 +412,8 @@ function WhatWeDoBand({
         open={panelOpen}
         onClose={() => {
           setPanelIndex(null)
-          if (!scrollReveal) setActive(null)
+          // Desktop: clear hover highlight. Tap mode: keep the expanded service.
+          if (!tapMode) setActive(null)
         }}
         content={
           panelCard

@@ -2,6 +2,7 @@
 
 import {resolveProjectVideoSources} from '@/components/ProjectVideoLightbox'
 import {isVimeoUrl, vimeoBackgroundSrc} from '@/lib/vimeo'
+import {isYouTubeUrl, youtubeBackgroundSrc} from '@/lib/youtube'
 import {urlForImage} from '@/sanity/lib/utils'
 import {useEffect, useRef, useState} from 'react'
 
@@ -12,6 +13,7 @@ type PosterImage = {
 
 type ProjectGalleryVideoCellProps = {
   videoUrl?: string | null
+  videoFileUrl?: string | null
   poster?: PosterImage
   title: string
   aspectClass: string
@@ -22,6 +24,7 @@ type ProjectGalleryVideoCellProps = {
 /** Gallery video cell — muted autoplay loop in place (no lightbox, no caption). */
 export function ProjectGalleryVideoCell({
   videoUrl,
+  videoFileUrl,
   poster,
   title,
   aspectClass,
@@ -29,12 +32,14 @@ export function ProjectGalleryVideoCell({
 }: ProjectGalleryVideoCellProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoReady, setVideoReady] = useState(false)
-  const {cleanVideo, mp4Src, hasVideo} = resolveProjectVideoSources(videoUrl)
+  const {cleanVideo, mp4Src, hasVideo} = resolveProjectVideoSources(videoUrl, videoFileUrl)
+  const youtubeBg =
+    cleanVideo && isYouTubeUrl(cleanVideo) ? youtubeBackgroundSrc(cleanVideo) : null
   const vimeoBg = cleanVideo && isVimeoUrl(cleanVideo) ? vimeoBackgroundSrc(cleanVideo) : null
   const posterSrc = poster?.asset?._ref
     ? urlForImage({asset: {_ref: poster.asset._ref}})
-        ?.width(1600)
-        .height(900)
+        ?.width(2400)
+        .height(1350)
         .fit('crop')
         .url()
     : undefined
@@ -77,6 +82,14 @@ export function ProjectGalleryVideoCell({
           onLoadedData={() => setVideoReady(true)}
           className="absolute inset-0 h-full w-full object-cover"
           src={mp4Src}
+        />
+      ) : youtubeBg && active ? (
+        <iframe
+          src={youtubeBg}
+          title={title || 'Project video'}
+          className="pointer-events-none absolute inset-0 h-full w-full border-0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
         />
       ) : vimeoBg && active ? (
         <iframe

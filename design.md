@@ -160,7 +160,7 @@ Composition: asymmetry + void (large type one side, deliberate emptiness the oth
 | `--duration-slow`   | `500ms`                          | Transforms, clip-path                     |
 | `--duration-reveal` | `600ms`                          | Text mask reveals                         |
 
-### The eight patterns (the complete vocabulary — no others)
+### The nine patterns (the complete vocabulary — no others)
 
 | #   | Pattern                | Component        | Spec                                                                                                                                                                                                            |
 | --- | ---------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,6 +172,7 @@ Composition: asymmetry + void (large type one side, deliberate emptiness the oth
 | 6   | **Clip reveal**        | `ClipReveal`     | `clip-path: inset(100% 0 0) → inset(0)`, 0.5s ease-out-cubic or scrubbed                                                                                                                                        |
 | 7   | **Card hover**         | CSS only         | Media `scale 1.05` @ 0.5s ease-out-cubic + caption fade/slide-up + arrow nudge (`.work-card-media-zoom`)                                                                                                        |
 | 8   | **Grid flip**          | Flip plugin      | Work-page filter re-layout; 0.5s ease-out-cubic                                                                                                                                                                 |
+| 9   | **Site intro**         | `SiteIntro`      | Home, every load of `/`: ink + letter wipe → paper wipe + putty → mark flies to nav → empty paper → nav swipes in → hero type → project strip. Boot script covers ink before paint. Skipped under reduced motion. |
 
 Plus two CSS freebies: `mix-blend-difference` on the fixed nav wordmark; existing marquee keyframes.
 

@@ -3,6 +3,7 @@ import '@/styles/index.css'
 import {HashScroll} from '@/components/HashScroll'
 import {LenisProvider} from '@/components/motion/LenisProvider'
 import {PageTransition} from '@/components/motion/PageTransition'
+import {SiteIntro} from '@/components/motion/SiteIntro'
 import {Navbar} from '@/components/Navbar'
 import {SiteFooter} from '@/components/SiteFooter'
 import {SiteShell} from '@/components/SiteShell'
@@ -28,11 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteName = settings?.siteName || homePage?.seoTitle || 'Salt Studio'
   const siteDescription = settings?.siteDescription || homePage?.seoDescription
 
-  // Uploaded settings image wins; otherwise fall back to the auto-generated
-  // branded card so every page (including the 404) has a share image.
+  // Uploaded settings image wins; otherwise the auto-generated branded card.
+  // Site-name titles ("Salt Studio") use the wordmark + tagline composition.
   const ogImage =
-    urlForOpenGraphImage(settings?.ogImage) ??
-    ogImageUrl({title: siteName, subtitle: siteDescription})
+    urlForOpenGraphImage(settings?.ogImage) ?? ogImageUrl({title: siteName})
 
   return {
     title: {
@@ -73,6 +73,7 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
         </SiteShell>
       </LenisProvider>
       <PageTransition />
+      <SiteIntro />
       <Toaster />
       <SanityLive onError={handleError} />
       {(await draftMode()).isEnabled && (

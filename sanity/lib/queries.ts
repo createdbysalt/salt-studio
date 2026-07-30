@@ -54,7 +54,8 @@ export const homePageQuery = defineQuery(`
               "slug": slug.current,
               coverImage,
               "client": client->name,
-              "thought": pt::text(overview)
+              "thought": pt::text(overview),
+              hidden
             },
             testimonials[]->{
               _id,
@@ -101,7 +102,9 @@ export const homePageQuery = defineQuery(`
             coverImage,
             videoUrl,
             year,
-            "client": client->name
+            "client": client->name,
+            featured,
+            hidden
           }
         },
         linkLabel
@@ -201,6 +204,7 @@ export const projectBySlugQuery = defineQuery(`
     _type,
     projectType,
     comingSoon,
+    hidden,
     title,
     "slug": slug.current,
     seoTitle,
@@ -227,9 +231,11 @@ export const projectBySlugQuery = defineQuery(`
               image{ asset, alt, caption, hotspot, crop },
             },
             _type == "projectGalleryVideo" => {
+              source,
               videoUrl,
               caption,
               poster{ asset, alt, hotspot, crop },
+              "videoFileUrl": videoFile.asset->url,
             },
           },
         },
@@ -252,16 +258,31 @@ export const projectBySlugQuery = defineQuery(`
     gallery[]{
       _key,
       _type,
-      items[]{
-        _key,
-        _type,
-        _type == "projectGalleryPhoto" => {
-          image{ asset, alt, caption, hotspot, crop },
-        },
-        _type == "projectGalleryVideo" => {
-          videoUrl,
-          caption,
-          poster{ asset, alt, hotspot, crop },
+      _type == "projectGalleryPhoto" => {
+        image{ asset, alt, caption, hotspot, crop },
+      },
+      _type == "projectGalleryVideo" => {
+        source,
+        videoUrl,
+        caption,
+        poster{ asset, alt, hotspot, crop },
+        "videoFileUrl": videoFile.asset->url,
+      },
+      // Legacy row shape (pre–Gallery tab) — flatten on the frontend if present.
+      _type in ["projectGalleryRowOne", "projectGalleryRowTwo"] => {
+        items[]{
+          _key,
+          _type,
+          _type == "projectGalleryPhoto" => {
+            image{ asset, alt, caption, hotspot, crop },
+          },
+          _type == "projectGalleryVideo" => {
+            source,
+            videoUrl,
+            caption,
+            poster{ asset, alt, hotspot, crop },
+            "videoFileUrl": videoFile.asset->url,
+          },
         },
       },
     },
@@ -275,9 +296,11 @@ export const projectBySlugQuery = defineQuery(`
           image{ asset, alt, caption, hotspot, crop },
         },
         _type == "projectGalleryVideo" => {
+          source,
           videoUrl,
           caption,
           poster{ asset, alt, hotspot, crop },
+          "videoFileUrl": videoFile.asset->url,
         },
       },
     },
@@ -288,13 +311,22 @@ export const projectBySlugQuery = defineQuery(`
     client->{ _id, name, website },
     categories[]->{ _id, filterLabel, "slug": slug.current },
     stack[]->{ _id, name, kind, url },
-    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },
+    relatedProjects[]->{
+      _id,
+      title,
+      "slug": slug.current,
+      projectType,
+      year,
+      coverImage,
+      videoUrl,
+      hidden
+    },
   }
 `)
 
 /** Other projects for the project-page “Next project” rail when related is empty/short. */
 export const nextProjectsQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && comingSoon != true && slug.current != $slug]
+  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && comingSoon != true && hidden != true && slug.current != $slug]
     | order(featured desc, year desc, title asc)[0...3]{
     _id,
     title,
@@ -309,7 +341,7 @@ export const nextProjectsQuery = defineQuery(`
 // Card shape shared by the Work grid and category pages. A project appears
 // once it has a cover image OR a video; video is optional hover flair.
 export const allProjectsQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl))]|order(year desc, title asc){
+  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(year desc, title asc){
     _id,
     projectType,
     featured,
@@ -327,7 +359,7 @@ export const allProjectsQuery = defineQuery(`
 
 // Projects in one category, by the category's slug (for /work/[slug]).
 export const projectsByCategoryQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(year desc, title asc){
+  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(year desc, title asc){
     _id,
     projectType,
     featured,
@@ -383,7 +415,7 @@ export const capabilitiesQuery = defineQuery(`
 
 // Featured projects (both standard and case study) for home / highlight views.
 export const featuredProjectsQuery = defineQuery(`
-  *[_type == "project" && featured == true && defined(slug.current)]|order(year desc, title asc){
+  *[_type == "project" && featured == true && hidden != true && defined(slug.current)]|order(year desc, title asc){
     _id,
     projectType,
     featured,
@@ -454,7 +486,7 @@ export const projectBodyBackgroundVideoQuery = defineQuery(`
 `)
 
 export const slugsByTypeQuery = defineQuery(`
-  *[_type == $type && defined(slug.current)]{"slug": slug.current}
+  *[_type == $type && defined(slug.current) && hidden != true]{"slug": slug.current}
 `)
 
 export const developerSettingsQuery = defineQuery(`
@@ -561,6 +593,7 @@ export const workPageQuery = defineQuery(`
       projectType,
       featured,
       comingSoon,
+      hidden,
       title,
       "slug": slug.current,
       overview,
@@ -569,7 +602,7 @@ export const workPageQuery = defineQuery(`
       year,
       "client": client->name,
       categories[]->{ _id, filterLabel, "slug": slug.current },
-    }[defined(_id) && (defined(coverImage.asset) || defined(videoUrl))],
+    },
     pillSource,
     categoryPills[]->{ _id, filterLabel, "slug": slug.current },
     videoPlayback,

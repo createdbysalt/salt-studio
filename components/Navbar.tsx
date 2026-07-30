@@ -429,6 +429,8 @@ export function Navbar({data}: NavbarProps) {
             }`}
             aria-label="Main navigation"
             data-global-nav-left-pill="true"
+            data-nav-pill
+            data-intro-hide
           >
             <div
               className={`${pillRowBase} gap-5 px-3.5 sm:gap-6 sm:px-4 lg:gap-7 ${
@@ -483,7 +485,10 @@ export function Navbar({data}: NavbarProps) {
                 </svg>
               </button>
 
-              <div className="hidden items-center gap-3 sm:gap-6 lg:flex">
+              <div
+                className="hidden items-center gap-3 sm:gap-6 lg:flex"
+                data-nav-links
+              >
                 {items.map((item) =>
                   item.children?.length ? (
                     <NavDropdown
@@ -520,7 +525,12 @@ export function Navbar({data}: NavbarProps) {
             )}
           </nav>
 
-          <div ref={bookWrapRef} className="pointer-events-auto flex shrink-0 items-start gap-2">
+          <div
+            ref={bookWrapRef}
+            className="pointer-events-auto flex shrink-0 items-start gap-2"
+            data-nav-cta
+            data-intro-hide
+          >
             <BookDiscoveryCta className={`${pillBase} ${pillFill} ${ctaClass} gap-2`} />
           </div>
         </div>
@@ -588,6 +598,9 @@ function isColorSurfaceUnderNav(): boolean {
   for (const el of stack) {
     if (!(el instanceof HTMLElement)) continue
     if (el.closest('header')) continue
+    // Session intro paints an ink cover over the page — never treat it as the
+    // nav's underlying surface or the chrome locks to white-on-paper.
+    if (el.closest('[data-site-intro], #salt-intro-boot')) continue
 
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
       return true

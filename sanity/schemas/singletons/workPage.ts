@@ -124,15 +124,18 @@ export default defineType({
       type: 'string',
       group: 'grid',
       description:
-        'Autoplay plays muted looping previews as cards scroll into view. Hover keeps a still (cover or first frame) until someone hovers a card — lighter on the page when you have a lot of projects.',
+        'Hover (recommended): every card autoplays; on desktop they stay greyscale until you hover (full color). Phones and tablets play in full color. Autoplay: full-color loops on every screen size, no greyscale.',
       options: {
         list: [
-          {title: 'Play all at once (as they scroll into view)', value: 'autoplay'},
-          {title: 'Play only on hover (still until hover)', value: 'hover'},
+          {
+            title: 'Greyscale → color on hover (desktop)',
+            value: 'hover',
+          },
+          {title: 'Full color always (every screen size)', value: 'autoplay'},
         ],
         layout: 'radio',
       },
-      initialValue: 'autoplay',
+      initialValue: 'hover',
     }),
 
     // ==========================================================================

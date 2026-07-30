@@ -395,9 +395,11 @@ function ShowcaseCard({
         <ProjectCardMedia
           title={project.title}
           coverImage={project.coverImage}
+          videoUrl={project.videoUrl}
           posterUrl={project.posterUrl}
-          // Cover still only — no video swap so the photo stays put.
-          playback="hover"
+          // Autoplay the project film once the card nears the viewport; the
+          // first-frame cover holds until it's ready.
+          playback="autoplay"
         />
       </div>
 

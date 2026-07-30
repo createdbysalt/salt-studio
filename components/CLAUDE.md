@@ -22,6 +22,8 @@ components/
     ├── gsap.ts                ← Central plugin registration + EASE/DURATION constants
     ├── LenisProvider.tsx      ← Smooth-scroll root, ScrollTrigger sync (mounted in (personal) layout)
     ├── PageTransition.tsx     ← Curtain wipe on internal navigation
+    ├── SiteIntro.tsx          ← Home session intro (ink → mark → paper wipe → nav)
+    ├── intro.ts               ← Intro helpers (session gate, phase events)
     ├── LineReveal.tsx         ← SplitText line-mask reveal
     ├── WordSwap.tsx           ← Two-face hero word swap
     ├── ParallaxMedia.tsx      ← Scroll-scrubbed oversized media
@@ -37,6 +39,7 @@ The second sanctioned exception to the flat rule. All motion components are clie
 - **All GSAP work goes through `useGSAP`** from `@gsap/react` (React Compiler-safe, auto-cleanup). No DOM reads in render.
 - **Every component checks `prefersReducedMotion()`** and renders static/visible content when it's on. Keep that invariant when adding patterns.
 - New animations should be one of the named patterns in `DESIGN.md` Motion — no one-off effects.
+- **Site intro:** `SiteIntro` mounts in `app/(personal)/layout.tsx`. Plays on every load of `/` (hard reload or return via client nav). Skipped under `prefers-reduced-motion`.
 
 ## Conventions
 

@@ -43,23 +43,30 @@ export async function HomePage({data}: HomePageProps) {
   const workSection = sections.find(
     (s): s is SectionOf<'homeWorkSection'> => s._type === 'homeWorkSection',
   )
-  const curatedTeasers = (workSection?.projects ?? []).filter(Boolean).map((project) => ({
-    _id: project!._id,
-    title: project!.title ?? null,
-    slug: project!.slug ?? null,
-    coverImage: project!.coverImage ?? null,
-    videoUrl: project!.videoUrl ?? null,
-    year: project!.year ?? null,
-    client: project!.client ?? null,
-    comingSoon: null as boolean | null,
-  }))
+  const curatedTeasers = (workSection?.projects ?? [])
+    .filter(
+      (project) =>
+        Boolean(project?._id) && project?.hidden !== true && project?.featured === true,
+    )
+    .map((project) => ({
+      _id: project!._id,
+      title: project!.title ?? null,
+      slug: project!.slug ?? null,
+      coverImage: project!.coverImage ?? null,
+      videoUrl: project!.videoUrl ?? null,
+      year: project!.year ?? null,
+      client: project!.client ?? null,
+      comingSoon: null as boolean | null,
+    }))
 
   // Hero slider: curated home teaser when set, otherwise the full published roster.
   const {data: allProjects} = await sanityFetch({query: allProjectsQuery})
   const sliderSource =
     curatedTeasers.length > 0
       ? curatedTeasers
-      : (allProjects ?? []).map((project) => ({
+      : (allProjects ?? [])
+          .filter((project) => project.featured === true)
+          .map((project) => ({
           _id: project._id,
           title: project.title ?? null,
           slug: project.slug ?? null,
@@ -182,7 +189,7 @@ function HomeServices({section}: {section: SectionOf<'homeServicesSection'>}) {
           .filter((step) => Boolean(step?.text))
           .map((step) => ({_key: step!._key, lead: step!.lead, text: step!.text!})),
         projects: (item!.featuredProjects ?? [])
-          .filter((project) => Boolean(project?._id && project?.title))
+          .filter((project) => Boolean(project?._id && project?.title) && project?.hidden !== true)
           .map((project) => ({
             _id: project!._id,
             title: project!.title!,

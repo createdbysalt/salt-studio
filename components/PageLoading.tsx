@@ -1,7 +1,5 @@
 'use client'
 
-import {SaltWordmark} from '@/components/SaltWordmark'
-
 function LoadingScan({accent = false}: {accent?: boolean}) {
   return (
     <div
@@ -68,20 +66,18 @@ function LoadingShell({
   )
 }
 
-/** Home — ink stage with wordmark, matching the session preloader language. */
+/**
+ * Home route suspense shell — plain ink only.
+ * The branded session sequence lives in SiteIntro; do not duplicate a mark here.
+ */
 export function HomeLoading() {
   return (
-    <LoadingShell label="home" dark className="flex min-h-screen flex-col">
-      <div className="flex flex-1 flex-col items-center justify-center gap-5 px-6">
-        <div className="animate-salt-mark-in overflow-hidden">
-          <SaltWordmark className="h-9 w-auto text-foreground md:h-10" />
-        </div>
-        <div className="relative h-px w-28 overflow-hidden bg-foreground/15">
-          <div className="absolute inset-y-0 w-full origin-left animate-salt-scan-fill bg-accent" />
-        </div>
-        <LoadingStatus label="Loading" />
-      </div>
-    </LoadingShell>
+    <div
+      role="status"
+      aria-label="Loading home"
+      aria-live="polite"
+      className="min-h-screen bg-[#08090a]"
+    />
   )
 }
 

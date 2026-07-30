@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
     // Projects
     client.fetch<{slug: string; _updatedAt: string}[]>(
-      `*[_type == "project" && defined(slug.current)]{
+      `*[_type == "project" && defined(slug.current) && hidden != true]{
         "slug": slug.current,
         _updatedAt
       }`,
