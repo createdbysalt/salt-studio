@@ -5,6 +5,7 @@ import {
   CogIcon,
   DocumentsIcon,
   FolderIcon,
+  HelpCircleIcon,
   HomeIcon,
   RocketIcon,
   SearchIcon,
@@ -156,6 +157,22 @@ export const saltDeskStructure: StructureResolver = (S) => {
         ]),
     )
 
+  /** A quizSubmission list filtered to one pipeline status. */
+  const submissionsByStatus = (title: string, status: string) =>
+    S.listItem()
+      .id(`submissions-${status}`)
+      .title(title)
+      .icon(ClipboardIcon)
+      .child(
+        S.documentList()
+          .id(`submissions-${status}`)
+          .title(title)
+          .schemaType('quizSubmission')
+          .filter('_type == "quizSubmission" && coalesce(status, "new") == $status')
+          .params({status})
+          .defaultOrdering([{field: 'submittedAt', direction: 'desc'}]),
+      )
+
   const leads = S.listItem()
     .id('leads')
     .title('Leads')
@@ -164,7 +181,14 @@ export const saltDeskStructure: StructureResolver = (S) => {
       S.list()
         .title('Leads')
         .items([
-          S.documentTypeListItem('quizSubmission').title('Quiz Submissions').icon(ClipboardIcon),
+          S.documentTypeListItem('quiz').title('Quizzes').icon(HelpCircleIcon),
+          S.divider().title('Pipeline'),
+          S.documentTypeListItem('quizSubmission').title('All Submissions').icon(ClipboardIcon),
+          submissionsByStatus('New', 'new'),
+          submissionsByStatus('Contacted', 'contacted'),
+          submissionsByStatus('Call Booked', 'call-booked'),
+          submissionsByStatus('Won', 'won'),
+          submissionsByStatus('Lost', 'lost'),
         ]),
     )
 

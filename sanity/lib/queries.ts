@@ -641,3 +641,48 @@ export const contactPageQuery = defineQuery(`
     },
   }
 `)
+
+export const quizBySlugQuery = defineQuery(`
+  *[_type == "quiz" && slug.current == $slug][0]{
+    _id,
+    _type,
+    title,
+    "slug": slug.current,
+    "serviceTitle": service->title,
+    introHeadline,
+    introBody,
+    startLabel,
+    questions[]{
+      _key,
+      "key": key.current,
+      prompt,
+      hint,
+      shortLabel,
+      kind,
+      weight,
+      options[]{ _key, label, points },
+    },
+    scoreUnit,
+    bands[]{
+      _key,
+      label,
+      minScore,
+      resultHeadline,
+      resultBody,
+      benefits,
+      ctaLead,
+      primaryCtaLabel,
+      primaryCtaHref,
+      secondaryCtaLabel,
+      secondaryCtaHref,
+    },
+    gateHeadline,
+    gateBody,
+    gateButtonLabel,
+    waitlistLabel,
+  }
+`)
+
+export const quizSlugsQuery = defineQuery(`
+  *[_type == "quiz" && defined(slug.current)]{"slug": slug.current}
+`)

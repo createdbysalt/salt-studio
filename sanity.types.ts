@@ -769,6 +769,160 @@ export type Testimonial = {
   project?: ProjectReference
 }
 
+export type Capability = {
+  _id: string
+  _type: 'capability'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  kind?: 'language' | 'framework' | 'platform' | 'tool' | 'discipline'
+  categories?: Array<
+    {
+      _key: string
+    } & WorkCategoryReference
+  >
+  url?: string
+  iconSlug?: string
+  logo?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  sortOrder?: number
+}
+
+export type SanityImageCrop = {
+  _type: 'sanity.imageCrop'
+  top?: number
+  bottom?: number
+  left?: number
+  right?: number
+}
+
+export type SanityImageHotspot = {
+  _type: 'sanity.imageHotspot'
+  x?: number
+  y?: number
+  height?: number
+  width?: number
+}
+
+export type WorkCategory = {
+  _id: string
+  _type: 'workCategory'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  filterLabel?: string
+  slug?: Slug
+  headline?: string
+  subhead?: string
+  seoTitle?: string
+  seoDescription?: string
+}
+
+export type Slug = {
+  _type: 'slug'
+  current?: string
+  source?: string
+}
+
+export type QuizReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'quiz'
+}
+
+export type QuizSubmission = {
+  _id: string
+  _type: 'quizSubmission'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  status?: 'new' | 'contacted' | 'call-booked' | 'won' | 'lost'
+  quiz?: QuizReference
+  quizTitle?: string
+  email?: string
+  submittedAt?: string
+  track?: 'solo' | 'org'
+  businessType?: string
+  teamSize?: string
+  neverAgain?: string
+  workflowAnswers?: Array<{
+    key?: string
+    label?: string
+    answer?: string
+    _type: 'workflowAnswer'
+    _key: string
+  }>
+  websiteFlag?: string
+  score?: number
+  scoreBand?: string
+  topWorkflows?: Array<string>
+  waitlistOptIn?: boolean
+  source?: {
+    utmSource?: string
+    utmMedium?: string
+    utmCampaign?: string
+    referrer?: string
+    landingPath?: string
+  }
+}
+
+export type Quiz = {
+  _id: string
+  _type: 'quiz'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  slug?: Slug
+  service?: ServiceReference
+  introHeadline?: string
+  introBody?: string
+  startLabel?: string
+  questions?: Array<{
+    key?: Slug
+    prompt?: string
+    hint?: string
+    shortLabel?: string
+    kind?: 'choice' | 'text' | 'url'
+    options?: Array<{
+      label?: string
+      points?: number
+      _type: 'quizOptionItem'
+      _key: string
+    }>
+    weight?: number
+    _type: 'quizQuestionItem'
+    _key: string
+  }>
+  scoreUnit?: 'hours' | 'band'
+  bands?: Array<{
+    label?: string
+    minScore?: number
+    resultHeadline?: string
+    resultBody?: string
+    benefits?: Array<string>
+    ctaLead?: string
+    primaryCtaLabel?: string
+    primaryCtaHref?: string
+    secondaryCtaLabel?: string
+    secondaryCtaHref?: string
+    _type: 'quizBandItem'
+    _key: string
+  }>
+  gateHeadline?: string
+  gateBody?: string
+  gateButtonLabel?: string
+  waitlistLabel?: string
+}
+
 export type CapabilityReference = {
   _ref: string
   _type: 'reference'
@@ -876,101 +1030,6 @@ export type Service = {
   fitCheckLabel?: string
   fitCheckHref?: string
   routingLine?: string
-}
-
-export type SanityImageCrop = {
-  _type: 'sanity.imageCrop'
-  top?: number
-  bottom?: number
-  left?: number
-  right?: number
-}
-
-export type SanityImageHotspot = {
-  _type: 'sanity.imageHotspot'
-  x?: number
-  y?: number
-  height?: number
-  width?: number
-}
-
-export type Slug = {
-  _type: 'slug'
-  current?: string
-  source?: string
-}
-
-export type Capability = {
-  _id: string
-  _type: 'capability'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  name?: string
-  kind?: 'language' | 'framework' | 'platform' | 'tool' | 'discipline'
-  categories?: Array<
-    {
-      _key: string
-    } & WorkCategoryReference
-  >
-  url?: string
-  iconSlug?: string
-  logo?: {
-    asset?: SanityImageAssetReference
-    media?: unknown
-    hotspot?: SanityImageHotspot
-    crop?: SanityImageCrop
-    alt?: string
-    _type: 'image'
-  }
-  sortOrder?: number
-}
-
-export type WorkCategory = {
-  _id: string
-  _type: 'workCategory'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  filterLabel?: string
-  slug?: Slug
-  headline?: string
-  subhead?: string
-  seoTitle?: string
-  seoDescription?: string
-}
-
-export type QuizSubmission = {
-  _id: string
-  _type: 'quizSubmission'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  email?: string
-  submittedAt?: string
-  track?: 'solo' | 'org'
-  businessType?: string
-  teamSize?: string
-  neverAgain?: string
-  workflowAnswers?: Array<{
-    key?: string
-    label?: string
-    answer?: string
-    _type: 'workflowAnswer'
-    _key: string
-  }>
-  websiteFlag?: string
-  score?: number
-  scoreBand?: string
-  topWorkflows?: Array<string>
-  waitlistOptIn?: boolean
-  source?: {
-    utmSource?: string
-    utmMedium?: string
-    utmCampaign?: string
-    referrer?: string
-    landingPath?: string
-  }
 }
 
 export type Project = {
@@ -1787,15 +1846,17 @@ export type AllSanitySchemaTypes =
   | ServiceBlock
   | ContactForm
   | Testimonial
+  | Capability
+  | SanityImageCrop
+  | SanityImageHotspot
+  | WorkCategory
+  | Slug
+  | QuizReference
+  | QuizSubmission
+  | Quiz
   | CapabilityReference
   | TestimonialReference
   | Service
-  | SanityImageCrop
-  | SanityImageHotspot
-  | Slug
-  | Capability
-  | WorkCategory
-  | QuizSubmission
   | Project
   | Client
   | Page
@@ -2322,6 +2383,16 @@ export type HomePageQueryResult =
     }
   | {
       _id: 'home'
+      _type: 'quiz'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
+    }
+  | {
+      _id: 'home'
       _type: 'quizSubmission'
       seoTitle: null
       seoDescription: null
@@ -2784,6 +2855,16 @@ export type ServicesPageQueryResult =
             internalName: string | null
           }
       > | null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'quiz'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
     }
   | {
       _id: 'servicesPage'
@@ -3294,6 +3375,15 @@ export type AboutPageQueryResult =
             internalName: string | null
           }
       > | null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'quiz'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
     }
   | {
       _id: 'aboutPage'
@@ -3946,7 +4036,7 @@ export type NextProjectsQueryResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: allProjectsQuery
-// Query: *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(featured desc, _createdAt desc, year desc, title asc){    _id,    projectType,    featured,    comingSoon,    title,    "slug": slug.current,    overview,    coverImage,    videoUrl,    year,    _createdAt,    "client": client->name,    categories[]->{ _id, filterLabel, "slug": slug.current },  }
+// Query: *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(featured desc, year desc, _createdAt desc, title asc){    _id,    projectType,    featured,    comingSoon,    title,    "slug": slug.current,    overview,    coverImage,    videoUrl,    year,    _createdAt,    "client": client->name,    categories[]->{ _id, filterLabel, "slug": slug.current },  }
 export type AllProjectsQueryResult = Array<{
   _id: string
   projectType: 'case-study' | 'standard' | null
@@ -3989,7 +4079,7 @@ export type AllProjectsQueryResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: projectsByCategoryQuery
-// Query: *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(featured desc, _createdAt desc, year desc, title asc){    _id,    projectType,    featured,    comingSoon,    title,    "slug": slug.current,    overview,    coverImage,    videoUrl,    year,    _createdAt,    "client": client->name,    categories[]->{ _id, filterLabel, "slug": slug.current },  }
+// Query: *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(featured desc, year desc, _createdAt desc, title asc){    _id,    projectType,    featured,    comingSoon,    title,    "slug": slug.current,    overview,    coverImage,    videoUrl,    year,    _createdAt,    "client": client->name,    categories[]->{ _id, filterLabel, "slug": slug.current },  }
 export type ProjectsByCategoryQueryResult = Array<{
   _id: string
   projectType: 'case-study' | 'standard' | null
@@ -4721,6 +4811,22 @@ export type WorkPageQueryResult =
     }
   | {
       _id: 'workPage'
+      _type: 'quiz'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+    }
+  | {
+      _id: 'workPage'
       _type: 'quizSubmission'
       headline: null
       subhead: null
@@ -5253,6 +5359,15 @@ export type ContactPageQueryResult =
     }
   | {
       _id: 'contactPage'
+      _type: 'quiz'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
       _type: 'quizSubmission'
       seoTitle: null
       seoDescription: null
@@ -5391,6 +5506,59 @@ export type ContactPageQueryResult =
     }
   | null
 
+// Source: sanity/lib/queries.ts
+// Variable: quizBySlugQuery
+// Query: *[_type == "quiz" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    "serviceTitle": service->title,    introHeadline,    introBody,    startLabel,    questions[]{      _key,      "key": key.current,      prompt,      hint,      shortLabel,      kind,      weight,      options[]{ _key, label, points },    },    scoreUnit,    bands[]{      _key,      label,      minScore,      resultHeadline,      resultBody,      benefits,      ctaLead,      primaryCtaLabel,      primaryCtaHref,      secondaryCtaLabel,      secondaryCtaHref,    },    gateHeadline,    gateBody,    gateButtonLabel,    waitlistLabel,  }
+export type QuizBySlugQueryResult = {
+  _id: string
+  _type: 'quiz'
+  title: string | null
+  slug: string | null
+  serviceTitle: string | null
+  introHeadline: string | null
+  introBody: string | null
+  startLabel: string | null
+  questions: Array<{
+    _key: string
+    key: string | null
+    prompt: string | null
+    hint: string | null
+    shortLabel: string | null
+    kind: 'choice' | 'text' | 'url' | null
+    weight: number | null
+    options: Array<{
+      _key: string
+      label: string | null
+      points: number | null
+    }> | null
+  }> | null
+  scoreUnit: 'band' | 'hours' | null
+  bands: Array<{
+    _key: string
+    label: string | null
+    minScore: number | null
+    resultHeadline: string | null
+    resultBody: string | null
+    benefits: Array<string> | null
+    ctaLead: string | null
+    primaryCtaLabel: string | null
+    primaryCtaHref: string | null
+    secondaryCtaLabel: string | null
+    secondaryCtaHref: string | null
+  }> | null
+  gateHeadline: string | null
+  gateBody: string | null
+  gateButtonLabel: string | null
+  waitlistLabel: string | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: quizSlugsQuery
+// Query: *[_type == "quiz" && defined(slug.current)]{"slug": slug.current}
+export type QuizSlugsQueryResult = Array<{
+  slug: string | null
+}>
+
 declare module '@sanity/client' {
   interface SanityQueries {
     '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "homeHeroSection" => {\n        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter,\n        splitPrimaryLeft, splitPrimaryRight, splitSecondaryLeft, splitSecondaryRight\n      },\n      _type == "homeProofSection" => {\n        label,\n        clients[]{ _key, ...@->{ _id, name, website } }\n      },\n      _type == "homeServicesSection" => {\n        label,\n        services[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            headline,\n            shortDescription,\n            priceLine,\n            timelineLine,\n            linkLabel,\n            timeline[]{ _key, label, duration, detail },\n            deliverables[]{ _key, title, detail },\n            plans[]{ _key, name, price, summary, features, highlight },\n            capabilities[]->{ _id, name, kind },\n            idealFor,\n            notAFit,\n            detailEyebrow,\n            detailBody,\n            sceneLine,\n            stepsLabel,\n            steps[]{ _key, lead, text },\n            detailImage{ asset, alt, hotspot, crop },\n            backgroundImage{ asset, alt, hotspot, crop },\n            backgroundVideoUrl,\n            featuredProjects[]->{\n              _id,\n              title,\n              "slug": slug.current,\n              coverImage,\n              "client": client->name,\n              "thought": pt::text(overview),\n              hidden\n            },\n            testimonials[]->{\n              _id,\n              quote,\n              author,\n              role\n            },\n            clients[]->{ _id, name },\n            proofAnchor,\n            nextStep->{\n              _id,\n              subhead,\n              buttonLabel,\n              link,\n              contactSubject\n            },\n            fitCheckLabel,\n            fitCheckHref,\n            routingLine\n          }\n        },\n        cards[]{\n          _key,\n          title,\n          body,\n          priceLine,\n          linkLabel,\n          detailEyebrow,\n          detailBody,\n          detailImage{ asset, alt, hotspot, crop },\n          hoverImage{ asset, alt, hotspot, crop },\n          backgroundVideoUrl,\n        }\n      },\n      _type == "homeWorkSection" => {\n        label,\n        projects[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            overview,\n            coverImage,\n            videoUrl,\n            year,\n            "client": client->name,\n            featured,\n            hidden\n          }\n        },\n        linkLabel\n      },\n      _type == "homeProductSection" => { headline, body, ctaLabel },\n      _type == "homePhilosophySection" => { line1, line2 },\n      _type == "homeFinalCtaSection" => {\n        headline,\n        body,\n        emailLine,\n        cta->{\n          buttonLabel,\n          link,\n          contactSubject\n        }\n      },\n    },\n  }\n': HomePageQueryResult
@@ -5399,8 +5567,8 @@ declare module '@sanity/client' {
     '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    _type,\n    body[]{\n      ...,\n      _type == "ctaRef" => {\n        "cta": @->{subhead, buttonLabel, link, contactSubject}\n      }\n    },\n    overview,\n    title,\n    "slug": slug.current,\n  }\n': PagesBySlugQueryResult
     '\n  *[_type == "project" && slug.current == $slug][0] {\n    _id,\n    _type,\n    projectType,\n    comingSoon,\n    hidden,\n    title,\n    "slug": slug.current,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    overview,\n    deliverables,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "projectStatementSection" => { label, body },\n      _type == "projectScopeSection" => { label, items[]{ _key, title, detail } },\n      _type == "projectMediaSection" => {\n        rows[]{\n          _key,\n          _type,\n          items[]{\n            _key,\n            _type,\n            _type == "projectGalleryPhoto" => {\n              image{ asset, alt, caption, hotspot, crop },\n            },\n            _type == "projectGalleryVideo" => {\n              source,\n              videoUrl,\n              caption,\n              poster{ asset, alt, hotspot, crop },\n              "videoFileUrl": videoFile.asset->url,\n            },\n          },\n        },\n      },\n      _type == "projectQuoteSection" => { quote, attribution, attributionRole },\n      _type == "projectStatsSection" => { items[]{ _key, value, label } },\n      _type == "projectCreditsSection" => { items[]{ _key, role, name } },\n    },\n    context,\n    btsNote,\n    brief,\n    approach,\n    result,\n    showTestimonials,\n    "testimonials": *[_type == "testimonial" && project._ref == ^._id] | order(_createdAt asc){\n      _id, quote, author, role\n    },\n    coverImage,\n    videoUrl,\n    gallery[]{\n      _key,\n      _type,\n      _type == "projectGalleryPhoto" => {\n        image{ asset, alt, caption, hotspot, crop },\n      },\n      _type == "projectGalleryVideo" => {\n        source,\n        videoUrl,\n        caption,\n        poster{ asset, alt, hotspot, crop },\n        "videoFileUrl": videoFile.asset->url,\n      },\n      // Legacy row shape (pre\u2013Gallery tab) \u2014 flatten on the frontend if present.\n      _type in ["projectGalleryRowOne", "projectGalleryRowTwo"] => {\n        items[]{\n          _key,\n          _type,\n          _type == "projectGalleryPhoto" => {\n            image{ asset, alt, caption, hotspot, crop },\n          },\n          _type == "projectGalleryVideo" => {\n            source,\n            videoUrl,\n            caption,\n            poster{ asset, alt, hotspot, crop },\n            "videoFileUrl": videoFile.asset->url,\n          },\n        },\n      },\n    },\n    btsImages[]{\n      _key,\n      _type,\n      items[]{\n        _key,\n        _type,\n        _type == "projectGalleryPhoto" => {\n          image{ asset, alt, caption, hotspot, crop },\n        },\n        _type == "projectGalleryVideo" => {\n          source,\n          videoUrl,\n          caption,\n          poster{ asset, alt, hotspot, crop },\n          "videoFileUrl": videoFile.asset->url,\n        },\n      },\n    },\n    role,\n    year,\n    site,\n    siteButtonLabel,\n    client->{ _id, name, website },\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n    stack[]->{ _id, name, kind, url },\n    relatedProjects[]->{\n      _id,\n      title,\n      "slug": slug.current,\n      projectType,\n      year,\n      coverImage,\n      videoUrl,\n      hidden\n    },\n  }\n': ProjectBySlugQueryResult
     '\n  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && comingSoon != true && hidden != true && slug.current != $slug]\n    | order(featured desc, year desc, title asc)[0...3]{\n    _id,\n    title,\n    "slug": slug.current,\n    coverImage,\n    videoUrl,\n    year,\n    "client": client->name,\n  }\n': NextProjectsQueryResult
-    '\n  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(featured desc, _createdAt desc, year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    comingSoon,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    _createdAt,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': AllProjectsQueryResult
-    '\n  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(featured desc, _createdAt desc, year desc, title asc){\n    _id,\n    projectType,\n    featured,\n    comingSoon,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    _createdAt,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': ProjectsByCategoryQueryResult
+    '\n  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(featured desc, year desc, _createdAt desc, title asc){\n    _id,\n    projectType,\n    featured,\n    comingSoon,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    _createdAt,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': AllProjectsQueryResult
+    '\n  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(featured desc, year desc, _createdAt desc, title asc){\n    _id,\n    projectType,\n    featured,\n    comingSoon,\n    title,\n    "slug": slug.current,\n    overview,\n    coverImage,\n    videoUrl,\n    year,\n    _createdAt,\n    "client": client->name,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': ProjectsByCategoryQueryResult
     '\n  *[_type == "workCategory" && defined(slug.current)]|order(filterLabel asc){\n    _id,\n    filterLabel,\n    "slug": slug.current,\n  }\n': WorkCategoriesQueryResult
     '\n  *[_type == "workCategory" && slug.current == $slug][0]{\n    _id,\n    _type,\n    filterLabel,\n    "slug": slug.current,\n    headline,\n    subhead,\n    seoTitle,\n    seoDescription,\n    "capabilities": *[_type == "capability" && ^._id in categories[]._ref]\n      | order(kind asc, sortOrder asc, name asc){ _id, name, kind, url, iconSlug, logo },\n  }\n': WorkCategoryBySlugQueryResult
     '\n  *[_type == "capability"] | order(kind asc, sortOrder asc, name asc){\n    _id,\n    name,\n    kind,\n    url,\n    iconSlug,\n    logo,\n    categories[]->{ _id, filterLabel, "slug": slug.current },\n  }\n': CapabilitiesQueryResult
@@ -5417,5 +5585,7 @@ declare module '@sanity/client' {
     '\n  *[_type == "errorPage"][0]{\n    _id,\n    _type,\n    eyebrow,\n    headline,\n    message,\n    retryButtonText,\n    homeButtonText,\n    homeButtonLink,\n  }\n': ErrorPageQueryResult
     '\n  *[_id == "workPage"][0]{\n    _id,\n    _type,\n    headline,\n    subhead,\n    projectSource,\n    // Hand-picked grid (manual mode) \u2014 same card shape as allProjectsQuery.\n    curatedProjects[]->{\n      _id,\n      projectType,\n      featured,\n      comingSoon,\n      hidden,\n      title,\n      "slug": slug.current,\n      overview,\n      coverImage,\n      videoUrl,\n      year,\n      _createdAt,\n      "client": client->name,\n      categories[]->{ _id, filterLabel, "slug": slug.current },\n    },\n    pillSource,\n    categoryPills[]->{ _id, filterLabel, "slug": slug.current },\n    videoPlayback,\n    emptyState,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n  }\n': WorkPageQueryResult
     '\n  *[_id == "contactPage"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "contactHeroSection" => { headline, lead },\n      _type == "contactBookingSection" => { calLink, fallbackNote },\n      _type == "contactCallDetailsSection" => { label, bullets[]{ _key, lead, text }, recommendationDays },\n      _type == "contactDirectSection" => { directContactLine },\n      _type == "contactFormSection" => { formConfig },\n      _type == "contactFooterSection" => { email, cityTimezone, responseLine },\n    },\n  }\n': ContactPageQueryResult
+    '\n  *[_type == "quiz" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    "serviceTitle": service->title,\n    introHeadline,\n    introBody,\n    startLabel,\n    questions[]{\n      _key,\n      "key": key.current,\n      prompt,\n      hint,\n      shortLabel,\n      kind,\n      weight,\n      options[]{ _key, label, points },\n    },\n    scoreUnit,\n    bands[]{\n      _key,\n      label,\n      minScore,\n      resultHeadline,\n      resultBody,\n      benefits,\n      ctaLead,\n      primaryCtaLabel,\n      primaryCtaHref,\n      secondaryCtaLabel,\n      secondaryCtaHref,\n    },\n    gateHeadline,\n    gateBody,\n    gateButtonLabel,\n    waitlistLabel,\n  }\n': QuizBySlugQueryResult
+    '\n  *[_type == "quiz" && defined(slug.current)]{"slug": slug.current}\n': QuizSlugsQueryResult
   }
 }

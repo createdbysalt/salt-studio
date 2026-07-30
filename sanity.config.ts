@@ -21,6 +21,7 @@ import client from '@/sanity/schemas/documents/client'
 import legalPage from '@/sanity/schemas/documents/legalPage'
 import page from '@/sanity/schemas/documents/page'
 import project from '@/sanity/schemas/documents/project'
+import quiz from '@/sanity/schemas/documents/quiz'
 import quizSubmission from '@/sanity/schemas/documents/quizSubmission'
 import service from '@/sanity/schemas/documents/service'
 import testimonial from '@/sanity/schemas/documents/testimonial'
@@ -143,6 +144,7 @@ export default defineConfig({
       legalPage,
       page,
       project,
+      quiz,
       quizSubmission,
       workCategory,
       capability,
