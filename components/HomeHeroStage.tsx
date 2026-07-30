@@ -1,7 +1,8 @@
 'use client'
 
 import {HomeProjectSlider} from '@/components/HomeProjectSlider'
-import {gsap, prefersReducedMotion, ScrollTrigger} from '@/components/motion/gsap'
+import {EASE, gsap, prefersReducedMotion, ScrollTrigger} from '@/components/motion/gsap'
+import {isIntroBlocking, waitForIntroPhase} from '@/components/motion/intro'
 import {WordSwap, type SwapFace} from '@/components/motion/WordSwap'
 import type {WorkProjectCard} from '@/components/ProjectGrid'
 import {useGSAP} from '@gsap/react'
@@ -124,9 +125,41 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
     {scope: triggerRef, dependencies: [setLen]},
   )
 
+  // Project strip comes last — after nav + hero type (intro phase `projects`).
+  useGSAP(
+    () => {
+      const stage = stageRef.current
+      if (!stage || prefersReducedMotion()) return
+
+      let cancelled = false
+      let tween: gsap.core.Tween | null = null
+
+      const reveal = () => {
+        if (cancelled) return
+        tween = gsap.fromTo(
+          stage,
+          {autoAlpha: 0, y: 48},
+          {autoAlpha: 1, y: 0, duration: 0.9, ease: EASE.outQuint},
+        )
+      }
+
+      if (isIntroBlocking()) {
+        gsap.set(stage, {autoAlpha: 0, y: 48})
+        waitForIntroPhase('projects').then(reveal)
+      }
+
+      return () => {
+        cancelled = true
+        tween?.kill()
+      }
+    },
+    {scope: stageRef, dependencies: [setLen]},
+  )
+
   return (
     <section
       ref={triggerRef}
+      data-home-hero
       className="relative flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden bg-background"
     >
       {/* Paper band — TinyWins per-word mask reveal + looping phrase swap */}

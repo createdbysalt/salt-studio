@@ -1,39 +1,58 @@
+import {readFile} from 'node:fs/promises'
+import {join} from 'node:path'
 import {ImageResponse} from 'next/og'
 
 /**
- * Dynamic Open Graph image — the auto-updating "social share card".
+ * Branded Open Graph image.
  *
- * Renders a branded Salt Studio card from query params (no manual upload needed).
- * Because the page's title/eyebrow/subtitle are baked into the URL, the image
- * updates automatically whenever that content changes in Sanity — and the CDN
- * caches each unique card.
+ * Default (no params): the site-wide statement card — mark + statement,
+ * tagline left / domain right. Black & white only.
  *
- * Usage (from a page's generateMetadata):
- *   openGraph: { images: [ogImageUrl({title, eyebrow, subtitle})] }
- * A manually-uploaded `ogImage` in Sanity should take precedence over this.
+ * Project cards (`?title=…&eyebrow=…`): the same frame, but the statement is
+ * replaced by a small eyebrow (e.g. "Case study · 2024") over the project title.
  *
- * Fonts: Satori (behind ImageResponse) can't read .woff2, and Salt Studio's brand
- * fonts are .woff2 only — so this uses the built-in font. To match the exact
- * brand type, drop an .otf/.ttf weight into the repo and pass it via `fonts`.
+ * Usage: openGraph: { images: [ogImageUrl({title, eyebrow})] }
  */
 
 export const size = {width: 1200, height: 630}
 export const contentType = 'image/png'
 
-const SALT_BLACK = '#0d0e12'
+const INK = '#08090a'
 const WHITE = '#ffffff'
+const MUTED = 'rgba(255, 255, 255, 0.5)'
+/** Intentional break — avoids orphaning “there.” on its own line. */
+const STATEMENT_LINES = ['We draw out the good', "that's already there."] as const
+const TAGLINE = 'Subtle. Essential. Transformative.'
 
-function clamp(value: string, max: number): string {
-  const trimmed = value.trim()
-  return trimmed.length <= max ? trimmed : `${trimmed.slice(0, max - 1)}…`
+async function loadAssets() {
+  const fontsDir = join(process.cwd(), 'app/api/og/fonts')
+  const brandDir = join(process.cwd(), 'public/brand')
+
+  const [geistBold, geistMedium, geistMono, wordmarkSvg] = await Promise.all([
+    readFile(join(fontsDir, 'Geist-Bold.ttf')),
+    readFile(join(fontsDir, 'Geist-Medium.ttf')),
+    readFile(join(fontsDir, 'GeistMono-Medium.ttf')),
+    readFile(join(brandDir, 'salt-wordmark.svg'), 'utf8'),
+  ])
+
+  const lightMark = wordmarkSvg.replace(/<path /g, '<path fill="#ffffff" ')
+  const wordmarkSrc = `data:image/svg+xml;base64,${Buffer.from(lightMark).toString('base64')}`
+
+  return {geistBold, geistMedium, geistMono, wordmarkSrc}
 }
 
-export function GET(request: Request) {
-  const {searchParams} = new URL(request.url)
+export async function GET(request: Request) {
+  const {geistBold, geistMedium, geistMono, wordmarkSrc} = await loadAssets()
 
-  const title = clamp(searchParams.get('title') || 'Salt Studio', 90)
-  const eyebrow = searchParams.get('eyebrow')?.trim() || ''
-  const subtitle = searchParams.get('subtitle')?.trim() || ''
+  const {searchParams} = new URL(request.url)
+  const title = searchParams.get('title')?.trim()
+  const eyebrow = searchParams.get('eyebrow')?.trim()
+  const isProject = Boolean(title)
+  // Bigger title for short names, smaller as it grows, so it never overflows.
+  const titleSize = !title ? 72 : title.length > 24 ? 60 : title.length > 15 ? 72 : 88
+
+  const markW = 260
+  const markH = Math.round(markW * (339.25 / 555.03))
 
   return new ImageResponse(
     <div
@@ -43,93 +62,129 @@ export function GET(request: Request) {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        backgroundColor: SALT_BLACK,
+        backgroundColor: INK,
         color: WHITE,
-        padding: 80,
-        fontFamily: 'sans-serif',
+        padding: '64px 80px 56px',
+        fontFamily: 'Geist',
       }}
     >
-      {/* Top: wordmark + site */}
-      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        <div style={{display: 'flex', fontSize: 26, fontWeight: 700, letterSpacing: 8}}>
-          SALT STUDIO
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          width: '100%',
+          flexGrow: 1,
+          justifyContent: 'center',
+          paddingBottom: 36,
+        }}
+      >
+        <img
+          src={wordmarkSrc}
+          width={markW}
+          height={markH}
+          alt="Salt Studio"
+          style={{display: 'flex', width: markW, height: markH, marginBottom: 28}}
+        />
+
+        {isProject ? (
+          <div style={{display: 'flex', flexDirection: 'column'}}>
+            {eyebrow ? (
+              <div
+                style={{
+                  display: 'flex',
+                  fontFamily: 'Geist Mono',
+                  fontSize: 20,
+                  fontWeight: 500,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: MUTED,
+                  marginBottom: 18,
+                }}
+              >
+                {eyebrow}
+              </div>
+            ) : null}
+            <div
+              style={{
+                display: 'flex',
+                fontSize: titleSize,
+                fontWeight: 700,
+                lineHeight: 1.02,
+                letterSpacing: '-0.04em',
+                color: WHITE,
+                maxWidth: 940,
+              }}
+            >
+              {title}
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              fontSize: 52,
+              fontWeight: 700,
+              lineHeight: 1.12,
+              letterSpacing: '-0.035em',
+              color: WHITE,
+            }}
+          >
+            {STATEMENT_LINES.map((line) => (
+              <div key={line} style={{display: 'flex'}}>
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            fontFamily: 'Geist Mono',
+            fontSize: 17,
+            fontWeight: 500,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: MUTED,
+          }}
+        >
+          {TAGLINE}
         </div>
         <div
           style={{
             display: 'flex',
-            fontSize: 18,
-            letterSpacing: 3,
+            fontFamily: 'Geist Mono',
+            fontSize: 17,
+            fontWeight: 500,
+            letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.55)',
+            color: MUTED,
           }}
         >
           createdbysalt.com
         </div>
       </div>
-
-      {/* Middle: eyebrow + headline + subtitle */}
-      <div style={{display: 'flex', flexDirection: 'column'}}>
-        {eyebrow ? (
-          <div
-            style={{
-              display: 'flex',
-              fontSize: 22,
-              letterSpacing: 4,
-              textTransform: 'uppercase',
-              color: 'rgba(255,255,255,0.6)',
-              marginBottom: 24,
-            }}
-          >
-            {clamp(eyebrow, 40)}
-          </div>
-        ) : null}
-        <div
-          style={{
-            display: 'flex',
-            fontSize: 76,
-            fontWeight: 700,
-            lineHeight: 1.05,
-            maxWidth: 960,
-          }}
-        >
-          {title}
-        </div>
-        {subtitle ? (
-          <div
-            style={{
-              display: 'flex',
-              fontSize: 30,
-              lineHeight: 1.35,
-              color: 'rgba(255,255,255,0.7)',
-              maxWidth: 900,
-              marginTop: 28,
-            }}
-          >
-            {clamp(subtitle, 140)}
-          </div>
-        ) : null}
-      </div>
-
-      {/* Bottom: rule + tagline */}
-      <div style={{display: 'flex', flexDirection: 'column'}}>
-        <div style={{display: 'flex', height: 1, backgroundColor: 'rgba(255,255,255,0.25)'}} />
-        <div
-          style={{
-            display: 'flex',
-            fontSize: 20,
-            letterSpacing: 2,
-            color: 'rgba(255,255,255,0.55)',
-            marginTop: 24,
-          }}
-        >
-          Subtle. Essential. Transformative.
-        </div>
-      </div>
     </div>,
     {
       ...size,
+      fonts: [
+        {name: 'Geist', data: geistBold, weight: 700, style: 'normal'},
+        {name: 'Geist', data: geistMedium, weight: 500, style: 'normal'},
+        {name: 'Geist Mono', data: geistMono, weight: 500, style: 'normal'},
+      ],
       headers: {
-        'cache-control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+        'cache-control': 'public, max-age=60, s-maxage=3600, stale-while-revalidate=86400',
       },
     },
   )

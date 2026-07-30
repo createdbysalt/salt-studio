@@ -5,24 +5,29 @@ import {useFormValue, type ObjectInputProps} from 'sanity'
  * Custom input for the shared `ogImage` field.
  *
  * Renders the normal image upload, then — when no image is uploaded — a live
- * preview of the auto-generated `/api/og` branded card, built from the page's
- * `seoTitle` + `seoDescription`. This makes it obvious that leaving the field
- * empty still produces a share image (it's generated at render time, so the
- * empty upload box alone gives no hint that anything is happening).
- *
- * Uploading an image overrides the card, so the preview hides once one is set.
+ * preview of the auto-generated `/api/og` card. Project documents preview their
+ * own title card (eyebrow + project name); every other page previews the
+ * site-wide statement card. Uploading an image overrides the auto card.
  */
 export function OgImagePreviewInput(props: ObjectInputProps) {
   const value = props.value as {asset?: {_ref?: string}} | undefined
   const hasImage = Boolean(value?.asset?._ref)
 
-  const seoTitle = useFormValue(['seoTitle']) as string | undefined
-  const seoDescription = useFormValue(['seoDescription']) as string | undefined
+  // The parent document, live — so the preview updates as fields change.
+  const doc = useFormValue([]) as
+    | {_type?: string; title?: string; projectType?: string; year?: string}
+    | undefined
 
-  const title = (seoTitle || 'Salt Studio').toString().trim()
-  const subtitle = (seoDescription || '').toString().trim()
-  const params = new URLSearchParams({title})
-  if (subtitle) params.set('subtitle', subtitle)
+  const isProject = doc?._type === 'project' && Boolean(doc?.title)
+
+  // Same param shape the site uses in lib/seo/og-image.ts — keep the version in sync.
+  const params = new URLSearchParams({v: 'bw-11'})
+  if (isProject) {
+    const kind = doc?.projectType === 'case-study' ? 'Case study' : 'Project'
+    const year = doc?.year ? String(doc.year).trim() : ''
+    params.set('title', String(doc?.title))
+    params.set('eyebrow', year ? `${kind} · ${year}` : kind)
+  }
   const ogUrl = `/api/og?${params.toString()}`
 
   return (
@@ -32,11 +37,11 @@ export function OgImagePreviewInput(props: ObjectInputProps) {
         <Card padding={3} radius={2} tone="transparent" border>
           <Stack space={3}>
             <Text size={1} muted>
-              Auto-generated preview — this is the branded card that gets shared. Upload an image
-              above to override it.
+              {isProject
+                ? 'This project’s social card — the image used when this project is shared.'
+                : 'Site-wide social card — the image used when this page is shared.'}
             </Text>
             <Box>
-              {/* Same-origin /api/og route; renders the live 1200×630 card. */}
               <img
                 src={ogUrl}
                 alt="Auto-generated social share card preview"

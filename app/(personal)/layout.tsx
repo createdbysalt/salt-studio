@@ -3,13 +3,13 @@ import '@/styles/index.css'
 import {HashScroll} from '@/components/HashScroll'
 import {LenisProvider} from '@/components/motion/LenisProvider'
 import {PageTransition} from '@/components/motion/PageTransition'
+import {SiteIntro} from '@/components/motion/SiteIntro'
 import {Navbar} from '@/components/Navbar'
 import {SiteFooter} from '@/components/SiteFooter'
 import {SiteShell} from '@/components/SiteShell'
 import {ogImageUrl, SiteStructuredData} from '@/lib/seo'
 import {sanityFetch, SanityLive} from '@/sanity/lib/live'
 import {footerLegalPagesQuery, homePageQuery, settingsQuery} from '@/sanity/lib/queries'
-import {urlForOpenGraphImage} from '@/sanity/lib/utils'
 import {SpeedInsights} from '@vercel/speed-insights/next'
 import type {Metadata, Viewport} from 'next'
 import {VisualEditing} from 'next-sanity/visual-editing'
@@ -28,11 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteName = settings?.siteName || homePage?.seoTitle || 'Salt Studio'
   const siteDescription = settings?.siteDescription || homePage?.seoDescription
 
-  // Uploaded settings image wins; otherwise fall back to the auto-generated
-  // branded card so every page (including the 404) has a share image.
-  const ogImage =
-    urlForOpenGraphImage(settings?.ogImage) ??
-    ogImageUrl({title: siteName, subtitle: siteDescription})
+  // Same branded social card on every page.
+  const ogImage = ogImageUrl()
 
   return {
     title: {
@@ -73,6 +70,7 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
         </SiteShell>
       </LenisProvider>
       <PageTransition />
+      <SiteIntro />
       <Toaster />
       <SanityLive onError={handleError} />
       {(await draftMode()).isEnabled && (

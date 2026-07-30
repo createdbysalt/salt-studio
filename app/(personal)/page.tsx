@@ -3,21 +3,15 @@ import {CorePageSchema, ogImageUrl} from '@/lib/seo'
 import {studioUrl} from '@/sanity/lib/api'
 import {sanityFetch} from '@/sanity/lib/live'
 import {homePageQuery} from '@/sanity/lib/queries'
-import {urlForOpenGraphImage} from '@/sanity/lib/utils'
 import type {Metadata} from 'next'
 import Link from 'next/link'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const {data} = await sanityFetch({query: homePageQuery, stega: false})
-
-  // Manual Sanity ogImage wins; otherwise fall back to the auto-generated card.
-  const ogImage = data?.ogImage
-    ? urlForOpenGraphImage(data.ogImage)
-    : ogImageUrl({title: data?.seoTitle ?? 'Salt Studio', subtitle: data?.seoDescription})
-
+  const ogImage = ogImageUrl()
   return {
-    openGraph: {images: ogImage ? [{url: ogImage, width: 1200, height: 630}] : []},
-    twitter: {card: 'summary_large_image', images: ogImage ? [ogImage] : []},
+    alternates: {canonical: '/'},
+    openGraph: {images: [{url: ogImage, width: 1200, height: 630}]},
+    twitter: {card: 'summary_large_image', images: [ogImage]},
   }
 }
 

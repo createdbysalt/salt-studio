@@ -37,9 +37,7 @@ export function resolveHref(documentType?: string, slug?: string | null): string
     case 'workPage':
       return '/work'
     case 'servicesPage':
-      // No standalone page — the nav "Capabilities" link scrolls to the
-      // homepage "How we can help" band (see components/HashScroll.tsx).
-      return '/#how-we-can-help'
+      return '/capabilities'
     case 'aboutPage':
       return '/about'
     case 'contactPage':
@@ -52,6 +50,8 @@ export function resolveHref(documentType?: string, slug?: string | null): string
       return slug ? `/projects/${slug}` : undefined
     case 'legalPage':
       return slug ? `/legal/${slug}` : undefined
+    case 'quiz':
+      return slug ? `/quiz/${slug}` : undefined
     default:
       console.warn('Invalid document type:', documentType)
       return undefined

@@ -4,7 +4,7 @@ import type {ProjectBySlugQueryResult} from '@/sanity.types'
 import {stegaClean} from 'next-sanity'
 
 type Project = NonNullable<ProjectBySlugQueryResult>
-type GalleryRows = NonNullable<Project['gallery']> | NonNullable<Project['btsImages']>
+type GalleryRows = NonNullable<Project['btsImages']>
 type GalleryRow = GalleryRows[number]
 type GalleryItem = NonNullable<NonNullable<GalleryRow['items']>[number]>
 
@@ -18,7 +18,8 @@ function galleryItemIsVisible(item: GalleryItem | null | undefined): boolean {
   if (item._type === 'projectGalleryPhoto') return Boolean(item.image?.asset)
   if (item._type === 'projectGalleryVideo') {
     const url = item.videoUrl ? stegaClean(item.videoUrl).trim() : ''
-    return Boolean(url)
+    const fileUrl = item.videoFileUrl ? stegaClean(item.videoFileUrl).trim() : ''
+    return Boolean(url || fileUrl)
   }
   return false
 }
@@ -56,6 +57,7 @@ function GalleryCell({
     return (
       <ProjectGalleryVideoCell
         videoUrl={item.videoUrl}
+        videoFileUrl={item.videoFileUrl}
         poster={item.poster}
         title={title}
         aspectClass={aspectClass}

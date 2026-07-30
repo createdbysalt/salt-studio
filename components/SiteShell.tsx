@@ -13,7 +13,13 @@ interface SiteShellProps {
 
 /** Routes whose page stage is dark — content cover + inverse footer. */
 function pageIsDark(pathname: string): boolean {
-  return pathname.startsWith('/projects/') || pathname === '/work' || pathname.startsWith('/work/')
+  return (
+    pathname.startsWith('/projects/') ||
+    pathname === '/work' ||
+    pathname.startsWith('/work/') ||
+    pathname === '/legal' ||
+    pathname.startsWith('/legal/')
+  )
 }
 
 /**

@@ -11,9 +11,9 @@ export type NavItem = {label: string; href: string; children?: NavChild[]}
 
 // Fallback nav if `settings.menuItems` hasn't been filled in Sanity yet, so the
 // header never renders empty. Once the client populates the nav, that wins.
-// Only routes that exist today — Services and About join when those pages ship.
 export const DEFAULT_NAV: NavItem[] = [
   {label: 'Work', href: '/work'},
+  {label: 'Capabilities', href: '/capabilities'},
   {label: 'Contact', href: '/contact'},
 ]
 

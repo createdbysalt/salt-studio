@@ -1,6 +1,7 @@
 'use client'
 
 import {isVimeoUrl, vimeoPlayerSrc} from '@/lib/vimeo'
+import {isYouTubeUrl, youtubePlayerSrc} from '@/lib/youtube'
 import {X} from 'lucide-react'
 import {stegaClean} from 'next-sanity'
 import {useCallback, useEffect, useId, useState} from 'react'
@@ -11,18 +12,25 @@ type ProjectVideoLightboxProps = {
   onClose: () => void
   title: string
   videoUrl?: string | null
+  videoFileUrl?: string | null
   dialogId?: string
 }
 
-export function resolveProjectVideoSources(videoUrl?: string | null) {
+export function resolveProjectVideoSources(videoUrl?: string | null, videoFileUrl?: string | null) {
+  const cleanFile = videoFileUrl ? stegaClean(videoFileUrl).trim() || null : null
   const cleanVideo = videoUrl ? stegaClean(videoUrl).trim() || null : null
+  const youtubePlayer = cleanVideo && isYouTubeUrl(cleanVideo) ? youtubePlayerSrc(cleanVideo) : null
   const vimeoPlayer = cleanVideo && isVimeoUrl(cleanVideo) ? vimeoPlayerSrc(cleanVideo) : null
-  const mp4Src = cleanVideo && !isVimeoUrl(cleanVideo) ? cleanVideo : null
+  const mp4Src =
+    cleanFile ||
+    (cleanVideo && !isVimeoUrl(cleanVideo) && !isYouTubeUrl(cleanVideo) ? cleanVideo : null)
   return {
     cleanVideo,
+    cleanFile,
+    youtubePlayer,
     vimeoPlayer,
     mp4Src,
-    hasVideo: Boolean(vimeoPlayer || mp4Src),
+    hasVideo: Boolean(youtubePlayer || vimeoPlayer || mp4Src),
   }
 }
 
@@ -32,12 +40,16 @@ export function ProjectVideoLightbox({
   onClose,
   title,
   videoUrl,
+  videoFileUrl,
   dialogId: dialogIdProp,
 }: ProjectVideoLightboxProps) {
   const generatedId = useId()
   const dialogId = dialogIdProp ?? generatedId
   const [mounted, setMounted] = useState(false)
-  const {vimeoPlayer, mp4Src, hasVideo} = resolveProjectVideoSources(videoUrl)
+  const {youtubePlayer, vimeoPlayer, mp4Src, hasVideo} = resolveProjectVideoSources(
+    videoUrl,
+    videoFileUrl,
+  )
 
   const closePlayer = useCallback(() => onClose(), [onClose])
 
@@ -92,7 +104,15 @@ export function ProjectVideoLightbox({
         </div>
 
         <div className="relative aspect-video w-full bg-black">
-          {vimeoPlayer ? (
+          {youtubePlayer ? (
+            <iframe
+              src={youtubePlayer}
+              title={title ? `${title} — full player` : 'Project video'}
+              allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full border-0"
+            />
+          ) : vimeoPlayer ? (
             <iframe
               src={vimeoPlayer}
               title={title ? `${title} — full player` : 'Project video'}

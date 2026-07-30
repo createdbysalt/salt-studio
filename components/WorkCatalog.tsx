@@ -33,7 +33,7 @@ function matchesQuery(project: WorkProjectCard, query: string): boolean {
 export function WorkCatalog({
   projects,
   emptyState,
-  videoPlayback = 'autoplay',
+  videoPlayback = 'hover',
 }: {
   projects: Array<WorkProjectCard | null>
   emptyState?: WorkEmptyState

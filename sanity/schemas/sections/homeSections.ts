@@ -51,6 +51,38 @@ export const homeHeroSection = defineType({
       description: 'The supporting line under the headline. One or two sentences.',
     }),
     defineField({
+      name: 'splitPrimaryLeft',
+      title: 'Split headline — primary, left side',
+      type: 'text',
+      rows: 2,
+      description:
+        'Left half of the edge-anchored hero split (the face visitors see first). Line breaks are kept exactly as typed. Leave empty to use the built-in copy.',
+    }),
+    defineField({
+      name: 'splitPrimaryRight',
+      title: 'Split headline — primary, right side',
+      type: 'text',
+      rows: 2,
+      description:
+        'Right half of the edge-anchored hero split (the face visitors see first). Leave empty to use the built-in copy.',
+    }),
+    defineField({
+      name: 'splitSecondaryLeft',
+      title: 'Split headline — swap, left side',
+      type: 'text',
+      rows: 2,
+      description:
+        'Left half of the face the hero briefly swaps to. Leave empty to use the built-in copy.',
+    }),
+    defineField({
+      name: 'splitSecondaryRight',
+      title: 'Split headline — swap, right side',
+      type: 'text',
+      rows: 2,
+      description:
+        'Right half of the face the hero briefly swaps to. Leave empty to use the built-in copy.',
+    }),
+    defineField({
       name: 'ctaLabel',
       title: 'CTA button label',
       type: 'string',

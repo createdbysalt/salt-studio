@@ -1,7 +1,16 @@
+import {
+  getCaseScope,
+  getCaseStats,
+  hasCaseMedia,
+  hasCaseSidebar,
+  ProjectCaseMedia,
+  ProjectCaseSidebar,
+} from '@/components/ProjectCaseSections'
 import {withWorkPosters, type WorkProjectCard} from '@/components/ProjectGrid'
 import {formatProjectYearMark} from '@/components/ProjectHeroMeta'
 import {ProjectNextSection} from '@/components/ProjectNextSection'
 import {ProjectScrollGallery, type ProjectScrollFrame} from '@/components/ProjectScrollGallery'
+import {ProjectStatsReveal} from '@/components/ProjectStatsReveal'
 import {ProjectTestimonialRotator} from '@/components/ProjectTestimonialRotator'
 import {ProjectWatchVideoButton} from '@/components/ProjectWatchVideoButton'
 import {fetchVimeoPoster, isVimeoUrl} from '@/lib/vimeo'
@@ -10,6 +19,7 @@ import {studioUrl} from '@/sanity/lib/api'
 import {sanityFetch} from '@/sanity/lib/live'
 import {nextProjectsQuery} from '@/sanity/lib/queries'
 import {urlForImage} from '@/sanity/lib/utils'
+import {ArrowUpRight} from 'lucide-react'
 import {createDataAttribute, stegaClean} from 'next-sanity'
 import Link from 'next/link'
 import type {ReactNode} from 'react'
@@ -45,6 +55,43 @@ async function resolveLeadPoster(project: Project): Promise<string | null> {
   }
 
   return null
+}
+
+type GalleryMediaItem =
+  | {
+      _key: string
+      _type: 'projectGalleryPhoto'
+      image?: Extract<ProjectScrollFrame, {kind: 'photo'}>['image']
+    }
+  | {
+      _key: string
+      _type: 'projectGalleryVideo'
+      videoUrl?: string | null
+      videoFileUrl?: string | null
+      poster?: Extract<ProjectScrollFrame, {kind: 'video'}>['poster']
+      caption?: string | null
+    }
+
+/** Flat Photo/Video items, or legacy 1-/2-column rows — normalize for the scroll stack. */
+function flattenProjectGallery(
+  entries: Project['gallery'] | Project['btsImages'],
+): GalleryMediaItem[] {
+  const out: GalleryMediaItem[] = []
+  for (const entry of entries ?? []) {
+    if (!entry) continue
+    if (entry._type === 'projectGalleryPhoto' || entry._type === 'projectGalleryVideo') {
+      out.push(entry as GalleryMediaItem)
+      continue
+    }
+    const items = 'items' in entry ? entry.items : null
+    for (const item of items ?? []) {
+      if (!item) continue
+      if (item._type === 'projectGalleryPhoto' || item._type === 'projectGalleryVideo') {
+        out.push(item as GalleryMediaItem)
+      }
+    }
+  }
+  return out
 }
 
 function toWorkCards(
@@ -95,11 +142,11 @@ export async function ProjectDetail({data}: {data: Project | null}) {
   const hasCover = Boolean(project.coverImage?.asset?._ref)
   const cleanVideo = project.videoUrl ? stegaClean(project.videoUrl).trim() || null : null
   const cleanSite = project.site ? stegaClean(project.site).trim() || null : null
-  const siteButtonLabelRaw =
-    (project.siteButtonLabel ? stegaClean(project.siteButtonLabel).trim() : '') || 'Visit site'
-  const siteButtonLabel = /→\s*$/.test(siteButtonLabelRaw)
-    ? siteButtonLabelRaw
-    : `${siteButtonLabelRaw} →`
+  const siteButtonLabel =
+    (project.siteButtonLabel ? stegaClean(project.siteButtonLabel).trim() : '').replace(
+      /[→\s]+$/,
+      '',
+    ) || 'Visit site'
   const hasLeadMedia = Boolean(cleanVideo || hasCover)
   const leadPosterUrl = await resolveLeadPoster(project)
 
@@ -113,8 +160,8 @@ export async function ProjectDetail({data}: {data: Project | null}) {
   const ideaText = briefText || contextText
   const insightText = approachText || (briefText && contextText ? contextText : '') || btsNoteText
 
-  const galleryRows = project.gallery ?? []
-  const btsRows = project.btsImages ?? []
+  const galleryItems = flattenProjectGallery(project.gallery)
+  const btsItems = flattenProjectGallery(project.btsImages)
 
   const scrollFrames: ProjectScrollFrame[] = []
   if (hasLeadMedia) {
@@ -127,27 +174,26 @@ export async function ProjectDetail({data}: {data: Project | null}) {
       posterUrl: leadPosterUrl,
     })
   }
-  for (const row of [...galleryRows, ...btsRows]) {
-    for (const item of row?.items ?? []) {
-      if (!item) continue
-      if (item._type === 'projectGalleryPhoto' && item.image?.asset) {
-        scrollFrames.push({
-          key: item._key,
-          kind: 'photo',
-          image: item.image,
-        })
-      } else if (item._type === 'projectGalleryVideo') {
-        const url = item.videoUrl ? stegaClean(item.videoUrl).trim() : ''
-        if (!url) continue
-        scrollFrames.push({
-          key: item._key,
-          kind: 'video',
-          title,
-          videoUrl: item.videoUrl,
-          poster: item.poster,
-          caption: item.caption,
-        })
-      }
+  for (const item of [...galleryItems, ...btsItems]) {
+    if (item._type === 'projectGalleryPhoto' && item.image?.asset) {
+      scrollFrames.push({
+        key: item._key,
+        kind: 'photo',
+        image: item.image,
+      })
+    } else if (item._type === 'projectGalleryVideo') {
+      const url = item.videoUrl ? stegaClean(item.videoUrl).trim() : ''
+      const fileUrl = item.videoFileUrl ? stegaClean(item.videoFileUrl).trim() : ''
+      if (!url && !fileUrl) continue
+      scrollFrames.push({
+        key: item._key,
+        kind: 'video',
+        title,
+        videoUrl: item.videoUrl,
+        videoFileUrl: item.videoFileUrl,
+        poster: item.poster,
+        caption: item.caption,
+      })
     }
   }
   const showScrollGallery = scrollFrames.length > 0
@@ -161,7 +207,9 @@ export async function ProjectDetail({data}: {data: Project | null}) {
       : []
   const showTestimonials = isCaseStudy && testimonials.length > 0
 
-  const relatedFromDoc = toWorkCards(project.relatedProjects ?? [])
+  const relatedFromDoc = toWorkCards(
+    (project.relatedProjects ?? []).filter((p) => p?.hidden !== true),
+  )
   const relatedIds = new Set(relatedFromDoc.map((p) => p._id))
   let nextSource = relatedFromDoc
   if (nextSource.length < 3 && project.slug) {
@@ -186,9 +234,21 @@ export async function ProjectDetail({data}: {data: Project | null}) {
     .map((item) => (item?.name ? stegaClean(item.name).trim() : ''))
     .filter(Boolean)
 
-  const showSidebarCopy = Boolean(ideaText || insightText || resultText)
+  const hasSidebarSections = hasCaseSidebar(project.sections)
+  const hasMediaSections = hasCaseMedia(project.sections)
+  const caseStats = getCaseStats(project.sections)
+  const caseScope = getCaseScope(project.sections)
+  const deliverableTerms = (caseScope?.items ?? [])
+    .map((it) => (it.title ? stegaClean(it.title).trim() : ''))
+    .filter(Boolean)
+  const showSidebarCopy = hasSidebarSections || Boolean(ideaText || insightText || resultText)
   const showMeta = Boolean(
-    clientName || yearDisplay || roleText || categoryItems.length || stackNames.length,
+    clientName ||
+    yearDisplay ||
+    roleText ||
+    categoryItems.length ||
+    stackNames.length ||
+    deliverableTerms.length,
   )
 
   return (
@@ -213,20 +273,31 @@ export async function ProjectDetail({data}: {data: Project | null}) {
         )}
         <h1
           data-sanity={dataAttribute?.('title')}
-          className="mx-auto mt-3.5 mb-6 w-full max-w-[16ch] font-sans text-[clamp(2.5rem,11vw,11rem)] font-bold uppercase leading-[0.85] tracking-[-0.05em] text-foreground md:mt-4 md:mb-0"
+          className={`mx-auto mt-3.5 w-full max-w-[16ch] font-sans text-[clamp(2.5rem,11vw,11rem)] font-bold uppercase leading-[0.85] tracking-[-0.05em] text-foreground md:mt-4 ${
+            caseStats.length > 0 ? 'mb-2.5 md:mb-3' : 'mb-6 md:mb-0'
+          }`}
         >
           {title}
         </h1>
+        {caseStats.length > 0 ? (
+          <div className="mx-auto mt-4 w-full px-2 pb-5 md:mt-0 md:pb-6">
+            <ProjectStatsReveal items={caseStats} />
+          </div>
+        ) : null}
       </header>
 
       {/* 2. Sticky sidebar + right-edge-bleed media stack */}
       <section
         aria-label="Project details"
-        className="mt-4 grid grid-cols-1 items-start gap-5 pb-16 pl-5 pr-5 md:mt-10 md:gap-6 md:pb-24 md:pl-6 md:pr-6 lg:mt-16 lg:grid-cols-[minmax(20rem,28rem)_minmax(0,1fr)] lg:gap-x-10 lg:gap-y-0 lg:pl-[30px] lg:pr-0 xl:grid-cols-[minmax(22rem,32rem)_minmax(0,1fr)] xl:gap-x-14"
+        className={`grid grid-cols-1 items-start gap-5 pb-16 pl-5 pr-5 md:gap-6 md:pb-24 md:pl-6 md:pr-6 lg:grid-cols-[minmax(20rem,28rem)_minmax(0,1fr)] lg:gap-x-10 lg:gap-y-0 lg:pl-[30px] lg:pr-0 xl:grid-cols-[minmax(22rem,32rem)_minmax(0,1fr)] xl:gap-x-14 ${
+          caseStats.length > 0 ? 'mt-0' : 'mt-4 md:mt-10 lg:mt-16'
+        }`}
       >
         {/* Below lg: gallery first (order-1), then sidebar copy. At lg+: sidebar left, gallery right. */}
         <aside className="order-2 min-w-0 lg:order-1 lg:sticky lg:top-28 lg:self-start lg:pb-8">
-          {showSidebarCopy ? (
+          {hasSidebarSections ? (
+            <ProjectCaseSidebar sections={project.sections} />
+          ) : showSidebarCopy ? (
             <div className="space-y-5 md:space-y-6 lg:space-y-10">
               {ideaText ? (
                 <div>
@@ -293,11 +364,16 @@ export async function ProjectDetail({data}: {data: Project | null}) {
                   <span className="inline-block max-w-[14rem]">{stackNames.join(', ')}</span>
                 ) : null}
               </MetaRow>
+              <MetaRow label="Deliverables">
+                {deliverableTerms.length ? (
+                  <span className="inline-block max-w-[14rem]">{deliverableTerms.join(', ')}</span>
+                ) : null}
+              </MetaRow>
             </dl>
           ) : null}
 
           {cleanSite || cleanVideo ? (
-            <div className="mt-5 flex flex-wrap items-center gap-3 md:mt-6 lg:mt-8">
+            <div className="mt-3 flex flex-wrap items-center gap-3 md:mt-4">
               {/* Prefer live site; Watch film only when there is no site URL. */}
               {cleanSite ? (
                 <a
@@ -305,9 +381,14 @@ export async function ProjectDetail({data}: {data: Project | null}) {
                   target="_blank"
                   rel="noopener noreferrer"
                   data-sanity={dataAttribute?.('siteButtonLabel')}
-                  className="btn-ghost w-full justify-center md:w-auto"
+                  className="group inline-flex items-center gap-1.5 border-b border-foreground/25 pb-0.5 font-mono text-[11px] font-medium uppercase tracking-label text-foreground/70 transition-colors duration-300 hover:border-foreground hover:text-foreground"
                 >
                   {siteButtonLabel}
+                  <ArrowUpRight
+                    aria-hidden
+                    className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                    strokeWidth={2.25}
+                  />
                 </a>
               ) : (
                 <ProjectWatchVideoButton
@@ -324,6 +405,12 @@ export async function ProjectDetail({data}: {data: Project | null}) {
           {showScrollGallery ? (
             <section aria-label="Project gallery" className="-mx-5 md:-mx-6 lg:mx-0">
               <ProjectScrollGallery frames={scrollFrames} />
+            </section>
+          ) : null}
+
+          {hasMediaSections ? (
+            <section aria-label="Case study media" className="-mx-5 md:-mx-6 lg:mx-0">
+              <ProjectCaseMedia sections={project.sections} title={title} />
             </section>
           ) : null}
 

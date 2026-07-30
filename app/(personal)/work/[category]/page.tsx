@@ -4,6 +4,7 @@ import {WorkCatalog} from '@/components/WorkCatalog'
 import {WorkFilterHeadline} from '@/components/WorkFilterHeadline'
 import {CorePageSchema, generateServiceSchema, ogImageUrl} from '@/lib/seo'
 import {resolveWorkPills} from '@/lib/work-pills'
+import {compareFeaturedThenRecent} from '@/lib/work-sort'
 import {sanityFetch} from '@/sanity/lib/live'
 import {
   projectsByCategoryQuery,
@@ -38,11 +39,12 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   if (!data) return {}
 
   const title = data.headline ?? data.filterLabel ?? 'Work'
-  const ogImage = ogImageUrl({title: data.seoTitle ?? title, subtitle: data.seoDescription})
+  const ogImage = ogImageUrl()
 
   return {
     title: data.seoTitle ? {absolute: data.seoTitle} : title,
     description: data.seoDescription ?? undefined,
+    alternates: {canonical: `/work/${category}`},
     openGraph: {
       title: data.seoTitle ?? title,
       description: data.seoDescription ?? undefined,
@@ -112,7 +114,9 @@ export default async function WorkCategoryRoute({params}: Props) {
       </header>
 
       <WorkCatalog
-        projects={await withWorkPosters(filterProjectsWithVideo(projects ?? []))}
+        projects={await withWorkPosters(
+          filterProjectsWithVideo([...(projects ?? [])].sort(compareFeaturedThenRecent)),
+        )}
         emptyState={page?.emptyState}
         videoPlayback={page?.videoPlayback}
       />

@@ -4,7 +4,7 @@ import {
   pageSectionsField,
 } from '@/sanity/schemas/shared/corePageFields'
 import {PackageIcon} from '@sanity/icons'
-import {defineType} from 'sanity'
+import {defineField, defineType} from 'sanity'
 
 /**
  * Services page singleton — /services (route ships with the frontend rebuild).
@@ -20,6 +20,14 @@ export default defineType({
   icon: PackageIcon,
   groups: corePageTabGroups,
   fields: [
+    defineField({
+      name: 'capabilitiesHeadline',
+      title: 'Capabilities masthead headline',
+      type: 'text',
+      rows: 2,
+      description:
+        'The big masthead line on /capabilities (the paper→ink hero). Line breaks are kept exactly as typed. Leave empty to use the built-in “Built to serve”.',
+    }),
     pageSectionsField([
       {type: 'servicesHeroSection', title: 'Hero'},
       {type: 'servicesListSection', title: 'Services'},

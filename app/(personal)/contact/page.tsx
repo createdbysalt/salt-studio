@@ -3,7 +3,6 @@ import {CorePageSchema, ogImageUrl, seoConfig} from '@/lib/seo'
 import {studioUrl} from '@/sanity/lib/api'
 import {sanityFetch} from '@/sanity/lib/live'
 import {contactPageQuery} from '@/sanity/lib/queries'
-import {urlForOpenGraphImage} from '@/sanity/lib/utils'
 import type {Metadata} from 'next'
 import Link from 'next/link'
 
@@ -12,23 +11,18 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const hero = data?.sections?.find((s) => s._type === 'contactHeroSection')
   const heroHeadline = hero && 'headline' in hero ? (hero.headline ?? undefined) : undefined
-
-  const ogImage = data?.ogImage
-    ? urlForOpenGraphImage(data.ogImage)
-    : ogImageUrl({
-        title: heroHeadline ?? 'Contact',
-        subtitle: data?.seoDescription,
-      })
+  const ogImage = ogImageUrl()
 
   return {
     title: data?.seoTitle ? {absolute: data.seoTitle} : 'Contact',
     description: data?.seoDescription ?? undefined,
+    alternates: {canonical: '/contact'},
     openGraph: {
       title: data?.seoTitle ?? heroHeadline ?? 'Contact',
       description: data?.seoDescription ?? undefined,
-      images: ogImage ? [{url: ogImage, width: 1200, height: 630}] : [],
+      images: [{url: ogImage, width: 1200, height: 630}],
     },
-    twitter: {card: 'summary_large_image', images: ogImage ? [ogImage] : []},
+    twitter: {card: 'summary_large_image', images: [ogImage]},
   }
 }
 

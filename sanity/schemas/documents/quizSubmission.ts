@@ -15,8 +15,41 @@ export default defineType({
   type: 'document',
   icon: ClipboardIcon,
   description:
-    'A Salt Score quiz submission. Created automatically when someone completes the quiz — read-only.',
+    'A quiz submission. Created automatically when someone completes a quiz — only the pipeline status is editable.',
   fields: [
+    defineField({
+      name: 'status',
+      title: 'Pipeline Status',
+      type: 'string',
+      initialValue: 'new',
+      description:
+        'Where this lead is in your pipeline. The only field you edit here — update it as you follow up.',
+      options: {
+        list: [
+          {title: 'New', value: 'new'},
+          {title: 'Contacted', value: 'contacted'},
+          {title: 'Call booked', value: 'call-booked'},
+          {title: 'Won', value: 'won'},
+          {title: 'Lost', value: 'lost'},
+        ],
+        layout: 'radio',
+      },
+    }),
+    defineField({
+      name: 'quiz',
+      title: 'Quiz',
+      type: 'reference',
+      to: [{type: 'quiz'}],
+      readOnly: true,
+      description: 'Which quiz produced this submission. Empty for legacy Salt Score submissions.',
+    }),
+    defineField({
+      name: 'quizTitle',
+      title: 'Quiz Title',
+      type: 'string',
+      readOnly: true,
+      description: 'Snapshot of the quiz title at submission time.',
+    }),
     defineField({
       name: 'email',
       title: 'Email',
@@ -163,12 +196,22 @@ export default defineType({
       score: 'score',
       scoreBand: 'scoreBand',
       waitlist: 'waitlistOptIn',
+      status: 'status',
+      quizTitle: 'quizTitle',
     },
-    prepare({title, track, score, scoreBand, waitlist}) {
-      const result = track === 'org' ? scoreBand : score != null ? `~${score} hrs/wk` : ''
+    prepare({title, track, score, scoreBand, waitlist, status, quizTitle}) {
+      const result = scoreBand || (score != null ? `~${score} hrs/wk` : '')
+      const origin = quizTitle || (track ? `Salt Score · ${track}` : null)
       return {
         title: title || 'No email',
-        subtitle: [track, result, waitlist ? '· waitlist' : ''].filter(Boolean).join(' '),
+        subtitle: [
+          status && status !== 'new' ? status : null,
+          origin,
+          result,
+          waitlist ? '· waitlist' : '',
+        ]
+          .filter(Boolean)
+          .join(' · '),
         media: ClipboardIcon,
       }
     },

@@ -13,6 +13,7 @@ export default defineType({
   icon: DocumentIcon,
   groups: [
     {name: 'details', title: 'Details', default: true},
+    {name: 'gallery', title: 'Gallery'},
     {name: 'sections', title: 'Case Study'},
     coreSearchGroup,
   ],
@@ -51,6 +52,15 @@ export default defineType({
       initialValue: false,
       description:
         'Turn on to show this project on the Work grid as a “Coming soon” card — not clickable, and its project page stays unpublished to visitors. Turn off when the case study is ready to open.',
+    }),
+    defineField({
+      name: 'hidden',
+      title: 'Hide from website',
+      type: 'boolean',
+      group: 'details',
+      initialValue: false,
+      description:
+        'Turn on to remove this project from every public surface — Work grid, home, related rails, sitemap, and the project page itself. The document stays in Studio so you can keep editing.',
     }),
     defineField({
       name: 'title',
@@ -147,14 +157,14 @@ export default defineType({
     }),
     defineField({
       name: 'gallery',
-      title: 'Gallery (legacy)',
+      title: 'Gallery',
       type: 'array',
-      group: 'details',
-      hidden: true,
-      description: 'Legacy — replaced by Media sections in the Case Study tab.',
+      group: 'gallery',
+      description:
+        'The project page media stack (right column beside the details). Add photos and videos, then drag to reorder. Prefer high-res stills (2400px+ wide) and 1080p+ video.',
       of: [
-        defineArrayMember({type: 'projectGalleryRowOne', title: '1 column'}),
-        defineArrayMember({type: 'projectGalleryRowTwo', title: '2 columns'}),
+        defineArrayMember({type: 'projectGalleryPhoto', title: 'Photo'}),
+        defineArrayMember({type: 'projectGalleryVideo', title: 'Video'}),
       ],
     }),
     defineField({
@@ -261,13 +271,13 @@ export default defineType({
         {type: 'projectScopeSection', title: 'Scope'},
         {type: 'projectMediaSection', title: 'Media'},
         {type: 'projectQuoteSection', title: 'Quote'},
-        {type: 'projectStatsSection', title: 'Stats'},
+        {type: 'projectStatsSection', title: 'Results'},
         {type: 'projectCreditsSection', title: 'Credits'},
       ],
       {
         uniqueTypes: false,
         description:
-          'The case-study body, top to bottom. Mix and repeat freely — the conversion shape is: a few labeled Statements telling the story, Scope listing exactly what was delivered, Media doing the showing, real Quotes and Stats only when they exist. Drag to reorder; toggle to hide. The closing “book a call” CTA renders automatically on every project.',
+          'The case-study body, top to bottom. Mix and repeat freely — the conversion shape is: a few labeled Statements telling the story, Scope listing exactly what was delivered, Media doing the showing, real Quotes and Results (under-title stats) only when they exist. Drag to reorder; toggle to hide. The closing “book a call” CTA renders automatically on every project.',
       },
     ),
     defineField({
@@ -353,16 +363,18 @@ export default defineType({
       title: 'title',
       projectType: 'projectType',
       featured: 'featured',
+      hidden: 'hidden',
       year: 'year',
       client: 'client.name',
       media: 'coverImage',
     },
-    prepare({title, projectType, featured, year, client, media}) {
+    prepare({title, projectType, featured, hidden, year, client, media}) {
       const type = projectType === 'case-study' ? 'Case Study' : 'Standard'
       const details = [client, year].filter(Boolean).join(' · ')
+      const status = hidden ? 'Hidden' : type
       return {
         title: `${featured ? '★ ' : ''}${title || 'Untitled project'}`,
-        subtitle: details ? `${type} — ${details}` : type,
+        subtitle: details ? `${status} — ${details}` : status,
         media,
       }
     },

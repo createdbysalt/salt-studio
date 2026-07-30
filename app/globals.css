@@ -605,6 +605,28 @@
     animation: salt-rise 0.55s var(--ease-out-cubic) both;
   }
 
+  /* Hide chrome that shouldn't peek during the home session intro */
+  html[data-intro='playing'] [aria-label='Cookie consent'],
+  html[data-intro='pending'] [aria-label='Cookie consent'] {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Project strip stays parked until intro phase `projects` */
+  html[data-intro='playing'] [data-home-hero] [data-hero-track],
+  html[data-intro='playing'] [data-home-hero] [data-nav-surface='color'] {
+    opacity: 0;
+  }
+
+  /*
+   * WordSwap FOUC guard: hide stacked faces until GSAP has parked words
+   * under their masks (WordSwap sets data-wordswap="ready").
+   */
+  [data-home-hero]:not([data-wordswap='ready']) [data-phrase-a],
+  [data-home-hero]:not([data-wordswap='ready']) [data-phrase-b] {
+    opacity: 0;
+  }
+
   /* ---- Reduced motion: collapse utility motion ---- */
   @media (prefers-reduced-motion: reduce) {
     .animate-salt-shimmer,

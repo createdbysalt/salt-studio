@@ -50,6 +50,7 @@ export function SiteLogo({
       href="/"
       onClick={onClick}
       aria-label={`${alt} — Home`}
+      data-site-logo
       className={`inline-flex items-center ${className}`}
     >
       {fromSanity && sanitySrc ? (

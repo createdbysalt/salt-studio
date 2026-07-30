@@ -5,8 +5,8 @@ import {usePathname} from 'next/navigation'
 import {useEffect} from 'react'
 
 /**
- * Smooth-scrolls in-page anchors through Lenis — e.g. the nav “Capabilities”
- * link (`/#how-we-can-help`) dropping to the homepage “How we can help” band.
+ * Smooth-scrolls in-page anchors through Lenis (e.g. deep links to a section
+ * hash on the homepage).
  *
  * Handles two cases:
  *  - Arriving on a route that already has a hash (cross-page nav or direct load)

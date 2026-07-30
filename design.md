@@ -160,18 +160,19 @@ Composition: asymmetry + void (large type one side, deliberate emptiness the oth
 | `--duration-slow`   | `500ms`                          | Transforms, clip-path                     |
 | `--duration-reveal` | `600ms`                          | Text mask reveals                         |
 
-### The eight patterns (the complete vocabulary — no others)
+### The nine patterns (the complete vocabulary — no others)
 
-| #   | Pattern                | Component        | Spec                                                                                                                                                                                                            |
-| --- | ---------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Line reveal**        | `LineReveal`     | SplitText lines in `overflow-hidden` masks; `y: 100% → 0`, 0.6s ease-out-cubic, stagger 0.08s; ScrollTrigger `top 85%`, once                                                                                    |
-| 2   | **Word swap**          | `WordSwap`       | Two stacked copies; per-word `y: ±105%` through line masks (measured mechanism). Homepage hero: DECIDE headline is the default face — poetic line is the swap target, never the initial or reduced-motion state |
-| 3   | **Curtain transition** | `PageTransition` | Route change: two half-width ink panels wipe in (~0.4s), swap route, wipe out (~0.4s), ease-out-quint. Native App Router (no Barba): intercept internal links, cover fully before `router.push`                 |
-| 4   | **Parallax media**     | `ParallaxMedia`  | Oversized media in clipped frame; scrubbed `yPercent ±8`; `will-change: transform`                                                                                                                              |
-| 5   | **Scrub section**      | `ScrubSection`   | Sticky viewport section in tall parent; timeline `scrub: true`, `start: "top center", end: "bottom center"` (measured off glitchandgrit)                                                                        |
-| 6   | **Clip reveal**        | `ClipReveal`     | `clip-path: inset(100% 0 0) → inset(0)`, 0.5s ease-out-cubic or scrubbed                                                                                                                                        |
-| 7   | **Card hover**         | CSS only         | Media `scale 1.05` @ 0.5s ease-out-cubic + caption fade/slide-up + arrow nudge (`.work-card-media-zoom`)                                                                                                        |
-| 8   | **Grid flip**          | Flip plugin      | Work-page filter re-layout; 0.5s ease-out-cubic                                                                                                                                                                 |
+| #   | Pattern                | Component        | Spec                                                                                                                                                                                                              |
+| --- | ---------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Line reveal**        | `LineReveal`     | SplitText lines in `overflow-hidden` masks; `y: 100% → 0`, 0.6s ease-out-cubic, stagger 0.08s; ScrollTrigger `top 85%`, once                                                                                      |
+| 2   | **Word swap**          | `WordSwap`       | Two stacked copies; per-word `y: ±105%` through line masks (measured mechanism). Homepage hero: DECIDE headline is the default face — poetic line is the swap target, never the initial or reduced-motion state   |
+| 3   | **Curtain transition** | `PageTransition` | Route change: two half-width ink panels wipe in (~0.4s), swap route, wipe out (~0.4s), ease-out-quint. Native App Router (no Barba): intercept internal links, cover fully before `router.push`                   |
+| 4   | **Parallax media**     | `ParallaxMedia`  | Oversized media in clipped frame; scrubbed `yPercent ±8`; `will-change: transform`                                                                                                                                |
+| 5   | **Scrub section**      | `ScrubSection`   | Sticky viewport section in tall parent; timeline `scrub: true`, `start: "top center", end: "bottom center"` (measured off glitchandgrit)                                                                          |
+| 6   | **Clip reveal**        | `ClipReveal`     | `clip-path: inset(100% 0 0) → inset(0)`, 0.5s ease-out-cubic or scrubbed                                                                                                                                          |
+| 7   | **Card hover**         | CSS only         | Media `scale 1.05` @ 0.5s ease-out-cubic + caption fade/slide-up + arrow nudge (`.work-card-media-zoom`)                                                                                                          |
+| 8   | **Grid flip**          | Flip plugin      | Work-page filter re-layout; 0.5s ease-out-cubic                                                                                                                                                                   |
+| 9   | **Site intro**         | `SiteIntro`      | Home, every load of `/`: ink + letter wipe → paper wipe + putty → mark flies to nav → empty paper → nav swipes in → hero type → project strip. Boot script covers ink before paint. Skipped under reduced motion. |
 
 Plus two CSS freebies: `mix-blend-difference` on the fixed nav wordmark; existing marquee keyframes.
 

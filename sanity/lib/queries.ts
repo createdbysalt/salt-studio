@@ -15,7 +15,8 @@ export const homePageQuery = defineQuery(`
       enabled,
       internalName,
       _type == "homeHeroSection" => {
-        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter
+        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter,
+        splitPrimaryLeft, splitPrimaryRight, splitSecondaryLeft, splitSecondaryRight
       },
       _type == "homeProofSection" => {
         label,
@@ -54,7 +55,8 @@ export const homePageQuery = defineQuery(`
               "slug": slug.current,
               coverImage,
               "client": client->name,
-              "thought": pt::text(overview)
+              "thought": pt::text(overview),
+              hidden
             },
             testimonials[]->{
               _id,
@@ -101,7 +103,9 @@ export const homePageQuery = defineQuery(`
             coverImage,
             videoUrl,
             year,
-            "client": client->name
+            "client": client->name,
+            featured,
+            hidden
           }
         },
         linkLabel
@@ -128,6 +132,7 @@ export const servicesPageQuery = defineQuery(`
   *[_id == "servicesPage"][0]{
     _id,
     _type,
+    capabilitiesHeadline,
     seoTitle,
     seoDescription,
     ogImage,
@@ -201,6 +206,7 @@ export const projectBySlugQuery = defineQuery(`
     _type,
     projectType,
     comingSoon,
+    hidden,
     title,
     "slug": slug.current,
     seoTitle,
@@ -227,9 +233,11 @@ export const projectBySlugQuery = defineQuery(`
               image{ asset, alt, caption, hotspot, crop },
             },
             _type == "projectGalleryVideo" => {
+              source,
               videoUrl,
               caption,
               poster{ asset, alt, hotspot, crop },
+              "videoFileUrl": videoFile.asset->url,
             },
           },
         },
@@ -252,16 +260,31 @@ export const projectBySlugQuery = defineQuery(`
     gallery[]{
       _key,
       _type,
-      items[]{
-        _key,
-        _type,
-        _type == "projectGalleryPhoto" => {
-          image{ asset, alt, caption, hotspot, crop },
-        },
-        _type == "projectGalleryVideo" => {
-          videoUrl,
-          caption,
-          poster{ asset, alt, hotspot, crop },
+      _type == "projectGalleryPhoto" => {
+        image{ asset, alt, caption, hotspot, crop },
+      },
+      _type == "projectGalleryVideo" => {
+        source,
+        videoUrl,
+        caption,
+        poster{ asset, alt, hotspot, crop },
+        "videoFileUrl": videoFile.asset->url,
+      },
+      // Legacy row shape (pre–Gallery tab) — flatten on the frontend if present.
+      _type in ["projectGalleryRowOne", "projectGalleryRowTwo"] => {
+        items[]{
+          _key,
+          _type,
+          _type == "projectGalleryPhoto" => {
+            image{ asset, alt, caption, hotspot, crop },
+          },
+          _type == "projectGalleryVideo" => {
+            source,
+            videoUrl,
+            caption,
+            poster{ asset, alt, hotspot, crop },
+            "videoFileUrl": videoFile.asset->url,
+          },
         },
       },
     },
@@ -275,9 +298,11 @@ export const projectBySlugQuery = defineQuery(`
           image{ asset, alt, caption, hotspot, crop },
         },
         _type == "projectGalleryVideo" => {
+          source,
           videoUrl,
           caption,
           poster{ asset, alt, hotspot, crop },
+          "videoFileUrl": videoFile.asset->url,
         },
       },
     },
@@ -288,13 +313,22 @@ export const projectBySlugQuery = defineQuery(`
     client->{ _id, name, website },
     categories[]->{ _id, filterLabel, "slug": slug.current },
     stack[]->{ _id, name, kind, url },
-    relatedProjects[]->{ _id, title, "slug": slug.current, projectType, year, coverImage, videoUrl },
+    relatedProjects[]->{
+      _id,
+      title,
+      "slug": slug.current,
+      projectType,
+      year,
+      coverImage,
+      videoUrl,
+      hidden
+    },
   }
 `)
 
 /** Other projects for the project-page “Next project” rail when related is empty/short. */
 export const nextProjectsQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && comingSoon != true && slug.current != $slug]
+  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && comingSoon != true && hidden != true && slug.current != $slug]
     | order(featured desc, year desc, title asc)[0...3]{
     _id,
     title,
@@ -309,7 +343,7 @@ export const nextProjectsQuery = defineQuery(`
 // Card shape shared by the Work grid and category pages. A project appears
 // once it has a cover image OR a video; video is optional hover flair.
 export const allProjectsQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl))]|order(year desc, title asc){
+  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl))]|order(featured desc, year desc, _createdAt desc, title asc){
     _id,
     projectType,
     featured,
@@ -320,6 +354,7 @@ export const allProjectsQuery = defineQuery(`
     coverImage,
     videoUrl,
     year,
+    _createdAt,
     "client": client->name,
     categories[]->{ _id, filterLabel, "slug": slug.current },
   }
@@ -327,7 +362,7 @@ export const allProjectsQuery = defineQuery(`
 
 // Projects in one category, by the category's slug (for /work/[slug]).
 export const projectsByCategoryQuery = defineQuery(`
-  *[_type == "project" && defined(slug.current) && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(year desc, title asc){
+  *[_type == "project" && defined(slug.current) && hidden != true && (defined(coverImage.asset) || defined(videoUrl)) && $slug in categories[]->slug.current]|order(featured desc, year desc, _createdAt desc, title asc){
     _id,
     projectType,
     featured,
@@ -338,6 +373,7 @@ export const projectsByCategoryQuery = defineQuery(`
     coverImage,
     videoUrl,
     year,
+    _createdAt,
     "client": client->name,
     categories[]->{ _id, filterLabel, "slug": slug.current },
   }
@@ -383,7 +419,7 @@ export const capabilitiesQuery = defineQuery(`
 
 // Featured projects (both standard and case study) for home / highlight views.
 export const featuredProjectsQuery = defineQuery(`
-  *[_type == "project" && featured == true && defined(slug.current)]|order(year desc, title asc){
+  *[_type == "project" && featured == true && hidden != true && defined(slug.current)]|order(year desc, title asc){
     _id,
     projectType,
     featured,
@@ -454,7 +490,7 @@ export const projectBodyBackgroundVideoQuery = defineQuery(`
 `)
 
 export const slugsByTypeQuery = defineQuery(`
-  *[_type == $type && defined(slug.current)]{"slug": slug.current}
+  *[_type == $type && defined(slug.current) && hidden != true]{"slug": slug.current}
 `)
 
 export const developerSettingsQuery = defineQuery(`
@@ -561,15 +597,17 @@ export const workPageQuery = defineQuery(`
       projectType,
       featured,
       comingSoon,
+      hidden,
       title,
       "slug": slug.current,
       overview,
       coverImage,
       videoUrl,
       year,
+      _createdAt,
       "client": client->name,
       categories[]->{ _id, filterLabel, "slug": slug.current },
-    }[defined(_id) && (defined(coverImage.asset) || defined(videoUrl))],
+    },
     pillSource,
     categoryPills[]->{ _id, filterLabel, "slug": slug.current },
     videoPlayback,
@@ -602,4 +640,49 @@ export const contactPageQuery = defineQuery(`
       _type == "contactFooterSection" => { email, cityTimezone, responseLine },
     },
   }
+`)
+
+export const quizBySlugQuery = defineQuery(`
+  *[_type == "quiz" && slug.current == $slug][0]{
+    _id,
+    _type,
+    title,
+    "slug": slug.current,
+    "serviceTitle": service->title,
+    introHeadline,
+    introBody,
+    startLabel,
+    questions[]{
+      _key,
+      "key": key.current,
+      prompt,
+      hint,
+      shortLabel,
+      kind,
+      weight,
+      options[]{ _key, label, points },
+    },
+    scoreUnit,
+    bands[]{
+      _key,
+      label,
+      minScore,
+      resultHeadline,
+      resultBody,
+      benefits,
+      ctaLead,
+      primaryCtaLabel,
+      primaryCtaHref,
+      secondaryCtaLabel,
+      secondaryCtaHref,
+    },
+    gateHeadline,
+    gateBody,
+    gateButtonLabel,
+    waitlistLabel,
+  }
+`)
+
+export const quizSlugsQuery = defineQuery(`
+  *[_type == "quiz" && defined(slug.current)]{"slug": slug.current}
 `)

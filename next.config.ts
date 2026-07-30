@@ -6,8 +6,6 @@ const config: NextConfig = {
     return [
       // No public /rentals hub — three rental pages only.
       {source: '/rentals', destination: '/rentals/studio', permanent: false},
-      // Capabilities is no longer a page — send old links to the homepage band.
-      {source: '/capabilities', destination: '/#how-we-can-help', permanent: false},
     ]
   },
   images: {

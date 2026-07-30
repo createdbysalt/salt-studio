@@ -26,6 +26,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.9,
     },
+    {
+      url: `${siteUrl}/capabilities`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/contact`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/legal`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
   ]
 
   // Fetch all dynamic content from Sanity
@@ -41,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ),
     // Projects
     client.fetch<{slug: string; _updatedAt: string}[]>(
-      `*[_type == "project" && defined(slug.current)]{
+      `*[_type == "project" && defined(slug.current) && hidden != true]{
         "slug": slug.current,
         _updatedAt
       }`,

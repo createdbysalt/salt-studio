@@ -36,6 +36,10 @@ export const mainDocuments = defineDocuments([
     filter: `_type == "legalPage" && slug.current == $slug`,
   },
   {
+    route: '/quiz/:slug',
+    filter: `_type == "quiz" && slug.current == $slug`,
+  },
+  {
     route: '/:slug',
     filter: `_type == "page" && slug.current == $slug`,
   },
@@ -102,6 +106,13 @@ export const locations = {
     message: 'Contact page',
     tone: 'positive',
     locations: [{title: 'Contact', href: resolveHref('contactPage')!}],
+  }),
+  quiz: defineLocations({
+    select: {title: 'title', slug: 'slug.current'},
+    resolve: (doc) => {
+      const href = resolveHref('quiz', doc?.slug)
+      return {locations: href ? [{title: doc?.title || 'Untitled quiz', href}] : []}
+    },
   }),
   workCategory: defineLocations({
     select: {title: 'filterLabel', slug: 'slug.current'},

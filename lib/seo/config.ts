@@ -76,10 +76,14 @@ export function getSEOConfig(): SEOConfig {
       process.env.NEXT_PUBLIC_SANITY_PROJECT_TITLE ||
       'My Business',
 
+    // Defaults are Salt Studio's own profiles so the Organization schema's
+    // sameAs works in every environment; env vars still win when set.
     socialLinks: {
-      twitter: process.env.NEXT_PUBLIC_TWITTER_URL,
-      linkedin: process.env.NEXT_PUBLIC_LINKEDIN_URL,
-      instagram: process.env.NEXT_PUBLIC_INSTAGRAM_URL,
+      twitter: process.env.NEXT_PUBLIC_TWITTER_URL || 'https://x.com/saltstudiohq',
+      linkedin:
+        process.env.NEXT_PUBLIC_LINKEDIN_URL || 'https://www.linkedin.com/company/createdbysalt/',
+      instagram:
+        process.env.NEXT_PUBLIC_INSTAGRAM_URL || 'https://www.instagram.com/createdbysalt/',
       facebook: process.env.NEXT_PUBLIC_FACEBOOK_URL,
       github: process.env.NEXT_PUBLIC_GITHUB_URL,
       youtube: process.env.NEXT_PUBLIC_YOUTUBE_URL,

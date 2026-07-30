@@ -5,11 +5,13 @@ import {
   CogIcon,
   DocumentsIcon,
   FolderIcon,
+  HelpCircleIcon,
   HomeIcon,
   RocketIcon,
   SearchIcon,
   StarIcon,
   TagIcon,
+  UsersIcon,
   WarningOutlineIcon,
   WrenchIcon,
 } from '@sanity/icons'
@@ -143,9 +145,6 @@ export const saltDeskStructure: StructureResolver = (S) => {
           S.divider().title('People'),
           S.documentTypeListItem('client').title('Clients').icon(CaseIcon),
           S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon),
-          // ─── Leads ───
-          S.divider().title('Leads'),
-          S.documentTypeListItem('quizSubmission').title('Quiz Submissions').icon(ClipboardIcon),
           // ─── Global ───
           S.divider().title('Global'),
           S.documentTypeListItem('callToAction').title('CTAs').icon(RocketIcon),
@@ -155,6 +154,41 @@ export const saltDeskStructure: StructureResolver = (S) => {
           // ─── Utilities ───
           S.divider().title('Utilities'),
           S.documentTypeListItem('legalPage').title('Legal Pages'),
+        ]),
+    )
+
+  /** A quizSubmission list filtered to one pipeline status. */
+  const submissionsByStatus = (title: string, status: string) =>
+    S.listItem()
+      .id(`submissions-${status}`)
+      .title(title)
+      .icon(ClipboardIcon)
+      .child(
+        S.documentList()
+          .id(`submissions-${status}`)
+          .title(title)
+          .schemaType('quizSubmission')
+          .filter('_type == "quizSubmission" && coalesce(status, "new") == $status')
+          .params({status})
+          .defaultOrdering([{field: 'submittedAt', direction: 'desc'}]),
+      )
+
+  const leads = S.listItem()
+    .id('leads')
+    .title('Leads')
+    .icon(UsersIcon)
+    .child(
+      S.list()
+        .title('Leads')
+        .items([
+          S.documentTypeListItem('quiz').title('Quizzes').icon(HelpCircleIcon),
+          S.divider().title('Pipeline'),
+          S.documentTypeListItem('quizSubmission').title('All Submissions').icon(ClipboardIcon),
+          submissionsByStatus('New', 'new'),
+          submissionsByStatus('Contacted', 'contacted'),
+          submissionsByStatus('Call Booked', 'call-booked'),
+          submissionsByStatus('Won', 'won'),
+          submissionsByStatus('Lost', 'lost'),
         ]),
     )
 
@@ -180,7 +214,7 @@ export const saltDeskStructure: StructureResolver = (S) => {
         ]),
     )
 
-  return S.list().title('Content').items([corePages, dynamicContent, settings])
+  return S.list().title('Content').items([corePages, dynamicContent, leads, settings])
 }
 
 export const saltSingletonTypes = [

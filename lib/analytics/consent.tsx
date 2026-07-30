@@ -3,6 +3,7 @@
 import {createContext, ReactNode, useCallback, useContext, useEffect, useState} from 'react'
 import {updateGoogleConsent} from './gtm'
 import type {ConsentLevel, ConsentState} from './types'
+import {ucAcceptAll, ucDenyAll, ucReadConsentLevels} from './usercentrics'
 
 const CONSENT_STORAGE_KEY = 'analytics_consent'
 const CONSENT_VERSION = 1 // Bump this to re-prompt users after policy changes
@@ -118,11 +119,36 @@ export function ConsentProvider({children}: ConsentProviderProps) {
   }, [])
 
   const acceptAll = useCallback(() => {
+    ucAcceptAll() // record with the Usercentrics CMP (compliance log)
     saveConsent({necessary: true, analytics: true, marketing: true, timestamp: 0})
   }, [saveConsent])
 
   const acceptNecessary = useCallback(() => {
+    ucDenyAll()
     saveConsent({necessary: true, analytics: false, marketing: false, timestamp: 0})
+  }, [saveConsent])
+
+  // Mirror choices made inside the Usercentrics second layer (granular
+  // per-service settings, opened from the footer's "Privacy settings").
+  useEffect(() => {
+    const onUcEvent = (event: Event) => {
+      const detail = (event as CustomEvent<{type?: string}>).detail
+      if (!detail?.type) return
+
+      if (detail.type === 'ACCEPT_ALL') {
+        saveConsent({necessary: true, analytics: true, marketing: true, timestamp: 0})
+      } else if (detail.type === 'DENY_ALL') {
+        saveConsent({necessary: true, analytics: false, marketing: false, timestamp: 0})
+      } else if (detail.type === 'SAVE') {
+        const levels = ucReadConsentLevels()
+        if (levels) {
+          saveConsent({necessary: true, ...levels, timestamp: 0})
+        }
+      }
+    }
+
+    window.addEventListener('UC_UI_CMP_EVENT', onUcEvent)
+    return () => window.removeEventListener('UC_UI_CMP_EVENT', onUcEvent)
   }, [saveConsent])
 
   const updateConsent = useCallback(
@@ -175,8 +201,8 @@ export function ConsentProvider({children}: ConsentProviderProps) {
 }
 
 /**
- * Consent Banner — semantic tokens so it renders correctly on the light stage
- * and inside dark bands alike. Buttons via .btn-solid / .btn-ghost (globals.css).
+ * Consent Banner — compact Salt-branded toast, bottom-right.
+ * Glass surface + mono telemetry match navbar pills; accent dot as brand mark.
  */
 function ConsentBanner() {
   const {acceptAll, acceptNecessary} = useConsent()
@@ -185,23 +211,37 @@ function ConsentBanner() {
     <div
       role="dialog"
       aria-label="Cookie consent"
-      className="fixed inset-x-4 bottom-4 z-50 md:inset-x-6 md:bottom-6"
+      className="fixed bottom-4 right-3 z-50 w-[min(100%-1.5rem,18.5rem)] sm:bottom-5 sm:right-4"
     >
-      <div className="mx-auto flex max-w-4xl flex-col gap-4 rounded-lg border border-border bg-background/90 p-4 backdrop-blur-md md:flex-row md:items-center md:justify-between md:gap-6 md:p-5">
-        <p className="font-mono text-[11px] uppercase leading-[1.7] tracking-[0.08em] text-foreground/70 md:flex-1">
+      <div className="flex flex-col gap-3 rounded-sm border border-border bg-background/90 p-3.5 shadow-[0_12px_40px_rgba(8,9,10,0.08)] backdrop-blur-[42px]">
+        <div className="flex items-center gap-2">
+          <span aria-hidden className="size-[6px] shrink-0 rounded-full bg-accent" />
+          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-foreground">
+            Cookies
+          </span>
+        </div>
+        <p className="font-mono text-[10px] uppercase leading-[1.65] tracking-[0.06em] text-foreground/60">
           We use cookies to analyze site usage and improve your experience.{' '}
           <a
             href="/legal/privacy-policy"
-            className="underline decoration-foreground/40 underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground"
+            className="text-foreground/80 underline decoration-foreground/30 underline-offset-2 transition-colors hover:text-foreground hover:decoration-foreground"
           >
             Learn more
           </a>
         </p>
-        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-          <button onClick={acceptNecessary} className="btn-ghost justify-center">
-            Necessary only
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={acceptNecessary}
+            className="inline-flex flex-1 items-center justify-center rounded-sm border border-foreground/40 px-2.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-foreground transition-colors hover:border-foreground"
+          >
+            Necessary
           </button>
-          <button onClick={acceptAll} className="btn-solid justify-center">
+          <button
+            type="button"
+            onClick={acceptAll}
+            className="inline-flex flex-1 items-center justify-center rounded-sm border border-foreground bg-foreground px-2.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-background transition-colors hover:bg-foreground/85"
+          >
             Accept all
           </button>
         </div>

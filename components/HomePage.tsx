@@ -1,16 +1,15 @@
-import {HomeCapabilitiesScrub} from '@/components/HomeCapabilitiesScrub'
-import {normalizeCtaLabel, resolveCtaHref} from '@/components/homeHero'
 import {HomeHeroStage} from '@/components/HomeHeroStage'
-import {HomeServicesShowcase} from '@/components/HomeServicesShowcase'
-import {LineReveal} from '@/components/motion/LineReveal'
+import {
+  HomePhilosophySection,
+  HomeProductSection,
+  HomeServicesSection,
+  type HomeSectionOf,
+} from '@/components/homeSections'
 import {filterProjectsWithVideo, withWorkPosters} from '@/components/ProjectGrid'
 import type {HomePageQueryResult} from '@/sanity.types'
 import {sanityFetch} from '@/sanity/lib/live'
-import {allProjectsQuery, capabilitiesQuery} from '@/sanity/lib/queries'
-import {urlForImage} from '@/sanity/lib/utils'
-import {ArrowUpRight} from 'lucide-react'
+import {allProjectsQuery} from '@/sanity/lib/queries'
 import {stegaClean} from 'next-sanity'
-import Link from 'next/link'
 
 export interface HomePageProps {
   data: HomePageQueryResult | null
@@ -18,8 +17,6 @@ export interface HomePageProps {
 
 type HomeSection = NonNullable<NonNullable<HomePageQueryResult>['sections']>[number]
 type SectionOf<T extends HomeSection['_type']> = Extract<HomeSection, {_type: T}>
-
-const WAITLIST_HREF = '/quiz'
 
 /** TinyWins-style edge-anchored splits. `\n` = intentional line break within a side. */
 const HERO_PRIMARY = {
@@ -32,6 +29,18 @@ const HERO_SECONDARY = {
   right: "It draws out what's\nalready there.",
 } as const
 
+/** Sanity value wins when filled; the constants above are the safety net. */
+function heroFace(
+  left: string | null | undefined,
+  right: string | null | undefined,
+  fallback: {left: string; right: string},
+) {
+  return {
+    left: stegaClean(left ?? '')?.trim() || fallback.left,
+    right: stegaClean(right ?? '')?.trim() || fallback.right,
+  }
+}
+
 /**
  * Homepage — 7 sections from the approved copy plan
  * (salt-studio-knowledge-base/studio/website/copy/homepage.md).
@@ -43,32 +52,38 @@ export async function HomePage({data}: HomePageProps) {
   const workSection = sections.find(
     (s): s is SectionOf<'homeWorkSection'> => s._type === 'homeWorkSection',
   )
-  const curatedTeasers = (workSection?.projects ?? []).filter(Boolean).map((project) => ({
-    _id: project!._id,
-    title: project!.title ?? null,
-    slug: project!.slug ?? null,
-    coverImage: project!.coverImage ?? null,
-    videoUrl: project!.videoUrl ?? null,
-    year: project!.year ?? null,
-    client: project!.client ?? null,
-    comingSoon: null as boolean | null,
-  }))
+  const curatedTeasers = (workSection?.projects ?? [])
+    .filter(
+      (project) => Boolean(project?._id) && project?.hidden !== true && project?.featured === true,
+    )
+    .map((project) => ({
+      _id: project!._id,
+      title: project!.title ?? null,
+      slug: project!.slug ?? null,
+      coverImage: project!.coverImage ?? null,
+      videoUrl: project!.videoUrl ?? null,
+      year: project!.year ?? null,
+      client: project!.client ?? null,
+      comingSoon: null as boolean | null,
+    }))
 
   // Hero slider: curated home teaser when set, otherwise the full published roster.
   const {data: allProjects} = await sanityFetch({query: allProjectsQuery})
   const sliderSource =
     curatedTeasers.length > 0
       ? curatedTeasers
-      : (allProjects ?? []).map((project) => ({
-          _id: project._id,
-          title: project.title ?? null,
-          slug: project.slug ?? null,
-          coverImage: project.coverImage ?? null,
-          videoUrl: project.videoUrl ?? null,
-          year: project.year ?? null,
-          client: project.client ?? null,
-          comingSoon: project.comingSoon ?? null,
-        }))
+      : (allProjects ?? [])
+          .filter((project) => project.featured === true)
+          .map((project) => ({
+            _id: project._id,
+            title: project.title ?? null,
+            slug: project.slug ?? null,
+            coverImage: project.coverImage ?? null,
+            videoUrl: project.videoUrl ?? null,
+            year: project.year ?? null,
+            client: project.client ?? null,
+            comingSoon: project.comingSoon ?? null,
+          }))
 
   const sliderProjects = await withWorkPosters(sliderSource)
   const heroSliderProjects = filterProjectsWithVideo(sliderProjects)
@@ -82,24 +97,32 @@ export async function HomePage({data}: HomePageProps) {
               <HomeHeroStage
                 key={section._key}
                 projects={heroSliderProjects}
-                primary={HERO_PRIMARY}
-                secondary={HERO_SECONDARY}
+                primary={heroFace(
+                  section.splitPrimaryLeft,
+                  section.splitPrimaryRight,
+                  HERO_PRIMARY,
+                )}
+                secondary={heroFace(
+                  section.splitSecondaryLeft,
+                  section.splitSecondaryRight,
+                  HERO_SECONDARY,
+                )}
               />
             )
           case 'homeProofSection':
             return null
           case 'homeServicesSection':
-            return <HomeServices key={section._key} section={section} />
+            return <HomeServicesSection key={section._key} section={section} />
           case 'homeWorkSection':
             return null
           case 'homeProductSection':
-            return <HomeProduct key={section._key} section={section} />
+            return <HomeProductSection key={section._key} section={section} />
           case 'homePhilosophySection': {
             const finalCta = sections.find(
-              (s): s is SectionOf<'homeFinalCtaSection'> => s._type === 'homeFinalCtaSection',
+              (s): s is HomeSectionOf<'homeFinalCtaSection'> => s._type === 'homeFinalCtaSection',
             )
             return (
-              <HomePhilosophy
+              <HomePhilosophySection
                 key={section._key}
                 section={section}
                 closingLine={finalCta?.headline ?? null}
@@ -115,275 +138,5 @@ export async function HomePage({data}: HomePageProps) {
         }
       })}
     </main>
-  )
-}
-
-function HomeServices({section}: {section: SectionOf<'homeServicesSection'>}) {
-  const fromServices = (section.services ?? [])
-    .filter((item) => Boolean(item?.title && item?.shortDescription))
-    .map((item) => {
-      const next = item!.nextStep
-      const href = next?.buttonLabel ? resolveCtaHref(next) : null
-
-      return {
-        _key: item!._key,
-        title: item!.title!,
-        body: item!.shortDescription!,
-        headline: item!.headline ?? null,
-        priceLine: item!.priceLine,
-        timelineLine: item!.timelineLine ?? null,
-        timeline: (item!.timeline ?? [])
-          .filter((phase) => Boolean(phase?.label && phase?.duration))
-          .map((phase) => ({
-            _key: phase!._key,
-            label: phase!.label!,
-            duration: phase!.duration!,
-            detail: phase!.detail,
-          })),
-        linkLabel: item!.linkLabel,
-        detailEyebrow: item!.detailEyebrow ?? null,
-        detailBody: item!.detailBody ?? null,
-        sceneLine: item!.sceneLine ?? null,
-        detailImageUrl: item!.detailImage?.asset?._ref
-          ? urlForImage({asset: {_ref: item!.detailImage.asset._ref}})
-              ?.width(1600)
-              .height(1200)
-              .fit('crop')
-              .url()
-          : null,
-        backgroundImageUrl: item!.backgroundImage?.asset?._ref
-          ? urlForImage({asset: {_ref: item!.backgroundImage.asset._ref}})
-              ?.width(2400)
-              .height(1600)
-              .fit('crop')
-              .url()
-          : null,
-        backgroundVideoUrl: item!.backgroundVideoUrl ?? null,
-        deliverables: (item!.deliverables ?? [])
-          .filter((row) => Boolean(row?.title))
-          .map((row) => ({_key: row!._key, title: row!.title!, detail: row!.detail})),
-        plans: (item!.plans ?? [])
-          .filter((plan) => Boolean(plan?.name && plan?.price))
-          .map((plan) => ({
-            _key: plan!._key,
-            name: plan!.name!,
-            price: plan!.price!,
-            summary: plan!.summary,
-            features: (plan!.features ?? []).filter((f): f is string => Boolean(f?.trim())),
-            highlight: plan!.highlight ?? false,
-          })),
-        capabilities: (item!.capabilities ?? [])
-          .filter((cap) => Boolean(cap?._id && cap?.name))
-          .map((cap) => ({_id: cap!._id, name: cap!.name!, kind: cap!.kind})),
-        idealFor: (item!.idealFor ?? []).filter((line): line is string => Boolean(line?.trim())),
-        notAFit: (item!.notAFit ?? []).filter((line): line is string => Boolean(line?.trim())),
-        stepsLabel: item!.stepsLabel ?? null,
-        steps: (item!.steps ?? [])
-          .filter((step) => Boolean(step?.text))
-          .map((step) => ({_key: step!._key, lead: step!.lead, text: step!.text!})),
-        projects: (item!.featuredProjects ?? [])
-          .filter((project) => Boolean(project?._id && project?.title))
-          .map((project) => ({
-            _id: project!._id,
-            title: project!.title!,
-            slug: project!.slug,
-            client: project!.client,
-            thought: project!.thought?.trim() || null,
-            imageUrl: project!.coverImage?.asset?._ref
-              ? urlForImage({asset: {_ref: project!.coverImage.asset._ref}})
-                  ?.width(1400)
-                  .height(875)
-                  .fit('crop')
-                  .url()
-              : null,
-          })),
-        testimonials: (item!.testimonials ?? [])
-          .filter((quote) => Boolean(quote?._id && quote?.quote && quote?.author))
-          .map((quote) => ({
-            _id: quote!._id,
-            quote: quote!.quote!,
-            author: quote!.author!,
-            role: quote!.role,
-          })),
-        clients: (item!.clients ?? [])
-          .filter((client) => Boolean(client?._id && client?.name))
-          .map((client) => ({_id: client!._id, name: client!.name!})),
-        proofAnchor: item!.proofAnchor ?? null,
-        nextStep:
-          next?.buttonLabel && href
-            ? {
-                subhead: next.subhead,
-                buttonLabel: next.buttonLabel,
-                href,
-              }
-            : null,
-        fitCheck:
-          item!.fitCheckLabel?.trim() && item!.fitCheckHref?.trim()
-            ? {
-                label: item!.fitCheckLabel!,
-                href: item!.fitCheckHref!,
-              }
-            : null,
-        routingLine: item!.routingLine ?? null,
-      }
-    })
-
-  const fromLegacy = (section.cards ?? [])
-    .filter((card) => Boolean(card?.title && card?.body))
-    .map((card) => ({
-      _key: card!._key,
-      title: card!.title!,
-      body: card!.body!,
-      priceLine: card!.priceLine,
-      linkLabel: card!.linkLabel,
-      detailEyebrow: card!.detailEyebrow ?? null,
-      detailBody: card!.detailBody ?? null,
-      detailImageUrl: card!.detailImage?.asset?._ref
-        ? urlForImage({asset: {_ref: card!.detailImage.asset._ref}})
-            ?.width(1600)
-            .height(1200)
-            .fit('crop')
-            .url()
-        : null,
-      backgroundImageUrl: card!.hoverImage?.asset?._ref
-        ? urlForImage({asset: {_ref: card!.hoverImage.asset._ref}})
-            ?.width(2400)
-            .height(1600)
-            .fit('crop')
-            .url()
-        : null,
-      backgroundVideoUrl: card!.backgroundVideoUrl ?? null,
-    }))
-
-  const cards = fromServices.length > 0 ? fromServices : fromLegacy
-
-  if (cards.length === 0) return null
-
-  return <HomeServicesShowcase label={section.label} cards={cards} />
-}
-
-async function HomeProduct({section}: {section: SectionOf<'homeProductSection'>}) {
-  const {data: capabilities} = await sanityFetch({query: capabilitiesQuery})
-
-  // Pill pile — names only. Mix kinds so the drop looks varied, not grouped.
-  const items = (capabilities ?? [])
-    .filter((cap) => Boolean(cap?.name?.trim()))
-    .map((cap) => ({
-      _id: cap._id,
-      name: stegaClean(cap.name ?? '').trim(),
-      kind: cap.kind ?? '',
-    }))
-    .sort((a, b) => {
-      // Stable interleave by kind hash so tools/disciplines aren’t clumped
-      const ha = a._id.charCodeAt(a._id.length - 1) + a.name.length
-      const hb = b._id.charCodeAt(b._id.length - 1) + b.name.length
-      return ha - hb || a.name.localeCompare(b.name)
-    })
-    .map(({_id, name}) => ({_id, name}))
-
-  const waitlistLabel = section.ctaLabel?.trim() || 'Join the waitlist'
-  const waitlistBody = section.body?.trim()
-
-  if (items.length === 0 && !waitlistBody && !section.ctaLabel) return null
-
-  return (
-    <div className="flex min-h-[145svh] flex-col bg-accent text-white md:h-[100dvh] md:min-h-[100dvh]">
-      {items.length > 0 ? <HomeCapabilitiesScrub items={items} label="What we work with" /> : null}
-
-      {/* Waitlist strip — under the scrub; desktop locks into the 100dvh product block */}
-      <section className="page-chrome shrink-0 border-t border-white/15 py-5 md:py-12">
-        <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-end md:gap-10">
-          <div className="min-w-0 max-w-[52ch]">
-            <p className="font-mono text-[11px] uppercase tracking-label text-white/55">
-              {section.headline?.trim() || 'What we’re building'}
-            </p>
-            {waitlistBody ? (
-              <p className="mt-2 text-base leading-relaxed text-white/85">{waitlistBody}</p>
-            ) : null}
-          </div>
-          <Link
-            href={WAITLIST_HREF}
-            className="inline-flex shrink-0 items-center gap-2 rounded border border-white bg-white px-5 py-3 font-mono text-[12px] font-medium uppercase tracking-label text-[#08090A] transition-colors duration-300 hover:bg-white/90"
-          >
-            {waitlistLabel}
-            <ArrowUpRight aria-hidden className="h-3.5 w-3.5" strokeWidth={2.5} />
-          </Link>
-        </div>
-      </section>
-    </div>
-  )
-}
-
-function HomePhilosophy({
-  section,
-  closingLine,
-  emailLine,
-  cta,
-}: {
-  section: SectionOf<'homePhilosophySection'>
-  closingLine?: string | null
-  emailLine?: string | null
-  cta?: SectionOf<'homeFinalCtaSection'>['cta']
-}) {
-  if (!section.line1 && !section.line2) return null
-
-  // "Subtle. Essential. Transformative." → three stacked display lines
-  const displayLines = (section.line1 ?? '')
-    .split('.')
-    .map((part) => part.trim())
-    .filter(Boolean)
-
-  const supportBase = section.line2?.trim().replace(/\.$/, '') ?? ''
-  const closing = closingLine?.trim().replace(/\.$/, '') ?? ''
-  // e.g. "We draw out the good that's already there, one build at a time."
-  const support = closing
-    ? `${supportBase}, ${closing.charAt(0).toLowerCase()}${closing.slice(1)}.`
-    : supportBase
-      ? `${supportBase}.`
-      : ''
-  const email = emailLine?.trim()
-  const ctaLabel = normalizeCtaLabel(cta?.buttonLabel)
-  const ctaHref = resolveCtaHref(cta)
-
-  return (
-    <section
-      aria-label="Philosophy"
-      className="page-chrome flex min-h-0 flex-col items-center justify-center border-t border-foreground/15 py-24 text-center sm:py-28 md:min-h-[85vh] md:py-32 lg:min-h-screen"
-    >
-      {displayLines.length > 0 ? (
-        <LineReveal
-          as="h2"
-          className="text-display font-semibold text-foreground max-md:[font-size:clamp(2.05rem,8.2vw,2.5rem)]"
-        >
-          {displayLines.map((line) => (
-            <span key={line} className="block">
-              {line}.
-            </span>
-          ))}
-        </LineReveal>
-      ) : null}
-
-      {support ? (
-        <LineReveal
-          as="p"
-          delay={0.22}
-          className="mt-[32px] max-w-[38ch] px-1 text-[clamp(1.05rem,2.1vw,1.5rem)] font-normal leading-snug tracking-[-0.01em] text-foreground/70 md:mt-[40px]"
-        >
-          {support}
-        </LineReveal>
-      ) : null}
-
-      <div className="mt-[40px] flex flex-col items-center gap-3 md:mt-[48px]">
-        <Link href={ctaHref} className="btn-solid">
-          {ctaLabel}
-          <ArrowUpRight aria-hidden className="h-3.5 w-3.5" strokeWidth={2.5} />
-        </Link>
-        {email ? (
-          <p className="max-w-[42ch] font-mono text-[12px] uppercase tracking-label text-foreground/40">
-            {email}
-          </p>
-        ) : null}
-      </div>
-    </section>
   )
 }

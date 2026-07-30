@@ -32,6 +32,7 @@ export type ProjectScrollFrame =
       kind: 'video'
       title: string
       videoUrl?: string | null
+      videoFileUrl?: string | null
       poster?: {asset?: {_ref?: string} | null; alt?: string | null} | null
       caption?: string | null
     }
@@ -129,6 +130,7 @@ export function ProjectScrollGallery({frames}: {frames: ProjectScrollFrame[]}) {
               {frame.kind === 'video' ? (
                 <ProjectGalleryVideoCell
                   videoUrl={frame.videoUrl}
+                  videoFileUrl={frame.videoFileUrl}
                   poster={frame.poster}
                   title={frame.title}
                   aspectClass="absolute inset-0 h-full w-full !aspect-auto"

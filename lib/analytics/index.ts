@@ -25,6 +25,9 @@ export {ClientGoogleAnalyticsScript} from './client-ga'
 // Consent management
 export {ConsentProvider, useConsent, getConsent, hasConsentFor} from './consent'
 
+// Usercentrics CMP (Termageddon bundle) — scripts + helpers
+export {UsercentricsScripts, ucAcceptAll, ucDenyAll, ucShowSecondLayer} from './usercentrics'
+
 // Automatic trackers (include in layout)
 export {ClientIdentifier} from './client-identifier'
 export {WebVitalsReporter} from './web-vitals'
