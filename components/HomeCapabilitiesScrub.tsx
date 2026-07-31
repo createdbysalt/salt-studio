@@ -626,7 +626,8 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
 
       const trigger = ScrollTrigger.create({
         trigger: frame,
-        start: 'top 78%',
+        // Fire as the red band enters — 78% felt like a dead scroll beat.
+        start: 'top 92%',
         end: 'bottom top',
         onEnter: () => runDrop(),
         onEnterBack: () => runDrop(),
@@ -658,13 +659,13 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
   return (
     <section
       ref={frameRef}
-      className="relative isolate min-h-[100svh] flex-1 overflow-hidden bg-accent text-white md:min-h-0"
+      className="relative isolate min-h-[68svh] flex-1 overflow-hidden bg-accent text-white sm:min-h-[72svh] lg:min-h-0"
       aria-label={label?.trim() || 'Capabilities'}
     >
       {label?.trim() ? (
         <p
           data-cap-label
-          className="page-chrome pointer-events-none absolute inset-x-0 top-0 z-10 pt-14 font-mono text-[11px] uppercase tracking-label text-white/55 md:pt-16"
+          className="page-chrome pointer-events-none absolute inset-x-0 top-0 z-10 pt-16 font-mono text-[11px] uppercase tracking-label text-white/55 sm:pt-[4.5rem] lg:pt-16"
         >
           {label}
         </p>

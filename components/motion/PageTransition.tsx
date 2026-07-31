@@ -1,53 +1,129 @@
 'use client'
 
+import {isAboutHref} from '@/lib/aboutPanel'
+import {isContactHref} from '@/lib/contactMenu'
+import {isHomePath, pageIsDark} from '@/lib/pageTheme'
 import {usePathname, useRouter} from 'next/navigation'
 import {useEffect, useRef} from 'react'
-import {DURATION, EASE, gsap, prefersReducedMotion} from './gsap'
+import {EASE, gsap, prefersReducedMotion} from './gsap'
+import {setPageWiping} from './pageTransitionState'
+
+const INK = '#08090a'
+const PAPER = '#ffffff'
+const WIPE = 0.55
 
 /**
- * Curtain page transition (motion pattern #1 — the Barba replacement).
+ * Vertical page wipe (motion pattern #1 — the Barba replacement).
  *
- * Two fixed half-width ink panels wipe in from the sides on internal link
- * clicks, the route changes underneath, then the panels retract once the new
- * pathname has rendered. Works by intercepting document-level clicks on
- * same-origin anchors — no custom Link component needed.
+ * Cover: opposite color DOWN, destination color UP.
+ * Reveal: destination cover fades out once the real page is ready — no second
+ * directional swipe (that read as an extra blank loader on dark routes).
  *
- * Escape hatches: external links, new-tab/download links, modifier clicks,
- * hash-only navigation, /edit (Studio), links marked data-no-transition, and
- * reduced motion all fall through to default Next.js navigation.
+ * Homepage / About / Contact are skipped.
  */
 export function PageTransition() {
   const router = useRouter()
   const pathname = usePathname()
-  const containerRef = useRef<HTMLDivElement>(null)
+  const firstRef = useRef<HTMLDivElement>(null)
+  const secondRef = useRef<HTMLDivElement>(null)
   const isCovering = useRef(false)
+  const pendingPath = useRef<string | null>(null)
 
-  // Retract the curtain once the new route has rendered under it.
+  useEffect(() => {
+    const first = firstRef.current
+    const second = secondRef.current
+    if (!first || !second) return
+    gsap.set(first, {yPercent: -101, autoAlpha: 1, force3D: true})
+    gsap.set(second, {yPercent: 101, autoAlpha: 1, force3D: true})
+  }, [])
+
+  // Hold the destination cover until the page is ready, then fade it away.
   useEffect(() => {
     if (!isCovering.current) return
-    isCovering.current = false
-    const panels = containerRef.current?.children
-    if (!panels) return
-    gsap.to(panels, {
-      xPercent: (i) => (i === 0 ? -101 : 101),
-      duration: DURATION.slow,
-      ease: EASE.outQuint,
-      delay: 0.1,
-    })
+    if (pendingPath.current && pathname !== pendingPath.current) return
+
+    let cancelled = false
+    const first = firstRef.current
+    const second = secondRef.current
+    if (!first || !second) return
+
+    const reveal = () => {
+      if (cancelled) return
+      isCovering.current = false
+      pendingPath.current = null
+
+      gsap
+        .timeline({
+          overwrite: true,
+          onComplete: () => {
+            setPageWiping(false)
+            gsap.set(first, {yPercent: -101, autoAlpha: 1, force3D: true})
+            gsap.set(second, {yPercent: 101, autoAlpha: 1, force3D: true})
+          },
+        })
+        // Fade only — the down/up pair already did the wipe. Another swipe
+        // felt like a blank loader beat on Work (dark).
+        .to(second, {
+          autoAlpha: 0,
+          duration: 0.35,
+          ease: EASE.outQuint,
+        })
+        .set(first, {yPercent: -101, autoAlpha: 0}, 0)
+    }
+
+    const waitUntilReady = () => {
+      const start = performance.now()
+      const grace = 200
+      const minAfterLoad = 40
+      const maxWait = 4000
+      let sawLoading = false
+      let loadingGoneAt: number | null = null
+
+      const tick = () => {
+        if (cancelled) return
+        const loading = document.querySelector('[data-page-loading]')
+        const elapsed = performance.now() - start
+
+        if (loading) {
+          sawLoading = true
+          loadingGoneAt = null
+        } else if (sawLoading && loadingGoneAt === null) {
+          loadingGoneAt = performance.now()
+        }
+
+        // Instant/cached nav: loading never mounts — wait a grace window so we
+        // don't lift early and flash a blank shell (Work was especially bad).
+        const instantReady = !sawLoading && elapsed >= grace
+        const loadedReady =
+          sawLoading && loadingGoneAt !== null && performance.now() - loadingGoneAt >= minAfterLoad
+
+        if (instantReady || loadedReady || elapsed >= maxWait) {
+          reveal()
+          return
+        }
+        requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }
+
+    waitUntilReady()
+    return () => {
+      cancelled = true
+    }
   }, [pathname])
 
   useEffect(() => {
     function onClick(event: MouseEvent) {
-      if (
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey
-      ) {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
         return
       }
+      if (isCovering.current) {
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+      if (prefersReducedMotion()) return
+
       const anchor = (event.target as Element | null)?.closest?.('a')
       if (!anchor) return
       if (anchor.target === '_blank' || anchor.hasAttribute('download')) return
@@ -58,42 +134,81 @@ export function PageTransition() {
         return
       }
 
-      const url = new URL(anchor.href, window.location.href)
+      let url: URL
+      try {
+        url = new URL(href, window.location.href)
+      } catch {
+        return
+      }
       if (url.origin !== window.location.origin) return
       if (url.pathname.startsWith('/edit')) return
-      if (url.pathname === window.location.pathname && url.search === window.location.search) return
-      if (prefersReducedMotion()) return
-      if (isCovering.current) return
+      if (isHomePath(url.pathname)) return
+      if (isAboutHref(url.pathname) || isContactHref(url.pathname)) return
+      if (url.pathname === window.location.pathname && url.search === window.location.search) {
+        return
+      }
 
-      const panels = containerRef.current?.children
-      if (!panels) return
+      const first = firstRef.current
+      const second = secondRef.current
+      if (!first || !second) return
 
       event.preventDefault()
+      event.stopPropagation()
+
       isCovering.current = true
+      setPageWiping(true)
       const destination = url.pathname + url.search + url.hash
-      gsap.to(panels, {
-        xPercent: 0,
-        duration: DURATION.slow,
-        ease: EASE.outQuint,
-        overwrite: true,
-        onComplete: () => router.push(destination),
+      pendingPath.current = url.pathname
+      const dark = pageIsDark(url.pathname)
+      const firstColor = dark ? PAPER : INK
+      const secondColor = dark ? INK : PAPER
+
+      gsap.killTweensOf([first, second])
+      gsap.set(first, {
+        backgroundColor: firstColor,
+        yPercent: -101,
+        autoAlpha: 1,
+        force3D: true,
       })
+      gsap.set(second, {
+        backgroundColor: secondColor,
+        yPercent: 101,
+        autoAlpha: 1,
+        force3D: true,
+      })
+
+      gsap
+        .timeline({
+          onComplete: () => {
+            router.push(destination)
+          },
+        })
+        .to(first, {
+          yPercent: 0,
+          duration: WIPE,
+          ease: EASE.outQuint,
+          force3D: true,
+        })
+        .to(
+          second,
+          {
+            yPercent: 0,
+            duration: WIPE,
+            ease: EASE.outQuint,
+            force3D: true,
+          },
+          `-=${WIPE * 0.28}`,
+        )
     }
 
-    document.addEventListener('click', onClick)
-    return () => document.removeEventListener('click', onClick)
+    document.addEventListener('click', onClick, true)
+    return () => document.removeEventListener('click', onClick, true)
   }, [router])
 
   return (
-    <div ref={containerRef} aria-hidden className="pointer-events-none fixed inset-0 z-[999]">
-      <div
-        className="absolute inset-y-0 left-0 w-[51%] bg-ink"
-        style={{transform: 'translateX(-101%)'}}
-      />
-      <div
-        className="absolute inset-y-0 right-0 w-[51%] bg-ink"
-        style={{transform: 'translateX(101%)'}}
-      />
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-[999]">
+      <div ref={firstRef} className="absolute inset-0" />
+      <div ref={secondRef} className="absolute inset-0" />
     </div>
   )
 }

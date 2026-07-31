@@ -195,7 +195,7 @@ export async function HomeProductSection({
   if (items.length === 0 && !waitlistBody && !section.ctaLabel) return null
 
   return (
-    <div className="flex min-h-[145svh] flex-col bg-accent text-white md:h-[100dvh] md:min-h-[100dvh]">
+    <div className="flex min-h-0 flex-col bg-accent text-white lg:h-[100dvh] lg:min-h-[100dvh]">
       {items.length > 0 ? <HomeCapabilitiesScrub items={items} label="What we work with" /> : null}
 
       {/* Waitlist strip — under the scrub; desktop locks into the 100dvh product block */}
@@ -275,13 +275,13 @@ export function HomePhilosophySection({
         <LineReveal
           as="p"
           delay={0.22}
-          className="mt-[32px] max-w-[38ch] px-1 text-[clamp(1.05rem,2.1vw,1.5rem)] font-normal leading-snug tracking-[-0.01em] text-foreground/70 md:mt-[40px]"
+          className="mt-10 max-w-[38ch] px-1 text-[clamp(1.05rem,2.1vw,1.5rem)] font-normal leading-snug tracking-[-0.01em] text-foreground/70 md:mt-12"
         >
           {support}
         </LineReveal>
       ) : null}
 
-      <div className="mt-[40px] flex flex-col items-center gap-3 md:mt-[48px]">
+      <div className="mt-10 flex flex-col items-center gap-3 md:mt-12">
         <Link href={ctaHref} className="btn-solid">
           {ctaLabel}
           <ArrowUpRight aria-hidden className="h-3.5 w-3.5" strokeWidth={2.5} />

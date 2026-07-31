@@ -1,12 +1,11 @@
 'use client'
 
 import {gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {bindInkDomeScrub, INK, INK_DOME_TRIGGER_CLASS, PAPER} from '@/components/motion/inkDome'
 import {LineReveal} from '@/components/motion/LineReveal'
+import {ScrollCue} from '@/components/motion/ScrollCue'
 import {useGSAP} from '@gsap/react'
 import {Fragment, useRef} from 'react'
-
-const INK = '#08090a'
-const PAPER = '#ffffff'
 
 /** Split a legal title into 1–2 display lines for the masthead. */
 function toHeadlineLines(title: string): string[] {
@@ -60,27 +59,10 @@ export function LegalHero({title}: {title: string}) {
       }
 
       setCovered(false)
-      gsap.set(ink, {y: '50%', force3D: true})
-
-      gsap.to(ink, {
-        y: '-45%',
-        ease: 'none',
-        force3D: true,
-        scrollTrigger: {
-          trigger,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: true,
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            setCovered(self.progress > 0.9)
-          },
-          onLeave: () => setCovered(true),
-          onLeaveBack: () => setCovered(false),
-        },
-      })
+      const unbind = bindInkDomeScrub({trigger, ink, onCovered: setCovered})
 
       return () => {
+        unbind()
         panel.removeAttribute('data-theme')
         panel.removeAttribute('data-nav-surface')
         themeDarkRef.current = false
@@ -91,12 +73,12 @@ export function LegalHero({title}: {title: string}) {
   )
 
   return (
-    <div ref={triggerRef} className="relative h-[125vh] md:h-[160vh] lg:h-[180vh]">
+    <div ref={triggerRef} data-ink-dome-trigger className={INK_DOME_TRIGGER_CLASS}>
       <section
         ref={panelRef}
         aria-label={title}
         data-nav-surface="paper"
-        className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-3 pb-8 pt-14 text-center text-foreground sm:px-4 md:px-12 md:pb-10 md:pt-20"
+        className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-3 text-center text-foreground sm:px-4 md:px-12"
         style={{backgroundColor: PAPER}}
       >
         <div
@@ -127,6 +109,8 @@ export function LegalHero({title}: {title: string}) {
             ))}
           </LineReveal>
         </div>
+
+        <ScrollCue />
       </section>
     </div>
   )

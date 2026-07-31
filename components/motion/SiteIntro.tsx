@@ -20,13 +20,13 @@ import {
  * Home intro — TinyWins choreography, Salt-tuned.
  *
  * Runs imperatively (DOM + GSAP on document.body) so React Strict Mode
- * remounts cannot kill the ~5.5s timeline mid-flight.
+ * remounts cannot kill the timeline mid-flight.
  *
  * Timing:
  *  0.0s   Ink + filled letters
- *  2.0s   White wipe DOWN — putty reaction as it hits the mark
- *  3.1s   Mark flies to nav on solid white (paper locked)
- *  4.1s   Overlay clears → empty paper
+ *  0.9s   White wipe DOWN — putty reaction as it hits the mark
+ *  1.45s  Mark flies to nav (throw + soft settle)
+ *  2.1s   Overlay clears → empty paper
  *  then   nav swipe → hero type → project strip
  */
 export function SiteIntro() {
@@ -117,17 +117,28 @@ function measureFly(mark: HTMLElement) {
   const navLogo = document.querySelector<HTMLElement>('[data-site-logo]')
   if (!navLogo) return null
 
+  // The pill is parked off-left for the later swipe-in. Measure against its
+  // final x:0 seat so the mark doesn’t overshoot into the left gutter.
+  const navPill = document.querySelector<HTMLElement>('[data-nav-pill]')
+  const pillX = navPill ? Number(gsap.getProperty(navPill, 'x')) || 0 : 0
+  const pillY = navPill ? Number(gsap.getProperty(navPill, 'y')) || 0 : 0
+  if (navPill) gsap.set(navPill, {x: 0, y: 0})
+
   // Temporarily reveal for accurate layout (autoAlpha may have visibility:hidden).
   const prevVis = navLogo.style.visibility
   const prevOp = navLogo.style.opacity
   navLogo.style.visibility = 'visible'
   navLogo.style.opacity = '0'
 
+  // Drop residual putty scaleX/scaleY so the fly uses a clean uniform scale.
+  gsap.set(mark, {scaleX: 1, scaleY: 1, rotation: 0})
+
   const from = mark.getBoundingClientRect()
   const to = navLogo.getBoundingClientRect()
 
   navLogo.style.visibility = prevVis
   navLogo.style.opacity = prevOp
+  if (navPill) gsap.set(navPill, {x: pillX, y: pillY})
 
   if (from.width < 1 || to.width < 1) return null
 
@@ -228,50 +239,52 @@ function runIntro(overlay: Overlay) {
       lightPaths,
       {
         clipPath: 'inset(0 0% 0 0)',
-        duration: 0.7,
-        stagger: 0.18,
+        duration: 0.38,
+        stagger: 0.07,
         ease: 'power3.inOut',
       },
-      0.4,
+      0.08,
     )
   }
 
   // Brief hold, then white arrives — putty is the wipe's impact, not a pause.
-  const WIPE = 2.05
+  const WIPE = 0.9
   tl.to({}, {duration: WIPE}, 0)
 
   // 2 — White wipe DOWN + dark mark swap
-  tl.to(wipe, {yPercent: 0, duration: 0.8, ease: 'power2.inOut'}, WIPE)
-  tl.to(markDark, {autoAlpha: 1, duration: 0.22, ease: 'power2.out'}, WIPE + 0.12)
-  tl.to(markLight, {autoAlpha: 0, duration: 0.28, ease: 'power2.in'}, WIPE + 0.16)
+  const WIPE_DUR = 0.48
+  tl.to(wipe, {yPercent: 0, duration: WIPE_DUR, ease: 'power2.inOut'}, WIPE)
+  tl.to(markDark, {autoAlpha: 1, duration: 0.14, ease: 'power2.out'}, WIPE + 0.08)
+  tl.to(markLight, {autoAlpha: 0, duration: 0.16, ease: 'power2.in'}, WIPE + 0.1)
 
   // Putty reaction as the wipe edge hits the mark (continuous with the wipe)
   tl.to(
     mark,
     {
       keyframes: [
-        {scaleX: 1.07, scaleY: 0.9, rotation: -1.5, duration: 0.09},
-        {scaleX: 0.93, scaleY: 1.08, rotation: 2.1, duration: 0.11},
-        {scaleX: 1.05, scaleY: 0.95, rotation: -1.3, duration: 0.1},
-        {scaleX: 0.97, scaleY: 1.04, rotation: 0.9, duration: 0.1},
-        {scaleX: 1.015, scaleY: 0.99, rotation: -0.25, duration: 0.12},
-        {scaleX: 1, scaleY: 1, rotation: 0, duration: 0.16},
+        {scaleX: 1.07, scaleY: 0.9, rotation: -1.5, duration: 0.07},
+        {scaleX: 0.93, scaleY: 1.08, rotation: 2.1, duration: 0.08},
+        {scaleX: 1.05, scaleY: 0.95, rotation: -1.3, duration: 0.08},
+        {scaleX: 0.97, scaleY: 1.04, rotation: 0.9, duration: 0.08},
+        {scaleX: 1.015, scaleY: 0.99, rotation: -0.25, duration: 0.09},
+        {scaleX: 1, scaleY: 1, rotation: 0, duration: 0.09},
       ],
       ease: 'none',
       transformOrigin: '50% 50%',
     },
-    WIPE + 0.28,
+    WIPE + 0.14,
   )
 
   // Ink gone + paper locked before any later reveal
-  tl.set(black, {autoAlpha: 0, display: 'none'}, WIPE + 0.8)
+  tl.set(black, {autoAlpha: 0, display: 'none'}, WIPE + WIPE_DUR)
   tl.add(() => {
     black.remove()
     lockPaper()
-  }, WIPE + 0.8)
+  }, WIPE + WIPE_DUR)
 
-  // 3 — Fly to nav on solid white (wipe stays fully opaque the whole flight)
-  const FLY = WIPE + 1.05
+  // 3 — Fly to nav: throw out → soft arc land (not a linear slide)
+  const FLY_DUR = 0.62
+  const FLY = WIPE + WIPE_DUR + 0.08
   tl.call(
     () => {
       const fly = measureFly(mark)
@@ -284,6 +297,25 @@ function runIntro(overlay: Overlay) {
     FLY,
   )
 
+  // Clear putty scaleX/Y so the uniform scale tween reads cleanly.
+  tl.set(mark, {scaleX: 1, scaleY: 1, rotation: 0}, FLY)
+
+  const throwDur = FLY_DUR * 0.38
+  const landDur = FLY_DUR * 0.62
+  // Midpoint lifts slightly so the path arcs instead of sliding on a line.
+  tl.to(
+    mark,
+    {
+      x: () => flyX * 0.42,
+      y: () => flyY * 0.28 - 36,
+      scale: () => 1 + (flyScale - 1) * 0.35,
+      rotation: () => (flyX <= 0 ? 3.2 : -3.2),
+      duration: throwDur,
+      ease: 'power2.in',
+      force3D: true,
+    },
+    FLY,
+  )
   tl.to(
     mark,
     {
@@ -291,40 +323,43 @@ function runIntro(overlay: Overlay) {
       y: () => flyY,
       scale: () => flyScale,
       rotation: 0,
-      duration: 1.05,
-      ease: 'power3.inOut',
+      duration: landDur,
+      ease: 'power3.out',
+      force3D: true,
     },
-    FLY,
+    FLY + throwDur,
   )
 
   // 4 — Land on paper, clear the loader veil → empty white beat
-  const LAND = FLY + 1.05
+  const LAND = FLY + FLY_DUR
   tl.add(() => {
     clearIntroBootDom()
     lockPaper()
   }, LAND)
-  tl.to(mark, {autoAlpha: 0, duration: 0.2, ease: 'power2.in'}, LAND)
-  tl.to(root, {autoAlpha: 0, duration: 0.45, ease: 'power2.out'}, LAND + 0.12)
+  tl.to(mark, {autoAlpha: 0, duration: 0.12, ease: 'power2.in'}, LAND)
+  tl.to(root, {autoAlpha: 0, duration: 0.28, ease: 'power2.out'}, LAND + 0.06)
 
   // 5 — Empty paper, then staged page chrome (all after the loader)
   //     empty → nav pill + Book CTA → hero type → project strip
-  const NAV = LAND + 0.75
+  // Keep the blank beat short — long gaps read as “nothing is happening.”
+  const NAV = LAND + 0.22
   tl.add(() => {
     emitIntroPhase('nav')
     window.dispatchEvent(new Event('resize'))
   }, NAV)
 
   if (navPill) {
-    tl.to(navPill, {autoAlpha: 1, x: 0, duration: 0.75, ease: EASE.outQuint}, NAV)
+    tl.to(navPill, {autoAlpha: 1, x: 0, duration: 0.5, ease: EASE.outQuint}, NAV)
   }
   if (navCta) {
-    tl.to(navCta, {autoAlpha: 1, x: 0, duration: 0.75, ease: EASE.outQuint}, NAV + 0.1)
+    tl.to(navCta, {autoAlpha: 1, x: 0, duration: 0.5, ease: EASE.outQuint}, NAV + 0.06)
   }
 
-  const HERO = NAV + 0.9
+  // Start type while nav is still settling so the page never idles empty.
+  const HERO = NAV + 0.2
   tl.add(() => emitIntroPhase('hero'), HERO)
 
-  const PROJECTS = HERO + 0.85
+  const PROJECTS = HERO + 0.4
   tl.add(() => emitIntroPhase('projects'), PROJECTS)
 
   return tl

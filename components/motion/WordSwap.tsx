@@ -135,11 +135,11 @@ export function WordSwap({primary, secondary, className}: WordSwapProps) {
         const heroEl = scope.current.closest<HTMLElement>('[data-home-hero]')
         if (heroEl) heroEl.dataset.wordswap = 'ready'
 
-        // Intro — left then right, matching TinyWins stagger offsets
+        // Intro — left then right, snappy so the post-nav beat doesn’t idle
         intro = gsap.timeline()
         intro
-          .to(leftA, {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'}, 0.15)
-          .to(rightA, {yPercent: 0, duration: 0.7, stagger: 0.06, ease: 'power3.out'}, 0.25)
+          .to(leftA, {yPercent: 0, duration: 0.5, stagger: 0.04, ease: 'power3.out'}, 0)
+          .to(rightA, {yPercent: 0, duration: 0.5, stagger: 0.04, ease: 'power3.out'}, 0.1)
 
         // Loop — A ↔ B with ~3s pause between cycles (TinyWins repeatDelay)
         const cycleHold = 5.1

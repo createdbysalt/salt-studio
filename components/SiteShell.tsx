@@ -2,6 +2,7 @@
 
 import {AboutPanelProvider} from '@/components/AboutPanel'
 import {ContactMenuProvider} from '@/components/ContactMenu'
+import {pageIsDark} from '@/lib/pageTheme'
 import {usePathname} from 'next/navigation'
 import type {ReactNode} from 'react'
 
@@ -9,17 +10,6 @@ interface SiteShellProps {
   navbar: ReactNode
   footer: ReactNode
   children: ReactNode
-}
-
-/** Routes whose page stage is dark — content cover + inverse footer. */
-function pageIsDark(pathname: string): boolean {
-  return (
-    pathname.startsWith('/projects/') ||
-    pathname === '/work' ||
-    pathname.startsWith('/work/') ||
-    pathname === '/legal' ||
-    pathname.startsWith('/legal/')
-  )
 }
 
 /**

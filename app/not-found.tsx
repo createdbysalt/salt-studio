@@ -29,7 +29,6 @@ export default async function NotFound() {
   const ctaLink = data?.ctaLink || '/'
   const secondaryCtaText = data?.secondaryCtaText || 'See the work'
   const secondaryCtaLink = data?.secondaryCtaLink || '/work'
-  const footerTagline = data?.footerTagline || 'Salt Studio — Subtle. Essential. Transformative.'
 
   const suggested =
     data?.suggestedLinks && data.suggestedLinks.length > 0 ? (
@@ -55,11 +54,7 @@ export default async function NotFound() {
           })}
         </ul>
       </nav>
-    ) : (
-      <p className="font-mono text-[10px] uppercase tracking-label text-foreground/35">
-        {footerTagline}
-      </p>
-    )
+    ) : undefined
 
   return (
     <StatusPage
