@@ -31,7 +31,10 @@ function WordRows({text}: {text: string}) {
   return (
     <>
       {toRows(text).map((row) => (
-        <span key={row.join('-')} className="flex gap-x-[0.28em] overflow-hidden leading-none">
+        <span
+          key={row.join('-')}
+          className="flex max-w-full gap-x-[0.28em] overflow-hidden pb-[0.1em] leading-none"
+        >
           {row.map((word) => (
             <span
               key={word}
@@ -49,7 +52,7 @@ function WordRows({text}: {text: string}) {
 
 function PhraseLayout({face}: {face: SwapFace}) {
   return (
-    <span className="flex h-full min-h-0 w-full flex-col justify-between gap-8 md:h-auto md:flex-row md:items-end md:gap-4">
+    <span className="flex h-full min-h-0 w-full flex-col justify-between gap-5 md:h-auto md:flex-row md:items-end md:gap-4">
       <span
         data-side="left"
         className="flex w-full min-w-0 flex-col items-end text-right md:w-1/2 md:items-start md:text-left"
@@ -58,7 +61,7 @@ function PhraseLayout({face}: {face: SwapFace}) {
       </span>
       <span
         data-side="right"
-        className="flex w-full min-w-0 flex-col items-start text-left md:w-1/2 md:items-end md:text-right"
+        className="flex w-full min-w-0 flex-col items-start pb-0.5 text-left md:w-1/2 md:items-end md:pb-0 md:text-right"
       >
         <WordRows text={face.right} />
       </span>

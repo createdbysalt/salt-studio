@@ -163,17 +163,17 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
       className="relative flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden bg-background"
     >
       {/* Paper band — TinyWins per-word mask reveal + looping phrase swap */}
-      <div className="relative flex min-h-0 flex-1 flex-col px-3 pb-5 pt-[5.75rem] sm:px-4 sm:pb-6 sm:pt-[6.5rem]">
-        <h1 className="flex min-h-0 flex-1 flex-col font-sans text-[clamp(1.85rem,8vw,5.4rem)] font-bold uppercase leading-[0.9] tracking-[-0.03em] text-foreground sm:text-[clamp(2.05rem,4.7vw,5.4rem)]">
+      <div className="relative flex min-h-0 flex-1 flex-col px-3 pb-3 pt-[5.75rem] sm:px-4 sm:pb-6 sm:pt-[6.5rem]">
+        <h1 className="flex min-h-0 flex-1 flex-col font-sans text-[clamp(1.4rem,6.4vw,5.4rem)] font-bold uppercase leading-[0.92] tracking-[-0.03em] text-foreground sm:text-[clamp(2.05rem,4.7vw,5.4rem)]">
           <WordSwap primary={primary} secondary={secondary} />
         </h1>
       </div>
 
-      {/* Visual band — project strip fills the full height (no dark stage) */}
+      {/* Visual band — shorter on mobile so hero type isn't crushed */}
       <div
         ref={stageRef}
         data-nav-surface="color"
-        className="relative h-[min(46dvh,32rem)] shrink-0 overflow-x-clip sm:h-[min(48dvh,36rem)]"
+        className="relative h-[min(38dvh,26rem)] shrink-0 overflow-x-clip sm:h-[min(48dvh,36rem)]"
       >
         <HomeProjectSlider
           projects={roster}

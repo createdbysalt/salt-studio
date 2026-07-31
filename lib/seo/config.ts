@@ -64,9 +64,23 @@ export interface SEOConfig {
  * - NEXT_PUBLIC_GITHUB_URL - GitHub profile/org URL
  * - NEXT_PUBLIC_YOUTUBE_URL - YouTube channel URL
  */
+/** Prefer a public https URL — never bake localhost into production OG tags. */
+function resolveSiteUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '')
+  if (configured && !/localhost|127\.0\.0\.1/i.test(configured)) {
+    return configured
+  }
+  // Vercel system envs — available at build time on every deployment.
+  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  if (productionHost) return `https://${productionHost.replace(/\/$/, '')}`
+  const deploymentHost = process.env.VERCEL_URL
+  if (deploymentHost) return `https://${deploymentHost.replace(/\/$/, '')}`
+  return configured || 'http://localhost:4000'
+}
+
 export function getSEOConfig(): SEOConfig {
   return {
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4000',
+    siteUrl: resolveSiteUrl(),
     siteName: process.env.NEXT_PUBLIC_SITE_NAME || 'My Website',
     siteDescription: process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Welcome to our website',
 
