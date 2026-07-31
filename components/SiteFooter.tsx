@@ -38,7 +38,7 @@ const SOCIAL_FALLBACKS: Partial<Record<FooterSocialPlatform, string>> = {
   whatsapp: 'https://wa.me/19712052186',
 }
 
-const iconClass = 'h-[14px] w-[14px] fill-current'
+const iconClass = 'h-[18px] w-[18px] fill-current'
 
 function SocialIcon({platform}: {platform: FooterSocialPlatform}) {
   if (platform === 'instagram') {
@@ -272,7 +272,7 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
           />
         </div>
 
-        <ul className="flex items-center gap-3.5">
+        <ul className="flex items-center gap-4 sm:gap-6">
           {socialLinks.map((item) => {
             const external = isExternalHref(item.href)
             return (

@@ -1,7 +1,7 @@
 import {seoConfig} from './config'
 
 /** Cache-bust when the branded card design changes. */
-const OG_VERSION = 'bw-11'
+const OG_VERSION = 'bw-12'
 
 /**
  * Salt social share card (`/api/og`).
