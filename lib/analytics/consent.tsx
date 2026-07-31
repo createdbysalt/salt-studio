@@ -1,5 +1,7 @@
 'use client'
 
+import {pageIsDark} from '@/lib/pageTheme'
+import {usePathname} from 'next/navigation'
 import {createContext, ReactNode, useCallback, useContext, useEffect, useState} from 'react'
 import {updateGoogleConsent} from './gtm'
 import type {ConsentLevel, ConsentState} from './types'
@@ -201,46 +203,67 @@ export function ConsentProvider({children}: ConsentProviderProps) {
 }
 
 /**
- * Consent Banner — compact Salt-branded toast, bottom-right.
- * Glass surface + mono telemetry match navbar pills; accent dot as brand mark.
+ * Consent Banner — compact toast, bottom-right.
+ * Same glass as navbar pills (black/6 on paper, white/10 frost on dark).
  */
 function ConsentBanner() {
   const {acceptAll, acceptNecessary} = useConsent()
+  const pathname = usePathname()
+  const onColor = pageIsDark(pathname)
 
   return (
     <div
       role="dialog"
       aria-label="Cookie consent"
-      className="fixed bottom-4 right-3 z-50 w-[min(100%-1.5rem,18.5rem)] sm:bottom-5 sm:right-4"
+      className="fixed bottom-4 right-3 z-50 w-[min(100%-1.5rem,20rem)] sm:bottom-5 sm:right-4"
     >
-      <div className="flex flex-col gap-3 rounded-sm border border-border bg-background/90 p-3.5 shadow-[0_12px_40px_rgba(8,9,10,0.08)] backdrop-blur-[42px]">
-        <div className="flex items-center gap-2">
-          <span aria-hidden className="size-[6px] shrink-0 rounded-full bg-accent" />
-          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-foreground">
-            Cookies
-          </span>
-        </div>
-        <p className="font-mono text-[10px] uppercase leading-[1.65] tracking-[0.06em] text-foreground/60">
-          We use cookies to analyze site usage and improve your experience.{' '}
-          <a
-            href="/legal/privacy-policy"
-            className="text-foreground/80 underline decoration-foreground/30 underline-offset-2 transition-colors hover:text-foreground hover:decoration-foreground"
+      <div
+        className={`flex flex-col gap-3.5 rounded-sm p-4 backdrop-blur-[42px] ${
+          onColor
+            ? 'bg-[rgba(255,255,255,0.10)] text-white'
+            : 'bg-[rgba(0,0,0,0.06)] text-foreground'
+        }`}
+      >
+        <div>
+          <p className="font-sans text-[14px] font-medium tracking-[-0.01em]">Cookies</p>
+          <p
+            className={`mt-1.5 font-sans text-[13px] leading-snug tracking-[-0.01em] ${
+              onColor ? 'text-white/70' : 'text-foreground/65'
+            }`}
           >
-            Learn more
-          </a>
-        </p>
+            We use cookies to analyze site usage and improve your experience.{' '}
+            <a
+              href="/legal/privacy-policy"
+              className={`underline underline-offset-2 transition-colors ${
+                onColor
+                  ? 'text-white/90 decoration-white/35 hover:text-white hover:decoration-white'
+                  : 'text-foreground/85 decoration-foreground/30 hover:text-foreground hover:decoration-foreground'
+              }`}
+            >
+              Learn more
+            </a>
+          </p>
+        </div>
         <div className="flex gap-2">
           <button
             type="button"
             onClick={acceptNecessary}
-            className="inline-flex flex-1 items-center justify-center rounded-sm border border-foreground/40 px-2.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-foreground transition-colors hover:border-foreground"
+            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-2 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
+              onColor
+                ? 'border border-white/35 text-white/90 hover:border-white/55 hover:text-white'
+                : 'border border-foreground/35 text-foreground hover:border-foreground'
+            }`}
           >
             Necessary
           </button>
           <button
             type="button"
             onClick={acceptAll}
-            className="inline-flex flex-1 items-center justify-center rounded-sm border border-foreground bg-foreground px-2.5 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-background transition-colors hover:bg-foreground/85"
+            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-2 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
+              onColor
+                ? 'bg-white text-[#08090a] hover:bg-white/90'
+                : 'bg-foreground text-background hover:bg-foreground/85'
+            }`}
           >
             Accept all
           </button>

@@ -25,8 +25,9 @@ interface NavbarProps {
 // Glass pills — black/6 on paper; white/10 frost on dark/media when collapsed.
 // Expanded mobile sheet on dark uses opaque ink — white/10 + blur reads as a
 // milky white panel over large areas.
-const pillBase = 'flex shrink-0 overflow-hidden rounded-sm backdrop-blur-[42px]'
-const pillRowBase = 'flex h-10 w-full shrink-0 items-center sm:h-12'
+const pillBase = 'flex overflow-hidden rounded-sm backdrop-blur-[42px]'
+// Mobile/tablet run taller so the glass chrome matches the wider viewport; lg keeps the tighter desktop row.
+const pillRowBase = 'flex h-12 w-full shrink-0 items-center sm:h-14 lg:h-12'
 const pillFillPaper =
   'bg-[rgba(0,0,0,0.06)] hover:bg-[rgba(0,0,0,0.10)] transition-colors duration-300'
 const pillFillColor =
@@ -35,6 +36,7 @@ const pillFillColorMenu =
   'bg-[rgba(8,9,10,0.94)] hover:bg-[rgba(8,9,10,0.96)] transition-colors duration-300'
 
 const BOOK_CTA_LABEL = 'Book Discovery Call'
+const BOOK_CTA_LABEL_SHORT = 'Book a call'
 
 function BookDiscoveryCta({className, onClick}: {className: string; onClick?: () => void}) {
   const rootRef = useRef<HTMLAnchorElement>(null)
@@ -77,15 +79,17 @@ function BookDiscoveryCta({className, onClick}: {className: string; onClick?: ()
       target="_blank"
       rel="noopener noreferrer"
       onClick={onClick}
+      aria-label={BOOK_CTA_LABEL}
       className={className}
     >
       <span
         aria-hidden
         data-book-cta-dot
-        className="inline-block size-[6px] shrink-0 rounded-full bg-accent will-change-transform"
+        className="inline-block size-[7px] shrink-0 rounded-full bg-accent will-change-transform lg:size-[6px]"
       />
-      <span data-book-cta-label className="inline-block will-change-transform">
-        {BOOK_CTA_LABEL}
+      <span data-book-cta-label className="inline-block min-w-0 will-change-transform">
+        <span className="sm:hidden">{BOOK_CTA_LABEL_SHORT}</span>
+        <span className="hidden sm:inline">{BOOK_CTA_LABEL}</span>
       </span>
     </a>
   )
@@ -105,7 +109,7 @@ export function Navbar({data}: NavbarProps) {
   const bookWrapRef = useRef<HTMLDivElement>(null)
   const menuTlRef = useRef<gsap.core.Timeline | null>(null)
   const menuOpenRef = useRef(menuOpen)
-  const collapsedPillRef = useRef({width: 99, height: 40})
+  const collapsedPillRef = useRef({width: 120, height: 48})
 
   menuOpenRef.current = menuOpen
 
@@ -124,20 +128,20 @@ export function Navbar({data}: NavbarProps) {
   const pillFill = onColor ? (menuPresent ? pillFillColorMenu : pillFillColor) : pillFillPaper
 
   const linkClass = onColor
-    ? 'font-sans text-[13px] font-medium tracking-[-0.01em] text-white/85 transition-colors duration-300 hover:text-white sm:text-[14px]'
-    : 'font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/70 transition-colors duration-300 hover:text-foreground sm:text-[14px]'
+    ? 'font-sans text-[14px] font-medium tracking-[-0.01em] text-white/85 transition-colors duration-300 hover:text-white sm:text-[15px] lg:text-[14px]'
+    : 'font-sans text-[14px] font-medium tracking-[-0.01em] text-foreground/70 transition-colors duration-300 hover:text-foreground sm:text-[15px] lg:text-[14px]'
 
   const childLinkClass = onColor
-    ? 'whitespace-nowrap font-sans text-[12px] font-medium tracking-[-0.01em] text-white/65 transition-colors duration-300 hover:text-white sm:text-[13px]'
-    : 'whitespace-nowrap font-sans text-[12px] font-medium tracking-[-0.01em] text-foreground/50 transition-colors duration-300 hover:text-foreground sm:text-[13px]'
+    ? 'whitespace-nowrap font-sans text-[13px] font-medium tracking-[-0.01em] text-white/65 transition-colors duration-300 hover:text-white sm:text-[14px] lg:text-[13px]'
+    : 'whitespace-nowrap font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/50 transition-colors duration-300 hover:text-foreground sm:text-[14px] lg:text-[13px]'
 
   const ctaClass = onColor
-    ? 'pointer-events-auto inline-flex h-10 items-center justify-center whitespace-nowrap px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-white/90 transition-colors duration-300 hover:text-white sm:h-12 sm:px-4 sm:text-[14px]'
-    : 'pointer-events-auto inline-flex h-10 items-center justify-center whitespace-nowrap px-2.5 font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/80 transition-colors duration-300 hover:text-foreground sm:h-12 sm:px-4 sm:text-[14px]'
+    ? 'pointer-events-auto inline-flex h-12 max-w-full items-center justify-center whitespace-nowrap px-3 font-sans text-[13px] font-medium tracking-[-0.01em] text-white/90 transition-colors duration-300 hover:text-white sm:h-14 sm:px-5 sm:text-[15px] lg:h-12 lg:px-4 lg:text-[14px]'
+    : 'pointer-events-auto inline-flex h-12 max-w-full items-center justify-center whitespace-nowrap px-3 font-sans text-[13px] font-medium tracking-[-0.01em] text-foreground/80 transition-colors duration-300 hover:text-foreground sm:h-14 sm:px-5 sm:text-[15px] lg:h-12 lg:px-4 lg:text-[14px]'
 
   const hamburgerClass = onColor
-    ? 'ml-auto flex h-6 w-3.5 shrink-0 items-center justify-center text-white/85 transition-opacity hover:opacity-100 lg:ml-0 lg:hidden'
-    : 'ml-auto flex h-6 w-3.5 shrink-0 items-center justify-center text-foreground/70 transition-opacity hover:opacity-100 lg:ml-0 lg:hidden'
+    ? 'ml-auto flex h-8 w-5 shrink-0 items-center justify-center text-white/85 transition-opacity hover:opacity-100 lg:ml-0 lg:hidden'
+    : 'ml-auto flex h-8 w-5 shrink-0 items-center justify-center text-foreground/70 transition-opacity hover:opacity-100 lg:ml-0 lg:hidden'
 
   const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
     if (isAboutHref(href)) {
@@ -421,10 +425,10 @@ export function Navbar({data}: NavbarProps) {
         data-sanity={dataAttribute?.('menuItems')}
         data-nav-on-color={onColor ? 'true' : 'false'}
       >
-        <div className="flex w-full items-start justify-between gap-2 px-3 pt-3 sm:px-4 sm:pt-4">
+        <div className="flex w-full min-w-0 items-start justify-between gap-2 px-3 pt-3.5 sm:gap-3 sm:px-5 sm:pt-5 lg:gap-2 lg:px-4 lg:pt-4">
           <nav
             ref={pillRef}
-            className={`pointer-events-auto min-w-0 flex-col ${pillBase} ${pillFill} ${
+            className={`pointer-events-auto min-w-0 shrink-0 flex-col ${pillBase} ${pillFill} ${
               menuPresent ? '' : 'lg:flex-row lg:items-center'
             }`}
             aria-label="Main navigation"
@@ -433,8 +437,8 @@ export function Navbar({data}: NavbarProps) {
             data-intro-hide
           >
             <div
-              className={`${pillRowBase} gap-5 px-3.5 sm:gap-6 sm:px-4 lg:gap-7 ${
-                menuPresent ? 'px-3.5 sm:px-4' : 'lg:px-[10px] lg:pr-[18px]'
+              className={`${pillRowBase} gap-3 px-3 sm:gap-5 sm:px-4 lg:gap-7 ${
+                menuPresent ? 'px-3 sm:px-4' : 'lg:px-[10px] lg:pr-[18px]'
               }`}
             >
               <SiteLogo
@@ -442,7 +446,7 @@ export function Navbar({data}: NavbarProps) {
                 className="shrink-0"
                 logo={data?.logo}
                 siteName={data?.siteName}
-                markClassName="h-[18px] w-auto sm:h-[22px]"
+                markClassName="h-[22px] w-auto sm:h-[26px] lg:h-[22px]"
               />
 
               <button
@@ -455,8 +459,8 @@ export function Navbar({data}: NavbarProps) {
                 data-menu-toggle
               >
                 <svg
-                  width="14"
-                  height="14"
+                  width="18"
+                  height="18"
                   viewBox="0 0 16 16"
                   fill="none"
                   aria-hidden="true"
@@ -464,22 +468,22 @@ export function Navbar({data}: NavbarProps) {
                 >
                   <line
                     data-menu-bar="top"
-                    x1="2"
+                    x1="1"
                     y1="5"
-                    x2="14"
+                    x2="15"
                     y2="5"
                     stroke="currentColor"
-                    strokeWidth="1.5"
+                    strokeWidth="1.75"
                     strokeLinecap="round"
                   />
                   <line
                     data-menu-bar="bot"
-                    x1="2"
+                    x1="1"
                     y1="11"
-                    x2="14"
+                    x2="15"
                     y2="11"
                     stroke="currentColor"
-                    strokeWidth="1.5"
+                    strokeWidth="1.75"
                     strokeLinecap="round"
                   />
                 </svg>
@@ -524,11 +528,13 @@ export function Navbar({data}: NavbarProps) {
 
           <div
             ref={bookWrapRef}
-            className="pointer-events-auto flex shrink-0 items-start gap-2"
+            className="pointer-events-auto flex min-w-0 max-w-[min(100%,16.5rem)] shrink items-start sm:max-w-none"
             data-nav-cta
             data-intro-hide
           >
-            <BookDiscoveryCta className={`${pillBase} ${pillFill} ${ctaClass} gap-2`} />
+            <BookDiscoveryCta
+              className={`${pillBase} ${pillFill} ${ctaClass} min-w-0 gap-1.5 sm:gap-2`}
+            />
           </div>
         </div>
       </header>
@@ -836,12 +842,12 @@ const ExpandingMenuBody = forwardRef<
 
   // Explicit px — project remaps Tailwind spacing (spacing-8 = 136px).
   const menuLinkClass = onColor
-    ? 'font-sans text-[24px] font-medium leading-[1.1] tracking-[-0.02em] text-white transition-opacity duration-200 hover:opacity-70 sm:text-[28px]'
-    : 'font-sans text-[24px] font-medium leading-[1.1] tracking-[-0.02em] text-foreground transition-opacity duration-200 hover:opacity-70 sm:text-[28px]'
+    ? 'font-sans text-[28px] font-medium leading-[1.1] tracking-[-0.02em] text-white transition-opacity duration-200 hover:opacity-70 sm:text-[32px]'
+    : 'font-sans text-[28px] font-medium leading-[1.1] tracking-[-0.02em] text-foreground transition-opacity duration-200 hover:opacity-70 sm:text-[32px]'
 
   const menuSubmenuChildClass = onColor
-    ? 'font-sans text-[15px] font-medium leading-tight tracking-[-0.01em] text-white/45 transition-opacity duration-200 hover:opacity-80'
-    : 'font-sans text-[15px] font-medium leading-tight tracking-[-0.01em] text-foreground/45 transition-opacity duration-200 hover:opacity-80'
+    ? 'font-sans text-[16px] font-medium leading-tight tracking-[-0.01em] text-white/45 transition-opacity duration-200 hover:opacity-80'
+    : 'font-sans text-[16px] font-medium leading-tight tracking-[-0.01em] text-foreground/45 transition-opacity duration-200 hover:opacity-80'
 
   return (
     <div
@@ -852,8 +858,8 @@ const ExpandingMenuBody = forwardRef<
       aria-modal="true"
       aria-label="Navigation menu"
     >
-      <div className="flex flex-col gap-3 px-3.5 pb-0 pt-3 sm:px-4 sm:pb-0 sm:pt-4">
-        <nav className="flex flex-col items-start gap-[2px] py-2 sm:py-2.5" aria-label="Main">
+      <div className="flex flex-col gap-3 px-4 pb-4 pt-3.5 sm:px-5 sm:pb-5 sm:pt-4">
+        <nav className="flex flex-col items-start gap-[2px] py-2.5 sm:py-3" aria-label="Main">
           {/* Contact is covered by Book a call / WhatsApp CTAs below. */}
           {items
             .filter(
@@ -912,7 +918,7 @@ const ExpandingMenuBody = forwardRef<
 
         <div
           data-menu-reveal
-          className={`flex gap-2 border-t pt-3 pb-0 ${
+          className={`flex gap-2 border-t pt-3 ${
             onColor ? 'border-white/10' : 'border-foreground/10'
           }`}
         >
@@ -921,13 +927,13 @@ const ExpandingMenuBody = forwardRef<
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}
-            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-sm px-3 py-2 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
+            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-sm px-3 py-2.5 font-sans text-[14px] font-medium tracking-[-0.01em] transition-colors ${
               onColor
                 ? 'bg-white/12 text-white hover:bg-white/18'
                 : 'bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.1]'
             }`}
           >
-            <span aria-hidden className="size-[6px] shrink-0 rounded-full bg-accent" />
+            <span aria-hidden className="size-[7px] shrink-0 rounded-full bg-accent" />
             Book a call
           </a>
           <a
@@ -935,7 +941,7 @@ const ExpandingMenuBody = forwardRef<
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}
-            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-2 font-sans text-[13px] font-medium tracking-[-0.01em] transition-colors ${
+            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-2.5 font-sans text-[14px] font-medium tracking-[-0.01em] transition-colors ${
               onColor
                 ? 'bg-white/12 text-white hover:bg-white/18'
                 : 'bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.1]'

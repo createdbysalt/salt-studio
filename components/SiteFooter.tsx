@@ -8,6 +8,7 @@ import {SaltWordmark} from '@/components/SaltWordmark'
 import {isAboutHref} from '@/lib/aboutPanel'
 import {ucShowSecondLayer} from '@/lib/analytics'
 import {isContactHref} from '@/lib/contactMenu'
+import {pageIsDark} from '@/lib/pageTheme'
 import type {FooterLegalPagesQueryResult, SettingsQueryResult} from '@/sanity.types'
 import {resolveMenu} from '@/sanity/lib/utils'
 import {useGSAP} from '@gsap/react'
@@ -15,17 +16,6 @@ import {stegaClean} from 'next-sanity'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 import {useRef, type MouseEvent} from 'react'
-
-/** Routes whose page stage is dark — footer flips to paper (inverse). */
-function pageIsDark(pathname: string): boolean {
-  return (
-    pathname.startsWith('/projects/') ||
-    pathname === '/work' ||
-    pathname.startsWith('/work/') ||
-    pathname === '/legal' ||
-    pathname.startsWith('/legal/')
-  )
-}
 
 type FooterSocialPlatform = 'linkedin' | 'instagram' | 'x' | 'email' | 'whatsapp'
 
@@ -198,6 +188,7 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
           duration: 0.65,
           stagger: 0.06,
           ease: EASE.outQuint,
+          clearProps: 'transform',
           scrollTrigger: {
             trigger: footer,
             start: 'bottom bottom',
@@ -259,14 +250,14 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
       <nav
         ref={navRef}
         aria-label="Footer"
-        className="flex w-full items-center justify-between px-6 pt-3 md:px-10 md:pt-3.5"
+        className="flex w-full items-center px-3 pt-3 md:px-10 md:pt-3.5"
       >
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             onClick={(event) => handleNavClick(event, item.href)}
-            className="font-sans text-[12px] font-semibold tracking-[-0.02em] text-foreground/45 transition-opacity hover:opacity-70 md:text-[13px]"
+            className="min-w-0 flex-1 text-center font-sans text-[11px] font-semibold tracking-[-0.02em] text-foreground/45 transition-opacity hover:opacity-70 md:text-[13px]"
           >
             {item.label}
           </Link>
