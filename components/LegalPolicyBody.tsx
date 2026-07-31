@@ -1,6 +1,6 @@
 'use client'
 
-import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {EASE, gsap, prefersReducedMotion, ScrollTrigger} from '@/components/motion/gsap'
 import {useGSAP} from '@gsap/react'
 import {useRef} from 'react'
 
@@ -22,23 +22,47 @@ export function LegalPolicyBody({html}: {html: string}) {
 
       if (!targets.length) return
 
-      gsap.set(targets, {autoAlpha: 0, y: 28})
+      // One container trigger + stagger. Per-element ScrollTriggers left the
+      // Termageddon body stuck at autoAlpha:0 under Lenis (onEnter never fired).
+      const alreadyInView = scope.current.getBoundingClientRect().top < window.innerHeight * 0.9
 
-      targets.forEach((el) => {
-        gsap.to(el, {
+      if (alreadyInView) {
+        gsap.fromTo(
+          targets,
+          {autoAlpha: 0, y: 20},
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.55,
+            ease: EASE.outCubic,
+            stagger: 0.02,
+            clearProps: 'transform',
+          },
+        )
+        return
+      }
+
+      gsap.fromTo(
+        targets,
+        {autoAlpha: 0, y: 20},
+        {
           autoAlpha: 1,
           y: 0,
-          duration: 0.7,
+          duration: 0.55,
           ease: EASE.outCubic,
+          stagger: 0.02,
+          clearProps: 'transform',
           scrollTrigger: {
-            trigger: el,
-            start: 'top 92%',
+            trigger: scope.current,
+            start: 'top 90%',
             once: true,
           },
-        })
-      })
+        },
+      )
+
+      ScrollTrigger.refresh()
     },
-    {scope},
+    {scope, dependencies: [html]},
   )
 
   return (
