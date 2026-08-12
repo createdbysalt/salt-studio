@@ -12,7 +12,7 @@ import Script from 'next/script'
 
 const UC_SETTINGS_ID = '3lNRNwFF7b2Anu'
 
-/** Renders in the root <head>, before GTM so the auto-blocker can do its job. */
+/** Renders in the root <head>. Consent Mode governs storage; no script blocking. */
 export function UsercentricsScripts() {
   return (
     <>
