@@ -16,20 +16,9 @@ const UC_SETTINGS_ID = '3lNRNwFF7b2Anu'
 export function UsercentricsScripts() {
   return (
     <>
-      <link rel="preconnect" href="//privacy-proxy.usercentrics.eu" />
-      <link
-        rel="preload"
-        href="//privacy-proxy.usercentrics.eu/latest/uc-block.bundle.js"
-        as="script"
-      />
       <Script id="uc-suppress-default-ui" strategy="beforeInteractive">
         {'window.UC_UI_SUPPRESS_CMP_DISPLAY=true;'}
       </Script>
-      <Script
-        id="uc-block"
-        src="https://privacy-proxy.usercentrics.eu/latest/uc-block.bundle.js"
-        strategy="beforeInteractive"
-      />
       <Script
         id="usercentrics-cmp"
         src="https://app.usercentrics.eu/browser-ui/latest/loader.js"
