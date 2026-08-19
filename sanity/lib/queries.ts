@@ -381,7 +381,7 @@ export const projectsByCategoryQuery = defineQuery(`
 
 // All work categories, for the Work page filter bar (alphabetical by label).
 export const workCategoriesQuery = defineQuery(`
-  *[_type == "workCategory" && defined(slug.current)]|order(filterLabel asc){
+  *[_type == "workCategory" && defined(slug.current) && count(*[_type == "project" && hidden != true && defined(slug.current) && ^._id in categories[]._ref]) > 0]|order(filterLabel asc){
     _id,
     filterLabel,
     "slug": slug.current,
@@ -685,4 +685,86 @@ export const quizBySlugQuery = defineQuery(`
 
 export const quizSlugsQuery = defineQuery(`
   *[_type == "quiz" && defined(slug.current)]{"slug": slug.current}
+`)
+
+export const personBySlugQuery = defineQuery(`
+  *[_type == "person" && slug.current == $slug][0]{
+    _id,
+    _type,
+    name,
+    shortName,
+    "slug": slug.current,
+    role,
+    headline,
+    photo,
+    location,
+    availability,
+    body,
+    showStudioVideo,
+    principles[]{ _key, title, body },
+    highlights[]{ _key, metric, label },
+    cases[]{
+      _key,
+      title,
+      role,
+      problem,
+      whatTheyDid,
+      result,
+      year,
+      "relatedProject": relatedProject->{ _id, title, "slug": slug.current }
+    },
+    howTheyWork,
+    studioNote,
+    email,
+    linkedinUrl,
+    "resumeUrl": resume.asset->url,
+    primaryCta,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    sortOrder
+  }
+`)
+
+export const peopleQuery = defineQuery(`
+  *[_type == "person" && defined(slug.current)]|order(sortOrder asc, name asc){
+    _id,
+    _type,
+    name,
+    shortName,
+    "slug": slug.current,
+    role,
+    headline,
+    photo,
+    location,
+    availability,
+    body,
+    showStudioVideo,
+    principles[]{ _key, title, body },
+    highlights[]{ _key, metric, label },
+    cases[]{
+      _key,
+      title,
+      role,
+      problem,
+      whatTheyDid,
+      result,
+      year,
+      "relatedProject": relatedProject->{ _id, title, "slug": slug.current }
+    },
+    howTheyWork,
+    studioNote,
+    email,
+    linkedinUrl,
+    "resumeUrl": resume.asset->url,
+    primaryCta,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    sortOrder
+  }
+`)
+
+export const personSlugsQuery = defineQuery(`
+  *[_type == "person" && defined(slug.current)]{"slug": slug.current}
 `)

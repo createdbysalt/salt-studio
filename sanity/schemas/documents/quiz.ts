@@ -294,7 +294,7 @@ export default defineType({
               name: 'primaryCtaLabel',
               title: 'Primary Button Label',
               type: 'string',
-              initialValue: 'Book a discovery call',
+              initialValue: 'Request a conversation',
               description: 'The main action for this band.',
             }),
             defineField({

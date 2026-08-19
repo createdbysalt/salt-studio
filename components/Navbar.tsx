@@ -5,8 +5,8 @@ import {useContactMenu} from '@/components/ContactMenu'
 import {DEFAULT_NAV, type NavChild, type NavItem} from '@/components/homeHero'
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {SiteLogo} from '@/components/SiteLogo'
-import {isAboutHref} from '@/lib/aboutPanel'
-import {CONTACT_BOOK_HREF, CONTACT_WHATSAPP_HREF, isContactHref} from '@/lib/contactMenu'
+import {ABOUT_DEFAULT_SLUG, isAboutHref, personHref} from '@/lib/aboutPanel'
+import {CONTACT_INTEREST_HREF, isContactHref} from '@/lib/contactMenu'
 import type {SettingsQueryResult} from '@/sanity.types'
 import {studioUrl} from '@/sanity/lib/api'
 import {resolveMenu} from '@/sanity/lib/utils'
@@ -15,7 +15,7 @@ import {ChevronDown} from 'lucide-react'
 import {AnimatePresence, motion} from 'motion/react'
 import {createDataAttribute} from 'next-sanity'
 import Link from 'next/link'
-import {usePathname} from 'next/navigation'
+import {usePathname, useRouter} from 'next/navigation'
 import {forwardRef, useEffect, useLayoutEffect, useRef, useState, type MouseEvent} from 'react'
 
 interface NavbarProps {
@@ -35,8 +35,8 @@ const pillFillColor =
 const pillFillColorMenu =
   'bg-[rgba(8,9,10,0.94)] hover:bg-[rgba(8,9,10,0.96)] transition-colors duration-300'
 
-const BOOK_CTA_LABEL = 'Book Discovery Call'
-const BOOK_CTA_LABEL_SHORT = 'Book a call'
+const BOOK_CTA_LABEL = 'Request a conversation'
+const BOOK_CTA_LABEL_SHORT = 'Request'
 
 function BookDiscoveryCta({className, onClick}: {className: string; onClick?: () => void}) {
   const rootRef = useRef<HTMLAnchorElement>(null)
@@ -73,11 +73,9 @@ function BookDiscoveryCta({className, onClick}: {className: string; onClick?: ()
   )
 
   return (
-    <a
+    <Link
       ref={rootRef}
-      href={CONTACT_BOOK_HREF}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={CONTACT_INTEREST_HREF}
       onClick={onClick}
       aria-label={BOOK_CTA_LABEL}
       className={className}
@@ -91,12 +89,13 @@ function BookDiscoveryCta({className, onClick}: {className: string; onClick?: ()
         <span className="sm:hidden">{BOOK_CTA_LABEL_SHORT}</span>
         <span className="hidden sm:inline">{BOOK_CTA_LABEL}</span>
       </span>
-    </a>
+    </Link>
   )
 }
 
 export function Navbar({data}: NavbarProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuPresent, setMenuPresent] = useState(false)
   const {openAbout} = useAboutPanel()
@@ -146,7 +145,7 @@ export function Navbar({data}: NavbarProps) {
   const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
     if (isAboutHref(href)) {
       event.preventDefault()
-      openAbout()
+      router.push(personHref(ABOUT_DEFAULT_SLUG), {scroll: false})
       return
     }
     if (isContactHref(href)) {
@@ -550,11 +549,7 @@ export function Navbar({data}: NavbarProps) {
 function useNavOnColorSurface(pathname: string, menuPresent: boolean): boolean {
   // Media-hero routes start on color even before the first sample.
   const routeHint =
-    pathname === '/contact' ||
-    pathname.startsWith('/contact/') ||
-    pathname.startsWith('/projects/') ||
-    pathname === '/work' ||
-    pathname.startsWith('/work/')
+    pathname.startsWith('/projects/') || pathname === '/work' || pathname.startsWith('/work/')
 
   const [onColor, setOnColor] = useState(routeHint)
   const latestRef = useRef(routeHint)
@@ -860,7 +855,7 @@ const ExpandingMenuBody = forwardRef<
     >
       <div className="flex flex-col gap-3 px-4 pb-4 pt-3.5 sm:px-5 sm:pb-5 sm:pt-4">
         <nav className="flex flex-col items-start gap-[2px] py-2.5 sm:py-3" aria-label="Main">
-          {/* Contact is covered by Book a call / WhatsApp CTAs below. */}
+          {/* Contact is covered by the request-a-conversation CTA below. */}
           {items
             .filter(
               (item) => !isContactHref(item.href) && item.label.trim().toLowerCase() !== 'contact',
@@ -922,10 +917,8 @@ const ExpandingMenuBody = forwardRef<
             onColor ? 'border-white/10' : 'border-foreground/10'
           }`}
         >
-          <a
-            href={CONTACT_BOOK_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href={CONTACT_INTEREST_HREF}
             onClick={onClose}
             className={`inline-flex flex-1 items-center justify-center gap-2 rounded-sm px-3 py-2.5 font-sans text-[14px] font-medium tracking-[-0.01em] transition-colors ${
               onColor
@@ -934,21 +927,8 @@ const ExpandingMenuBody = forwardRef<
             }`}
           >
             <span aria-hidden className="size-[7px] shrink-0 rounded-full bg-accent" />
-            Book a call
-          </a>
-          <a
-            href={CONTACT_WHATSAPP_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onClose}
-            className={`inline-flex flex-1 items-center justify-center rounded-sm px-3 py-2.5 font-sans text-[14px] font-medium tracking-[-0.01em] transition-colors ${
-              onColor
-                ? 'bg-white/12 text-white hover:bg-white/18'
-                : 'bg-foreground/[0.06] text-foreground hover:bg-foreground/[0.1]'
-            }`}
-          >
-            Chat via WhatsApp
-          </a>
+            Request a conversation
+          </Link>
         </div>
       </div>
     </div>

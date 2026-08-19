@@ -1,11 +1,10 @@
 'use client'
 
-import {useAboutPanel} from '@/components/AboutPanel'
 import {useContactMenu} from '@/components/ContactMenu'
 import {DEFAULT_NAV} from '@/components/homeHero'
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {SaltWordmark} from '@/components/SaltWordmark'
-import {isAboutHref} from '@/lib/aboutPanel'
+import {ABOUT_DEFAULT_SLUG, isAboutHref, personHref} from '@/lib/aboutPanel'
 import {ucShowSecondLayer} from '@/lib/analytics'
 import {isContactHref} from '@/lib/contactMenu'
 import {pageIsDark} from '@/lib/pageTheme'
@@ -14,7 +13,7 @@ import {resolveMenu} from '@/sanity/lib/utils'
 import {useGSAP} from '@gsap/react'
 import {stegaClean} from 'next-sanity'
 import Link from 'next/link'
-import {usePathname} from 'next/navigation'
+import {usePathname, useRouter} from 'next/navigation'
 import {useRef, type MouseEvent} from 'react'
 
 type FooterSocialPlatform = 'linkedin' | 'instagram' | 'x' | 'email' | 'whatsapp'
@@ -120,7 +119,7 @@ const LEGAL_FALLBACKS = [
  */
 export function SiteFooter({settings, legalPages}: SiteFooterProps) {
   const pathname = usePathname()
-  const {openAbout} = useAboutPanel()
+  const router = useRouter()
   const {openContact} = useContactMenu()
   const inverseLight = pageIsDark(pathname)
   const siteName = stegaClean(settings?.siteName ?? '') || 'Salt Studio'
@@ -132,7 +131,7 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
   const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, href: string) => {
     if (isAboutHref(href)) {
       event.preventDefault()
-      openAbout()
+      router.push(personHref(ABOUT_DEFAULT_SLUG), {scroll: false})
       return
     }
     if (isContactHref(href)) {

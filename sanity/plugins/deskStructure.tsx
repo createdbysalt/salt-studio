@@ -143,6 +143,7 @@ export const saltDeskStructure: StructureResolver = (S) => {
           S.documentTypeListItem('service').title('Services').icon(WrenchIcon),
           // ─── People ───
           S.divider().title('People'),
+          S.documentTypeListItem('person').title('People').icon(UsersIcon),
           S.documentTypeListItem('client').title('Clients').icon(CaseIcon),
           S.documentTypeListItem('testimonial').title('Testimonials').icon(StarIcon),
           // ─── Global ───

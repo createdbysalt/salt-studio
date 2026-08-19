@@ -3,7 +3,7 @@ import {Reveal} from '@/components/Reveal'
 import {WorkCatalog} from '@/components/WorkCatalog'
 import {WorkFilterHeadline} from '@/components/WorkFilterHeadline'
 import {CorePageSchema, ogImageUrl} from '@/lib/seo'
-import {resolveWorkPills} from '@/lib/work-pills'
+import {resolveWorkPills, usedWorkCategorySlugs} from '@/lib/work-pills'
 import {resolveWorkProjects} from '@/lib/work-sort'
 import {sanityFetch} from '@/sanity/lib/live'
 import {allProjectsQuery, workCategoriesQuery, workPageQuery} from '@/sanity/lib/queries'
@@ -41,7 +41,12 @@ export default async function WorkIndexRoute() {
   const projects = await withWorkPosters(
     resolveWorkProjects(page?.projectSource, page?.curatedProjects, allProjects ?? []),
   )
-  const pills = resolveWorkPills(page?.pillSource, page?.categoryPills, categories ?? [])
+  const pills = resolveWorkPills(
+    page?.pillSource,
+    page?.categoryPills,
+    categories ?? [],
+    usedWorkCategorySlugs(allProjects ?? []),
+  )
 
   return (
     <main className="bg-background text-foreground pb-24">

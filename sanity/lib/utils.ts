@@ -44,6 +44,8 @@ export function resolveHref(documentType?: string, slug?: string | null): string
       return '/contact'
     case 'workCategory':
       return slug ? `/work/${slug}` : undefined
+    case 'person':
+      return slug ? `/${slug}` : undefined
     case 'page':
       return slug ? `/${slug}` : undefined
     case 'project':

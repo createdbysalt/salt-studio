@@ -9,7 +9,12 @@ import {SiteFooter} from '@/components/SiteFooter'
 import {SiteShell} from '@/components/SiteShell'
 import {ogImageUrl, SiteStructuredData} from '@/lib/seo'
 import {sanityFetch, SanityLive} from '@/sanity/lib/live'
-import {footerLegalPagesQuery, homePageQuery, settingsQuery} from '@/sanity/lib/queries'
+import {
+  footerLegalPagesQuery,
+  homePageQuery,
+  peopleQuery,
+  settingsQuery,
+} from '@/sanity/lib/queries'
 import {SpeedInsights} from '@vercel/speed-insights/next'
 import type {Metadata, Viewport} from 'next'
 import {VisualEditing} from 'next-sanity/visual-editing'
@@ -53,9 +58,10 @@ export const viewport: Viewport = {
 }
 
 export default async function IndexRoute({children}: {children: React.ReactNode}) {
-  const [{data}, {data: legalPages}] = await Promise.all([
+  const [{data}, {data: legalPages}, {data: people}] = await Promise.all([
     sanityFetch({query: settingsQuery}),
     sanityFetch({query: footerLegalPagesQuery}),
+    sanityFetch({query: peopleQuery}),
   ])
   return (
     <>
@@ -65,6 +71,7 @@ export default async function IndexRoute({children}: {children: React.ReactNode}
         <SiteShell
           navbar={<Navbar data={data} />}
           footer={<SiteFooter settings={data} legalPages={legalPages} />}
+          people={people ?? []}
         >
           {children}
         </SiteShell>
