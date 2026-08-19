@@ -11,11 +11,9 @@ type ContactHeroProps = {
 }
 
 const EMAIL_RE = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g
-const DEFAULT_DIRECT =
-  'Rather skip the form? Email us directly — hello@createdbysalt.com.'
+const DEFAULT_DIRECT = 'Rather skip the form? Email us directly — hello@createdbysalt.com.'
 
-const DEFAULT_RESPONSE =
-  "We only take on a few projects a year. We'd love to hear from you."
+const DEFAULT_RESPONSE = "We only take on a few projects a year. We'd love to hear from you."
 
 function linkifyEmails(text: string): ReactNode[] {
   const nodes: ReactNode[] = []

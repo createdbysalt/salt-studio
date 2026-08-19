@@ -31,7 +31,8 @@ export default defineType({
       title: 'Display name',
       type: 'string',
       group: 'overview',
-      description: 'The name shown as the heading on their About panel (e.g. “Gabriella”, “Matheus”).',
+      description:
+        'The name shown as the heading on their About panel (e.g. “Gabriella”, “Matheus”).',
       validation: (rule) => rule.required().error('The panel needs a name to show'),
     }),
     defineField({
@@ -51,14 +52,17 @@ export default defineType({
         'The sendable URL: /gabi or /matt. Do not use reserved site paths like work, contact, or about.',
       options: {source: 'shortName', maxLength: 96},
       validation: (rule) =>
-        rule.required().error('A slug is required so this person has a public URL').custom((value) => {
-          const current = value?.current?.trim().toLowerCase()
-          if (!current) return true
-          if (RESERVED_ROUTE_SLUGS.includes(current)) {
-            return `“${current}” is already a site page. Use a first-name slug like gabi or matt.`
-          }
-          return true
-        }),
+        rule
+          .required()
+          .error('A slug is required so this person has a public URL')
+          .custom((value) => {
+            const current = value?.current?.trim().toLowerCase()
+            if (!current) return true
+            if (RESERVED_ROUTE_SLUGS.includes(current)) {
+              return `“${current}” is already a site page. Use a first-name slug like gabi or matt.`
+            }
+            return true
+          }),
     }),
     defineField({
       name: 'role',
@@ -73,26 +77,31 @@ export default defineType({
       title: 'Headline',
       type: 'string',
       group: 'overview',
-      description: 'Optional one-line result or thesis under the title. Shown on the panel and used for SEO if no SEO description is set.',
+      description:
+        'Optional one-line result or thesis under the title. Shown on the panel and used for SEO if no SEO description is set.',
     }),
     defineField({
       name: 'photo',
       title: 'Photo',
       type: 'image',
       group: 'overview',
-      description: 'Headshot used for Open Graph and Person schema. Recommended 1200×630 or a square crop with a hotspot.',
+      description:
+        'Headshot used for Open Graph and Person schema. Recommended 1200×630 or a square crop with a hotspot.',
       options: {hotspot: true},
       fields: [
         defineField({
           name: 'alt',
           title: 'Alt text',
           type: 'string',
-          description: 'Describe the photo for screen readers (e.g. “Gabriella, founder of Salt Studio”).',
+          description:
+            'Describe the photo for screen readers (e.g. “Gabriella, founder of Salt Studio”).',
           validation: (rule) => rule.warning('Alt text improves accessibility and SEO'),
         }),
       ],
       validation: (rule) =>
-        rule.warning('A photo is used for the share card and Person schema. The panel still works without one.'),
+        rule.warning(
+          'A photo is used for the share card and Person schema. The panel still works without one.',
+        ),
     }),
     defineField({
       name: 'location',
@@ -151,14 +160,16 @@ export default defineType({
       type: 'boolean',
       group: 'story',
       initialValue: false,
-      description: 'On for Gabi — plays the existing /about/studio.mp4. Off unless this person has that film.',
+      description:
+        'On for Gabi — plays the existing /about/studio.mp4. Off unless this person has that film.',
     }),
     defineField({
       name: 'principles',
       title: 'Principles',
       type: 'array',
       group: 'story',
-      description: 'Gabi’s studio principles. Leave empty for Matt — he uses “How they work” instead.',
+      description:
+        'Gabi’s studio principles. Leave empty for Matt — he uses “How they work” instead.',
       of: [
         defineArrayMember({
           type: 'object',
@@ -177,7 +188,8 @@ export default defineType({
               type: 'text',
               rows: 3,
               description: 'One or two sentences explaining the principle.',
-              validation: (rule) => rule.required().error('Each principle needs a short explanation'),
+              validation: (rule) =>
+                rule.required().error('Each principle needs a short explanation'),
             }),
           ],
           preview: {
@@ -191,7 +203,8 @@ export default defineType({
       title: 'Highlights',
       type: 'array',
       group: 'proof',
-      description: 'Number + label only. Max 5. Empty slots stay unpublished — do not invent metrics.',
+      description:
+        'Number + label only. Max 5. Empty slots stay unpublished — do not invent metrics.',
       of: [
         defineArrayMember({
           type: 'object',
@@ -203,7 +216,11 @@ export default defineType({
               type: 'string',
               description: 'The number, short — about 12 characters (e.g. “~$10M”, “21%”).',
               validation: (rule) =>
-                rule.required().error('A highlight needs a metric').max(16).warning('Keep the metric short so it scans'),
+                rule
+                  .required()
+                  .error('A highlight needs a metric')
+                  .max(16)
+                  .warning('Keep the metric short so it scans'),
             }),
             defineField({
               name: 'label',
@@ -257,7 +274,8 @@ export default defineType({
               title: 'What they did',
               type: 'text',
               rows: 4,
-              description: 'Their motion — not the studio’s website deliverables unless that was their job.',
+              description:
+                'Their motion — not the studio’s website deliverables unless that was their job.',
             }),
             defineField({
               name: 'result',
@@ -277,7 +295,8 @@ export default defineType({
               title: 'Related project',
               type: 'reference',
               to: [{type: 'project'}],
-              description: 'Optional. Links this case to a project on /work when you’re allowed to show it there.',
+              description:
+                'Optional. Links this case to a project on /work when you’re allowed to show it there.',
             }),
           ],
           preview: {
@@ -297,7 +316,8 @@ export default defineType({
       title: 'How they work',
       type: 'array',
       group: 'proof',
-      description: 'Short process lines. Used on Matt’s panel. Leave empty if principles already cover it.',
+      description:
+        'Short process lines. Used on Matt’s panel. Leave empty if principles already cover it.',
       of: [defineArrayMember({type: 'string'})],
     }),
     defineField({
@@ -314,9 +334,9 @@ export default defineType({
       title: 'Email',
       type: 'string',
       group: 'contact',
-      description: 'Public email on the panel. Leave empty if you don’t have one — don’t invent it.',
-      validation: (rule) =>
-        rule.email().warning('Use a real email address, or leave this blank'),
+      description:
+        'Public email on the panel. Leave empty if you don’t have one — don’t invent it.',
+      validation: (rule) => rule.email().warning('Use a real email address, or leave this blank'),
     }),
     defineField({
       name: 'linkedinUrl',
@@ -357,7 +377,8 @@ export default defineType({
       title: 'SEO title',
       type: 'string',
       group: 'seo',
-      description: 'Browser tab and share title. Defaults to “Name · Role” if empty. Keep under 60 characters.',
+      description:
+        'Browser tab and share title. Defaults to “Name · Role” if empty. Keep under 60 characters.',
       validation: (rule) => rule.max(60).warning('Longer titles get truncated in search results'),
     }),
     defineField({

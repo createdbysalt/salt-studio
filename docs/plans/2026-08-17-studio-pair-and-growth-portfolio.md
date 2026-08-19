@@ -5,7 +5,7 @@
 **Trigger:** qplan
 **Goal:** Combine Gabriella’s build practice with Matt’s Growth Marketing and Sales — without turning the studio site into a resume, and without turning his job-application link into an agency brochure.
 
-**IA decision (2026-08-17):** The About panel *is* the sendable surface. A Gabi / Matt toggle shows each person separately. URLs are `createdbysalt.com/gabi` and `createdbysalt.com/matt`. No `/team/[slug]`, no combined “meet the couple” scroll.
+**IA decision (2026-08-17):** The About panel _is_ the sendable surface. A Gabi / Matt toggle shows each person separately. URLs are `createdbysalt.com/gabi` and `createdbysalt.com/matt`. No `/team/[slug]`, no combined “meet the couple” scroll.
 
 ---
 
@@ -13,14 +13,14 @@
 
 Two jobs share one domain.
 
-| Visitor | They arrived because | They need in 10 seconds | Wrong page feels like |
-| --- | --- | --- | --- |
-| Client / discovery-call booker | They want a site, an automation, or software | “This studio can ship it. Maybe they can also grow it.” | A LinkedIn profile with a hire-me button |
-| Recruiter / hiring manager | He sent them a link on an application | “This person owns pipeline and revenue. I can picture them on my team.” | A studio homepage selling $2,500 websites |
+| Visitor                        | They arrived because                         | They need in 10 seconds                                                 | Wrong page feels like                     |
+| ------------------------------ | -------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
+| Client / discovery-call booker | They want a site, an automation, or software | “This studio can ship it. Maybe they can also grow it.”                 | A LinkedIn profile with a hire-me button  |
+| Recruiter / hiring manager     | He sent them a link on an application        | “This person owns pipeline and revenue. I can picture them on my team.” | A studio homepage selling $2,500 websites |
 
 Doing this well means **two people, one panel, two URLs** — not one mashed bio, and not a second site.
 
-The unique pair story (told in the *chrome*, not in either bio):
+The unique pair story (told in the _chrome_, not in either bio):
 
 > Gabriella builds the system. Matt grows the pipeline. Same household, one brief.
 
@@ -50,7 +50,7 @@ Reasons, in order:
 
 ### Why not a separate personal site?
 
-A second domain costs you the proof. His strongest current work *is* Salt. One domain, one panel, two first-name URLs.
+A second domain costs you the proof. His strongest current work _is_ Salt. One domain, one panel, two first-name URLs.
 
 ---
 
@@ -67,16 +67,16 @@ createdbysalt.com/matt                About panel, Matt selected   ← sendable
 createdbysalt.com/about               308 → /gabi
 ```
 
-Kill `/?about=1`. Today `/about` redirects to `/?about=1`, then the panel strips the query and the URL becomes `/`. That is the opposite of sendable. The first-name path *is* the About URL. It stays in the address bar until they close the panel or toggle.
+Kill `/?about=1`. Today `/about` redirects to `/?about=1`, then the panel strips the query and the URL becomes `/`. That is the opposite of sendable. The first-name path _is_ the About URL. It stays in the address bar until they close the panel or toggle.
 
-| Action | What happens |
-| --- | --- |
-| Click About in nav | Panel opens on **Gabi**. URL becomes `/gabi`. |
-| Toggle **Matt** | Panel stays open. Content swaps. URL becomes `/matt`. Scroll resets to top. |
-| Toggle **Gabi** | Same, URL `/gabi`. |
+| Action                                  | What happens                                                                                                |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Click About in nav                      | Panel opens on **Gabi**. URL becomes `/gabi`.                                                               |
+| Toggle **Matt**                         | Panel stays open. Content swaps. URL becomes `/matt`. Scroll resets to top.                                 |
+| Toggle **Gabi**                         | Same, URL `/gabi`.                                                                                          |
 | Land on `/matt` cold (he sent the link) | Homepage (or current studio chrome) underneath, panel already open on Matt. Document title + OG are Matt’s. |
-| Close the panel | Navigate to `/`. Never leave them on `/matt` with the panel shut — that URL would be a lie. |
-| Hit `/about` | Redirect to `/gabi`. |
+| Close the panel                         | Navigate to `/`. Never leave them on `/matt` with the panel shut — that URL would be a lie.                 |
+| Hit `/about`                            | Redirect to `/gabi`.                                                                                        |
 
 - **About stays in the nav.** It is how clients meet you. Active on `/gabi`, `/matt`, and `/about`.
 - **Both URLs in the sitemap.** Indexable. Their names should be findable.
@@ -110,14 +110,14 @@ This is “both of us, separately.” A client can meet either person. A recruit
 
 Migrate the current `lib/aboutPanel.ts` copy. It is already her voice. Do not replace it with a corporate team blurb.
 
-| Section | Source |
-| --- | --- |
-| Name · role | Gabriella · design & software (or whatever she wants on the title line) |
-| Bio | Existing `ABOUT_BIO` — origin, systems, the salt metaphor |
-| Meta | EST 2025 · Portland |
-| Video | Existing `/about/studio.mp4` stays on her side |
-| Principles | Existing four: Reveal / few at a time / your hours / yours to keep |
-| CTA | Studio interest form (primary) + Salt-product waitlist (secondary, red, already distinct) |
+| Section     | Source                                                                                    |
+| ----------- | ----------------------------------------------------------------------------------------- |
+| Name · role | Gabriella · design & software (or whatever she wants on the title line)                   |
+| Bio         | Existing `ABOUT_BIO` — origin, systems, the salt metaphor                                 |
+| Meta        | EST 2025 · Portland                                                                       |
+| Video       | Existing `/about/studio.mp4` stays on her side                                            |
+| Principles  | Existing four: Reveal / few at a time / your hours / yours to keep                        |
+| CTA         | Studio interest form (primary) + Salt-product waitlist (secondary, red, already distinct) |
 
 She may mention the pair in her bio (second beat) if it feels true. She does not have to. The toggle is already the pair.
 
@@ -125,14 +125,14 @@ She may mention the pair in her bio (second beat) if it feels true. She does not
 
 Hiring managers do not read. They scan for: title, a number, whether this person will show up on Monday.
 
-| # | Section | What it does |
-| --- | --- | --- |
-| 1 | Name · title · one result line | “Growth marketing & sales. [One metric that would make a VP reply.]” |
-| 2 | 3–5 highlights | Number + label only. Pipeline, revenue influenced, conversion, cycle time. No adjectives. |
-| 3 | Selected work | 3–5 cases. Problem → what *he* did → result. Sales/growth, not websites. If a Salt client is used, his role is the headline. |
-| 4 | How he works | 3–4 short process lines. Replaces Gabi’s principles — do not paste studio philosophy onto him. |
-| 5 | Salt, as context | 4–6 sentences. Current collaboration, not a competing employer. |
-| 6 | Close | Email, LinkedIn, résumé PDF. Optional availability line. |
+| #   | Section                        | What it does                                                                                                                 |
+| --- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Name · title · one result line | “Growth marketing & sales. [One metric that would make a VP reply.]”                                                         |
+| 2   | 3–5 highlights                 | Number + label only. Pipeline, revenue influenced, conversion, cycle time. No adjectives.                                    |
+| 3   | Selected work                  | 3–5 cases. Problem → what _he_ did → result. Sales/growth, not websites. If a Salt client is used, his role is the headline. |
+| 4   | How he works                   | 3–4 short process lines. Replaces Gabi’s principles — do not paste studio philosophy onto him.                               |
+| 5   | Salt, as context               | 4–6 sentences. Current collaboration, not a competing employer.                                                              |
+| 6   | Close                          | Email, LinkedIn, résumé PDF. Optional availability line.                                                                     |
 
 **Do not put “Book a discovery call” on Matt.** That CTA tells a hiring manager the page is for clients. A quiet text link to `/contact` at the bottom is enough if someone landed here and actually wants the studio.
 
@@ -142,10 +142,10 @@ Hiring managers do not read. They scan for: title, a number, whether this person
 
 ### 4.4 Shared vs separate
 
-| Shared (panel chrome) | Gabi only | Matt only |
-| --- | --- | --- |
+| Shared (panel chrome)           | Gabi only                                           | Matt only                                                                |
+| ------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ |
 | Toggle, close, studio one-liner | Origin bio, studio video, principles, discovery CTA | Highlights, cases, how he works, résumé / LinkedIn / email, availability |
-| Paper drawer, motion, type | | |
+| Paper drawer, motion, type      |                                                     |                                                                          |
 
 Homepage / Capabilities stay three doors. Optional later: one sentence that the studio can attach growth when that’s the brief. Not a fourth door.
 
@@ -167,30 +167,30 @@ New: `sanity/schemas/documents/person.ts`
 
 Groups: `overview` · `story` · `proof` · `contact` · `seo`
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| `name` | string | Required. Display name. |
-| `shortName` | string | Toggle label. “Gabi” / “Matt”. |
-| `slug` | slug | Required. URL = `/{slug}`. Reserved: `gabi`, `matt`. |
-| `role` | string | e.g. “Growth Marketing & Sales” / “Design & software” |
-| `headline` | string | Optional one result line under the name |
-| `photo` | image + alt | Required for OG + Person schema |
-| `location` | string | e.g. “Portland, Oregon” |
-| `availability` | string | Optional. Hide if empty. Matt only, in practice. |
-| `body` | portable text | Bio. Their voice. |
-| `showStudioVideo` | boolean | On for Gabi (uses existing `/about/studio.mp4`). Off for Matt unless he has one. |
-| `principles[]` | object: `title`, `body` | Gabi’s four. Empty for Matt. |
-| `highlights[]` | object: `metric`, `label` | Max 5. Metric short (~12 chars). Empty for Gabi unless she wants them. |
-| `cases[]` | object: `title`, `role`, `problem`, `whatTheyDid`, `result`, `year?`, `relatedProject?` | Embedded in v1. Optional project ref. |
-| `howTheyWork[]` | string | Matt’s process lines. Empty for Gabi if principles cover it. |
-| `studioNote` | text | Optional Salt-context paragraph (Matt). |
-| `email` | string | |
-| `linkedinUrl` | url | |
-| `resume` | file (PDF) | Sanity asset. |
-| `primaryCta` | reference → `callToAction` **or** enum `studio` / `personal` | `studio` = interest form + Salt-product waitlist (Gabi). `personal` = email / LinkedIn / résumé (Matt). Keep it obvious in Studio. |
-| `seoTitle` / `seoDescription` | string | |
-| `ogImage` | image | If empty, fall back to `photo` |
-| `sortOrder` | number | Toggle order. Gabi `0`, Matt `1`. |
+| Field                         | Type                                                                                    | Notes                                                                                                                              |
+| ----------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                        | string                                                                                  | Required. Display name.                                                                                                            |
+| `shortName`                   | string                                                                                  | Toggle label. “Gabi” / “Matt”.                                                                                                     |
+| `slug`                        | slug                                                                                    | Required. URL = `/{slug}`. Reserved: `gabi`, `matt`.                                                                               |
+| `role`                        | string                                                                                  | e.g. “Growth Marketing & Sales” / “Design & software”                                                                              |
+| `headline`                    | string                                                                                  | Optional one result line under the name                                                                                            |
+| `photo`                       | image + alt                                                                             | Required for OG + Person schema                                                                                                    |
+| `location`                    | string                                                                                  | e.g. “Portland, Oregon”                                                                                                            |
+| `availability`                | string                                                                                  | Optional. Hide if empty. Matt only, in practice.                                                                                   |
+| `body`                        | portable text                                                                           | Bio. Their voice.                                                                                                                  |
+| `showStudioVideo`             | boolean                                                                                 | On for Gabi (uses existing `/about/studio.mp4`). Off for Matt unless he has one.                                                   |
+| `principles[]`                | object: `title`, `body`                                                                 | Gabi’s four. Empty for Matt.                                                                                                       |
+| `highlights[]`                | object: `metric`, `label`                                                               | Max 5. Metric short (~12 chars). Empty for Gabi unless she wants them.                                                             |
+| `cases[]`                     | object: `title`, `role`, `problem`, `whatTheyDid`, `result`, `year?`, `relatedProject?` | Embedded in v1. Optional project ref.                                                                                              |
+| `howTheyWork[]`               | string                                                                                  | Matt’s process lines. Empty for Gabi if principles cover it.                                                                       |
+| `studioNote`                  | text                                                                                    | Optional Salt-context paragraph (Matt).                                                                                            |
+| `email`                       | string                                                                                  |                                                                                                                                    |
+| `linkedinUrl`                 | url                                                                                     |                                                                                                                                    |
+| `resume`                      | file (PDF)                                                                              | Sanity asset.                                                                                                                      |
+| `primaryCta`                  | reference → `callToAction` **or** enum `studio` / `personal`                            | `studio` = interest form + Salt-product waitlist (Gabi). `personal` = email / LinkedIn / résumé (Matt). Keep it obvious in Studio. |
+| `seoTitle` / `seoDescription` | string                                                                                  |                                                                                                                                    |
+| `ogImage`                     | image                                                                                   | If empty, fall back to `photo`                                                                                                     |
+| `sortOrder`                   | number                                                                                  | Toggle order. Gabi `0`, Matt `1`.                                                                                                  |
 
 Client-friendly schema rules from `sanity/CLAUDE.md`: every field gets a plain-English `description`, validation messages explain why, groups on the document.
 
@@ -198,12 +198,12 @@ Client-friendly schema rules from `sanity/CLAUDE.md`: every field gets a plain-E
 
 Live categories today (Sanity, 2026-08-17):
 
-| Filter label | Slug | What the tagged work actually is |
-| --- | --- | --- |
-| AI & Automation | `ai-automation` | (empty so far) |
-| Brand & Identity | `brand-identity` | Rebrands, visual systems |
+| Filter label            | Slug                | What the tagged work actually is                                                  |
+| ----------------------- | ------------------- | --------------------------------------------------------------------------------- |
+| AI & Automation         | `ai-automation`     | (empty so far)                                                                    |
+| Brand & Identity        | `brand-identity`    | Rebrands, visual systems                                                          |
 | **Content & Marketing** | `content-marketing` | Copy, site strategy, SEO, quiz funnel — Enjoy Life, Cultivated, Photon, One Youth |
-| Web & Software | `web-software` | Almost every project |
+| Web & Software          | `web-software`      | Almost every project                                                              |
 
 **Content & Marketing is already the right home for Gabi’s words-and-funnel work.** Those four projects are copywriting, SEO, site strategy, a Clarity quiz — not outbound, not pipeline, not a sales motion. Matt’s growth/sales cases should use the same `project` document type (case study sections, results, deliverables already exist). They should **not** be stuffed into that existing tag.
 
@@ -211,7 +211,7 @@ Live categories today (Sanity, 2026-08-17):
 
 **Do add a fifth category: Growth Marketing** (`slug: growth-marketing`). Filter label: **Growth Marketing**. Headline later. No schema change — `workCategory` is already a document.
 
-A project can wear both tags when both things happened (Cultivated’s quiz + Matt running the funnel). One Youth’s “Marketing” deliverable can pick up Growth *if* that work was campaign/pipeline, not just a marketing site.
+A project can wear both tags when both things happened (Cultivated’s quiz + Matt running the funnel). One Youth’s “Marketing” deliverable can pick up Growth _if_ that work was campaign/pipeline, not just a marketing site.
 
 **When the pill appears:** add the category in Studio whenever you want. Show it on `/work` only once at least one **published, unhidden** project uses it. Until then, set Work → filter pills to **Pick manually** and omit the empty Growth pill (and empty AI & Automation, if it still has no work). An empty fifth pill next to four real ones looks like a promise.
 
@@ -222,13 +222,13 @@ A project can wear both tags when both things happened (Cultivated’s quiz + Ma
 
 No new `growthCase` type. No `contributors[]` on `project` in v1 (add later if you want “Matt / Gabi” credits on the case page).
 
-Optional later, not required: keep the `content-marketing` slug (so `/work/content-marketing` doesn’t break) and change the *filter label* to **Copy & Content** if “Marketing” next to “Growth Marketing” feels muddy. Don’t do that in the same breath as launching `/matt` unless the overlap bothers you on the live filter bar.
+Optional later, not required: keep the `content-marketing` slug (so `/work/content-marketing` doesn’t break) and change the _filter label_ to **Copy & Content** if “Marketing” next to “Growth Marketing” feels muddy. Don’t do that in the same breath as launching `/matt` unless the overlap bothers you on the live filter bar.
 
-### What we are *not* changing in v1
+### What we are _not_ changing in v1
 
 - No new `service` for Growth (the Work category is not a priced door).
 - No `contributors[]` on `project`.
-- Do not migrate the unused `aboutPage` singleton. The live About *is* the person panel. `/about` just redirects to `/gabi`.
+- Do not migrate the unused `aboutPage` singleton. The live About _is_ the person panel. `/about` just redirects to `/gabi`.
 
 ---
 
@@ -257,7 +257,7 @@ Reserved collision list: `gabi`, `matt`, plus existing routes (`work`, `contact`
 
 ### Panel-on-home, URL honest
 
-`/gabi` and `/matt` render the homepage underneath so the studio is still *there* (same as today’s About). The panel is open on load. Close → `router.replace('/')`.
+`/gabi` and `/matt` render the homepage underneath so the studio is still _there_ (same as today’s About). The panel is open on load. Close → `router.replace('/')`.
 
 Do **not** strip the path the way `AboutDeepLink` strips `?about=1`. The path is the shareable object.
 
@@ -282,7 +282,7 @@ Do not change `NEXT_PUBLIC_BUSINESS_TYPE`. The site stays an Organization.
 
 ## 7. Phases
 
-### Phase 0 — Content worksheet (human, blocker for *Matt*)
+### Phase 0 — Content worksheet (human, blocker for _Matt_)
 
 Gabi can ship from the copy already in `lib/aboutPanel.ts`. Matt does not publish empty.
 
@@ -291,7 +291,7 @@ Fill before `qcode` (Matt):
 1. Title line, city, LinkedIn, public email.
 2. **Availability line** — yes/no, and the exact sentence.
 3. **3–5 highlights** he will stand behind in an interview. Number + label.
-4. **3–5 cases** — context, what *he* did, result, year, can we name the company, Salt client + permission?
+4. **3–5 cases** — context, what _he_ did, result, year, can we name the company, Salt client + permission?
 5. Headshot + résumé PDF.
 6. Salt paragraph in his voice, 4–6 sentences.
 7. **Growth for sale?** `not now` (recommended) / `yes, add a service door in this same build`.
@@ -312,7 +312,7 @@ New `service` in Sanity. Only when the staffing question has a real answer.
 
 ## 8. Implementation steps
 
-**For each step: tool / skill / command is named. Do not write code until this plan is approved and Matt’s Phase 0 is filled enough to *model* the schema (copy can stay draft).**
+**For each step: tool / skill / command is named. Do not write code until this plan is approved and Matt’s Phase 0 is filled enough to _model_ the schema (copy can stay draft).**
 
 ### Step 1 — Lock remaining product calls
 
@@ -331,7 +331,7 @@ New `service` in Sanity. Only when the staffing question has a real answer.
 
 - `personBySlugQuery`, `peopleQuery` (for the toggle list, ordered by `sortOrder`) in `sanity/lib/queries.ts` (`defineQuery` only).
 - `resolveHref('person', slug)` → `/${slug}` in `sanity/lib/utils.ts`.
-- `mainDocuments` for `/:slug` must resolve `person` *or* `page` (`_type in ["person", "page"] && slug.current == $slug`). Add `locations.person`.
+- `mainDocuments` for `/:slug` must resolve `person` _or_ `page` (`_type in ["person", "page"] && slug.current == $slug`). Add `locations.person`.
 - Tool: `sanity/CLAUDE.md` “New URL-backed document types” checklist.
 
 ### Step 4 — Typegen
@@ -374,6 +374,7 @@ New `service` in Sanity. Only when the staffing question has a real answer.
 ### Step 9 — Studio interest form (sitewide primary CTA)
 
 See §18. Swap “Book a discovery call” → interest form. Do not advertise a calendar.
+
 - Tool: `lib/contactMenu.ts`, `components/ContactMenu.tsx`, `components/ContactForm.tsx`, Sanity CTA docs + contact page success copy.
 
 ### Step 10 — Optional Growth service (Phase 3 only)
@@ -393,30 +394,30 @@ See §18. Swap “Book a discovery call” → interest form. Do not advertise a
 
 ## 9. Files
 
-| Action | Path |
-| --- | --- |
-| Create | `sanity/schemas/documents/person.ts` |
-| Edit | `app/(personal)/[slug]/page.tsx` (person-first) |
-| Edit | `app/(personal)/about/page.tsx` (redirect → `/gabi`) |
-| Edit | `components/AboutPanel.tsx` (toggle, person content, URL sync) |
-| Edit | `lib/aboutPanel.ts` (href helpers; drop hardcoded bio once seeded) |
-| Edit | `components/Navbar.tsx` (`isAboutHref` + About → `/gabi`) |
-| Edit | `app/(personal)/layout.tsx` (pass people into the provider, if that’s the fetch point) |
-| Edit | `sanity.config.ts` |
-| Edit | `sanity/plugins/deskStructure.tsx` |
-| Edit | `sanity/plugins/resolve.ts` |
-| Edit | `sanity/lib/queries.ts` |
-| Edit | `sanity/lib/utils.ts` |
-| Edit | `lib/seo/structured-data.tsx` |
-| Edit | `lib/seo/index.ts` |
-| Edit | `app/sitemap.ts` |
-| Edit | `lib/contactMenu.ts` (drop Cal.com as primary) |
-| Edit | `components/ContactMenu.tsx` |
-| Edit | `components/ContactForm.tsx` (success copy — no “one business day”) |
-| Edit | Sanity `callToAction` + contact page + home/services CTA labels (Studio, not code if already CMS) |
-| Generate | `sanity.types.ts`, `schema.json` via `npm run typegen` |
+| Action   | Path                                                                                              |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| Create   | `sanity/schemas/documents/person.ts`                                                              |
+| Edit     | `app/(personal)/[slug]/page.tsx` (person-first)                                                   |
+| Edit     | `app/(personal)/about/page.tsx` (redirect → `/gabi`)                                              |
+| Edit     | `components/AboutPanel.tsx` (toggle, person content, URL sync)                                    |
+| Edit     | `lib/aboutPanel.ts` (href helpers; drop hardcoded bio once seeded)                                |
+| Edit     | `components/Navbar.tsx` (`isAboutHref` + About → `/gabi`)                                         |
+| Edit     | `app/(personal)/layout.tsx` (pass people into the provider, if that’s the fetch point)            |
+| Edit     | `sanity.config.ts`                                                                                |
+| Edit     | `sanity/plugins/deskStructure.tsx`                                                                |
+| Edit     | `sanity/plugins/resolve.ts`                                                                       |
+| Edit     | `sanity/lib/queries.ts`                                                                           |
+| Edit     | `sanity/lib/utils.ts`                                                                             |
+| Edit     | `lib/seo/structured-data.tsx`                                                                     |
+| Edit     | `lib/seo/index.ts`                                                                                |
+| Edit     | `app/sitemap.ts`                                                                                  |
+| Edit     | `lib/contactMenu.ts` (drop Cal.com as primary)                                                    |
+| Edit     | `components/ContactMenu.tsx`                                                                      |
+| Edit     | `components/ContactForm.tsx` (success copy — no “one business day”)                               |
+| Edit     | Sanity `callToAction` + contact page + home/services CTA labels (Studio, not code if already CMS) |
+| Generate | `sanity.types.ts`, `schema.json` via `npm run typegen`                                            |
 
-No `app/(personal)/team/` route. No vanity `redirects` in `next.config.ts` — the first name *is* the route.
+No `app/(personal)/team/` route. No vanity `redirects` in `next.config.ts` — the first name _is_ the route.
 
 ---
 
@@ -440,7 +441,7 @@ No `app/(personal)/team/` route. No vanity `redirects` in `next.config.ts` — t
 - Migrating the unused `aboutPage` singleton.
 - Fourth homepage door (unless Phase 3 is explicitly pulled in).
 - `contributors` on `project`, combined “build + grow” packages.
-- Renaming Content & Marketing. Growth Marketing is a *new* category, created in Studio (no code).
+- Renaming Content & Marketing. Growth Marketing is a _new_ category, created in Studio (no code).
 - Separate personal domain or subdomain.
 - Blog / thought-leadership.
 - Changing the quiz funnels or proposal engine to know about Growth.
@@ -450,15 +451,15 @@ No `app/(personal)/team/` route. No vanity `redirects` in `next.config.ts` — t
 
 ## 12. Risks
 
-| Risk | What we do |
-| --- | --- |
+| Risk                                                       | What we do                                                                                   |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | `/matt` looks like “the studio is for sale / he’s leaving” | Availability only on his profile. Gabi’s CTA stays the studio call. Homepage copy unchanged. |
-| Recruiter toggles to Gabi and gets confused | Good. They see the pair. His bio still leads with him. Salt note is short. |
-| Client toggles to Matt and hits a résumé | Fine — that’s who he is. His CTA is not “book a call” unless you later choose it. |
-| `page` slug collides with `gabi` / `matt` | Person wins. Reserved list. Don’t create those pages. |
-| Land on `/matt`, close, URL still `/matt` | Close always `replace`s to `/`. |
-| Empty Matt ships as lorem | Draft until highlights + two true cases. Gabi can go live first. |
-| `?about=1` bookmarks | `/about` → `/gabi`. Optional: keep reading `?about=1` once and replace with `/gabi`. |
+| Recruiter toggles to Gabi and gets confused                | Good. They see the pair. His bio still leads with him. Salt note is short.                   |
+| Client toggles to Matt and hits a résumé                   | Fine — that’s who he is. His CTA is not “book a call” unless you later choose it.            |
+| `page` slug collides with `gabi` / `matt`                  | Person wins. Reserved list. Don’t create those pages.                                        |
+| Land on `/matt`, close, URL still `/matt`                  | Close always `replace`s to `/`.                                                              |
+| Empty Matt ships as lorem                                  | Draft until highlights + two true cases. Gabi can go live first.                             |
+| `?about=1` bookmarks                                       | `/about` → `/gabi`. Optional: keep reading `?about=1` once and replace with `/gabi`.         |
 
 ---
 
@@ -466,14 +467,14 @@ No `app/(personal)/team/` route. No vanity `redirects` in `next.config.ts` — t
 
 The spoken dump was useful. **LinkedIn is what we publish from.** It also corrects the dump:
 
-| Dump said | LinkedIn says | Use |
-| --- | --- | --- |
+| Dump said                                    | LinkedIn says                                                                                                          | Use                                                                                 |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | Senaki, $5k/day, CPL $35→$25, 2,000 leads/mo | Trade MKT **flagship account** (unnamed): CPL ~$35 → $25–27, **1,500–2,000** leads/mo. Reach layer + converting layer. | Print Trade numbers. Do **not** name Senaki unless he confirms that’s the flagship. |
-| $33k/day across YT/FB/IG/display/search | Same number, **senate campaign that won**. Largest single-day budget in the Trade book. | One case. Spend + win. |
-| $3M paid media | Trade MKT portfolio, Meta + Google + native | Trade highlight. Not Salt revenue. |
-| Food / Foot Summit | Salt: “largest online soccer summit in Brazil” (no brand name) | Case without a made-up name until he spells it. |
-| 60+ niches / real estate | Trade: **40+ accounts, 20 industries** (contractors, housing, schools, law, studios, retail, municipal + political) | 20 industries, not 60 niches. |
-| Freelance Jan 2021, Salt 2025 | LinkedIn: **SALT Studio Jan 2021–present** (his practice); Vida Plena **2018–2020**; Mannahouse **Aug 2024–present** | His *work* dates follow LinkedIn. Studio founding stays **2025** — see §14. |
+| $33k/day across YT/FB/IG/display/search      | Same number, **senate campaign that won**. Largest single-day budget in the Trade book.                                | One case. Spend + win.                                                              |
+| $3M paid media                               | Trade MKT portfolio, Meta + Google + native                                                                            | Trade highlight. Not Salt revenue.                                                  |
+| Food / Foot Summit                           | Salt: “largest online soccer summit in Brazil” (no brand name)                                                         | Case without a made-up name until he spells it.                                     |
+| 60+ niches / real estate                     | Trade: **40+ accounts, 20 industries** (contractors, housing, schools, law, studios, retail, municipal + political)    | 20 industries, not 60 niches.                                                       |
+| Freelance Jan 2021, Salt 2025                | LinkedIn: **SALT Studio Jan 2021–present** (his practice); Vida Plena **2018–2020**; Mannahouse **Aug 2024–present**   | His _work_ dates follow LinkedIn. Studio founding stays **2025** — see §14.         |
 
 Employers we can name (they’re on a public LinkedIn): **Mannahouse**, **SALT Studio**, **Trade MKT** (Trade \| Ideias que rendem), **Comunidade Vida Plena**.
 
@@ -489,14 +490,14 @@ Already on createdbysalt.com: project **One Youth Conference** (`one-youth-confe
 
 How that reads, without a fight:
 
-| Year | What happened |
-| --- | --- |
-| Feb 2018 | Gabi starts freelance |
-| Jan 2018–Aug 2020 | Matt: Digital Marketing Manager, Comunidade Vida Plena |
-| Jan 2021– | Matt’s growth practice (LinkedIn lists this as SALT Studio — Founder & Growth Marketer) |
-| Oct 2021–Oct 2022 | Matt: Senior Marketing Manager, Trade MKT (Curitiba) |
-| Aug 2024– | Matt: Director of Growth and Engagement, Mannahouse (Portland, current) |
-| 2025 | You join forces and **found Salt Studio** — the husband-and-wife studio this site is |
+| Year              | What happened                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| Feb 2018          | Gabi starts freelance                                                                   |
+| Jan 2018–Aug 2020 | Matt: Digital Marketing Manager, Comunidade Vida Plena                                  |
+| Jan 2021–         | Matt’s growth practice (LinkedIn lists this as SALT Studio — Founder & Growth Marketer) |
+| Oct 2021–Oct 2022 | Matt: Senior Marketing Manager, Trade MKT (Curitiba)                                    |
+| Aug 2024–         | Matt: Director of Growth and Engagement, Mannahouse (Portland, current)                 |
+| 2025              | You join forces and **found Salt Studio** — the husband-and-wife studio this site is    |
 
 On the chrome and on Gabi: **est. 2025**.
 
@@ -529,19 +530,20 @@ The About below is **his**. Do not rewrite it into a Salt-voice impersonation. T
 
 Use the About’s scale numbers. Do not also show $2M+ (that’s inside ~$10M) or $3M media (that’s inside $3.6M).
 
-| Metric | Label |
-| --- | --- |
-| ~$10M | Revenue and contract value, eight years |
-| $3.6M | Paid media, three continents |
-| $3M / yr | Budget across 40+ accounts, 20 verticals |
-| 36 | Person team |
-| 21% | ONE Conference registration growth (2,000+ attendees) — current, Portland |
+| Metric   | Label                                                                     |
+| -------- | ------------------------------------------------------------------------- |
+| ~$10M    | Revenue and contract value, eight years                                   |
+| $3.6M    | Paid media, three continents                                              |
+| $3M / yr | Budget across 40+ accounts, 20 verticals                                  |
+| 36       | Person team                                                               |
+| 21%      | ONE Conference registration growth (2,000+ attendees) — current, Portland |
 
 CPL $35→$25–27, $33k/day, $150K save, 12 accounts stay in the cases. Both ends of the market (local till vs committee) stay in the bio — they’re the point, not a sixth tile.
 
 ### Cases (panel; promote to `/work` where noted)
 
-**1. ONE Conference — Mannahouse + Salt** *(current · already a project)*
+**1. ONE Conference — Mannahouse + Salt** _(current · already a project)_
+
 - Role: Own the full acquisition funnel. Salt also shipped brand, site, and the conference web app (existing deliverables).
 - Problem: Largest youth conference in the Pacific Northwest. Registrations have to grow without losing the room.
 - What he did: Full acquisition. Lifecycle and retention across 4 campuses (email/SMS, content tracks, cohort leadership pipelines) so first-timers come back.
@@ -550,6 +552,7 @@ CPL $35→$25–27, $33k/day, $150K save, 12 accounts stay in the cases. Both en
 - On `/work`: yes. Add **Growth Marketing**. Point `relatedProject` at `one-youth-conference`.
 
 **2. Trade MKT — the book**
+
 - Role: Senior Marketing Manager. 36-person team. 40+ advertiser accounts, 20 industries.
 - Problem: Parallel paid acquisition that had to hit CAC and ROAS, not reach. He owned the relationships and the renewals.
 - What he did: Operating rhythm (experiment planning, weekly readouts, budget reallocation). Segmentation, targeting, A/B systems used across the book. Flagship quarterly: low-cost reach layer + converting layer.
@@ -558,19 +561,22 @@ CPL $35→$25–27, $33k/day, $150K save, 12 accounts stay in the cases. Both en
 - On `/work`: only with Trade’s / the advertiser’s permission. Fine on `/matt`.
 
 **3. Senate campaign — Trade MKT**
+
 - Role: Largest single-day budget in the book.
 - What he did: **$33,333/day** across YouTube, Facebook, Instagram, Display.
 - Result: **The campaign won.** National awards: Best Strategic Project and Technology Implementation; one campaign named best in the country.
 - Name the senator / award body: `[VERIFY]` if he wants them on the page. LinkedIn already says “senate campaign that won.”
 
 **4. The Salt practice — 2021–**
-- Role: Founder & Growth Marketer. He sourced and closed **all** new business. 12 concurrent accounts. Retainers from first pitch through renewal. *(This is the sales proof. Keep it.)*
+
+- Role: Founder & Growth Marketer. He sourced and closed **all** new business. 12 concurrent accounts. Retainers from first pitch through renewal. _(This is the sales proof. Keep it.)_
 - Paid: Meta, Google, YouTube. Managed to CAC, ROAS, payback — not reach.
 - Result: **$2M+** client revenue from funnels built, tested, and optimized end to end.
 - Nested launches (one extra line each, not their own cases unless he wants pages): influencer courses at **10x ROI**; largest online soccer summit in Brazil. `[VERIFY]` summit name.
 - On `/work`: only named clients with permission.
 
-**5. Comunidade Vida Plena — 2018–2020** *(origin, shorter)*
+**5. Comunidade Vida Plena — 2018–2020** _(origin, shorter)_
+
 - Role: Digital Marketing Manager (contract, alongside agency work).
 - What he did: COVID digital transformation from zero — livestream, online giving, site, email, Meta, social. Onboarding → content → donor journey.
 - Result: Online engagement **+40%**. Giving retention via structured touchpoints.
@@ -652,13 +658,13 @@ The form already exists on `/contact`. The leak is everywhere else: nav popover,
 
 A few projects a year. You write. If it’s a fit, we write back. Same filter the site already has — now the ask matches.
 
-| Print | Do not print |
-| --- | --- |
-| Request a conversation | Book a discovery call |
-| Tell us about the work | Schedule 25 minutes |
-| You’re on the list. We take a few projects a year. If this is one of them, we’ll write. | We’ll be back within one business day |
-| A few projects a year. We read every note. | Not taking clients / fully booked / closed / on pause |
-| Join the Salt waitlist (product, red, already separate) | Merging the studio list with the Salt software waitlist |
+| Print                                                                                   | Do not print                                            |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Request a conversation                                                                  | Book a discovery call                                   |
+| Tell us about the work                                                                  | Schedule 25 minutes                                     |
+| You’re on the list. We take a few projects a year. If this is one of them, we’ll write. | We’ll be back within one business day                   |
+| A few projects a year. We read every note.                                              | Not taking clients / fully booked / closed / on pause   |
+| Join the Salt waitlist (product, red, already separate)                                 | Merging the studio list with the Salt software waitlist |
 
 **Primary label (studio):** `Request a conversation`  
 **Submit:** `Send interest →`  
@@ -679,29 +685,29 @@ Do not invent a second form stack. `/contact` already posts through `submitConta
 
 What exists today:
 
-| Surface | What it is |
-| --- | --- |
-| Cal.com `createdbysalt/discovery` | The real discovery intake (questions below). Calendar on top. |
-| `/contact` fallback form | Weaker 6-field “Calls aren’t your thing?” form. Already emails via Resend. |
+| Surface                              | What it is                                                                                                                                                             |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cal.com `createdbysalt/discovery`    | The real discovery intake (questions below). Calendar on top.                                                                                                          |
+| `/contact` fallback form             | Weaker 6-field “Calls aren’t your thing?” form. Already emails via Resend.                                                                                             |
 | `ContactForm.tsx` `fieldsForAskPath` | Looks for `projectType` / `company` / `message` — **does not match** the live Sanity field names. Must be fixed or bypassed so every discovery field actually renders. |
 
 **Job:** `/contact` becomes the discovery form. Same questions as Cal.com. No slot picker. Submit → Resend to you, confirmation to them. Turn `contactBookingSection` off.
 
 Pulled from Cal.com’s public event (`GET /v2/event-types?username=createdbysalt&eventSlug=discovery`) on 2026-08-17. Skip calendar-only fields (`location`, `guests`, `rescheduleReason`).
 
-| # | Field | Type | Required | Options / notes |
-| --- | --- | --- | --- | --- |
-| 1 | Your name | text | yes | |
-| 2 | Email | email | yes | `replyTo` on the Resend message to you |
-| 3 | Your organization or business name | text | yes | |
-| 4 | What industry are you in? | select | yes | Church or faith community · Coaching practice · Nonprofit or cause-driven organization · Creative studio or agency · Something else |
-| 5 | Your website | text / url | no | placeholder `https://` |
-| 6 | What type of project are you looking for? | **multiselect** | yes | Website · Software · AI Automation · Not sure yet |
-| 7 | What is your budget range? | select | yes | Under $5,000 · $5,000–$10,000 · $10,000–$25,000 · $25,000–$50,000 · $50,000+ · Not sure yet — let's discuss |
-| 8 | What is your timeline? | select | yes | ASAP — within the next month · 1 to 3 months · 3 to 6 months · 6 months or more · Flexible — no firm deadline |
-| 9 | What is the primary goal for this project? | textarea | yes | “Tell us what you are hoping to achieve...” |
-| 10 | Anything else we should know? | textarea | no | Cal.com’s default `notes` |
-| 11 | How did you hear about us? | select | no | Referral · Existing or past client · Instagram · LinkedIn · Twitter / X · Google search · AI · Other |
+| #   | Field                                      | Type            | Required | Options / notes                                                                                                                     |
+| --- | ------------------------------------------ | --------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Your name                                  | text            | yes      |                                                                                                                                     |
+| 2   | Email                                      | email           | yes      | `replyTo` on the Resend message to you                                                                                              |
+| 3   | Your organization or business name         | text            | yes      |                                                                                                                                     |
+| 4   | What industry are you in?                  | select          | yes      | Church or faith community · Coaching practice · Nonprofit or cause-driven organization · Creative studio or agency · Something else |
+| 5   | Your website                               | text / url      | no       | placeholder `https://`                                                                                                              |
+| 6   | What type of project are you looking for?  | **multiselect** | yes      | Website · Software · AI Automation · Not sure yet                                                                                   |
+| 7   | What is your budget range?                 | select          | yes      | Under $5,000 · $5,000–$10,000 · $10,000–$25,000 · $25,000–$50,000 · $50,000+ · Not sure yet — let's discuss                         |
+| 8   | What is your timeline?                     | select          | yes      | ASAP — within the next month · 1 to 3 months · 3 to 6 months · 6 months or more · Flexible — no firm deadline                       |
+| 9   | What is the primary goal for this project? | textarea        | yes      | “Tell us what you are hoping to achieve...”                                                                                         |
+| 10  | Anything else we should know?              | textarea        | no       | Cal.com’s default `notes`                                                                                                           |
+| 11  | How did you hear about us?                 | select          | no       | Referral · Existing or past client · Instagram · LinkedIn · Twitter / X · Google search · AI · Other                                |
 
 Budget bands are Cal.com’s, not the old fallback form’s (`Under $5,500` / `$15,000–75,000`). Use the discovery list.
 

@@ -86,12 +86,7 @@ export async function submitContactForm(
 
     const senderName = data.name || data.Name || 'Website Visitor'
     const senderEmail = data.email || data.Email || ''
-    const org =
-      data.organization ||
-      data.company ||
-      data.business ||
-      data.organizationName ||
-      ''
+    const org = data.organization || data.company || data.business || data.organizationName || ''
 
     const labeledRows = fields
       .map((field) => {

@@ -1,12 +1,7 @@
 'use client'
 
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
-import {
-  CONTACT_EMAIL,
-  CONTACT_INTEREST_HREF,
-  CONTACT_MAILTO,
-  CONTACT_MENU,
-} from '@/lib/contactMenu'
+import {CONTACT_EMAIL, CONTACT_INTEREST_HREF, CONTACT_MAILTO, CONTACT_MENU} from '@/lib/contactMenu'
 import {useGSAP} from '@gsap/react'
 import Link from 'next/link'
 import {usePathname} from 'next/navigation'

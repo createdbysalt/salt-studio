@@ -7,10 +7,16 @@ import {
   PersonStructuredData,
   SpeakableWebPage,
 } from '@/lib/seo'
-import {sanityFetch} from '@/sanity/lib/live'
-import {homePageQuery, pagesBySlugQuery, personBySlugQuery, personSlugsQuery, slugsByTypeQuery} from '@/sanity/lib/queries'
-import {urlForOpenGraphImage} from '@/sanity/lib/utils'
 import type {PersonBySlugQueryResult} from '@/sanity.types'
+import {sanityFetch} from '@/sanity/lib/live'
+import {
+  homePageQuery,
+  pagesBySlugQuery,
+  personBySlugQuery,
+  personSlugsQuery,
+  slugsByTypeQuery,
+} from '@/sanity/lib/queries'
+import {urlForOpenGraphImage} from '@/sanity/lib/utils'
 import type {Metadata, ResolvingMetadata} from 'next'
 import {stegaClean, toPlainText, type PortableTextBlock} from 'next-sanity'
 import {draftMode} from 'next/headers'
@@ -109,9 +115,7 @@ export default async function PageSlugRoute({params}: Props) {
     const {data: home} = await sanityFetch({query: homePageQuery})
     const name = stegaClean(person.name ?? 'About')
     const description =
-      stegaClean(person.seoDescription ?? '') ||
-      stegaClean(person.headline ?? '') ||
-      undefined
+      stegaClean(person.seoDescription ?? '') || stegaClean(person.headline ?? '') || undefined
     const image =
       urlForOpenGraphImage(person.ogImage) || urlForOpenGraphImage(person.photo) || undefined
     const speakableSelectors = ['h1', '.person-headline', '.person-bio']

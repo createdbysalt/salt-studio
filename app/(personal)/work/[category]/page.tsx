@@ -78,7 +78,11 @@ export default async function WorkCategoryRoute({params}: Props) {
     page?.pillSource,
     page?.categoryPills,
     categories ?? [],
-    new Set((categories ?? []).map((category) => category.slug).filter((slug): slug is string => Boolean(slug))),
+    new Set(
+      (categories ?? [])
+        .map((category) => category.slug)
+        .filter((slug): slug is string => Boolean(slug)),
+    ),
   )
 
   return (

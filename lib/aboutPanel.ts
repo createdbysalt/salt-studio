@@ -31,11 +31,7 @@ export function isAboutHref(href: string | null | undefined): boolean {
       ? new URL(href).pathname
       : href.split('?')[0]?.split('#')[0]
     const normalized = path?.replace(/\/$/, '') || '/'
-    return (
-      normalized === '/about' ||
-      normalized === '/gabi' ||
-      normalized === '/matt'
-    )
+    return normalized === '/about' || normalized === '/gabi' || normalized === '/matt'
   } catch {
     return href === '/about' || href === '/gabi' || href === '/matt'
   }

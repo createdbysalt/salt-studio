@@ -549,9 +549,7 @@ export function Navbar({data}: NavbarProps) {
 function useNavOnColorSurface(pathname: string, menuPresent: boolean): boolean {
   // Media-hero routes start on color even before the first sample.
   const routeHint =
-    pathname.startsWith('/projects/') ||
-    pathname === '/work' ||
-    pathname.startsWith('/work/')
+    pathname.startsWith('/projects/') || pathname === '/work' || pathname.startsWith('/work/')
 
   const [onColor, setOnColor] = useState(routeHint)
   const latestRef = useRef(routeHint)

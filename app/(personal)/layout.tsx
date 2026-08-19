@@ -9,7 +9,12 @@ import {SiteFooter} from '@/components/SiteFooter'
 import {SiteShell} from '@/components/SiteShell'
 import {ogImageUrl, SiteStructuredData} from '@/lib/seo'
 import {sanityFetch, SanityLive} from '@/sanity/lib/live'
-import {footerLegalPagesQuery, homePageQuery, peopleQuery, settingsQuery} from '@/sanity/lib/queries'
+import {
+  footerLegalPagesQuery,
+  homePageQuery,
+  peopleQuery,
+  settingsQuery,
+} from '@/sanity/lib/queries'
 import {SpeedInsights} from '@vercel/speed-insights/next'
 import type {Metadata, Viewport} from 'next'
 import {VisualEditing} from 'next-sanity/visual-editing'

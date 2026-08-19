@@ -5,10 +5,10 @@ import {SidePanelClose} from '@/components/SidePanelClose'
 import {
   ABOUT_DEFAULT_SLUG,
   ABOUT_INTEREST_HREF,
-  personVideoSrc,
   ABOUT_WAITLIST_HREF,
   aboutSlugFromPath,
   personHref,
+  personVideoSrc,
 } from '@/lib/aboutPanel'
 import type {PeopleQueryResult} from '@/sanity.types'
 import {useGSAP} from '@gsap/react'
@@ -85,12 +85,7 @@ export function AboutPanelProvider({
       <Suspense fallback={null}>
         <AboutDeepLink />
       </Suspense>
-      <AboutPanel
-        open={open}
-        onClose={closeAbout}
-        people={people ?? []}
-        selectedSlug={pathSlug}
-      />
+      <AboutPanel open={open} onClose={closeAbout} people={people ?? []} selectedSlug={pathSlug} />
     </AboutPanelContext.Provider>
   )
 }
@@ -384,7 +379,12 @@ function AboutPanel({open, onClose, people, selectedSlug}: AboutPanelProps) {
             ) : null}
 
             {person ? (
-              <PersonPanelBody person={person} titleId={titleId} videoRef={videoRef} onNavigate={close} />
+              <PersonPanelBody
+                person={person}
+                titleId={titleId}
+                videoRef={videoRef}
+                onNavigate={close}
+              />
             ) : (
               <p data-about-reveal className="mt-[32px] text-[16px] font-medium text-[#08090a]/70">
                 About is not published yet.
@@ -550,8 +550,8 @@ function PersonPanelBody({
           </p>
           <div>
             <p className="text-[15px] font-medium leading-[1.15] tracking-[-0.015em] text-white lg:text-[22px]">
-              The studio runs on software we&apos;re building ourselves — Salt — so small teams
-              can spend less time gathering and drafting, and more time on the work that matters.
+              The studio runs on software we&apos;re building ourselves — Salt — so small teams can
+              spend less time gathering and drafting, and more time on the work that matters.
             </p>
             <div className="mt-[24px]">
               <Link
