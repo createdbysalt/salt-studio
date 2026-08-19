@@ -7,14 +7,15 @@ type ContactHeroProps = {
   headline?: string | null
   lead?: string | null
   directLine?: string | null
+  responseLine?: string | null
 }
 
 const EMAIL_RE = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g
 const DEFAULT_DIRECT =
-  'Rather skip the form? Email us directly — hello@createdbysalt.com. We answer same day, usually same hour.'
+  'Rather skip the form? Email us directly — hello@createdbysalt.com.'
 
-const WHO_YOU_REACH =
-  "You'll hear from Salt Studio within one business day — usually faster. If it's urgent, say so in the message and we'll prioritize."
+const DEFAULT_RESPONSE =
+  "We only take on a few projects a year. We'd love to hear from you."
 
 function linkifyEmails(text: string): ReactNode[] {
   const nodes: ReactNode[] = []
@@ -45,15 +46,16 @@ function linkifyEmails(text: string): ReactNode[] {
  * Contact thesis column — headline, lead, Chris escape hatch.
  * Stacks above the form on mobile/tablet; sticky from lg.
  */
-export function ContactHero({headline, lead, directLine}: ContactHeroProps) {
+export function ContactHero({headline, lead, directLine, responseLine}: ContactHeroProps) {
   const direct = directLine?.trim() || DEFAULT_DIRECT
+  const response = responseLine?.trim() || DEFAULT_RESPONSE
 
   return (
     <div className="flex min-w-0 flex-col gap-6 sm:gap-8 md:gap-10 lg:sticky lg:top-[calc(var(--project-nav-height-md)+1.5rem)] lg:self-start">
       <div className="min-w-0">
         {headline?.trim() ? (
           <Reveal immediate y={14}>
-            <h1 className="max-w-[11ch] text-[clamp(2.125rem,8.5vw,4.75rem)] font-semibold uppercase leading-[0.95] tracking-[-0.02em] text-foreground sm:text-[clamp(2.35rem,7vw,4.75rem)]">
+            <h1 className="max-w-[11ch] text-[clamp(1.75rem,4.8vw,2.75rem)] font-semibold uppercase leading-[0.95] tracking-[-0.02em] text-foreground">
               {headline}
             </h1>
           </Reveal>
@@ -73,7 +75,7 @@ export function ContactHero({headline, lead, directLine}: ContactHeroProps) {
             {linkifyEmails(direct)}
           </p>
           <p className="mt-4 text-[0.9375rem] leading-relaxed text-foreground/40 sm:text-base md:text-[0.9375rem] md:leading-relaxed">
-            {WHO_YOU_REACH}
+            {response}
           </p>
         </div>
       </Reveal>

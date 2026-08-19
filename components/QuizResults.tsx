@@ -16,8 +16,8 @@ export function QuizResults({result, websiteFlag, waitlistOptIn}: QuizResultsPro
   const showWebsiteCta = websiteFlag === 'yes' || websiteFlag === 'sort-of'
   const lowSolo = result.track === 'solo' && result.hours < 2
 
-  const primaryHref = isOrg ? QUIZ_CTAS.orgIntroCall : QUIZ_CTAS.auditCall
-  const primaryLabel = isOrg ? 'Book an intro call' : 'Book your automation audit'
+  const primaryHref = '/contact'
+  const primaryLabel = 'Request a conversation'
 
   return (
     <div className="animate-quiz-rise pb-24">
@@ -70,8 +70,8 @@ export function QuizResults({result, websiteFlag, waitlistOptIn}: QuizResultsPro
       <div className="mt-12 max-w-md">
         <p className="text-base leading-relaxed text-foreground/70">
           {isOrg
-            ? 'Organizations your size usually start with a bounded pilot: one workflow, fixed scope, real results before any bigger commitment. The first step is a short call.'
-            : 'The fastest way to get those hours back: a one-day automation audit. We map your workflows, score what’s automatable, and hand you a prioritized plan — whether or not you build it with us.'}
+            ? 'Organizations your size usually start with a bounded pilot: one workflow, fixed scope, real results before any bigger commitment. Tell us about the work — if it’s a fit, we’ll write.'
+            : 'The fastest way to get those hours back is a focused automation pass. Tell us about the work — if it’s a fit, we’ll write.'}
         </p>
         <a
           href={primaryHref}

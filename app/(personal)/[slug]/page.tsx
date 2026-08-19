@@ -1,10 +1,18 @@
 import {CustomPortableText} from '@/components/CustomPortableText'
 import {Header} from '@/components/Header'
-import {BreadcrumbStructuredData, ogImageUrl} from '@/lib/seo'
+import {HomePage} from '@/components/HomePage'
+import {
+  BreadcrumbStructuredData,
+  ogImageUrl,
+  PersonStructuredData,
+  SpeakableWebPage,
+} from '@/lib/seo'
 import {sanityFetch} from '@/sanity/lib/live'
-import {pagesBySlugQuery, slugsByTypeQuery} from '@/sanity/lib/queries'
+import {homePageQuery, pagesBySlugQuery, personBySlugQuery, personSlugsQuery, slugsByTypeQuery} from '@/sanity/lib/queries'
+import {urlForOpenGraphImage} from '@/sanity/lib/utils'
+import type {PersonBySlugQueryResult} from '@/sanity.types'
 import type {Metadata, ResolvingMetadata} from 'next'
-import {toPlainText, type PortableTextBlock} from 'next-sanity'
+import {stegaClean, toPlainText, type PortableTextBlock} from 'next-sanity'
 import {draftMode} from 'next/headers'
 import {notFound} from 'next/navigation'
 
@@ -16,13 +24,23 @@ export async function generateMetadata(
   {params}: Props,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
+  const {slug} = await params
+  const {data: person} = await sanityFetch({
+    query: personBySlugQuery,
+    params: {slug},
+    stega: false,
+  })
+
+  if (person?._id) {
+    return personMetadata(person, slug)
+  }
+
   const {data: page} = await sanityFetch({
     query: pagesBySlugQuery,
     params,
     stega: false,
   })
 
-  const {slug} = await params
   const ogImage = ogImageUrl()
 
   return {
@@ -34,17 +52,98 @@ export async function generateMetadata(
   }
 }
 
+function personMetadata(person: NonNullable<PersonBySlugQueryResult>, slug: string): Metadata {
+  const name = stegaClean(person.name ?? '')
+  const role = stegaClean(person.role ?? '')
+  const title = stegaClean(person.seoTitle ?? '') || [name, role].filter(Boolean).join(' · ')
+  const description =
+    stegaClean(person.seoDescription ?? '') || stegaClean(person.headline ?? '') || undefined
+  const shareImage =
+    urlForOpenGraphImage(person.ogImage) ||
+    urlForOpenGraphImage(person.photo) ||
+    ogImageUrl({title, eyebrow: role || name})
+
+  return {
+    title: {absolute: title},
+    description,
+    alternates: {canonical: `/${slug}`},
+    openGraph: {
+      title,
+      description,
+      images: [{url: shareImage, width: 1200, height: 630}],
+    },
+    twitter: {card: 'summary_large_image', images: [shareImage]},
+  }
+}
+
 export async function generateStaticParams() {
-  const {data} = await sanityFetch({
-    query: slugsByTypeQuery,
-    params: {type: 'page'},
-    stega: false,
-    perspective: 'published',
-  })
-  return data
+  const [{data: pages}, {data: people}] = await Promise.all([
+    sanityFetch({
+      query: slugsByTypeQuery,
+      params: {type: 'page'},
+      stega: false,
+      perspective: 'published',
+    }),
+    sanityFetch({
+      query: personSlugsQuery,
+      stega: false,
+      perspective: 'published',
+    }),
+  ])
+
+  const slugs = new Set<string>()
+  for (const item of pages ?? []) {
+    if (item.slug) slugs.add(item.slug)
+  }
+  for (const item of people ?? []) {
+    if (item.slug) slugs.add(item.slug)
+  }
+  return [...slugs].map((slug) => ({slug}))
 }
 
 export default async function PageSlugRoute({params}: Props) {
+  const {slug} = await params
+  const {data: person} = await sanityFetch({query: personBySlugQuery, params: {slug}})
+
+  if (person?._id) {
+    const {data: home} = await sanityFetch({query: homePageQuery})
+    const name = stegaClean(person.name ?? 'About')
+    const description =
+      stegaClean(person.seoDescription ?? '') ||
+      stegaClean(person.headline ?? '') ||
+      undefined
+    const image =
+      urlForOpenGraphImage(person.ogImage) || urlForOpenGraphImage(person.photo) || undefined
+    const speakableSelectors = ['h1', '.person-headline', '.person-bio']
+
+    return (
+      <>
+        <PersonStructuredData
+          name={name}
+          jobTitle={stegaClean(person.role ?? '') || undefined}
+          url={`/${slug}`}
+          image={image}
+          email={stegaClean(person.email ?? '') || undefined}
+          sameAs={person.linkedinUrl ? [person.linkedinUrl] : undefined}
+          description={description}
+        />
+        <SpeakableWebPage
+          name={name}
+          description={description ?? name}
+          url={`/${slug}`}
+          speakableSelectors={speakableSelectors}
+        />
+        <BreadcrumbStructuredData
+          items={[
+            {name: 'Home', url: '/'},
+            {name, url: `/${slug}`},
+          ]}
+        />
+        <HomePage data={home} />
+      </>
+    )
+  }
+
   const {data} = await sanityFetch({query: pagesBySlugQuery, params})
 
   // Only show the 404 page if we're in production, when in draft mode we might be about to create a page on this slug, and live reload won't work on the 404 route
@@ -53,7 +152,6 @@ export default async function PageSlugRoute({params}: Props) {
   }
 
   const {body, overview, title} = data ?? {}
-  const {slug} = await params
 
   return (
     <div>
@@ -66,7 +164,6 @@ export default async function PageSlugRoute({params}: Props) {
         />
       ) : null}
       <div className="mb-14">
-        {/* Header */}
         <Header
           id={data?._id || null}
           type={data?._type || null}
@@ -75,7 +172,6 @@ export default async function PageSlugRoute({params}: Props) {
           description={overview}
         />
 
-        {/* Body */}
         {body && (
           <CustomPortableText
             id={data?._id || null}

@@ -3,6 +3,7 @@
 import {AboutPanelProvider} from '@/components/AboutPanel'
 import {ContactMenuProvider} from '@/components/ContactMenu'
 import {pageIsDark} from '@/lib/pageTheme'
+import type {PeopleQueryResult} from '@/sanity.types'
 import {usePathname} from 'next/navigation'
 import type {ReactNode} from 'react'
 
@@ -10,6 +11,7 @@ interface SiteShellProps {
   navbar: ReactNode
   footer: ReactNode
   children: ReactNode
+  people?: PeopleQueryResult
 }
 
 /**
@@ -17,12 +19,12 @@ interface SiteShellProps {
  * (TinyWins pattern): the stage is z-10 with an opaque background so it
  * covers the footer while scrolling; the footer sticks underneath at z-0.
  */
-export function SiteShell({navbar, footer, children}: SiteShellProps) {
+export function SiteShell({navbar, footer, children, people = []}: SiteShellProps) {
   const pathname = usePathname()
   const dark = pageIsDark(pathname)
 
   return (
-    <AboutPanelProvider>
+    <AboutPanelProvider people={people}>
       <ContactMenuProvider>
         <div className="min-h-screen bg-background text-foreground">
           {navbar}

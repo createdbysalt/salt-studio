@@ -240,6 +240,72 @@ export function generateProductSchema(
 }
 
 /**
+ * Person schema — used on sendable About URLs (`/gabi`, `/matt`).
+ * The site itself stays an Organization (`NEXT_PUBLIC_BUSINESS_TYPE`).
+ */
+export function generatePersonSchema(
+  person: {
+    name: string
+    jobTitle?: string
+    url: string
+    image?: string
+    email?: string
+    sameAs?: string[]
+    description?: string
+  },
+  config: SEOConfig = seoConfig,
+) {
+  const pageUrl = person.url.startsWith('http') ? person.url : `${config.siteUrl}${person.url}`
+  const sameAs = (person.sameAs ?? []).filter(Boolean)
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    'name': person.name,
+    'jobTitle': person.jobTitle,
+    'url': pageUrl,
+    'image': person.image,
+    'email': person.email,
+    'description': person.description,
+    'sameAs': sameAs.length > 0 ? sameAs : undefined,
+    'worksFor': {
+      '@type': 'Organization',
+      'name': config.businessName,
+      'url': config.siteUrl,
+    },
+  }
+}
+
+export function PersonStructuredData({
+  name,
+  jobTitle,
+  url,
+  image,
+  email,
+  sameAs,
+  description,
+}: {
+  name: string
+  jobTitle?: string
+  url: string
+  image?: string
+  email?: string
+  sameAs?: string[]
+  description?: string
+}) {
+  const schema = generatePersonSchema({
+    name,
+    jobTitle,
+    url,
+    image,
+    email,
+    sameAs,
+    description,
+  })
+  return <JsonLd data={schema} />
+}
+
+/**
  * CreativeWork schema - alternative to Product for portfolio/case studies.
  * Better semantic fit for creative agencies.
  */

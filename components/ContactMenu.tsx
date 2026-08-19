@@ -2,13 +2,13 @@
 
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {
-  CONTACT_BOOK_HREF,
   CONTACT_EMAIL,
+  CONTACT_INTEREST_HREF,
   CONTACT_MAILTO,
   CONTACT_MENU,
-  CONTACT_WHATSAPP_HREF,
 } from '@/lib/contactMenu'
 import {useGSAP} from '@gsap/react'
+import Link from 'next/link'
 import {usePathname} from 'next/navigation'
 import {
   createContext,
@@ -373,12 +373,10 @@ function ContactMenu({open, onClose}: ContactMenuProps) {
 
           <div data-contact-reveal className={`h-px ${rule}`} />
 
-          <a
+          <Link
             data-contact-reveal
             data-contact-cta
-            href={CONTACT_BOOK_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={CONTACT_INTEREST_HREF}
             onClick={onClose}
             className="flex items-center justify-between gap-4"
           >
@@ -397,33 +395,7 @@ function ContactMenu({open, onClose}: ContactMenuProps) {
             <span aria-hidden data-contact-cta-arrow className={`inline-block ${arrow}`}>
               →
             </span>
-          </a>
-
-          <a
-            data-contact-reveal
-            data-contact-cta
-            href={CONTACT_WHATSAPP_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onClose}
-            className="flex items-center justify-between gap-4"
-          >
-            <span data-contact-cta-label>
-              <span
-                className={`block font-sans text-[15px] font-medium tracking-[-0.015em] sm:text-[16px] ${ink}`}
-              >
-                {CONTACT_MENU.whatsappLabel}
-              </span>
-              <span
-                className={`mt-0.5 block font-sans text-[12px] font-medium tracking-[-0.01em] ${muted}`}
-              >
-                {CONTACT_MENU.whatsappHint}
-              </span>
-            </span>
-            <span aria-hidden data-contact-cta-arrow className={`inline-block ${arrow}`}>
-              →
-            </span>
-          </a>
+          </Link>
         </div>
       </section>
     </div>,

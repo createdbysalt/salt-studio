@@ -214,7 +214,7 @@ export const aboutClosingSection = defineType({
       name: 'ctaLabel',
       title: 'CTA button label',
       type: 'string',
-      initialValue: 'Book a discovery call',
+      initialValue: 'Request a conversation',
       description: 'Text on the closing button. It links to the contact page.',
       validation: (rule) => rule.max(40).warning('Keep this short — it sits in a button'),
     }),

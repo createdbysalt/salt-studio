@@ -86,7 +86,7 @@ export const homeHeroSection = defineType({
       name: 'ctaLabel',
       title: 'CTA button label',
       type: 'string',
-      initialValue: 'Book a discovery call',
+      initialValue: 'Request a conversation',
       description: 'Text on the hero button. It links to the contact page.',
       validation: (rule) => rule.max(40).warning('Keep this short — it sits in a button'),
     }),
@@ -371,7 +371,7 @@ export const homeFinalCtaSection = defineType({
       type: 'reference',
       to: [{type: 'callToAction'}],
       description:
-        'Primary button under Philosophy — solid mono label with arrow. Pick from Dynamic Content → CTAs (usually “Primary — Book a discovery call”).',
+        'Primary button under Philosophy — solid mono label with arrow. Pick from Dynamic Content → CTAs (usually “Primary — Request a conversation”).',
       validation: (rule) =>
         rule.required().error('Link a CTA so the Philosophy section has a button'),
     }),

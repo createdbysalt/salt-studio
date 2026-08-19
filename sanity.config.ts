@@ -20,6 +20,7 @@ import capability from '@/sanity/schemas/documents/capability'
 import client from '@/sanity/schemas/documents/client'
 import legalPage from '@/sanity/schemas/documents/legalPage'
 import page from '@/sanity/schemas/documents/page'
+import person from '@/sanity/schemas/documents/person'
 import project from '@/sanity/schemas/documents/project'
 import quiz from '@/sanity/schemas/documents/quiz'
 import quizSubmission from '@/sanity/schemas/documents/quizSubmission'
@@ -143,6 +144,7 @@ export default defineConfig({
       callToAction,
       legalPage,
       page,
+      person,
       project,
       quiz,
       quizSubmission,

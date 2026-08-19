@@ -6,16 +6,16 @@
 export const CONTACT_EMAIL = 'hello@createdbysalt.com'
 export const CONTACT_MAILTO = `mailto:${CONTACT_EMAIL}`
 export const CONTACT_WHATSAPP_HREF = 'https://wa.me/19712052186'
-/** Cal.com discovery call — primary booking destination sitewide. */
+/** Kept for pocket invites — not used as a public CTA. */
 export const CONTACT_BOOK_HREF = 'https://cal.com/createdbysalt/discovery'
+/** Sitewide studio ask — interest form, not a calendar. */
+export const CONTACT_INTEREST_HREF = '/contact'
 
 export const CONTACT_MENU = {
   eyebrow: 'Talk to us',
-  line: "Let's innovate together",
-  bookLabel: 'Book a discovery call',
-  bookHint: '25 minutes',
-  whatsappLabel: 'Chat via WhatsApp',
-  whatsappHint: 'Usually same hour',
+  line: 'A few projects a year.',
+  bookLabel: 'Request a conversation',
+  bookHint: 'Tell us about the work',
 } as const
 
 /** True when a nav/link href should open the contact menu instead of navigating. */
