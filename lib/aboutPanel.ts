@@ -14,7 +14,7 @@ export function personVideoSrc(slug: string | null | undefined): string | null {
 
 export const ABOUT_DEFAULT_SLUG = 'gabi'
 
-export const ABOUT_WAITLIST_HREF = '/contact?subject=Salt%20waitlist'
+export const ABOUT_WAITLIST_HREF = 'https://usesalt.io'
 
 export const ABOUT_INTEREST_HREF = '/contact'
 

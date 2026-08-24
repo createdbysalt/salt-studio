@@ -162,7 +162,7 @@ export default defineType({
           title: 'Link text',
           type: 'string',
           description: 'The clickable call-to-action after the message.',
-          initialValue: 'Start a conversation →',
+          initialValue: 'Reach out →',
         }),
         defineField({
           name: 'ctaHref',

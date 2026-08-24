@@ -419,7 +419,7 @@ export default defineType({
       group: 'nextStep',
       to: [{type: 'callToAction'}],
       description:
-        'What someone should do after reading this service — usually “Request a conversation”. Leave empty for offerings that shouldn’t cold-CTA (e.g. Site care). Managed under Dynamic Content → CTAs.',
+        'What someone should do after reading this service — usually “Reach out”. Leave empty for offerings that shouldn’t cold-CTA (e.g. Site care). Managed under Dynamic Content → CTAs.',
     }),
     defineField({
       name: 'fitCheckLabel',
@@ -428,7 +428,7 @@ export default defineType({
       group: 'nextStep',
       initialValue: 'See how much this could help',
       description:
-        'Secondary CTA next to “Request a conversation” — sends people to the Salt Score quiz to see how useful this service could be. Leave empty to hide it.',
+        'Secondary CTA next to “Reach out” — sends people to the Salt Score quiz to see how useful this service could be. Leave empty to hide it.',
       validation: (rule) =>
         rule.max(48).warning('Keep this short — it sits beside the discovery-call link'),
     }),

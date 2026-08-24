@@ -116,7 +116,7 @@ export function ProjectGrid({
 
   if (items.length === 0) {
     const text = emptyState?.text || 'Nothing here yet.'
-    const ctaLabel = emptyState?.ctaLabel || 'Start a conversation →'
+    const ctaLabel = emptyState?.ctaLabel || 'Reach out →'
     const ctaHref = emptyState?.ctaHref || '/contact'
     return (
       <div className="page-chrome mt-14 text-center font-sans text-[15px] leading-[1.6] text-foreground/60">

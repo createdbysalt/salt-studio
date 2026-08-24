@@ -17,7 +17,7 @@ export function QuizResults({result, websiteFlag, waitlistOptIn}: QuizResultsPro
   const lowSolo = result.track === 'solo' && result.hours < 2
 
   const primaryHref = '/contact'
-  const primaryLabel = 'Request a conversation'
+  const primaryLabel = 'Reach out'
 
   return (
     <div className="animate-quiz-rise pb-24">

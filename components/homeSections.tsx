@@ -13,7 +13,7 @@ import Link from 'next/link'
 type HomeSection = NonNullable<NonNullable<HomePageQueryResult>['sections']>[number]
 export type HomeSectionOf<T extends HomeSection['_type']> = Extract<HomeSection, {_type: T}>
 
-const WAITLIST_HREF = '/quiz'
+const WAITLIST_HREF = 'https://usesalt.io'
 
 export function HomeServicesSection({
   section,
@@ -211,6 +211,8 @@ export async function HomeProductSection({
           </div>
           <Link
             href={WAITLIST_HREF}
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex shrink-0 items-center gap-2 rounded border border-white bg-white px-5 py-3 font-mono text-[12px] font-medium uppercase tracking-label text-[#08090A] transition-colors duration-300 hover:bg-white/90"
           >
             {waitlistLabel}

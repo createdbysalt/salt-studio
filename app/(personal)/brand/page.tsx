@@ -211,7 +211,7 @@ export default function BrandPage() {
             <div className="flex flex-wrap gap-4">
               <button type="button" className="btn-solid group">
                 <span className="inline-flex items-center gap-2">
-                  Request a conversation
+                  Reach out
                   <span
                     aria-hidden="true"
                     className="inline-block transition-transform duration-300 ease-out group-hover:translate-x-1"
@@ -246,7 +246,7 @@ export default function BrandPage() {
             </p>
             <div className="flex flex-wrap gap-4">
               <button type="button" className="btn-solid">
-                Request a conversation
+                Reach out
               </button>
               <button type="button" className="btn-ghost group">
                 <span className="inline-flex items-center gap-2">

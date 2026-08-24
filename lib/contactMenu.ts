@@ -14,7 +14,7 @@ export const CONTACT_INTEREST_HREF = '/contact'
 export const CONTACT_MENU = {
   eyebrow: 'Talk to us',
   line: 'A few projects a year.',
-  bookLabel: 'Request a conversation',
+  bookLabel: 'Reach out',
   bookHint: 'Tell us about the work',
 } as const
 

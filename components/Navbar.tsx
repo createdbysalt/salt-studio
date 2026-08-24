@@ -35,8 +35,7 @@ const pillFillColor =
 const pillFillColorMenu =
   'bg-[rgba(8,9,10,0.94)] hover:bg-[rgba(8,9,10,0.96)] transition-colors duration-300'
 
-const BOOK_CTA_LABEL = 'Request a conversation'
-const BOOK_CTA_LABEL_SHORT = 'Request'
+const BOOK_CTA_LABEL = 'Reach out'
 
 function BookDiscoveryCta({className, onClick}: {className: string; onClick?: () => void}) {
   const rootRef = useRef<HTMLAnchorElement>(null)
@@ -86,8 +85,7 @@ function BookDiscoveryCta({className, onClick}: {className: string; onClick?: ()
         className="inline-block size-[7px] shrink-0 rounded-full bg-accent will-change-transform lg:size-[6px]"
       />
       <span data-book-cta-label className="inline-block min-w-0 will-change-transform">
-        <span className="sm:hidden">{BOOK_CTA_LABEL_SHORT}</span>
-        <span className="hidden sm:inline">{BOOK_CTA_LABEL}</span>
+        <span>{BOOK_CTA_LABEL}</span>
       </span>
     </Link>
   )
@@ -855,7 +853,7 @@ const ExpandingMenuBody = forwardRef<
     >
       <div className="flex flex-col gap-3 px-4 pb-4 pt-3.5 sm:px-5 sm:pb-5 sm:pt-4">
         <nav className="flex flex-col items-start gap-[2px] py-2.5 sm:py-3" aria-label="Main">
-          {/* Contact is covered by the request-a-conversation CTA below. */}
+          {/* Contact is covered by the reach-out CTA below. */}
           {items
             .filter(
               (item) => !isContactHref(item.href) && item.label.trim().toLowerCase() !== 'contact',
@@ -927,7 +925,7 @@ const ExpandingMenuBody = forwardRef<
             }`}
           >
             <span aria-hidden className="size-[7px] shrink-0 rounded-full bg-accent" />
-            Request a conversation
+            Reach out
           </Link>
         </div>
       </div>
