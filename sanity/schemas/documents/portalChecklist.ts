@@ -21,7 +21,8 @@ export default defineType({
   title: 'Checklist',
   type: 'document',
   icon: ClipboardIcon,
-  description: 'The checklist groups on a client table, tied to one service and one kind of client.',
+  description:
+    'The checklist groups on a client table, tied to one service and one kind of client.',
   fields: [
     defineField({
       name: 'title',
@@ -37,14 +38,16 @@ export default defineType({
       to: [{type: 'service'}],
       options: {disableNew: true},
       description: 'Which offering this checklist belongs to. Church websites use Websites.',
-      validation: (rule) => rule.required().error('Link this to a service so the right tables can find it'),
+      validation: (rule) =>
+        rule.required().error('Link this to a service so the right tables can find it'),
     }),
     defineField({
       name: 'clientType',
       title: 'Client type',
       type: 'string',
       options: {list: [...CLIENT_TYPES], layout: 'radio'},
-      description: 'Who this list is for. Church websites use Church. Business websites can have their own later.',
+      description:
+        'Who this list is for. Church websites use Church. Business websites can have their own later.',
       validation: (rule) =>
         rule
           .required()
@@ -84,7 +87,9 @@ export default defineType({
       const count = Array.isArray(categories) ? categories.length : 0
       return {
         title: title || 'Untitled checklist',
-        subtitle: [service, typeLabel, count ? `${count} groups` : null].filter(Boolean).join(' · '),
+        subtitle: [service, typeLabel, count ? `${count} groups` : null]
+          .filter(Boolean)
+          .join(' · '),
       }
     },
   },

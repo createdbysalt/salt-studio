@@ -1,9 +1,9 @@
 'use client'
 
 import {usePortalStatus} from '@/components/ClientPortalStatus'
+import {DURATION, EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {useGSAP} from '@gsap/react'
 import {useRef} from 'react'
-import {DURATION, EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 
 const FALLBACK_PHASES = [
   {
@@ -185,7 +185,9 @@ export function TableOverviewTimeline({
                   <h3 className="mt-[4px] font-sans text-[16px] font-medium leading-snug">
                     {phase.name}
                   </h3>
-                  <p className="mt-[8px] text-[14px] leading-relaxed text-secondary">{phase.note}</p>
+                  <p className="mt-[8px] text-[14px] leading-relaxed text-secondary">
+                    {phase.note}
+                  </p>
                 </div>
               </li>
             )

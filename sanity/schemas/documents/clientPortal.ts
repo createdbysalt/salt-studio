@@ -86,8 +86,7 @@ export default defineType({
       group: 'client',
       to: [{type: 'projectPhases'}],
       options: {disableNew: true},
-      description:
-        'The Overview timeline on the table. Leave empty to hide Overview in the nav.',
+      description: 'The Overview timeline on the table. Leave empty to hide Overview in the nav.',
     }),
     defineField({
       name: 'checklistTemplate',
@@ -170,7 +169,8 @@ export default defineType({
       title: 'Public link',
       type: 'url',
       group: 'project',
-      description: 'Staging or preview. The See the site button on the table. Hidden until you add it.',
+      description:
+        'Staging or preview. The See the site button on the table. Hidden until you add it.',
       validation: (rule) =>
         rule.uri({allowRelative: false, scheme: ['http', 'https']}).warning('Use a full https URL'),
     }),
@@ -179,7 +179,8 @@ export default defineType({
       title: 'Production link',
       type: 'url',
       group: 'project',
-      description: 'The live site. The See the live site button on the table. Hidden until you add it.',
+      description:
+        'The live site. The See the live site button on the table. Hidden until you add it.',
       validation: (rule) =>
         rule.uri({allowRelative: false, scheme: ['http', 'https']}).warning('Use a full https URL'),
     }),

@@ -91,10 +91,7 @@ export function TableNav({
     : 'ml-auto flex h-8 w-5 shrink-0 items-center justify-center text-foreground/70 transition-opacity hover:opacity-100 lg:ml-0 lg:hidden'
 
   return (
-    <header
-      data-table-nav
-      className="pointer-events-none fixed top-0 z-[70] w-full bg-transparent"
-    >
+    <header data-table-nav className="pointer-events-none fixed top-0 z-[70] w-full bg-transparent">
       <div className="flex w-full min-w-0 items-start justify-between gap-2 px-3 pt-3.5 sm:gap-3 sm:px-5 sm:pt-5 lg:gap-2 lg:px-4 lg:pt-4">
         <nav
           className={`pointer-events-auto min-w-0 shrink-0 flex-col ${pillBase} ${pillFill} ${
@@ -196,7 +193,10 @@ export function TableNav({
             aria-label="Contact Salt on WhatsApp"
             className={`${pillBase} ${pillFill} ${ctaClass} min-w-0 gap-1.5 sm:gap-2`}
           >
-            <span aria-hidden className="inline-block size-[7px] shrink-0 rounded-full bg-accent lg:size-[6px]" />
+            <span
+              aria-hidden
+              className="inline-block size-[7px] shrink-0 rounded-full bg-accent lg:size-[6px]"
+            />
             <span>Contact</span>
           </a>
         </div>

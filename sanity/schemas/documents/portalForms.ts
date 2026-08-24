@@ -30,14 +30,16 @@ export default defineType({
       to: [{type: 'service'}],
       options: {disableNew: true},
       description: 'Which offering this list belongs to. Church websites use Websites.',
-      validation: (rule) => rule.required().error('Link this to a service so the right tables can find it'),
+      validation: (rule) =>
+        rule.required().error('Link this to a service so the right tables can find it'),
     }),
     defineField({
       name: 'clientType',
       title: 'Client type',
       type: 'string',
       options: {list: [...CLIENT_TYPES], layout: 'radio'},
-      description: 'Who this list is for. Church websites use Church. Business websites can have their own later.',
+      description:
+        'Who this list is for. Church websites use Church. Business websites can have their own later.',
       validation: (rule) =>
         rule
           .required()
@@ -67,7 +69,8 @@ export default defineType({
       title: 'Intro',
       type: 'text',
       rows: 3,
-      description: 'Short note under the heading. Tell them who should fill each form, then to tick when everyone has sent theirs.',
+      description:
+        'Short note under the heading. Tell them who should fill each form, then to tick when everyone has sent theirs.',
     }),
     defineField({
       name: 'items',

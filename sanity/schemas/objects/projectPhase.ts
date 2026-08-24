@@ -21,7 +21,8 @@ export default defineType({
       type: 'text',
       rows: 2,
       description: 'One or two sentences under the name. Keep it plain.',
-      validation: (rule) => rule.required().error('A short note tells the client what this step is'),
+      validation: (rule) =>
+        rule.required().error('A short note tells the client what this step is'),
     }),
   ],
   preview: {

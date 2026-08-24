@@ -11,12 +11,7 @@ import {useState} from 'react'
 
 function ActionLink({href, children}: {href: string; children: string}) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      className="btn-ghost group shrink-0"
-    >
+    <a href={href} target="_blank" rel="noreferrer" className="btn-ghost group shrink-0">
       <span>{children}</span>
       <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
     </a>
@@ -109,11 +104,7 @@ function ChecklistRow({
   )
 }
 
-export function ClientPortalChecklist({
-  driveUrl,
-}: {
-  driveUrl?: string | null
-}) {
+export function ClientPortalChecklist({driveUrl}: {driveUrl?: string | null}) {
   const {groups, done, pendingKey, error, toggle} = usePortalStatus()
   const [openKey, setOpenKey] = useState(() => firstIncompleteGroupKey(groups, done))
 
@@ -145,7 +136,9 @@ export function ClientPortalChecklist({
         {groups.map((group) => {
           const open = openKey === group._key
           const total = group.items.length
-          const complete = group.items.filter((item) => done[`${item.categoryKey}:${item._key}`]).length
+          const complete = group.items.filter(
+            (item) => done[`${item.categoryKey}:${item._key}`],
+          ).length
           const panelId = `checklist-panel-${group._key}`
           return (
             <div key={group._key} className="border-t border-border">
@@ -156,7 +149,9 @@ export function ClientPortalChecklist({
                 onClick={() => setOpenKey(open ? '' : group._key)}
                 className="group flex w-full items-center justify-between gap-[20px] py-[22px] text-left"
               >
-                <span className="font-sans text-h3 font-semibold tracking-heading">{group.title}</span>
+                <span className="font-sans text-h3 font-semibold tracking-heading">
+                  {group.title}
+                </span>
                 <span className="flex items-center gap-[12px]">
                   <span className="text-label text-muted-foreground">
                     {complete}/{total}

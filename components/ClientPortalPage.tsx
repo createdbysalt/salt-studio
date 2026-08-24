@@ -10,9 +10,10 @@ import type {ReactNode} from 'react'
 type Portal = NonNullable<ClientPortalBySlugQueryResult>
 type Category = NonNullable<NonNullable<Portal['checklist']>[number]>
 type Item = NonNullable<NonNullable<Category['items']>[number]>
+type TickItem = Omit<Item, 'done'> & {done?: boolean | null}
 
-function splitItems(items: Category['items']) {
-  const list = (items ?? []).filter((item): item is Item => Boolean(item?.title))
+function splitItems(items: Array<TickItem | null> | null | undefined) {
+  const list = (items ?? []).filter((item): item is TickItem => Boolean(item?.title))
   return {
     required: list.filter((item) => item.required !== false),
     optional: list.filter((item) => item.required === false),
@@ -125,11 +126,10 @@ function itemDone(
   return Boolean(item?.done)
 }
 
-function mergeChecklist(
-  source: Portal['checklistSource'],
-  local: Portal['checklist'],
-): Category[] {
-  const localList = (local ?? []).filter((category): category is Category => Boolean(category?.title))
+function mergeChecklist(source: Portal['checklistSource'], local: Portal['checklist']): Category[] {
+  const localList = (local ?? []).filter((category): category is Category =>
+    Boolean(category?.title),
+  )
   const sourceList = (source?.categories ?? []).filter((category): category is Category =>
     Boolean(category?.title),
   )
@@ -152,7 +152,7 @@ function mergeChecklist(
   return [...fromSource, ...extra]
 }
 
-function withCategory(category: Category, item: Item, local?: Category[]) {
+function withCategory(category: Category, item: TickItem, local?: Category[]) {
   const stored = findLocalItem(local, item._key)
   return {
     _key: item._key,
@@ -271,9 +271,7 @@ export function ClientPortalPage({data}: {data: Portal}) {
       <header data-theme="dark" data-table-hero className="bg-background text-foreground">
         <div className="px-[40px] pb-16 pt-28 sm:px-[56px] md:pb-24 md:pt-36 lg:px-[80px]">
           <p className="text-label text-muted-foreground">Website project</p>
-          <h1 className="mt-4 text-display">
-            {data.name}
-          </h1>
+          <h1 className="mt-4 text-display">{data.name}</h1>
           <p className="mt-6 max-w-xl text-body text-foreground/70">
             Here is how the project runs, then what we need from you.
           </p>
@@ -305,52 +303,52 @@ export function ClientPortalPage({data}: {data: Portal}) {
         formItems={formItems}
         phaseOverride={resolvePhaseOverride(data.projectPhases?.phases, data.activePhase)}
       >
-      {showOverview ? (
-        <div className="px-[40px] py-16 sm:px-[56px] md:py-24 lg:px-[80px]">
-          <section id="overview" className="scroll-mt-28 py-[64px] md:py-[96px]">
-            <SectionIntro
-              title="Overview"
-              dueAt={data.launchEstimate}
-              dueLabel="Estimated launch"
-              description="This is a target. If content or feedback comes in late, launch can move."
-              descriptionStyle="label"
-            />
-            <TableOverviewTimeline
-              heading={data.projectPhases?.heading}
-              phases={data.projectPhases?.phases}
-            />
-          </section>
-        </div>
-      ) : null}
-
-      {showChecklist ? (
-        <section
-          id="checklist"
-          data-theme="dark"
-          className="scroll-mt-28 bg-background text-foreground"
-        >
-          <div className="px-[40px] py-[64px] sm:px-[56px] md:py-[96px] lg:px-[80px]">
-            <SectionIntro title="Checklist" dueAt={data.contentDue} />
-            <ClientPortalChecklist driveUrl={data.sharedFolderUrl} />
+        {showOverview ? (
+          <div className="px-[40px] py-16 sm:px-[56px] md:py-24 lg:px-[80px]">
+            <section id="overview" className="scroll-mt-28 py-[64px] md:py-[96px]">
+              <SectionIntro
+                title="Overview"
+                dueAt={data.launchEstimate}
+                dueLabel="Estimated launch"
+                description="This is a target. If content or feedback comes in late, launch can move."
+                descriptionStyle="label"
+              />
+              <TableOverviewTimeline
+                heading={data.projectPhases?.heading}
+                phases={data.projectPhases?.phases}
+              />
+            </section>
           </div>
-        </section>
-      ) : null}
+        ) : null}
 
-      {showForms ? (
-        <div className="px-[40px] py-16 sm:px-[56px] md:py-24 lg:px-[80px]">
-          <section id="forms" className="scroll-mt-28 py-[64px] md:py-[96px]">
-            <SectionIntro
-              title={data.formsSource?.heading?.trim() || 'Forms'}
-              dueAt={data.contentDue}
-              description={
-                data.formsSource?.description?.trim() ||
-                'These are public links. Send each one to the right people on staff so they can fill out their own area — bios, ministry details, photos, and the rest. When everyone has sent theirs, tick the form so we know it is done.'
-              }
-            />
-            <ClientPortalForms />
+        {showChecklist ? (
+          <section
+            id="checklist"
+            data-theme="dark"
+            className="scroll-mt-28 bg-background text-foreground"
+          >
+            <div className="px-[40px] py-[64px] sm:px-[56px] md:py-[96px] lg:px-[80px]">
+              <SectionIntro title="Checklist" dueAt={data.contentDue} />
+              <ClientPortalChecklist driveUrl={data.sharedFolderUrl} />
+            </div>
           </section>
-        </div>
-      ) : null}
+        ) : null}
+
+        {showForms ? (
+          <div className="px-[40px] py-16 sm:px-[56px] md:py-24 lg:px-[80px]">
+            <section id="forms" className="scroll-mt-28 py-[64px] md:py-[96px]">
+              <SectionIntro
+                title={data.formsSource?.heading?.trim() || 'Forms'}
+                dueAt={data.contentDue}
+                description={
+                  data.formsSource?.description?.trim() ||
+                  'These are public links. Send each one to the right people on staff so they can fill out their own area — bios, ministry details, photos, and the rest. When everyone has sent theirs, tick the form so we know it is done.'
+                }
+              />
+              <ClientPortalForms />
+            </section>
+          </div>
+        ) : null}
       </ClientPortalStatusProvider>
     </main>
   )

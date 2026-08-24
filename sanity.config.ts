@@ -5,7 +5,6 @@
  */
 import {dataset, projectId, studioUrl} from '@/sanity/lib/api'
 import {getChurchWebsitePortalInitialValue} from '@/sanity/lib/portal-templates/church-website'
-import {AddIcon} from '@sanity/icons'
 import {
   plusCreateIconPlugin,
   saltDeskStructure,
@@ -21,13 +20,13 @@ import callToAction from '@/sanity/schemas/documents/callToAction'
 import capability from '@/sanity/schemas/documents/capability'
 import client from '@/sanity/schemas/documents/client'
 import clientPortal from '@/sanity/schemas/documents/clientPortal'
-import portalChecklist from '@/sanity/schemas/documents/portalChecklist'
-import portalForms from '@/sanity/schemas/documents/portalForms'
-import projectPhases from '@/sanity/schemas/documents/projectPhases'
 import legalPage from '@/sanity/schemas/documents/legalPage'
 import page from '@/sanity/schemas/documents/page'
 import person from '@/sanity/schemas/documents/person'
+import portalChecklist from '@/sanity/schemas/documents/portalChecklist'
+import portalForms from '@/sanity/schemas/documents/portalForms'
 import project from '@/sanity/schemas/documents/project'
+import projectPhases from '@/sanity/schemas/documents/projectPhases'
 import quiz from '@/sanity/schemas/documents/quiz'
 import quizSubmission from '@/sanity/schemas/documents/quizSubmission'
 import service from '@/sanity/schemas/documents/service'
@@ -43,13 +42,13 @@ import {navChild, navItem} from '@/sanity/schemas/objects/navItem'
 import {homeSection} from '@/sanity/schemas/objects/pageSection'
 import portalChecklistCategory from '@/sanity/schemas/objects/portalChecklistCategory'
 import portalChecklistItem from '@/sanity/schemas/objects/portalChecklistItem'
-import projectPhase from '@/sanity/schemas/objects/projectPhase'
 import {
   projectGalleryPhoto,
   projectGalleryRowOne,
   projectGalleryRowTwo,
   projectGalleryVideo,
 } from '@/sanity/schemas/objects/projectGallery'
+import projectPhase from '@/sanity/schemas/objects/projectPhase'
 import serviceBlock from '@/sanity/schemas/objects/serviceBlock'
 import testimonials from '@/sanity/schemas/objects/testimonials'
 import timeline from '@/sanity/schemas/objects/timeline'
@@ -103,6 +102,7 @@ import notFoundPage from '@/sanity/schemas/singletons/notFoundPage'
 import servicesPage from '@/sanity/schemas/singletons/servicesPage'
 import settings from '@/sanity/schemas/singletons/settings'
 import workPage from '@/sanity/schemas/singletons/workPage'
+import {AddIcon} from '@sanity/icons'
 import {defineConfig} from 'sanity'
 import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 import {media} from 'sanity-plugin-media'

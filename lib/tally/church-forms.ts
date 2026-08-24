@@ -56,7 +56,8 @@ export const CHURCH_TALLY_FORM_META: Record<
   gettingStarted: {
     title: 'Salt Church — Getting Started',
     sendTo: 'Church admin or project lead',
-    expect: 'Kickoff context plus full church intake (mission through DNS). Voice samples required.',
+    expect:
+      'Kickoff context plus full church intake (mission through DNS). Voice samples required.',
   },
   staff: {
     title: 'Salt Church — Staff Bio',

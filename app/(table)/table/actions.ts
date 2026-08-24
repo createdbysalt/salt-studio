@@ -6,8 +6,8 @@ import {sanityFetch} from '@/sanity/lib/live'
 import {clientPortalAuthQuery} from '@/sanity/lib/queries'
 import {writeToken} from '@/sanity/lib/write-token'
 import {createClient, stegaClean} from 'next-sanity'
-import {cookies} from 'next/headers'
 import {revalidatePath} from 'next/cache'
+import {cookies} from 'next/headers'
 import {redirect} from 'next/navigation'
 
 const KEY_PATTERN = /^[a-zA-Z0-9._-]+$/

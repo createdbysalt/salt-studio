@@ -6,28 +6,28 @@ Shared Tally forms for Salt church website clients. The kit lives in Tally. This
 
 [`church-forms.ts`](church-forms.ts)
 
-| Export | What it is |
-| --- | --- |
+| Export                     | What it is                                                         |
+| -------------------------- | ------------------------------------------------------------------ |
 | `PROTECTED_TALLY_FORM_IDS` | Enjoy Life + Before We Meet + MFI. Never PATCH, rename, or delete. |
-| `ENJOY_LIFE_TALLY_FORMS` | Example URLs. Do not send new clients here. |
-| `CHURCH_TALLY_FORMS` | The Salt Church kit. Use these in the portal template. |
-| `CHURCH_TALLY_FORM_META` | Title, who fills it, what we expect. |
+| `ENJOY_LIFE_TALLY_FORMS`   | Example URLs. Do not send new clients here.                        |
+| `CHURCH_TALLY_FORMS`       | The Salt Church kit. Use these in the portal template.             |
+| `CHURCH_TALLY_FORM_META`   | Title, who fills it, what we expect.                               |
 
 The church portal template imports `CHURCH_TALLY_FORMS` from here: `sanity/lib/portal-templates/church-website.ts`.
 
 ## Salt Church kit
 
-| Key | Form | URL |
-| --- | --- | --- |
+| Key              | Form                          | URL                       |
+| ---------------- | ----------------------------- | ------------------------- |
 | `gettingStarted` | Salt Church — Getting Started | https://tally.so/r/XxPl4P |
-| `staff` | Salt Church — Staff Bio | https://tally.so/r/814oZl |
-| `ministry` | Salt Church — Ministry | https://tally.so/r/0QRre9 |
-| `dreamTeam` | Salt Church — Crew | https://tally.so/r/zx5X7k |
-| `smallGroup` | Salt Church — Small Group | https://tally.so/r/5BPKZN |
-| `event` | Salt Church — Event | https://tally.so/r/Y5lD4N |
-| `course` | Salt Church — Course | https://tally.so/r/lbkD6o |
-| `testimony` | Salt Church — Testimony | https://tally.so/r/RGyKPK |
-| `faq` | Salt Church — FAQ | https://tally.so/r/obL6Gb |
+| `staff`          | Salt Church — Staff Bio       | https://tally.so/r/814oZl |
+| `ministry`       | Salt Church — Ministry        | https://tally.so/r/0QRre9 |
+| `dreamTeam`      | Salt Church — Crew            | https://tally.so/r/zx5X7k |
+| `smallGroup`     | Salt Church — Small Group     | https://tally.so/r/5BPKZN |
+| `event`          | Salt Church — Event           | https://tally.so/r/Y5lD4N |
+| `course`         | Salt Church — Course          | https://tally.so/r/lbkD6o |
+| `testimony`      | Salt Church — Testimony       | https://tally.so/r/RGyKPK |
+| `faq`            | Salt Church — FAQ             | https://tally.so/r/obL6Gb |
 
 Getting Started is the only intake. Kickoff questions first, then mission through DNS. Voice samples are on that form. PCO secrets and registrar passwords stay off Tally — share those through 1Password.
 

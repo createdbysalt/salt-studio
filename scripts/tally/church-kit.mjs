@@ -8,7 +8,6 @@
  *
  * Create only. Never PATCHes PROTECTED_TALLY_FORM_IDS.
  */
-
 import {execSync} from 'node:child_process'
 import {randomUUID} from 'node:crypto'
 
@@ -542,7 +541,9 @@ function buildGettingStartedForm() {
     })
     .pageBreak('Voice')
     .heading2('Voice samples')
-    .hint('Writing samples that capture your voice. We use these to write copy that sounds like you.')
+    .hint(
+      'Writing samples that capture your voice. We use these to write copy that sounds like you.',
+    )
     .fileUpload('Upload at least one sample', {
       required: true,
       multiple: true,
@@ -566,18 +567,19 @@ function buildGettingStartedForm() {
       ],
       {hint: 'Skip if you do not use Planning Center.'},
     )
-    .multipleChoice('Would you like us to integrate Planning Center data?', ['Yes, integrate', 'No, manual only'], {
-      hint: 'We can pull groups, events, and more into the website.',
-    })
-    .checkboxes(
-      'What should be synced?',
-      [
-        'Groups (small groups, courses)',
-        'Registrations (events, courses)',
-        'Calendar',
-        'Also allow manual additions (not just from PCO)',
-      ],
+    .multipleChoice(
+      'Would you like us to integrate Planning Center data?',
+      ['Yes, integrate', 'No, manual only'],
+      {
+        hint: 'We can pull groups, events, and more into the website.',
+      },
     )
+    .checkboxes('What should be synced?', [
+      'Groups (small groups, courses)',
+      'Registrations (events, courses)',
+      'Calendar',
+      'Also allow manual additions (not just from PCO)',
+    ])
     .inputLink('Planning Center organization URL', {
       placeholder: 'https://yourchurch.planningcenteronline.com',
     })
@@ -1255,7 +1257,11 @@ function buildFaqForm() {
 }
 
 const FORMS = [
-  {key: 'gettingStarted', name: `${TITLE_PREFIX}Getting Started`, blocks: buildGettingStartedForm()},
+  {
+    key: 'gettingStarted',
+    name: `${TITLE_PREFIX}Getting Started`,
+    blocks: buildGettingStartedForm(),
+  },
   {key: 'staff', name: `${TITLE_PREFIX}Staff Bio`, blocks: buildStaffBioForm()},
   {key: 'ministry', name: `${TITLE_PREFIX}Ministry`, blocks: buildMinistryForm()},
   {key: 'dreamTeam', name: `${TITLE_PREFIX}Crew`, blocks: buildCrewForm()},
@@ -1271,7 +1277,7 @@ async function tallyFetch(path, {method = 'GET', body} = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
     method,
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'tally-version': TALLY_VERSION,
     },

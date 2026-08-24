@@ -68,7 +68,10 @@ export function ClientPortalForms() {
           const checked = Boolean(done[key])
           const formLabel = item.linkLabel?.trim().replace(' →', '') || 'Open form'
           return (
-            <li key={item._key} className="flex items-start gap-4 border-t border-border-subtle py-5">
+            <li
+              key={item._key}
+              className="flex items-start gap-4 border-t border-border-subtle py-5"
+            >
               <CheckControl
                 checked={checked}
                 pending={pendingKey === key}
@@ -78,7 +81,9 @@ export function ClientPortalForms() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="max-w-xl">
-                    <p className={`text-body ${checked ? 'text-foreground/50' : 'text-foreground'}`}>
+                    <p
+                      className={`text-body ${checked ? 'text-foreground/50' : 'text-foreground'}`}
+                    >
                       {item.title}
                       {item.required === false ? (
                         <span className="ml-3 text-telemetry text-muted-foreground">Optional</span>

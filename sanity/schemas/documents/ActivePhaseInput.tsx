@@ -32,7 +32,9 @@ export function ActivePhaseInput(props: StringInputProps) {
       .fetch<{phases?: Array<Phase | null> | null} | null>(query, {id: idRef})
       .then((doc) => {
         if (cancelled) return
-        setPhases((doc?.phases ?? []).filter((phase): phase is Phase => Boolean(phase?._key && phase.name)))
+        setPhases(
+          (doc?.phases ?? []).filter((phase): phase is Phase => Boolean(phase?._key && phase.name)),
+        )
         setLoaded(true)
       })
       .catch(() => {
