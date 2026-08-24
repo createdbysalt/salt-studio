@@ -1,0 +1,14 @@
+---
+description: Church Tally kit catalog and protected form IDs
+globs: lib/tally/**/*,scripts/tally/**/*,sanity/lib/portal-templates/church-website.ts
+alwaysApply: false
+---
+
+# Church Tally kit
+
+**Canonical doc:** `lib/tally/CLAUDE.md`
+
+- Use `CHURCH_TALLY_FORMS` for new church clients. Do not send them to `ENJOY_LIFE_TALLY_FORMS`.
+- Never PATCH, rename, or delete `PROTECTED_TALLY_FORM_IDS`.
+- Create forms with `node scripts/tally/church-kit.mjs` (create-only). Key: `TALLY_API_KEY` or `op://salt-studio-development/tally/credential`.
+- To add a form: describe it, create via MCP or the script, then add the URL to the catalog and the church portal template.

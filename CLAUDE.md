@@ -206,6 +206,7 @@ The `.claude/` workspace was originally copied from a different project (Salt Co
 - `components/CLAUDE.md` — flat layout, template-literal Tailwind, server/client splits
 - `lib/analytics/CLAUDE.md` — GTM setup, event helpers, consent, debugging
 - `lib/seo/CLAUDE.md` — structured data, AEO, sitemap, adding schemas to new pages
+- `lib/tally/CLAUDE.md` — church Tally kit catalog, protected form IDs, how to add the next form
 - `brand-identity/asset-tagging-strategy.md` — **read before uploading anything to the Sanity Media Library.** Canonical tagging convention (4 prefix dimensions: `type-`, `color-`, `use-`, `style-`), title/description rules, how to extend the vocabulary. `scripts/upload-brand-assets.mjs` is the reference implementation.
 
 ## Velocity Shortcuts (Trigger Words)

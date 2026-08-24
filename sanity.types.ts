@@ -733,6 +733,33 @@ export type ServiceBlock = {
   routingLine?: string
 }
 
+export type ProjectPhase = {
+  _type: 'projectPhase'
+  name?: string
+  note?: string
+}
+
+export type PortalChecklistCategory = {
+  _type: 'portalChecklistCategory'
+  title?: string
+  description?: string
+  items?: Array<
+    {
+      _key: string
+    } & PortalChecklistItem
+  >
+}
+
+export type PortalChecklistItem = {
+  _type: 'portalChecklistItem'
+  title?: string
+  description?: string
+  required?: boolean
+  link?: string
+  linkLabel?: string
+  done?: boolean
+}
+
 export type ContactForm = {
   _type: 'contactForm'
   title?: string
@@ -767,6 +794,116 @@ export type Testimonial = {
   role?: string
   client?: ClientReference
   project?: ProjectReference
+}
+
+export type ProjectPhasesReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'projectPhases'
+}
+
+export type PortalChecklistReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'portalChecklist'
+}
+
+export type PortalFormsReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'portalForms'
+}
+
+export type ClientPortal = {
+  _id: string
+  _type: 'clientPortal'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  client?: ClientReference
+  name?: string
+  slug?: Slug
+  clientType?: 'church' | 'business' | 'nonprofit' | 'school' | 'other'
+  serviceType?: 'website' | 'software' | 'ai' | 'growth'
+  projectPhases?: ProjectPhasesReference
+  checklistTemplate?: PortalChecklistReference
+  formsTemplate?: PortalFormsReference
+  activePhase?: string
+  launchEstimate?: string
+  contentDue?: string
+  checklistDue?: string
+  formsDue?: string
+  previewUrl?: string
+  productionUrl?: string
+  sharedFolderUrl?: string
+  brandingFolderUrl?: string
+  mediaFolderUrl?: string
+  password?: string
+  enabled?: boolean
+  checklist?: Array<
+    {
+      _key: string
+    } & PortalChecklistCategory
+  >
+}
+
+export type PortalForms = {
+  _id: string
+  _type: 'portalForms'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  service?: ServiceReference
+  clientType?: 'church' | 'business' | 'nonprofit' | 'school' | 'other'
+  heading?: string
+  description?: string
+  items?: Array<
+    {
+      _key: string
+    } & PortalChecklistItem
+  >
+}
+
+export type PortalChecklist = {
+  _id: string
+  _type: 'portalChecklist'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  service?: ServiceReference
+  clientType?: 'church' | 'business' | 'nonprofit' | 'school' | 'other'
+  categories?: Array<
+    {
+      _key: string
+    } & PortalChecklistCategory
+  >
+}
+
+export type ProjectPhases = {
+  _id: string
+  _type: 'projectPhases'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  service?: ServiceReference
+  heading?: string
+  phases?: Array<
+    {
+      _key: string
+    } & ProjectPhase
+  >
+}
+
+export type Slug = {
+  _type: 'slug'
+  current?: string
+  source?: string
 }
 
 export type Capability = {
@@ -823,12 +960,6 @@ export type WorkCategory = {
   subhead?: string
   seoTitle?: string
   seoDescription?: string
-}
-
-export type Slug = {
-  _type: 'slug'
-  current?: string
-  source?: string
 }
 
 export type QuizReference = {
@@ -1930,13 +2061,23 @@ export type AllSanitySchemaTypes =
   | Faq
   | Duration
   | ServiceBlock
+  | ProjectPhase
+  | PortalChecklistCategory
+  | PortalChecklistItem
   | ContactForm
   | Testimonial
+  | ProjectPhasesReference
+  | PortalChecklistReference
+  | PortalFormsReference
+  | ClientPortal
+  | PortalForms
+  | PortalChecklist
+  | ProjectPhases
+  | Slug
   | Capability
   | SanityImageCrop
   | SanityImageHotspot
   | WorkCategory
-  | Slug
   | QuizReference
   | QuizSubmission
   | Quiz
@@ -2049,6 +2190,16 @@ export type HomePageQueryResult =
   | {
       _id: 'home'
       _type: 'client'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
+    }
+  | {
+      _id: 'home'
+      _type: 'clientPortal'
       seoTitle: null
       seoDescription: null
       ogImage: null
@@ -2433,6 +2584,26 @@ export type HomePageQueryResult =
     }
   | {
       _id: 'home'
+      _type: 'portalChecklist'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
+    }
+  | {
+      _id: 'home'
+      _type: 'portalForms'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
+    }
+  | {
+      _id: 'home'
       _type: 'project'
       seoTitle: string | null
       seoDescription: string | null
@@ -2484,6 +2655,16 @@ export type HomePageQueryResult =
             internalName: string | null
           }
       > | null
+    }
+  | {
+      _id: 'home'
+      _type: 'projectPhases'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
     }
   | {
       _id: 'home'
@@ -2734,6 +2915,16 @@ export type ServicesPageQueryResult =
     }
   | {
       _id: 'servicesPage'
+      _type: 'clientPortal'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
       _type: 'contactPage'
       capabilitiesHeadline: null
       seoTitle: string | null
@@ -2925,6 +3116,26 @@ export type ServicesPageQueryResult =
     }
   | {
       _id: 'servicesPage'
+      _type: 'portalChecklist'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'portalForms'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
       _type: 'project'
       capabilitiesHeadline: null
       seoTitle: string | null
@@ -2976,6 +3187,16 @@ export type ServicesPageQueryResult =
             internalName: string | null
           }
       > | null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'projectPhases'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
     }
   | {
       _id: 'servicesPage'
@@ -3280,6 +3501,15 @@ export type AboutPageQueryResult =
     }
   | {
       _id: 'aboutPage'
+      _type: 'clientPortal'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
       _type: 'contactPage'
       seoTitle: string | null
       seoDescription: string | null
@@ -3462,6 +3692,24 @@ export type AboutPageQueryResult =
     }
   | {
       _id: 'aboutPage'
+      _type: 'portalChecklist'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'portalForms'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
       _type: 'project'
       seoTitle: string | null
       seoDescription: string | null
@@ -3512,6 +3760,15 @@ export type AboutPageQueryResult =
             internalName: string | null
           }
       > | null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'projectPhases'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
     }
   | {
       _id: 'aboutPage'
@@ -4783,6 +5040,22 @@ export type WorkPageQueryResult =
     }
   | {
       _id: 'workPage'
+      _type: 'clientPortal'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+    }
+  | {
+      _id: 'workPage'
       _type: 'contactPage'
       headline: null
       subhead: null
@@ -4948,6 +5221,38 @@ export type WorkPageQueryResult =
     }
   | {
       _id: 'workPage'
+      _type: 'portalChecklist'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+    }
+  | {
+      _id: 'workPage'
+      _type: 'portalForms'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+    }
+  | {
+      _id: 'workPage'
       _type: 'project'
       headline: null
       subhead: null
@@ -4968,6 +5273,22 @@ export type WorkPageQueryResult =
         _type: 'image'
       } | null
       speakableSummary: string | null
+    }
+  | {
+      _id: 'workPage'
+      _type: 'projectPhases'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
     }
   | {
       _id: 'workPage'
@@ -5284,6 +5605,15 @@ export type ContactPageQueryResult =
     }
   | {
       _id: 'contactPage'
+      _type: 'clientPortal'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
       _type: 'contactPage'
       seoTitle: string | null
       seoDescription: string | null
@@ -5482,6 +5812,24 @@ export type ContactPageQueryResult =
     }
   | {
       _id: 'contactPage'
+      _type: 'portalChecklist'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
+      _type: 'portalForms'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
       _type: 'project'
       seoTitle: string | null
       seoDescription: string | null
@@ -5532,6 +5880,15 @@ export type ContactPageQueryResult =
             internalName: string | null
           }
       > | null
+    }
+  | {
+      _id: 'contactPage'
+      _type: 'projectPhases'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
     }
   | {
       _id: 'contactPage'
@@ -5908,6 +6265,95 @@ export type PersonSlugsQueryResult = Array<{
   slug: string | null
 }>
 
+// Source: sanity/lib/queries.ts
+// Variable: clientPortalBySlugQuery
+// Query: *[_type == "clientPortal" && slug.current == $slug][0]{    _id,    _type,    name,    "slug": slug.current,    serviceType,    clientType,    "hasOverview": defined(projectPhases),    "hasChecklist": defined(checklistTemplate),    "hasForms": defined(formsTemplate),    "checklistSource": checklistTemplate->{      categories[]{        _key,        title,        description,        items[]{          _key,          title,          description,          required,          link,          linkLabel        }      }    },    "formsSource": formsTemplate->{      heading,      description,      items[]{        _key,        title,        description,        required,        link,        linkLabel      }    },    "projectPhases": projectPhases->{      heading,      phases[]{ _key, name, note }    },    activePhase,    sharedFolderUrl,    brandingFolderUrl,    mediaFolderUrl,    previewUrl,    productionUrl,    "contentDue": coalesce(contentDue, checklistDue, formsDue),    launchEstimate,    enabled,    checklist[]{      _key,      title,      description,      items[]{        _key,        title,        description,        required,        link,        linkLabel,        done      }    }  }
+export type ClientPortalBySlugQueryResult = {
+  _id: string
+  _type: 'clientPortal'
+  name: string | null
+  slug: string | null
+  serviceType: 'ai' | 'growth' | 'software' | 'website' | null
+  clientType: 'business' | 'church' | 'nonprofit' | 'other' | 'school' | null
+  hasOverview: false | true
+  hasChecklist: false | true
+  hasForms: false | true
+  checklistSource: {
+    categories: Array<{
+      _key: string
+      title: string | null
+      description: string | null
+      items: Array<{
+        _key: string
+        title: string | null
+        description: string | null
+        required: boolean | null
+        link: string | null
+        linkLabel: string | null
+      }> | null
+    }> | null
+  } | null
+  formsSource: {
+    heading: string | null
+    description: string | null
+    items: Array<{
+      _key: string
+      title: string | null
+      description: string | null
+      required: boolean | null
+      link: string | null
+      linkLabel: string | null
+    }> | null
+  } | null
+  projectPhases: {
+    heading: string | null
+    phases: Array<{
+      _key: string
+      name: string | null
+      note: string | null
+    }> | null
+  } | null
+  activePhase: string | null
+  sharedFolderUrl: string | null
+  brandingFolderUrl: string | null
+  mediaFolderUrl: string | null
+  previewUrl: string | null
+  productionUrl: string | null
+  contentDue: string | null
+  launchEstimate: string | null
+  enabled: boolean | null
+  checklist: Array<{
+    _key: string
+    title: string | null
+    description: string | null
+    items: Array<{
+      _key: string
+      title: string | null
+      description: string | null
+      required: boolean | null
+      link: string | null
+      linkLabel: string | null
+      done: boolean | null
+    }> | null
+  }> | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: clientPortalAuthQuery
+// Query: *[_type == "clientPortal" && slug.current == $slug][0]{    _id,    enabled,    password  }
+export type ClientPortalAuthQueryResult = {
+  _id: string
+  enabled: boolean | null
+  password: string | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: clientPortalSlugsQuery
+// Query: *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}
+export type ClientPortalSlugsQueryResult = Array<{
+  slug: string | null
+}>
+
 declare module '@sanity/client' {
   interface SanityQueries {
     '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "homeHeroSection" => {\n        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter,\n        splitPrimaryLeft, splitPrimaryRight, splitSecondaryLeft, splitSecondaryRight\n      },\n      _type == "homeProofSection" => {\n        label,\n        clients[]{ _key, ...@->{ _id, name, website } }\n      },\n      _type == "homeServicesSection" => {\n        label,\n        services[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            headline,\n            shortDescription,\n            priceLine,\n            timelineLine,\n            linkLabel,\n            timeline[]{ _key, label, duration, detail },\n            deliverables[]{ _key, title, detail },\n            plans[]{ _key, name, price, summary, features, highlight },\n            capabilities[]->{ _id, name, kind },\n            idealFor,\n            notAFit,\n            detailEyebrow,\n            detailBody,\n            sceneLine,\n            stepsLabel,\n            steps[]{ _key, lead, text },\n            detailImage{ asset, alt, hotspot, crop },\n            backgroundImage{ asset, alt, hotspot, crop },\n            backgroundVideoUrl,\n            featuredProjects[]->{\n              _id,\n              title,\n              "slug": slug.current,\n              coverImage,\n              "client": client->name,\n              "thought": pt::text(overview),\n              hidden\n            },\n            testimonials[]->{\n              _id,\n              quote,\n              author,\n              role\n            },\n            clients[]->{ _id, name },\n            proofAnchor,\n            nextStep->{\n              _id,\n              subhead,\n              buttonLabel,\n              link,\n              contactSubject\n            },\n            fitCheckLabel,\n            fitCheckHref,\n            routingLine\n          }\n        },\n        cards[]{\n          _key,\n          title,\n          body,\n          priceLine,\n          linkLabel,\n          detailEyebrow,\n          detailBody,\n          detailImage{ asset, alt, hotspot, crop },\n          hoverImage{ asset, alt, hotspot, crop },\n          backgroundVideoUrl,\n        }\n      },\n      _type == "homeWorkSection" => {\n        label,\n        projects[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            overview,\n            coverImage,\n            videoUrl,\n            year,\n            "client": client->name,\n            featured,\n            hidden\n          }\n        },\n        linkLabel\n      },\n      _type == "homeProductSection" => { headline, body, ctaLabel },\n      _type == "homePhilosophySection" => { line1, line2 },\n      _type == "homeFinalCtaSection" => {\n        headline,\n        body,\n        emailLine,\n        cta->{\n          buttonLabel,\n          link,\n          contactSubject\n        }\n      },\n    },\n  }\n': HomePageQueryResult
@@ -5939,5 +6385,8 @@ declare module '@sanity/client' {
     '\n  *[_type == "person" && slug.current == $slug][0]{\n    _id,\n    _type,\n    name,\n    shortName,\n    "slug": slug.current,\n    role,\n    headline,\n    photo,\n    location,\n    availability,\n    body,\n    showStudioVideo,\n    principles[]{ _key, title, body },\n    highlights[]{ _key, metric, label },\n    cases[]{\n      _key,\n      title,\n      role,\n      problem,\n      whatTheyDid,\n      result,\n      year,\n      "relatedProject": relatedProject->{ _id, title, "slug": slug.current }\n    },\n    howTheyWork,\n    studioNote,\n    email,\n    linkedinUrl,\n    "resumeUrl": resume.asset->url,\n    primaryCta,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    sortOrder\n  }\n': PersonBySlugQueryResult
     '\n  *[_type == "person" && defined(slug.current)]|order(sortOrder asc, name asc){\n    _id,\n    _type,\n    name,\n    shortName,\n    "slug": slug.current,\n    role,\n    headline,\n    photo,\n    location,\n    availability,\n    body,\n    showStudioVideo,\n    principles[]{ _key, title, body },\n    highlights[]{ _key, metric, label },\n    cases[]{\n      _key,\n      title,\n      role,\n      problem,\n      whatTheyDid,\n      result,\n      year,\n      "relatedProject": relatedProject->{ _id, title, "slug": slug.current }\n    },\n    howTheyWork,\n    studioNote,\n    email,\n    linkedinUrl,\n    "resumeUrl": resume.asset->url,\n    primaryCta,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    sortOrder\n  }\n': PeopleQueryResult
     '\n  *[_type == "person" && defined(slug.current)]{"slug": slug.current}\n': PersonSlugsQueryResult
+    '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    _type,\n    name,\n    "slug": slug.current,\n    serviceType,\n    clientType,\n    "hasOverview": defined(projectPhases),\n    "hasChecklist": defined(checklistTemplate),\n    "hasForms": defined(formsTemplate),\n    "checklistSource": checklistTemplate->{\n      categories[]{\n        _key,\n        title,\n        description,\n        items[]{\n          _key,\n          title,\n          description,\n          required,\n          link,\n          linkLabel\n        }\n      }\n    },\n    "formsSource": formsTemplate->{\n      heading,\n      description,\n      items[]{\n        _key,\n        title,\n        description,\n        required,\n        link,\n        linkLabel\n      }\n    },\n    "projectPhases": projectPhases->{\n      heading,\n      phases[]{ _key, name, note }\n    },\n    activePhase,\n    sharedFolderUrl,\n    brandingFolderUrl,\n    mediaFolderUrl,\n    previewUrl,\n    productionUrl,\n    "contentDue": coalesce(contentDue, checklistDue, formsDue),\n    launchEstimate,\n    enabled,\n    checklist[]{\n      _key,\n      title,\n      description,\n      items[]{\n        _key,\n        title,\n        description,\n        required,\n        link,\n        linkLabel,\n        done\n      }\n    }\n  }\n': ClientPortalBySlugQueryResult
+    '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    enabled,\n    password\n  }\n': ClientPortalAuthQueryResult
+    '\n  *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}\n': ClientPortalSlugsQueryResult
   }
 }

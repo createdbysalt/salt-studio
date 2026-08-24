@@ -6,6 +6,7 @@ const config: NextConfig = {
     return [
       // No public /rentals hub — three rental pages only.
       {source: '/rentals', destination: '/rentals/studio', permanent: false},
+      {source: '/table/:slug', destination: '/project/:slug', permanent: false},
     ]
   },
   images: {

@@ -12,7 +12,7 @@ import Script from 'next/script'
 
 const UC_SETTINGS_ID = '3lNRNwFF7b2Anu'
 
-/** Renders in the root <head>, before GTM so the auto-blocker can do its job. */
+/** Mount in the root layout body. beforeInteractive still lands in head, before GTM. */
 export function UsercentricsScripts() {
   return (
     <>

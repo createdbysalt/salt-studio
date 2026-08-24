@@ -24,7 +24,7 @@ import Script from 'next/script'
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID
 
 /**
- * GTM script to include in <head>.
+ * GTM script to mount in the root layout body.
  * Only renders if NEXT_PUBLIC_GTM_ID is set.
  *
  * Includes Google Consent Mode v2 default settings — all denied until

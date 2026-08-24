@@ -11,13 +11,15 @@
  * by GTM, so this will also be blocked until the user consents.
  */
 
+import Script from 'next/script'
+
 type ClientGoogleAnalyticsScriptProps = {
   measurementId: string | null | undefined
 }
 
 /**
  * Renders the gtag.js script for the client's GA4 property.
- * Include this in <head> after GoogleTagManagerScript.
+ * Mount in the root layout body after GoogleTagManagerScript.
  *
  * @example
  * // In app/layout.tsx
@@ -29,19 +31,18 @@ export function ClientGoogleAnalyticsScript({measurementId}: ClientGoogleAnalyti
 
   return (
     <>
-      {/* Load gtag.js for client's GA4 property */}
-      <script async src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`} />
-      <script
-        id="client-ga4-config"
-        dangerouslySetInnerHTML={{
-          __html: `
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
+        strategy="afterInteractive"
+      />
+      <Script id="client-ga4-config" strategy="afterInteractive">
+        {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${measurementId}');
-          `,
-        }}
-      />
+          `}
+      </Script>
     </>
   )
 }
