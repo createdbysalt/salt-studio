@@ -459,7 +459,7 @@ function PersonPanelBody({
           onClick={onNavigate}
           className="group inline-flex items-center gap-[0.4em] font-sans text-[13px] font-medium tracking-[-0.015em] text-[#08090a]/75 transition-colors duration-300 hover:text-[#08090a] lg:text-[20px]"
         >
-          <span>Request a conversation</span>
+          <span>Reach out</span>
           <span
             aria-hidden
             className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[5px]"
@@ -556,6 +556,8 @@ function PersonPanelBody({
             <div className="mt-[24px]">
               <Link
                 href={ABOUT_WAITLIST_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={onNavigate}
                 className="inline-flex items-center rounded-sm border border-white/30 px-4 py-3 font-mono text-[11px] uppercase tracking-label text-white transition-colors hover:border-white/60"
               >
