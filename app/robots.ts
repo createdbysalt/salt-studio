@@ -30,6 +30,9 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/studio', // Sanity Studio
+          '/edit', // Sanity Studio (current mount)
+          '/project', // Client project pages
+          '/table', // Old client project URLs
           '/api/', // API routes
           '/_next/', // Next.js internals
         ],

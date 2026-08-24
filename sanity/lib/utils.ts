@@ -54,6 +54,8 @@ export function resolveHref(documentType?: string, slug?: string | null): string
       return slug ? `/legal/${slug}` : undefined
     case 'quiz':
       return slug ? `/quiz/${slug}` : undefined
+    case 'clientPortal':
+      return slug ? `/project/${slug}` : undefined
     default:
       console.warn('Invalid document type:', documentType)
       return undefined

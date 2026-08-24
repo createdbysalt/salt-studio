@@ -21,6 +21,8 @@ interface SiteLogoProps {
    * Tailwind spacing scale, so h-8 ≠ 32px here). Default is nav scale.
    */
   markClassName?: string
+  /** Defaults to the public home. Pass a table URL to keep clients on their page. */
+  href?: string
 }
 
 /**
@@ -35,6 +37,7 @@ export function SiteLogo({
   logo,
   siteName,
   markClassName = 'h-[26px] w-auto md:h-[32px]',
+  href = '/',
 }: SiteLogoProps) {
   const sanitySrc = logo?.asset?._ref
     ? urlForImage({asset: {_ref: logo.asset._ref}})?.url()
@@ -47,9 +50,9 @@ export function SiteLogo({
 
   return (
     <Link
-      href="/"
+      href={href}
       onClick={onClick}
-      aria-label={`${alt} — Home`}
+      aria-label={href === '/' ? `${alt} — Home` : alt}
       data-site-logo
       className={`inline-flex items-center ${className}`}
     >

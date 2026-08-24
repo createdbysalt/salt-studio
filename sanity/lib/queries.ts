@@ -768,3 +768,83 @@ export const peopleQuery = defineQuery(`
 export const personSlugsQuery = defineQuery(`
   *[_type == "person" && defined(slug.current)]{"slug": slug.current}
 `)
+
+export const clientPortalBySlugQuery = defineQuery(`
+  *[_type == "clientPortal" && slug.current == $slug][0]{
+    _id,
+    _type,
+    name,
+    "slug": slug.current,
+    serviceType,
+    clientType,
+    "hasOverview": defined(projectPhases),
+    "hasChecklist": defined(checklistTemplate),
+    "hasForms": defined(formsTemplate),
+    "checklistSource": checklistTemplate->{
+      categories[]{
+        _key,
+        title,
+        description,
+        items[]{
+          _key,
+          title,
+          description,
+          required,
+          link,
+          linkLabel
+        }
+      }
+    },
+    "formsSource": formsTemplate->{
+      heading,
+      description,
+      items[]{
+        _key,
+        title,
+        description,
+        required,
+        link,
+        linkLabel
+      }
+    },
+    "projectPhases": projectPhases->{
+      heading,
+      phases[]{ _key, name, note }
+    },
+    activePhase,
+    sharedFolderUrl,
+    brandingFolderUrl,
+    mediaFolderUrl,
+    previewUrl,
+    productionUrl,
+    "contentDue": coalesce(contentDue, checklistDue, formsDue),
+    launchEstimate,
+    enabled,
+    checklist[]{
+      _key,
+      title,
+      description,
+      items[]{
+        _key,
+        title,
+        description,
+        required,
+        link,
+        linkLabel,
+        done
+      }
+    }
+  }
+`)
+
+export const clientPortalAuthQuery = defineQuery(`
+  *[_type == "clientPortal" && slug.current == $slug][0]{
+    _id,
+    enabled,
+    password
+  }
+`)
+
+export const clientPortalSlugsQuery = defineQuery(`
+  *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}
+`)

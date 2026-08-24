@@ -139,4 +139,5 @@ TypeScript errors are ignored on production builds (`typescript.ignoreBuildError
 - `CLAUDE.md` — Full codebase reference for AI assistants
 - `lib/analytics/CLAUDE.md` — Analytics implementation
 - `lib/seo/CLAUDE.md` — SEO and structured data
+- `lib/tally/CLAUDE.md` — Church Tally kit, protected IDs, how to add a form
 - `components/CLAUDE.md` — Component conventions

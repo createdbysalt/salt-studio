@@ -1,8 +1,12 @@
 import {
+  AddIcon,
   CaseIcon,
   ClipboardIcon,
+  ClockIcon,
   CodeBlockIcon,
   CogIcon,
+  ComposeIcon,
+  DesktopIcon,
   DocumentsIcon,
   FolderIcon,
   HelpCircleIcon,
@@ -40,7 +44,7 @@ export const plusCreateIconPlugin = () => ({
   document: {
     newDocumentOptions: (prev, {creationContext}: {creationContext: {type: string}}) => {
       if (creationContext.type !== 'structure') return prev
-      return prev.map((item) => ({...item, icon: undefined}))
+      return prev.map((item) => ({...item, icon: AddIcon}))
     },
   },
 })
@@ -215,7 +219,22 @@ export const saltDeskStructure: StructureResolver = (S) => {
         ]),
     )
 
-  return S.list().title('Content').items([corePages, dynamicContent, leads, settings])
+  const table = S.listItem()
+    .id('tableClients')
+    .title('Table')
+    .icon(DesktopIcon)
+    .child(
+      S.list()
+        .title('Table')
+        .items([
+          S.documentTypeListItem('clientPortal').title('Current Clients').icon(CaseIcon),
+          S.documentTypeListItem('projectPhases').title('Project Phases').icon(ClockIcon),
+          S.documentTypeListItem('portalChecklist').title('Checklist').icon(ClipboardIcon),
+          S.documentTypeListItem('portalForms').title('Forms').icon(ComposeIcon),
+        ]),
+    )
+
+  return S.list().title('Content').items([corePages, dynamicContent, leads, table, settings])
 }
 
 export const saltSingletonTypes = [
