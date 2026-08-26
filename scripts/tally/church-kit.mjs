@@ -528,10 +528,14 @@ function buildGettingStartedForm() {
       hint: 'Required if you want us to pull info from the site.',
     })
   const websiteField = b.lastField
-  b.multipleChoice('Get this info from your current website?', [PULL_FROM_SITE, FILL_IT_IN, NO_WEBSITE], {
-    required: true,
-    hint: 'We can take mission, Sunday expect, address, links, and sermons from the site. You still answer voice samples, Planning Center, and domain.',
-  })
+  b.multipleChoice(
+    'Get this info from your current website?',
+    [PULL_FROM_SITE, FILL_IT_IN, NO_WEBSITE],
+    {
+      required: true,
+      hint: 'We can take mission, Sunday expect, address, links, and sermons from the site. You still answer voice samples, Planning Center, and domain.',
+    },
+  )
   const scrapeChoice = b.lastChoice
   b.whenChoiceIs(scrapeChoice, PULL_FROM_SITE, [
     {

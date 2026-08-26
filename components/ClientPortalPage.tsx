@@ -153,7 +153,12 @@ function mergeChecklist(source: Portal['checklistSource'], local: Portal['checkl
   return [...fromSource, ...extra]
 }
 
-function withCategory(category: Category, item: TickItem, local?: Category[], slug?: string | null) {
+function withCategory(
+  category: Category,
+  item: TickItem,
+  local?: Category[],
+  slug?: string | null,
+) {
   const stored = findLocalItem(local, item._key)
   const override = item._key === 'gs-form' && slug ? CLIENT_GETTING_STARTED_OVERRIDES[slug] : null
   return {
