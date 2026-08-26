@@ -6,7 +6,8 @@
  *   export TALLY_API_KEY=$(op read "op://salt-studio-development/tally/credential")
  *   node scripts/tally/church-kit.mjs
  *
- * Create only. Never PATCHes PROTECTED_TALLY_FORM_IDS.
+ * Create only, unless you pass --refresh=<key> for a non-protected kit form.
+ * Never PATCHes PROTECTED_TALLY_FORM_IDS.
  */
 import {execSync} from 'node:child_process'
 import {randomUUID} from 'node:crypto'
@@ -123,9 +124,9 @@ class FormBuilder {
     return this
   }
 
-  pageBreak(name) {
+  pageBreak(name, pageUuid = uid()) {
     this.blocks.push({
-      uuid: uid(),
+      uuid: pageUuid,
       type: 'PAGE_BREAK',
       groupUuid: uid(),
       groupType: 'PAGE_BREAK',
@@ -134,6 +135,7 @@ class FormBuilder {
         name,
       },
     })
+    this.lastPage = pageUuid
     return this
   }
 
@@ -219,10 +221,12 @@ class FormBuilder {
       payload: schemaText(label),
     })
     if (hintText) this.hint(hintText)
+    const inputUuid = uid()
+    const groupUuid = uid()
     this.blocks.push({
-      uuid: uid(),
+      uuid: inputUuid,
       type: 'INPUT_LINK',
-      groupUuid: uid(),
+      groupUuid,
       groupType: 'INPUT_LINK',
       payload: {
         isRequired: required,
@@ -230,6 +234,13 @@ class FormBuilder {
         hasDefaultAnswer: false,
       },
     })
+    this.lastField = {
+      uuid: inputUuid,
+      type: 'INPUT_FIELD',
+      questionType: 'INPUT_LINK',
+      blockGroupUuid: groupUuid,
+      title: label,
+    }
     return this
   }
 
@@ -366,9 +377,10 @@ class FormBuilder {
     })
     if (hintText) this.hint(hintText)
     const groupUuid = uid()
-    options.forEach((text, index) => {
+    const choiceOptions = options.map((text, index) => {
+      const optionUuid = uid()
       this.blocks.push({
-        uuid: uid(),
+        uuid: optionUuid,
         type: 'MULTIPLE_CHOICE_OPTION',
         groupUuid,
         groupType: 'MULTIPLE_CHOICE',
@@ -382,6 +394,49 @@ class FormBuilder {
           hasDefaultAnswer: false,
         },
       })
+      return {text, uuid: optionUuid}
+    })
+    this.lastChoice = {
+      title: label,
+      groupUuid,
+      options: choiceOptions,
+      field: {
+        uuid: choiceOptions[0].uuid,
+        type: 'INPUT_FIELD',
+        questionType: 'MULTIPLE_CHOICE_OPTION',
+        blockGroupUuid: groupUuid,
+        title: label,
+      },
+    }
+    return this
+  }
+
+  whenChoiceIs(choice, optionText, actions) {
+    const option = choice.options.find((entry) => entry.text === optionText)
+    if (!option) {
+      throw new Error(`No choice option "${optionText}" on "${choice.title}"`)
+    }
+    this.blocks.push({
+      uuid: uid(),
+      type: 'CONDITIONAL_LOGIC',
+      groupUuid: uid(),
+      groupType: 'CONDITIONAL_LOGIC',
+      payload: {
+        logicalOperator: 'AND',
+        updateUuid: null,
+        conditionals: [
+          {
+            uuid: uid(),
+            type: 'SINGLE',
+            payload: {
+              field: choice.field,
+              comparison: 'IS',
+              value: option.uuid,
+            },
+          },
+        ],
+        actions,
+      },
     })
     return this
   }
@@ -446,9 +501,21 @@ class FormBuilder {
   }
 }
 
+const PULL_FROM_SITE = 'Yes — pull what you can from the site'
+const FILL_IT_IN = 'No — I will fill it in'
+const NO_WEBSITE = 'I do not have a current website'
+
 function buildGettingStartedForm() {
+  const pages = {
+    churchInfo: uid(),
+    voice: uid(),
+    pco: uid(),
+    links: uid(),
+    media: uid(),
+    domain: uid(),
+  }
   const b = new FormBuilder()
-  b.formTitle(`${TITLE_PREFIX}Getting Started`, 'Submit Getting Started')
+  b.formTitle('Church Project Kickoff', 'Submit Getting Started')
     .intro(
       'This is the one form that kicks off your church website project. Book the kickoff call separately, then fill this out so we have everything we need to start.',
     )
@@ -458,8 +525,26 @@ function buildGettingStartedForm() {
     .churchName()
     .inputLink('Current website', {
       placeholder: 'https://',
-      hint: 'Leave blank if you do not have one yet.',
+      hint: 'Required if you want us to pull info from the site.',
     })
+  const websiteField = b.lastField
+  b.multipleChoice('Get this info from your current website?', [PULL_FROM_SITE, FILL_IT_IN, NO_WEBSITE], {
+    required: true,
+    hint: 'We can take mission, Sunday expect, address, links, and sermons from the site. You still answer voice samples, Planning Center, and domain.',
+  })
+  const scrapeChoice = b.lastChoice
+  b.whenChoiceIs(scrapeChoice, PULL_FROM_SITE, [
+    {
+      uuid: uid(),
+      type: 'REQUIRE_ANSWER',
+      payload: {requireAnswer: websiteField.uuid},
+    },
+    {
+      uuid: uid(),
+      type: 'JUMP_TO_PAGE',
+      payload: {jumpToPage: pages.voice},
+    },
+  ])
     .textarea('What feels out of alignment?', {
       required: true,
       placeholder: 'What is not working about your current site, message, or digital presence?',
@@ -480,7 +565,7 @@ function buildGettingStartedForm() {
       placeholder: 'https://',
       hint: 'Optional. Drive folder, Figma, or a reference site.',
     })
-    .pageBreak('Church info')
+    .pageBreak('Church info', pages.churchInfo)
     .heading2('Church info')
     .textarea('Mission statement', {
       required: true,
@@ -539,7 +624,7 @@ function buildGettingStartedForm() {
     .textarea('Church history', {
       placeholder: 'Your story and how you started.',
     })
-    .pageBreak('Voice')
+    .pageBreak('Voice', pages.voice)
     .heading2('Voice samples')
     .hint(
       'Writing samples that capture your voice. We use these to write copy that sounds like you.',
@@ -550,7 +635,7 @@ function buildGettingStartedForm() {
       maxFiles: 10,
       hint: 'Newsletters, emails, bulletins, social posts — anything written. PDF, DOC, DOCX, TXT.',
     })
-    .pageBreak('Planning Center')
+    .pageBreak('Planning Center', pages.pco)
     .heading2('Planning Center')
     .multipleChoice('Do you use Planning Center?', ['Yes', 'No'], {required: true})
     .checkboxes(
@@ -589,7 +674,14 @@ function buildGettingStartedForm() {
     .hint(
       'Do not put Planning Center App ID or Secret here. Share those through 1Password or a private note to Salt.',
     )
-    .pageBreak('Links')
+    .whenChoiceIs(scrapeChoice, PULL_FROM_SITE, [
+      {
+        uuid: uid(),
+        type: 'JUMP_TO_PAGE',
+        payload: {jumpToPage: pages.domain},
+      },
+    ])
+    .pageBreak('Links', pages.links)
     .heading2('Important links')
     .inputLink('Giving URL', {placeholder: 'https://...'})
     .inputLink('Events / calendar URL', {placeholder: 'https://...'})
@@ -599,7 +691,7 @@ function buildGettingStartedForm() {
       placeholder: 'https://...',
       hint: 'One per line.',
     })
-    .pageBreak('Media')
+    .pageBreak('Media', pages.media)
     .heading2('Media and apps')
     .dropdown('Where do you host sermons?', [
       'YouTube',
@@ -630,7 +722,7 @@ function buildGettingStartedForm() {
     .textarea('Newsletter embed code', {
       placeholder: 'Paste the embed code from your email platform.',
     })
-    .pageBreak('Domain')
+    .pageBreak('Domain', pages.domain)
     .heading2('Domain and DNS')
     .multipleChoice('Do you already own a domain?', ['Yes', 'No'], {required: true})
     .inputText('If no, what domain would you like?', {
@@ -1210,9 +1302,9 @@ const FAQ_CATEGORIES = [
 
 function buildFaqForm() {
   const b = new FormBuilder()
-  b.formTitle(`${TITLE_PREFIX}FAQ`, 'Submit FAQ')
+  b.formTitle('Church FAQs', 'Submit FAQs')
     .intro(
-      'What questions do visitors or members frequently ask you? Submit them here so we can add them to the website.',
+      'Pick one category, then write as many questions as you have for that topic. Need another category? Fill the form again.',
     )
     .churchName()
     .heading2('About you')
@@ -1221,39 +1313,21 @@ function buildFaqForm() {
       placeholder: 'e.g., Guest Services, Kids Ministry, Worship Team',
       hint: 'Where do you serve? This helps us understand the context.',
     })
-    .pageBreak('Questions')
-    .heading2('Questions')
-    .hint('You can submit up to 5 questions on this form.')
-    .textarea('Question 1', {
+    .heading2('Questions for this category')
+    .dropdown('Category', FAQ_CATEGORIES, {required: true})
+    .inputText('Other category', {placeholder: 'If you selected Other'})
+    .textarea('Questions and answers', {
       required: true,
-      placeholder: 'e.g., What time does the service start?',
-      hint: 'Write the question exactly as someone might ask it.',
+      placeholder:
+        'Q: What time does the service start?\nA: We start at 10am every Sunday.\n\nQ: Is there parking?\nA: Yes — the lot is behind the building.',
+      hint: 'Use Q: for the question and A: for the answer. Leave a blank line between each pair.',
     })
-    .dropdown('Category (question 1)', FAQ_CATEGORIES, {required: true})
-    .inputText('Other category (question 1)', {placeholder: 'If you selected Other'})
-    .inputText('Where do you hear this? (question 1)', {
-      placeholder: 'e.g., At the welcome desk on Sundays',
-    })
-    .textarea('Suggested answer (question 1)', {
-      placeholder: 'Share what you typically tell people...',
-    })
-    .textarea('Question 2', {placeholder: 'Optional second question'})
-    .dropdown('Category (question 2)', FAQ_CATEGORIES)
-    .inputText('Where do you hear this? (question 2)')
-    .textarea('Suggested answer (question 2)')
-    .textarea('Question 3', {placeholder: 'Optional third question'})
-    .dropdown('Category (question 3)', FAQ_CATEGORIES)
-    .inputText('Where do you hear this? (question 3)')
-    .textarea('Suggested answer (question 3)')
-    .textarea('Question 4', {placeholder: 'Optional fourth question'})
-    .dropdown('Category (question 4)', FAQ_CATEGORIES)
-    .inputText('Where do you hear this? (question 4)')
-    .textarea('Suggested answer (question 4)')
-    .textarea('Question 5', {placeholder: 'Optional fifth question'})
-    .dropdown('Category (question 5)', FAQ_CATEGORIES)
-    .inputText('Where do you hear this? (question 5)')
-    .textarea('Suggested answer (question 5)')
   return b.build()
+}
+
+const KIT_FORM_IDS = {
+  gettingStarted: 'XxPl4P',
+  faq: 'obL6Gb',
 }
 
 const FORMS = [
@@ -1376,12 +1450,52 @@ async function createForms() {
   return results
 }
 
+function parseRefreshKey() {
+  const flag = process.argv.find((arg) => arg.startsWith('--refresh='))
+  return flag ? flag.slice('--refresh='.length) : null
+}
+
+async function refreshForm(key) {
+  const spec = FORMS.find((form) => form.key === key)
+  const id = KIT_FORM_IDS[key]
+  if (!spec || !id) {
+    throw new Error(`Cannot refresh ${key}. Add it to FORMS and KIT_FORM_IDS.`)
+  }
+  if (PROTECTED_TALLY_FORM_IDS.has(id)) {
+    throw new Error(`Refusing to PATCH protected form ${id}.`)
+  }
+
+  const current = await tallyFetch(`/forms/${id}`)
+  if (PROTECTED_TALLY_FORM_IDS.has(current.id)) {
+    throw new Error(`Refusing to PATCH protected form ${current.id}.`)
+  }
+
+  const updated = await tallyFetch(`/forms/${id}`, {
+    method: 'PATCH',
+    body: {
+      name: current.name,
+      status: 'PUBLISHED',
+      blocks: spec.blocks,
+    },
+  })
+
+  const url = `https://tally.so/r/${id}`
+  console.log(`Refreshed: ${updated.name || spec.name} → ${url}`)
+  return {key, id, url, skipped: false}
+}
+
 async function main() {
+  const refreshKey = parseRefreshKey()
   const before = await listForms()
   for (const form of before) {
     if (PROTECTED_TALLY_FORM_IDS.has(form.id)) {
       console.log(`Protected (will not write): ${form.id} ${form.name}`)
     }
+  }
+
+  if (refreshKey) {
+    await refreshForm(refreshKey)
+    return
   }
 
   const results = await createForms()

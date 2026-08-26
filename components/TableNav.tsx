@@ -2,7 +2,7 @@
 
 import {SiteLogo} from '@/components/SiteLogo'
 import {CONTACT_WHATSAPP_HREF} from '@/lib/contactMenu'
-import {useEffect, useLayoutEffect, useState} from 'react'
+import {useEffect, useLayoutEffect, useState, type MouseEvent} from 'react'
 
 const pillBase = 'flex overflow-hidden rounded-sm backdrop-blur-[42px]'
 const pillRowBase = 'flex h-12 w-full shrink-0 items-center sm:h-14 lg:h-12'
@@ -90,6 +90,29 @@ export function TableNav({
     ? 'ml-auto flex h-8 w-5 shrink-0 items-center justify-center text-white/85 transition-opacity hover:opacity-100 lg:ml-0 lg:hidden'
     : 'ml-auto flex h-8 w-5 shrink-0 items-center justify-center text-foreground/70 transition-opacity hover:opacity-100 lg:ml-0 lg:hidden'
 
+  const goToSection = (event: MouseEvent<HTMLAnchorElement>, href: `#${TableNavSection}`) => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+    const target = document.querySelector(href)
+    if (!(target instanceof HTMLElement)) return
+
+    event.preventDefault()
+    const wasOpen = menuOpen
+    setMenuOpen(false)
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const scroll = () => {
+      target.scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block: 'start'})
+      window.history.pushState(null, '', href)
+      window.dispatchEvent(new Event('hashchange'))
+    }
+
+    if (wasOpen && !reduced) {
+      window.setTimeout(scroll, 160)
+    } else {
+      scroll()
+    }
+  }
+
   return (
     <header data-table-nav className="pointer-events-none fixed top-0 z-[70] w-full bg-transparent">
       <div className="flex w-full min-w-0 items-start justify-between gap-2 px-3 pt-3.5 sm:gap-3 sm:px-5 sm:pt-5 lg:gap-2 lg:px-4 lg:pt-4">
@@ -123,21 +146,27 @@ export function TableNav({
                   <svg width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden>
                     <line
                       x1="1"
-                      y1={menuOpen ? 3 : 5}
+                      y1="5"
                       x2="15"
-                      y2={menuOpen ? 13 : 5}
+                      y2="5"
                       stroke="currentColor"
                       strokeWidth="1.75"
                       strokeLinecap="round"
+                      className={`origin-center transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                        menuOpen ? 'translate-y-[3px] rotate-45' : ''
+                      }`}
                     />
                     <line
                       x1="1"
-                      y1={menuOpen ? 13 : 11}
+                      y1="11"
                       x2="15"
-                      y2={menuOpen ? 3 : 11}
+                      y2="11"
                       stroke="currentColor"
                       strokeWidth="1.75"
                       strokeLinecap="round"
+                      className={`origin-center transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                        menuOpen ? '-translate-y-[3px] -rotate-45' : ''
+                      }`}
                     />
                   </svg>
                 </button>
@@ -148,12 +177,7 @@ export function TableNav({
                       key={item.href}
                       href={item.href}
                       className={linkClass}
-                      onClick={() => {
-                        requestAnimationFrame(() => {
-                          setOnColor(isColorSurfaceUnderTableNav())
-                          requestAnimationFrame(() => setOnColor(isColorSurfaceUnderTableNav()))
-                        })
-                      }}
+                      onClick={(event) => goToSection(event, item.href)}
                     >
                       {item.label}
                     </a>
@@ -163,24 +187,30 @@ export function TableNav({
             ) : null}
           </div>
 
-          {showNavLinks && menuOpen ? (
-            <div className="flex flex-col gap-3 px-4 pb-4 pt-2 lg:hidden">
-              {links.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => {
-                    setMenuOpen(false)
-                    requestAnimationFrame(() => {
-                      setOnColor(isColorSurfaceUnderTableNav())
-                      requestAnimationFrame(() => setOnColor(isColorSurfaceUnderTableNav()))
-                    })
-                  }}
-                  className={`${linkClass} text-[22px]`}
+          {showNavLinks ? (
+            <div
+              className={`grid lg:hidden ${
+                menuOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+              } transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none`}
+            >
+              <div className="overflow-hidden">
+                <div
+                  aria-hidden={!menuOpen}
+                  className={`flex flex-col gap-3 px-4 pb-4 pt-2 ${menuOpen ? '' : 'pointer-events-none'}`}
                 >
-                  {item.label}
-                </a>
-              ))}
+                  {links.map((item) => (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      tabIndex={menuOpen ? 0 : -1}
+                      onClick={(event) => goToSection(event, item.href)}
+                      className={`${linkClass} text-[22px]`}
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : null}
         </nav>

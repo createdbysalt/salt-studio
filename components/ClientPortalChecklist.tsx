@@ -7,6 +7,7 @@ import {
   usePortalStatus,
   type PortalChecklistItem,
 } from '@/components/ClientPortalStatus'
+import {CopyLinkButton} from '@/components/CopyLinkButton'
 import {useState} from 'react'
 
 function ActionLink({href, children}: {href: string; children: string}) {
@@ -97,7 +98,12 @@ function ChecklistRow({
               <p className="mt-1 text-[15px] leading-relaxed text-secondary">{item.description}</p>
             ) : null}
           </div>
-          {formHref ? <ActionLink href={formHref}>{formLabel}</ActionLink> : null}
+          {formHref ? (
+            <div className="flex shrink-0 items-start gap-2 self-start">
+              <CopyLinkButton href={formHref} label={item.title ?? 'form'} />
+              <ActionLink href={formHref}>{formLabel}</ActionLink>
+            </div>
+          ) : null}
         </div>
       </div>
     </li>

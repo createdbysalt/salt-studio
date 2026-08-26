@@ -1,6 +1,7 @@
 'use client'
 
 import {itemDoneKey, usePortalStatus} from '@/components/ClientPortalStatus'
+import {CopyLinkButton} from '@/components/CopyLinkButton'
 
 function ActionLink({href, children}: {href: string; children: string}) {
   return (
@@ -95,7 +96,12 @@ export function ClientPortalForms() {
                       </p>
                     ) : null}
                   </div>
-                  {item.link ? <ActionLink href={item.link}>{formLabel}</ActionLink> : null}
+                  {item.link ? (
+                    <div className="flex shrink-0 items-start gap-2 self-start">
+                      <CopyLinkButton href={item.link} label={item.title ?? 'form'} />
+                      <ActionLink href={item.link}>{formLabel}</ActionLink>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </li>
