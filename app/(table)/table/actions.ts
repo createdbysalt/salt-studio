@@ -53,13 +53,64 @@ export async function authenticateTable(slug: string, formData: FormData) {
   redirect(`/project/${slug}`)
 }
 
+type ChecklistCategory = {
+  _key?: string
+  _type?: string
+  title?: string
+  items?: Array<{
+    _key?: string
+    _type?: string
+    title?: string
+    done?: boolean
+  }>
+}
+
+function withChecklistTick(
+  checklist: unknown,
+  categoryKey: string,
+  itemKey: string,
+  done: boolean,
+  title?: string,
+) {
+  const list = Array.isArray(checklist) ? checklist.map((entry) => ({...(entry as object)})) : []
+  const categories = list as ChecklistCategory[]
+  let category = categories.find((entry) => entry?._key === categoryKey)
+  if (!category) {
+    category = {
+      _type: 'portalChecklistCategory',
+      _key: categoryKey,
+      title: title?.trim() || categoryKey,
+      items: [],
+    }
+    categories.push(category)
+  }
+
+  const items = Array.isArray(category.items) ? category.items.map((item) => ({...item})) : []
+  const index = items.findIndex((item) => item?._key === itemKey)
+  if (index === -1) {
+    items.push({
+      _type: 'portalChecklistItem',
+      _key: itemKey,
+      title: title?.trim() || itemKey,
+      done,
+    })
+  } else {
+    items[index] = {...items[index], done}
+  }
+
+  const categoryIndex = categories.findIndex((entry) => entry?._key === categoryKey)
+  categories[categoryIndex] = {...category, items}
+  return categories
+}
+
 export async function toggleChecklistItem(input: {
   slug: string
   categoryKey: string
   itemKey: string
   done: boolean
+  title?: string
 }) {
-  const {slug, categoryKey, itemKey, done} = input
+  const {slug, categoryKey, itemKey, done, title} = input
   if (!isValidTableSlug(slug)) {
     return {ok: false as const, error: 'That link is not valid.'}
   }
@@ -83,13 +134,18 @@ export async function toggleChecklistItem(input: {
   }
 
   try {
+    const document = await writeClient.getDocument(data._id)
+    if (!document) {
+      return {ok: false as const, error: 'That page is not available.'}
+    }
     await writeClient
       .patch(data._id)
       .set({
-        [`checklist[_key=="${categoryKey}"].items[_key=="${itemKey}"].done`]: done,
+        checklist: withChecklistTick(document.checklist, categoryKey, itemKey, done, title),
       })
       .commit({autoGenerateArrayKeys: false})
-  } catch {
+  } catch (error) {
+    console.error('toggleChecklistItem failed', error)
     return {ok: false as const, error: 'Could not save that check.'}
   }
 

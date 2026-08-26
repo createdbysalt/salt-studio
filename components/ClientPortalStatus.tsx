@@ -116,6 +116,7 @@ export function ClientPortalStatusProvider({
         categoryKey: item.categoryKey,
         itemKey: item._key,
         done: next,
+        title: item.title ?? undefined,
       })
       if (!result.ok) {
         setDone((prev) => ({...prev, [key]: !next}))
