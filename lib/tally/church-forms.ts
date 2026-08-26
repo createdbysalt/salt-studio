@@ -57,7 +57,7 @@ export const CHURCH_TALLY_FORM_META: Record<
     title: 'Salt Church — Getting Started',
     sendTo: 'Church admin or project lead',
     expect:
-      'Kickoff context plus full church intake (mission through DNS). Voice samples required.',
+      'Kickoff, then church info or “pull from current site.” Voice samples, Planning Center, and domain still required.',
   },
   staff: {
     title: 'Salt Church — Staff Bio',
@@ -97,6 +97,18 @@ export const CHURCH_TALLY_FORM_META: Record<
   faq: {
     title: 'Salt Church — FAQ',
     sendTo: 'Staff and volunteer leaders',
-    expect: 'Questions people ask, with suggested answers.',
+    expect: 'One category per submit. Q: / A: pairs in one text box, blank line between each.',
+  },
+}
+
+/** Per-client Getting Started replacements. Shared kit stays the default. */
+export const CLIENT_GETTING_STARTED_OVERRIDES: Record<
+  string,
+  {title: string; link: string; description?: string}
+> = {
+  clc: {
+    title: 'Church Info Form',
+    link: 'https://tally.so/r/yP5oEB',
+    description: 'Mission, vision, values, Sunday expect, location, and church history.',
   },
 }

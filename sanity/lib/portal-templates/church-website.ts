@@ -53,7 +53,7 @@ export function getChurchWebsiteChecklistCategories() {
         item('gs-form', {
           title: 'Fill Getting Started',
           description:
-            'Mission, Sunday expect, Planning Center, links, sermons, and DNS. Voice samples go on this form too.',
+            'Kickoff plus church info — or ask us to pull public info from the current site. Voice samples, Planning Center, and domain still go on this form.',
           link: CHURCH_TALLY_FORMS.gettingStarted,
           linkLabel: 'Open form →',
         }),
@@ -228,7 +228,8 @@ export function getChurchWebsiteFormItems() {
     }),
     item('f-faq', {
       title: 'FAQ forms',
-      description: 'Staff and volunteer leaders submit questions people ask often.',
+      description:
+        'Pick a category and paste Q: / A: pairs. Fill the form again for the next category.',
       required: false,
       link: CHURCH_TALLY_FORMS.faq,
       linkLabel: 'Open form →',

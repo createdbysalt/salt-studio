@@ -36,9 +36,11 @@ Getting Started is the only intake. Kickoff questions first, then mission throug
 ```bash
 export TALLY_API_KEY=$(op read "op://salt-studio-development/tally/credential")
 node scripts/tally/church-kit.mjs
+node scripts/tally/church-kit.mjs --refresh=faq
+node scripts/tally/church-kit.mjs --refresh=gettingStarted
 ```
 
-The script is create-only. It skips a form if a `Salt Church — …` title already exists. It refuses to write any ID in `PROTECTED_TALLY_FORM_IDS`.
+Create skips a form if that title already exists. `--refresh=<key>` PATCHes a listed kit form in place. It refuses to write any ID in `PROTECTED_TALLY_FORM_IDS`. FAQ is one category per submit, with Q: / A: pairs in one text box. Getting Started can skip church info, links, and media when the client asks us to pull that from the current site.
 
 A Tally `Church kit` folder is preferred. If the account cannot create folders, forms go at the workspace root.
 
