@@ -274,7 +274,7 @@ export function ClientPortalPage({data}: {data: Portal}) {
 
   return (
     <main className="min-h-svh bg-background text-foreground">
-      <TableNav homeHref={tableHref} sections={navSections} />
+      <TableNav homeHref={tableHref} sections={navSections} contactHref={data.whatsappGroupUrl} />
       <header data-theme="dark" data-table-hero className="bg-background text-foreground">
         <div className="px-[40px] pb-16 pt-28 sm:px-[56px] md:pb-24 md:pt-36 lg:px-[80px]">
           <p className="text-label text-muted-foreground">Website project</p>

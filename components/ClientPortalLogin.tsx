@@ -4,7 +4,15 @@ import {authenticateTable} from '@/app/(table)/table/actions'
 import {TableNav} from '@/components/TableNav'
 import {useActionState} from 'react'
 
-export function ClientPortalLogin({slug, name}: {slug: string; name: string}) {
+export function ClientPortalLogin({
+  slug,
+  name,
+  contactHref,
+}: {
+  slug: string
+  name: string
+  contactHref?: string | null
+}) {
   const [state, formAction, pending] = useActionState(
     async (_prev: {ok: false; error: string} | null, formData: FormData) =>
       authenticateTable(slug, formData),
@@ -13,7 +21,12 @@ export function ClientPortalLogin({slug, name}: {slug: string; name: string}) {
 
   return (
     <main data-theme="dark" className="scheme-dark min-h-svh bg-background text-foreground">
-      <TableNav homeHref={`/project/${slug}`} showLinks={false} onDark />
+      <TableNav
+        homeHref={`/project/${slug}`}
+        showLinks={false}
+        onDark
+        contactHref={contactHref}
+      />
       <div className="flex min-h-svh flex-col px-[24px] pb-[max(28px,env(safe-area-inset-bottom))] pt-28 sm:px-[40px] md:justify-center md:px-[56px] md:py-36 lg:px-[80px]">
         <div className="grid flex-1 grid-rows-[1fr_auto] md:w-full md:flex-none md:grid-cols-12 md:grid-rows-none md:items-end md:gap-16 lg:gap-20">
           <div className="flex flex-col justify-center md:col-span-7 md:block">

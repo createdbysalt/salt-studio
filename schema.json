@@ -4829,6 +4829,13 @@
         },
         "optional": true
       },
+      "whatsappGroupUrl": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "sharedFolderUrl": {
         "type": "objectAttribute",
         "value": {

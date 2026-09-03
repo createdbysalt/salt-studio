@@ -817,6 +817,7 @@ export const clientPortalBySlugQuery = defineQuery(`
     mediaFolderUrl,
     previewUrl,
     productionUrl,
+    whatsappGroupUrl,
     "contentDue": coalesce(contentDue, checklistDue, formsDue),
     launchEstimate,
     enabled,
