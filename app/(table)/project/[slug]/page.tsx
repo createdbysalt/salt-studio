@@ -51,7 +51,13 @@ export default async function ProjectSlugRoute({params}: Props) {
 
   const authenticated = await isTableAuthenticated(slug)
   if (!authenticated) {
-    return <ClientPortalLogin slug={slug} name={data.name || 'Your project'} />
+    return (
+      <ClientPortalLogin
+        slug={slug}
+        name={data.name || 'Your project'}
+        contactHref={data.whatsappGroupUrl}
+      />
+    )
   }
 
   return <ClientPortalPage data={data} />

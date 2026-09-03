@@ -24,12 +24,15 @@ export function TableNav({
   showLinks = true,
   onDark = false,
   sections = ['overview', 'checklist', 'forms'],
+  contactHref,
 }: {
   homeHref: string
   showLinks?: boolean
   onDark?: boolean
   sections?: TableNavSection[]
+  contactHref?: string | null
 }) {
+  const whatsappHref = contactHref?.trim() || CONTACT_WHATSAPP_HREF
   const links = LINKS.filter((item) => sections.includes(item.id))
   const showNavLinks = showLinks && links.length > 0
   const [menuOpen, setMenuOpen] = useState(false)
@@ -217,10 +220,10 @@ export function TableNav({
 
         <div className="pointer-events-auto flex min-w-0 max-w-[min(100%,16.5rem)] shrink items-start sm:max-w-none">
           <a
-            href={CONTACT_WHATSAPP_HREF}
+            href={whatsappHref}
             target="_blank"
             rel="noreferrer"
-            aria-label="Contact Salt on WhatsApp"
+            aria-label="Contact on WhatsApp"
             className={`${pillBase} ${pillFill} ${ctaClass} min-w-0 gap-1.5 sm:gap-2`}
           >
             <span

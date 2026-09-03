@@ -185,6 +185,32 @@ export default defineType({
         rule.uri({allowRelative: false, scheme: ['http', 'https']}).warning('Use a full https URL'),
     }),
     defineField({
+      name: 'whatsappGroupUrl',
+      title: 'WhatsApp group',
+      type: 'url',
+      group: 'project',
+      description:
+        'Invite link for this project’s WhatsApp group (Group info → Invite via link). The Contact button on the table opens it. Leave empty to use Salt’s studio number.',
+      validation: (rule) =>
+        rule.uri({allowRelative: false, scheme: ['https']}).custom((value) => {
+          if (!value) return true
+          try {
+            const host = new URL(value).hostname.replace(/^www\./, '')
+            if (
+              host === 'chat.whatsapp.com' ||
+              host === 'wa.me' ||
+              host === 'api.whatsapp.com' ||
+              host.endsWith('.whatsapp.com')
+            ) {
+              return true
+            }
+          } catch {
+            return 'Use a full https WhatsApp link'
+          }
+          return 'Use a WhatsApp group invite (chat.whatsapp.com) or wa.me link'
+        }),
+    }),
+    defineField({
       name: 'sharedFolderUrl',
       title: 'Shared Drive folder',
       type: 'url',
