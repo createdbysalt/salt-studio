@@ -53,7 +53,7 @@ export function getChurchWebsiteChecklistCategories() {
         item('gs-form', {
           title: 'Fill Getting Started',
           description:
-            'Kickoff plus church info — or ask us to pull public info from the current site. Voice samples, Planning Center, and domain still go on this form.',
+            'Kickoff plus church info — or ask us to pull public info from the current site. Design direction, voice samples, Planning Center, and domain still go on this form.',
           link: CHURCH_TALLY_FORMS.gettingStarted,
           linkLabel: 'Open form →',
         }),
