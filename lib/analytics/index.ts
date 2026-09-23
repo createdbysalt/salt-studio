@@ -43,6 +43,7 @@ export {
   trackFormStart,
   trackFormSubmit,
   trackFormError,
+  trackGenerateLead,
   trackScrollDepth,
   trackExternalLink,
   trackFileDownload,

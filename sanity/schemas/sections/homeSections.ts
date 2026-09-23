@@ -155,10 +155,10 @@ export const homeServicesSection = defineType({
       title: 'Services',
       type: 'array',
       description:
-        'Pick the three services for this band — order here is the order on the page. Edit each service under Dynamic Content → Services.',
+        'Pick the services for this band (3–4) — the order here is the order on the page. Edit each service under Dynamic Content → Services.',
       of: [defineArrayMember({type: 'reference', to: [{type: 'service'}]})],
       validation: (rule) =>
-        rule.length(3).error('The triad is exactly three services — one per offering'),
+        rule.min(3).max(4).error('Pick three or four services — one per offering'),
     }),
     defineField({
       name: 'cards',
@@ -263,12 +263,12 @@ export const homeWorkSection = defineType({
     }),
     defineField({
       name: 'projects',
-      title: 'Teaser projects',
+      title: 'Homepage projects',
       type: 'array',
       description:
-        'Hand-picked projects for the homepage teaser (2–3). Drafts won’t appear on the live site until published.',
+        'The projects shown in the homepage hero, in this exact order — drag to reorder. Each project needs a video to appear in the hero. Leave this empty to fall back to every Featured project, newest first. Drafts won’t appear on the live site until published.',
       of: [defineArrayMember({type: 'reference', to: [{type: 'project'}]})],
-      validation: (rule) => rule.max(3).warning('The teaser shows 2–3 pieces'),
+      validation: (rule) => rule.max(6).warning('The hero is designed for up to about six pieces'),
     }),
     defineField({
       name: 'linkLabel',

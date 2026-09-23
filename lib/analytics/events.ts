@@ -93,6 +93,18 @@ export function trackFormError(data: Omit<FormErrorEvent, 'event' | 'timestamp'>
 }
 
 /**
+ * Track a qualified lead — a contact form that submitted successfully.
+ *
+ * This is the conversion signal (distinct from `form_submit`, the engagement
+ * event): map it in GTM to the Google Ads conversion tag and a GA4 Key Event.
+ * Next.js server-action forms never trigger GTM's built-in form listener, so
+ * the event has to be pushed explicitly on success.
+ */
+export function trackGenerateLead(data: Omit<FormSubmitEvent, 'event' | 'timestamp'>): void {
+  trackEvent({event: 'generate_lead', ...data})
+}
+
+/**
  * Track scroll depth milestones.
  * Usually called by ScrollTracker component, not manually.
  */

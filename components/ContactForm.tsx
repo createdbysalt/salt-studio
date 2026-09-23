@@ -3,7 +3,7 @@
 import {submitContactForm} from '@/app/actions/contact'
 import {ContactSelect} from '@/components/ContactSelect'
 import {Reveal} from '@/components/Reveal'
-import {trackFormError, trackFormStart, trackFormSubmit} from '@/lib/analytics'
+import {trackFormError, trackFormStart, trackFormSubmit, trackGenerateLead} from '@/lib/analytics'
 import {useActionState, useEffect, useMemo, useRef} from 'react'
 
 type FormField = {
@@ -96,10 +96,11 @@ export function ContactForm({
 
   useEffect(() => {
     if (state.success) {
-      trackFormSubmit({
-        form_name: 'contact',
-        form_location: isPage ? 'page' : 'embed',
-      })
+      const where = isPage ? 'page' : 'embed'
+      // Engagement signal…
+      trackFormSubmit({form_name: 'contact', form_location: where})
+      // …and the conversion signal GTM maps to the Ads conversion + GA4 Key Event.
+      trackGenerateLead({form_name: 'contact', form_location: where})
     } else if (state.message && state.errors) {
       trackFormError({
         form_name: 'contact',

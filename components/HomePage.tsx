@@ -52,10 +52,11 @@ export async function HomePage({data}: HomePageProps) {
   const workSection = sections.find(
     (s): s is SectionOf<'homeWorkSection'> => s._type === 'homeWorkSection',
   )
+  // Hand-picked in Studio (Home → Selected Work) — this list's order IS the
+  // hero order. Hand-picking is the selection signal, so we don't also require
+  // the project's own "Featured" toggle. Falls back to all featured below.
   const curatedTeasers = (workSection?.projects ?? [])
-    .filter(
-      (project) => Boolean(project?._id) && project?.hidden !== true && project?.featured === true,
-    )
+    .filter((project) => Boolean(project?._id) && project?.hidden !== true)
     .map((project) => ({
       _id: project!._id,
       title: project!.title ?? null,
