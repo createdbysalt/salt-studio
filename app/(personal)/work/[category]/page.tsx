@@ -74,7 +74,16 @@ export default async function WorkCategoryRoute({params}: Props) {
   const description =
     categoryDoc.seoDescription ?? `${categoryDoc.filterLabel ?? 'Selected'} work by Salt Studio.`
 
-  const pills = resolveWorkPills(page?.pillSource, page?.categoryPills, categories ?? [])
+  const pills = resolveWorkPills(
+    page?.pillSource,
+    page?.categoryPills,
+    categories ?? [],
+    new Set(
+      (categories ?? [])
+        .map((category) => category.slug)
+        .filter((slug): slug is string => Boolean(slug)),
+    ),
+  )
 
   return (
     <main className="bg-background text-foreground pb-24">

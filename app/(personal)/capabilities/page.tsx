@@ -8,7 +8,7 @@ import {stegaClean} from 'next-sanity'
 import Link from 'next/link'
 
 const DESCRIPTION =
-  'AI automations, websites, and the tools Salt works with — for organizations with a mission.'
+  'AI automations, websites, software, and growth — for organizations with a mission.'
 
 export async function generateMetadata(): Promise<Metadata> {
   const {data: servicesPage} = await sanityFetch({query: servicesPageQuery, stega: false})
@@ -74,7 +74,7 @@ export default async function CapabilitiesRoute() {
         url="/capabilities"
         speakableSelectors={['h1']}
         primarySchema={generateServiceSchema({
-          name: 'Websites, AI automations, and custom software',
+          name: 'Websites, AI automations, custom software, and growth',
           description: DESCRIPTION,
           url: '/capabilities',
           serviceType: 'Web design and AI development',

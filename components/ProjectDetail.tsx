@@ -419,7 +419,7 @@ export async function ProjectDetail({data}: {data: Project | null}) {
               <ProjectTestimonialRotator items={testimonials} />
               <div className="mt-8">
                 <Link href="/contact" className="btn-ghost">
-                  Start a conversation →
+                  Reach out →
                 </Link>
               </div>
             </div>

@@ -63,6 +63,7 @@ export default defineType({
                   {title: 'Phone', value: 'tel'},
                   {title: 'Textarea (multi-line)', value: 'textarea'},
                   {title: 'Select dropdown', value: 'select'},
+                  {title: 'Multiselect (checkboxes)', value: 'multiselect'},
                 ],
                 layout: 'radio',
               },
@@ -85,9 +86,9 @@ export default defineType({
               name: 'options',
               title: 'Options',
               type: 'array',
-              description: 'For dropdown fields only. Add the available choices.',
+              description: 'For dropdown and multiselect fields. Add the available choices.',
               of: [{type: 'string'}],
-              hidden: ({parent}) => parent?.type !== 'select',
+              hidden: ({parent}) => parent?.type !== 'select' && parent?.type !== 'multiselect',
             }),
           ],
           preview: {
@@ -137,7 +138,7 @@ export default defineType({
       title: 'Submit Button Text',
       type: 'string',
       description: 'Text on the submit button.',
-      initialValue: 'Send Message',
+      initialValue: 'Send interest →',
     }),
     defineField({
       name: 'successHeadline',
@@ -151,7 +152,8 @@ export default defineType({
       type: 'text',
       rows: 3,
       description: 'Body copy shown after successful submission.',
-      initialValue: "Thanks! We'll be in touch soon.",
+      initialValue:
+        "We take a few projects a year. We read every note. If this is one of them, we'll write.",
     }),
     defineField({
       name: 'errorHeadline',

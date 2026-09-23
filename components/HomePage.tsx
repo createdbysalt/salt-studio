@@ -44,7 +44,7 @@ function heroFace(
 /**
  * Homepage — 7 sections from the approved copy plan
  * (salt-studio-knowledge-base/studio/website/copy/homepage.md).
- * One primary CTA: Book a discovery call. Services/work only route.
+ * One primary CTA: Reach out (interest form). Services/work only route.
  */
 export async function HomePage({data}: HomePageProps) {
   const sections = (data?.sections ?? []).filter((section) => section.enabled !== false)

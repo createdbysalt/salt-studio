@@ -2,7 +2,7 @@ import {WrenchIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
 /**
- * Service — one of Salt’s offerings (Websites, AI Builds, Software).
+ * Service — one of Salt’s offerings (Websites, AI, Software, Growth).
  *
  * Source of truth for the homepage “How we can help” band and the service
  * detail panel: what it is, what you get, what we use, proof, and the next step.
@@ -419,7 +419,7 @@ export default defineType({
       group: 'nextStep',
       to: [{type: 'callToAction'}],
       description:
-        'What someone should do after reading this service — usually “Book a discovery call”. Leave empty for offerings that shouldn’t cold-CTA (e.g. Site care). Managed under Dynamic Content → CTAs.',
+        'What someone should do after reading this service — usually “Reach out”. Leave empty for offerings that shouldn’t cold-CTA (e.g. Site care). Managed under Dynamic Content → CTAs.',
     }),
     defineField({
       name: 'fitCheckLabel',
@@ -428,7 +428,7 @@ export default defineType({
       group: 'nextStep',
       initialValue: 'See how much this could help',
       description:
-        'Secondary CTA next to “Book a discovery call” — sends people to the Salt Score quiz to see how useful this service could be. Leave empty to hide it.',
+        'Secondary CTA next to “Reach out” — sends people to the Salt Score quiz to see how useful this service could be. Leave empty to hide it.',
       validation: (rule) =>
         rule.max(48).warning('Keep this short — it sits beside the discovery-call link'),
     }),

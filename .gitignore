@@ -54,3 +54,4 @@ next-env.d.ts
 
 # Accidental sandbox / npm home pollution
 /000/
+.gstack/

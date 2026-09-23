@@ -16,6 +16,7 @@ export function ContactPage({sections}: ContactPageProps) {
   let headline: string | null = null
   let lead: string | null = null
   let directLine: string | null = null
+  let responseLine: string | null = null
   let formSection: Extract<Section, {_type: 'contactFormSection'}> | null = null
 
   for (const section of sections) {
@@ -25,6 +26,9 @@ export function ContactPage({sections}: ContactPageProps) {
     }
     if (section._type === 'contactDirectSection') {
       directLine = section.directContactLine ?? null
+    }
+    if (section._type === 'contactFooterSection') {
+      responseLine = section.responseLine ?? null
     }
     if (section._type === 'contactFormSection') {
       formSection = section
@@ -38,18 +42,23 @@ export function ContactPage({sections}: ContactPageProps) {
       _key: f!._key,
       name: f!.name as string,
       label: f!.label as string,
-      type: f!.type as 'text' | 'email' | 'tel' | 'textarea' | 'select',
+      type: f!.type as 'text' | 'email' | 'tel' | 'textarea' | 'select' | 'multiselect',
       placeholder: f!.placeholder ?? undefined,
       required: f!.required ?? undefined,
       options: f!.options ?? undefined,
     }))
 
   return (
-    <div className="overflow-x-clip bg-background text-foreground">
+    <div data-nav-surface="paper" className="overflow-x-clip bg-background text-foreground">
       {/* Horizontal inset matches Navbar (px-5 md:px-6) so columns align with logo / nav right */}
       <div className="w-full px-5 pb-14 pt-[calc(var(--project-nav-height)+2.5rem)] sm:pb-16 sm:pt-[calc(var(--project-nav-height)+3.5rem)] md:px-6 md:pb-20 md:pt-[calc(var(--project-nav-height-md)+4rem)] lg:pt-[calc(var(--project-nav-height-md)+5.5rem)]">
         <div className="grid grid-cols-1 items-start gap-10 sm:gap-12 md:gap-14 lg:grid-cols-2 lg:gap-16 xl:gap-24">
-          <ContactHero headline={headline} lead={lead} directLine={directLine} />
+          <ContactHero
+            headline={headline}
+            lead={lead}
+            directLine={directLine}
+            responseLine={responseLine}
+          />
           {fields.length > 0 ? (
             <div className="min-w-0 w-full">
               <ContactForm

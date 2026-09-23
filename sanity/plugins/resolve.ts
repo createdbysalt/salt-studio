@@ -40,8 +40,12 @@ export const mainDocuments = defineDocuments([
     filter: `_type == "quiz" && slug.current == $slug`,
   },
   {
+    route: '/project/:slug',
+    filter: `_type == "clientPortal" && slug.current == $slug`,
+  },
+  {
     route: '/:slug',
-    filter: `_type == "page" && slug.current == $slug`,
+    filter: `_type in ["person", "page"] && slug.current == $slug`,
   },
 ])
 
@@ -59,6 +63,13 @@ export const locations = {
     select: {title: 'title', slug: 'slug.current'},
     resolve: (doc) => {
       const href = resolveHref('project', doc?.slug)
+      return {locations: href ? [{title: doc?.title || 'Untitled', href}] : []}
+    },
+  }),
+  person: defineLocations({
+    select: {title: 'name', slug: 'slug.current'},
+    resolve: (doc) => {
+      const href = resolveHref('person', doc?.slug)
       return {locations: href ? [{title: doc?.title || 'Untitled', href}] : []}
     },
   }),
@@ -113,6 +124,25 @@ export const locations = {
       const href = resolveHref('quiz', doc?.slug)
       return {locations: href ? [{title: doc?.title || 'Untitled quiz', href}] : []}
     },
+  }),
+  clientPortal: defineLocations({
+    select: {title: 'name', slug: 'slug.current'},
+    resolve: (doc) => {
+      const href = resolveHref('clientPortal', doc?.slug)
+      return {locations: href ? [{title: doc?.title || 'Client portal', href}] : []}
+    },
+  }),
+  projectPhases: defineLocations({
+    message: 'This timeline appears on client tables for the linked service',
+    tone: 'positive',
+  }),
+  portalChecklist: defineLocations({
+    message: 'This checklist appears on client tables for the linked service and client type',
+    tone: 'positive',
+  }),
+  portalForms: defineLocations({
+    message: 'This form list appears on client tables for the linked service and client type',
+    tone: 'positive',
   }),
   workCategory: defineLocations({
     select: {title: 'filterLabel', slug: 'slug.current'},

@@ -22,7 +22,7 @@ export const DEFAULT_NAV: NavItem[] = [
 export function normalizeCtaLabel(label?: string | null): string {
   const clean = label ? stegaClean(label) : ''
   const stripped = clean.replace(/[→\s]+$/, '').trim()
-  return stripped || 'Book a discovery call'
+  return stripped || 'Reach out'
 }
 
 /** Resolve a CTA document link, optionally appending ?subject= for /contact. */

@@ -3,14 +3,17 @@
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {SidePanelClose} from '@/components/SidePanelClose'
 import {
-  ABOUT_BIO,
-  ABOUT_CTA,
-  ABOUT_META_LINE,
-  ABOUT_PRINCIPLES,
-  ABOUT_VIDEO_SRC,
+  ABOUT_DEFAULT_SLUG,
+  ABOUT_INTEREST_HREF,
+  ABOUT_WAITLIST_HREF,
+  aboutSlugFromPath,
+  personHref,
+  personVideoSrc,
 } from '@/lib/aboutPanel'
+import type {PeopleQueryResult} from '@/sanity.types'
 import {useGSAP} from '@gsap/react'
 import {useLenis} from 'lenis/react'
+import {PortableText, type PortableTextBlock} from 'next-sanity'
 import Link from 'next/link'
 import {usePathname, useRouter, useSearchParams} from 'next/navigation'
 import {
@@ -20,11 +23,14 @@ import {
   useContext,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
 } from 'react'
 import {createPortal} from 'react-dom'
+
+export type AboutPerson = NonNullable<PeopleQueryResult>[number]
 
 type AboutPanelContextValue = {
   open: boolean
@@ -47,37 +53,52 @@ export function useOptionalAboutPanel(): AboutPanelContextValue | null {
   return useContext(AboutPanelContext)
 }
 
-export function AboutPanelProvider({children}: {children: ReactNode}) {
-  const [open, setOpen] = useState(false)
+export function AboutPanelProvider({
+  people,
+  children,
+}: {
+  people: PeopleQueryResult
+  children: ReactNode
+}) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const pathSlug = aboutSlugFromPath(pathname)
+  const [open, setOpen] = useState(Boolean(pathSlug))
 
-  const openAbout = useCallback(() => setOpen(true), [])
-  const closeAbout = useCallback(() => setOpen(false), [])
+  const openAbout = useCallback(() => {
+    setOpen(true)
+    router.push(personHref(ABOUT_DEFAULT_SLUG), {scroll: false})
+  }, [router])
+
+  const closeAbout = useCallback(() => {
+    setOpen(false)
+    if (pathSlug) router.replace('/', {scroll: false})
+  }, [pathSlug, router])
+
+  useEffect(() => {
+    if (pathSlug) setOpen(true)
+  }, [pathSlug])
 
   return (
     <AboutPanelContext.Provider value={{open, openAbout, closeAbout}}>
       {children}
       <Suspense fallback={null}>
-        <AboutDeepLink openAbout={openAbout} />
+        <AboutDeepLink />
       </Suspense>
-      <AboutPanel open={open} onClose={closeAbout} />
+      <AboutPanel open={open} onClose={closeAbout} people={people ?? []} selectedSlug={pathSlug} />
     </AboutPanelContext.Provider>
   )
 }
 
-/** Opens the panel from `?about=1` (used by the /about redirect). */
-function AboutDeepLink({openAbout}: {openAbout: () => void}) {
+/** Remap leftover `?about=1` bookmarks to the sendable /gabi URL. */
+function AboutDeepLink() {
   const router = useRouter()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
 
   useEffect(() => {
     if (searchParams.get('about') !== '1') return
-    openAbout()
-    const params = new URLSearchParams(searchParams.toString())
-    params.delete('about')
-    const query = params.toString()
-    router.replace(query ? `${pathname}?${query}` : pathname, {scroll: false})
-  }, [searchParams, pathname, router, openAbout])
+    router.replace(personHref(ABOUT_DEFAULT_SLUG), {scroll: false})
+  }, [searchParams, router])
 
   return null
 }
@@ -85,13 +106,16 @@ function AboutDeepLink({openAbout}: {openAbout: () => void}) {
 type AboutPanelProps = {
   open: boolean
   onClose: () => void
+  people: AboutPerson[]
+  selectedSlug: string | null
 }
 
 /**
  * Paper side drawer for About — same motion grammar as ServiceDetailPanel,
- * simpler overlay, Monolog-shaped content (bio → meta → video → principles → CTA).
+ * simpler overlay, Monolog-shaped content. Toggle swaps the person without
+ * closing the drawer.
  */
-function AboutPanel({open, onClose}: AboutPanelProps) {
+function AboutPanel({open, onClose, people, selectedSlug}: AboutPanelProps) {
   const titleId = useId()
   const [mounted, setMounted] = useState(false)
   const [present, setPresent] = useState(false)
@@ -103,7 +127,13 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const openRef = useRef(open)
+  const selectedRef = useRef(selectedSlug)
   const lenis = useLenis()
+
+  const person = useMemo(() => {
+    if (!people.length) return null
+    return people.find((item) => item.slug === selectedSlug) ?? people[0] ?? null
+  }, [people, selectedSlug])
 
   const close = useCallback(() => onClose(), [onClose])
 
@@ -117,6 +147,7 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
 
   useEffect(() => {
     if (open) setPresent(true)
+    else selectedRef.current = null
   }, [open])
 
   useGSAP(
@@ -216,6 +247,44 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
     {scope: rootRef, dependencies: [present, open]},
   )
 
+  // Toggle: keep the drawer mounted, reset scroll, replay the inner reveal.
+  useGSAP(
+    () => {
+      if (!open || !present || !person) return
+      if (selectedRef.current == null) {
+        selectedRef.current = person.slug
+        return
+      }
+      if (selectedRef.current === person.slug) return
+      selectedRef.current = person.slug
+
+      const panel = panelRef.current
+      const scroller = scrollRef.current
+      if (scroller) scroller.scrollTop = 0
+      if (!panel) return
+
+      const reduced = prefersReducedMotion()
+      const revealEls = gsap.utils.toArray<HTMLElement>('[data-about-reveal]', panel)
+      if (!revealEls.length) return
+
+      gsap.killTweensOf(revealEls)
+      if (reduced) {
+        gsap.set(revealEls, {clearProps: 'opacity,transform'})
+        return
+      }
+
+      gsap.set(revealEls, {opacity: 0, y: 18})
+      gsap.to(revealEls, {
+        opacity: 1,
+        y: 0,
+        duration: 0.55,
+        stagger: 0.06,
+        ease: EASE.outCubic,
+      })
+    },
+    {scope: rootRef, dependencies: [person?.slug, open, present]},
+  )
+
   useEffect(() => {
     if (!present) return
     const onKeyDown = (event: KeyboardEvent) => {
@@ -234,18 +303,17 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
     }
   }, [present, close, lenis])
 
-  // Play/pause ambient video with the panel.
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-    if (open && present) {
+    if (open && present && personVideoSrc(person?.slug)) {
       void video.play().catch(() => {
         // Autoplay can fail before a user gesture — ignore.
       })
     } else {
       video.pause()
     }
-  }, [open, present])
+  }, [open, present, person?.slug])
 
   if (!mounted || !present) return null
 
@@ -280,124 +348,237 @@ function AboutPanel({open, onClose}: AboutPanelProps) {
           className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain"
         >
           <div className="px-[28px] pb-[56px] pt-[40px]">
-            {/* Header eyebrow — same top band as Close; scrolls away with content. */}
-            <p
-              data-about-reveal
-              className="flex items-center gap-2 pr-[110px] font-sans text-[12px] font-semibold tracking-[-0.01em] text-[#08090a]/55 lg:text-[18px]"
-            >
-              <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
-              About the studio
-            </p>
-
-            <h2 id={titleId} className="sr-only">
-              About Salt Studio
-            </h2>
-
-            {/* Type scale: mobile/tablet 16 → desktop 24 (2/3). Same ratio on siblings below. */}
-            <div
-              data-about-reveal
-              className="mt-[32px] space-y-[16px] text-[16px] font-medium leading-[1.2] tracking-[-0.015em] text-[#08090a] lg:space-y-[22px] lg:text-[24px] lg:leading-[1.1]"
-            >
-              {ABOUT_BIO.map((paragraph) => (
-                <p key={paragraph.slice(0, 32)}>{paragraph}</p>
-              ))}
-            </div>
-
-            <div data-about-reveal className="mt-[22px]">
-              <a
-                href={ABOUT_CTA.primaryHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={close}
-                className="group inline-flex items-center gap-[0.4em] font-sans text-[13px] font-medium tracking-[-0.015em] text-[#08090a]/75 transition-colors duration-300 hover:text-[#08090a] lg:text-[20px]"
+            {people.length > 1 ? (
+              <div
+                data-about-reveal
+                className="flex items-center gap-4 pr-[110px] font-sans text-[12px] font-semibold tracking-[-0.01em] lg:text-[18px]"
+                aria-label="People"
               >
-                <span>{ABOUT_CTA.primaryLabel}</span>
-                <span
-                  aria-hidden
-                  className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[5px]"
-                >
-                  →
-                </span>
-              </a>
-            </div>
-
-            <div
-              data-about-reveal
-              className="mt-[40px] flex items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[#08090a]/40 lg:text-[11px]"
-            >
-              <span>{ABOUT_META_LINE.established}</span>
-              <span className="text-right">{ABOUT_META_LINE.location}</span>
-            </div>
-
-            <div
-              data-about-reveal
-              className="relative mt-[20px] aspect-[1080/1434] w-full overflow-hidden bg-[#08090a]/08"
-            >
-              <video
-                ref={videoRef}
-                className="h-full w-full object-cover"
-                src={ABOUT_VIDEO_SRC}
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                aria-label="Salt Studio atmosphere"
-              />
-            </div>
-
-            <section data-about-reveal className="mt-[56px] lg:mt-[64px]">
-              <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
-                <p className="flex items-center gap-2 self-start font-sans text-[12px] font-semibold tracking-[-0.01em] text-[#08090a]/55 lg:text-[18px]">
-                  <span
-                    aria-hidden
-                    className="inline-block size-1.5 rounded-full bg-[#08090a]/35"
-                  />
-                  Our principles
-                </p>
-                <ul className="space-y-[28px] lg:space-y-[32px]">
-                  {ABOUT_PRINCIPLES.map((principle) => (
-                    <li key={principle.title}>
-                      <p className="font-sans text-[15px] font-medium leading-[1.15] tracking-[-0.015em] text-[#08090a] lg:text-[22px]">
-                        {principle.title}
-                      </p>
-                      <p className="mt-[8px] text-[12px] font-medium leading-[1.25] tracking-[-0.01em] text-[#08090a]/65 lg:text-[17px]">
-                        {principle.body}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-
-            <section
-              data-about-reveal
-              className="mt-[56px] rounded-sm bg-[#08090a] px-[24px] py-[28px] text-[#f3f3f3] lg:mt-[64px] lg:px-[28px] lg:py-[32px]"
-            >
-              <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
-                <p className="flex items-center gap-2 self-start font-sans text-[12px] font-semibold tracking-[-0.01em] text-white/55 lg:text-[18px]">
-                  <span aria-hidden className="inline-block size-1.5 rounded-full bg-white/40" />
-                  {ABOUT_CTA.eyebrow}
-                </p>
-                <div>
-                  <p className="text-[15px] font-medium leading-[1.15] tracking-[-0.015em] text-white lg:text-[22px]">
-                    {ABOUT_CTA.body}
-                  </p>
-                  <div className="mt-[24px]">
+                {people.map((item) => {
+                  const href = personHref(item.slug)
+                  const active = item.slug === person?.slug
+                  const shortName = (item.shortName || item.name || '').trim()
+                  return (
                     <Link
-                      href={ABOUT_CTA.secondaryHref}
-                      onClick={close}
-                      className="inline-flex items-center rounded-sm border border-white/30 px-4 py-3 font-mono text-[11px] uppercase tracking-label text-white transition-colors hover:border-white/60"
+                      key={item._id}
+                      href={href}
+                      scroll={false}
+                      aria-current={active ? 'page' : undefined}
+                      aria-label={`About ${shortName}`}
+                      className={`transition-colors duration-300 ${
+                        active
+                          ? 'text-[#08090a] underline decoration-[#08090a] underline-offset-[6px]'
+                          : 'text-[#08090a]/45 hover:text-[#08090a]/75'
+                      }`}
                     >
-                      {ABOUT_CTA.secondaryLabel}
+                      {`about ${shortName.toLowerCase()}`}
                     </Link>
-                  </div>
-                </div>
+                  )
+                })}
               </div>
-            </section>
+            ) : null}
+
+            {person ? (
+              <PersonPanelBody
+                person={person}
+                titleId={titleId}
+                videoRef={videoRef}
+                onNavigate={close}
+              />
+            ) : (
+              <p data-about-reveal className="mt-[32px] text-[16px] font-medium text-[#08090a]/70">
+                About is not published yet.
+              </p>
+            )}
           </div>
         </div>
       </aside>
     </div>,
     document.body,
   )
+}
+
+function PersonPanelBody({
+  person,
+  titleId,
+  videoRef,
+  onNavigate,
+}: {
+  person: AboutPerson
+  titleId: string
+  videoRef: React.RefObject<HTMLVideoElement | null>
+  onNavigate: () => void
+}) {
+  const principles = (person.principles ?? []).filter((item) => item?.title && item?.body)
+  const studioNote = person.studioNote?.trim()
+  const availability = person.availability?.trim()
+  const meta = personMeta(person)
+  const videoSrc = personVideoSrc(person.slug)
+  const body = (person.body ?? []) as PortableTextBlock[]
+
+  return (
+    <>
+      <header data-about-reveal className="mt-[32px]">
+        <h2
+          id={titleId}
+          className="font-sans text-[28px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#08090a] lg:text-[40px]"
+        >
+          {person.name}
+        </h2>
+        {person.role ? (
+          <p className="mt-[8px] font-sans text-[14px] font-medium tracking-[-0.015em] text-[#08090a]/70 lg:text-[20px]">
+            {person.role}
+          </p>
+        ) : null}
+        {person.headline ? (
+          <p className="person-headline mt-[10px] text-[15px] font-medium leading-[1.2] tracking-[-0.015em] text-[#08090a]/80 lg:text-[22px]">
+            {person.headline}
+          </p>
+        ) : null}
+      </header>
+
+      {body.length > 0 ? (
+        <div
+          data-about-reveal
+          className="person-bio mt-[28px] space-y-[16px] text-[16px] font-medium leading-[1.2] tracking-[-0.015em] text-[#08090a] lg:space-y-[22px] lg:text-[24px] lg:leading-[1.1]"
+        >
+          <PortableText
+            value={body}
+            components={{
+              block: {
+                normal: ({children}) => <p>{children}</p>,
+              },
+            }}
+          />
+        </div>
+      ) : null}
+
+      <div data-about-reveal className="mt-[22px]">
+        <Link
+          href={ABOUT_INTEREST_HREF}
+          onClick={onNavigate}
+          className="group inline-flex items-center gap-[0.4em] font-sans text-[13px] font-medium tracking-[-0.015em] text-[#08090a]/75 transition-colors duration-300 hover:text-[#08090a] lg:text-[20px]"
+        >
+          <span>Reach out</span>
+          <span
+            aria-hidden
+            className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[5px]"
+          >
+            →
+          </span>
+        </Link>
+      </div>
+
+      {meta.length > 0 ? (
+        <div
+          data-about-reveal
+          className="mt-[40px] flex flex-wrap items-center justify-between gap-x-4 gap-y-2 font-mono text-[10px] uppercase tracking-[0.14em] text-[#08090a]/40 lg:text-[11px]"
+        >
+          {meta.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+      ) : null}
+
+      {videoSrc ? (
+        <div
+          data-about-reveal
+          className="relative mt-[20px] aspect-[1080/1434] w-full overflow-hidden bg-[#08090a]/08"
+        >
+          <video
+            ref={videoRef}
+            key={videoSrc}
+            className="h-full w-full object-cover"
+            src={videoSrc}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label={person.slug === 'matt' ? 'Matheus' : 'Salt Studio atmosphere'}
+          />
+        </div>
+      ) : null}
+
+      {principles.length > 0 ? (
+        <section data-about-reveal className="mt-[56px] lg:mt-[64px]">
+          <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
+            <p className="flex items-center gap-2 self-start font-sans text-[12px] font-semibold tracking-[-0.01em] text-[#08090a]/55 lg:text-[18px]">
+              <span aria-hidden className="inline-block size-1.5 rounded-full bg-[#08090a]/35" />
+              Principles
+            </p>
+            <ul className="space-y-[28px] lg:space-y-[32px]">
+              {principles.map((principle) => (
+                <li key={principle._key}>
+                  <p className="font-sans text-[15px] font-medium leading-[1.15] tracking-[-0.015em] text-[#08090a] lg:text-[22px]">
+                    {principle.title}
+                  </p>
+                  <p className="mt-[8px] text-[12px] font-medium leading-[1.25] tracking-[-0.01em] text-[#08090a]/65 lg:text-[17px]">
+                    {principle.body}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      ) : null}
+
+      {studioNote ? (
+        <section data-about-reveal className="mt-[56px] lg:mt-[64px]">
+          <p className="text-[15px] font-medium leading-[1.2] tracking-[-0.015em] text-[#08090a]/80 lg:text-[20px]">
+            {studioNote}
+          </p>
+        </section>
+      ) : null}
+
+      {availability ? (
+        <p
+          data-about-reveal
+          className="mt-[28px] font-mono text-[10px] uppercase tracking-[0.12em] text-[#08090a]/40 lg:text-[11px]"
+        >
+          {availability}
+        </p>
+      ) : null}
+
+      <section
+        data-about-reveal
+        className="mt-[56px] rounded-sm bg-[#08090a] px-[24px] py-[28px] text-[#f3f3f3] lg:mt-[64px] lg:px-[28px] lg:py-[32px]"
+      >
+        <div className="grid gap-[24px] md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-[40px]">
+          <p className="flex items-center gap-2 self-start font-sans text-[12px] font-semibold tracking-[-0.01em] text-white/55 lg:text-[18px]">
+            <span aria-hidden className="inline-block size-1.5 rounded-full bg-white/40" />
+            Salt software
+          </p>
+          <div>
+            <p className="text-[15px] font-medium leading-[1.15] tracking-[-0.015em] text-white lg:text-[22px]">
+              The studio runs on software we&apos;re building ourselves — Salt — so small teams can
+              spend less time gathering and drafting, and more time on the work that matters.
+            </p>
+            <div className="mt-[24px]">
+              <Link
+                href={ABOUT_WAITLIST_HREF}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={onNavigate}
+                className="inline-flex items-center rounded-sm border border-white/30 px-4 py-3 font-mono text-[11px] uppercase tracking-label text-white transition-colors hover:border-white/60"
+              >
+                Join the waitlist
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
+
+function personMeta(person: AboutPerson): string[] {
+  if (person.slug === 'matt') {
+    return ['IN MARKET SINCE 2018', 'SALT STUDIO EST 2025', 'PORTLAND']
+  }
+  if (person.slug === 'gabi') {
+    return ['BUILDING SINCE 2018', 'SALT STUDIO EST 2025', 'PORTLAND']
+  }
+  const items = ['SALT STUDIO EST 2025']
+  if (person.location) items.push(person.location.toUpperCase())
+  return items
 }

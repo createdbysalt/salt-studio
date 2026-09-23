@@ -24,6 +24,7 @@ Before editing code, read the relevant **`CLAUDE.md`** file for that area. Those
 | Components   | `components/CLAUDE.md`                     | Flat layout, Tailwind, visual editing      |
 | Analytics    | `lib/analytics/CLAUDE.md`                  | GTM, GA4, consent, event helpers           |
 | SEO / AEO    | `lib/seo/CLAUDE.md`                        | JSON-LD, sitemap, structured data          |
+| Church Tally | `lib/tally/CLAUDE.md`                      | Church kit forms, protected IDs            |
 | Brand assets | `brand-identity/asset-tagging-strategy.md` | Before Sanity Media Library uploads        |
 
 ## Non-negotiables (summary)
