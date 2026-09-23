@@ -1,6 +1,6 @@
 'use client'
 
-import {gsap, prefersReducedMotion, ScrollTrigger} from '@/components/motion/gsap'
+import {gsap, ScrollTrigger, skipScrubMotion} from '@/components/motion/gsap'
 import {useGSAP} from '@gsap/react'
 import {useEffect, useRef} from 'react'
 
@@ -61,7 +61,9 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
       if (!pills.length) return
 
       const labelEl = frame.querySelector<HTMLElement>('[data-cap-label]')
-      const reduced = prefersReducedMotion()
+      // Touch devices get the static settled layout too: the pinned scrub
+      // physics batch badly against iOS momentum scroll and feel janky.
+      const reduced = skipScrubMotion()
 
       const parkOffstage = (rests: Rest[], aboveY: number[]) => {
         pills.forEach((pill, i) => {
@@ -295,13 +297,7 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
         parkOffstage(ctx.rests, ctx.aboveY)
       }
 
-      layoutOnce()
-      requestAnimationFrame(() => {
-        if (!ctxRef.current) return
-        layoutOnce()
-      })
-
-      if (reduced) {
+      const settleVisible = () => {
         pills.forEach((pill, i) => {
           const r = ctx.rests[i]
           if (!r) return
@@ -314,8 +310,27 @@ export function HomeCapabilitiesScrub({items, label}: HomeCapabilitiesScrubProps
           })
         })
         ctx.settled = true
+      }
+
+      layoutOnce()
+
+      if (reduced) {
+        // Static settled layout (reduced motion + touch): place pills at their
+        // rest positions, visible. Re-run after the first layout frame so a
+        // late measurement doesn't leave them parked offstage (opacity 0).
+        settleVisible()
+        requestAnimationFrame(() => {
+          if (!ctxRef.current) return
+          computeRests(ctx.rests, ctx.aboveY, ctx.order, {hideForMeasure: true})
+          settleVisible()
+        })
         return
       }
+
+      requestAnimationFrame(() => {
+        if (!ctxRef.current) return
+        layoutOnce()
+      })
 
       const startBreath = () => {
         ctx.breathTweens.forEach((t) => t.kill())

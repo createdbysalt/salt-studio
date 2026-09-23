@@ -6,19 +6,30 @@ import {gsap, ScrollTrigger} from './gsap'
 
 /**
  * Smooth-scroll root for the public site. Syncs Lenis with ScrollTrigger and
- * drives Lenis from the GSAP ticker (single rAF loop). Under reduced motion the
- * provider renders children with native scrolling — no Lenis instance at all.
+ * drives Lenis from the GSAP ticker (single rAF loop). Under reduced motion — or
+ * on touch devices — the provider renders children with native scrolling and no
+ * Lenis instance at all.
+ *
+ * Touch devices (phones/tablets) are excluded because iOS Safari runs native
+ * scroll on the compositor thread with real momentum; Lenis' main-thread rAF
+ * loop fights that engine and makes scrolling feel laggy. ScrollTrigger and the
+ * scrubbed animations keep working on native scroll — we just drop the smoothing.
  *
  * Mounted in app/(personal)/layout.tsx only; the Studio at /edit stays native.
  */
 export function LenisProvider({children}: {children: React.ReactNode}) {
   const lenisRef = useRef<LenisRef>(null)
-  const [reducedMotion, setReducedMotion] = useState(false)
+  const [nativeScroll, setNativeScroll] = useState(false)
 
   useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setReducedMotion(mq.matches)
-    const onChange = () => setReducedMotion(mq.matches)
+    // Reduced motion OR a coarse (touch) pointer → hand scrolling back to the
+    // browser. `pointer: coarse` catches phones and tablets, where native
+    // momentum scrolling beats anything we can do on the main thread.
+    const mq = window.matchMedia(
+      '(prefers-reduced-motion: reduce), (pointer: coarse)',
+    )
+    setNativeScroll(mq.matches)
+    const onChange = () => setNativeScroll(mq.matches)
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [])
@@ -35,7 +46,7 @@ export function LenisProvider({children}: {children: React.ReactNode}) {
   }, [])
 
   useEffect(() => {
-    if (reducedMotion) return
+    if (nativeScroll) return
 
     const lenis = lenisRef.current?.lenis
     const update = (time: number) => {
@@ -56,9 +67,9 @@ export function LenisProvider({children}: {children: React.ReactNode}) {
       gsap.ticker.remove(update)
       lenis?.off('scroll', ScrollTrigger.update)
     }
-  }, [reducedMotion])
+  }, [nativeScroll])
 
-  if (reducedMotion) {
+  if (nativeScroll) {
     return <>{children}</>
   }
 
