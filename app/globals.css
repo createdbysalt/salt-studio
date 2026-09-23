@@ -551,6 +551,15 @@
     pointer-events: none;
     backdrop-filter: blur(28px) saturate(0.8);
     -webkit-backdrop-filter: blur(28px) saturate(0.8);
+
+    /* Touch devices (iOS Safari): a large backdrop-blur re-rasterizes every
+       frame content scrolls behind it — one of the priciest things to
+       composite on mobile GPUs. Halve the radius; visually near-identical,
+       much cheaper to scroll. */
+    @media (pointer: coarse) {
+      backdrop-filter: blur(14px) saturate(0.8);
+      -webkit-backdrop-filter: blur(14px) saturate(0.8);
+    }
     mask-image: linear-gradient(
       to bottom,
       transparent 0%,

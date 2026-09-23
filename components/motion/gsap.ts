@@ -47,4 +47,19 @@ export function prefersReducedMotion(): boolean {
   )
 }
 
+/** Touch devices (phones/tablets) — coarse pointer, no fine hover. */
+export function isCoarsePointer(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+}
+
+/**
+ * Whether to skip scroll-scrubbed effects (parallax drift, scrub timelines).
+ * True under reduced motion OR on touch devices: iOS Safari batches scroll
+ * events during momentum, so anything tied frame-by-frame to scroll position
+ * looks choppy. Static content reads cleaner there than janky scrub.
+ */
+export function skipScrubMotion(): boolean {
+  return prefersReducedMotion() || isCoarsePointer()
+}
+
 export {Draggable, Flip, gsap, InertiaPlugin, MorphSVGPlugin, ScrollTrigger, SplitText, TextPlugin}
