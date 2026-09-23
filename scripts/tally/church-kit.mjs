@@ -11,24 +11,46 @@
  */
 import {execSync} from 'node:child_process'
 import {randomUUID} from 'node:crypto'
+import {readFileSync} from 'node:fs'
+import {dirname, join} from 'node:path'
+import {fileURLToPath} from 'node:url'
 
 const API_BASE = 'https://api.tally.so'
 const TALLY_VERSION = '2025-02-01'
 const FOLDER_NAME = 'Church kit'
 const TITLE_PREFIX = 'Salt Church — '
 
-const PROTECTED_TALLY_FORM_IDS = new Set([
-  '1AOReW',
-  'oblYeV',
-  'MePV4X',
-  'J9GoPd',
-  'gDgzld',
-  'yPg1Q4',
-  'Xx9Qa4',
-  '812rBx',
-  'ZjjkEe',
-  'eqYXjq',
-])
+/**
+ * Form IDs are client data and live in NEXT_PUBLIC_TALLY_CHURCH_FORMS
+ * (JSON in .env.local — see .env.example for the shape), not in the repo.
+ * Refusing to run without it: an empty protected list could let this script
+ * PATCH live client forms.
+ */
+function loadTallyCatalog() {
+  let raw = process.env.NEXT_PUBLIC_TALLY_CHURCH_FORMS
+  if (!raw) {
+    try {
+      const envPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', '.env.local')
+      const line = readFileSync(envPath, 'utf8')
+        .split('\n')
+        .find((entry) => entry.startsWith('NEXT_PUBLIC_TALLY_CHURCH_FORMS='))
+      raw = line
+        ?.slice(line.indexOf('=') + 1)
+        .trim()
+        .replace(/^['"]|['"]$/g, '')
+    } catch {
+      // fall through to the error below
+    }
+  }
+  if (!raw) {
+    throw new Error('NEXT_PUBLIC_TALLY_CHURCH_FORMS not set (see .env.example for the shape)')
+  }
+  return JSON.parse(raw)
+}
+
+const CATALOG = loadTallyCatalog()
+
+const PROTECTED_TALLY_FORM_IDS = new Set(CATALOG.protected ?? [])
 
 function getApiKey() {
   if (process.env.TALLY_API_KEY) return process.env.TALLY_API_KEY
@@ -505,9 +527,35 @@ const PULL_FROM_SITE = 'Yes — pull what you can from the site'
 const FILL_IT_IN = 'No — I will fill it in'
 const NO_WEBSITE = 'I do not have a current website'
 
+const REFERENCE_KIND = [
+  'The feeling',
+  'A layout or page structure',
+  'The photography',
+  'How they handle Sundays / visitors',
+  'Something else',
+]
+
+function addSiteReference(b, n, {required = false} = {}) {
+  const optional = required ? '' : ' (optional)'
+  b.heading2(`Site ${n}${optional}`)
+    .inputLink(`Website ${n}`, {
+      required,
+      placeholder: 'https://',
+    })
+    .textarea(`If we could take only one thing from site ${n}, what is it?`, {
+      required,
+      placeholder: 'The warmth. How they welcome first-time visitors. The photography. Not the whole site.',
+    })
+    .dropdown(`What is that one thing, mostly? (site ${n})`, REFERENCE_KIND)
+    .textarea(`Do not copy this from site ${n}`, {
+      placeholder: 'Optional. e.g., Too cold, too much motion, the mega-church scale.',
+    })
+}
+
 function buildGettingStartedForm() {
   const pages = {
     churchInfo: uid(),
+    design: uid(),
     voice: uid(),
     pco: uid(),
     links: uid(),
@@ -533,7 +581,7 @@ function buildGettingStartedForm() {
     [PULL_FROM_SITE, FILL_IT_IN, NO_WEBSITE],
     {
       required: true,
-      hint: 'We can take mission, Sunday expect, address, links, and sermons from the site. You still answer voice samples, Planning Center, and domain.',
+      hint: 'We can take mission, Sunday expect, address, links, and sermons from the site. You still answer design direction, voice samples, Planning Center, and domain.',
     },
   )
   const scrapeChoice = b.lastChoice
@@ -546,7 +594,7 @@ function buildGettingStartedForm() {
     {
       uuid: uid(),
       type: 'JUMP_TO_PAGE',
-      payload: {jumpToPage: pages.voice},
+      payload: {jumpToPage: pages.design},
     },
   ])
     .textarea('What feels out of alignment?', {
@@ -567,7 +615,7 @@ function buildGettingStartedForm() {
     })
     .inputLink('Links we should see before the call', {
       placeholder: 'https://',
-      hint: 'Optional. Drive folder, Figma, or a reference site.',
+      hint: 'Optional. Drive folder or Figma. Design references have their own page.',
     })
     .pageBreak('Church info', pages.churchInfo)
     .heading2('Church info')
@@ -627,6 +675,39 @@ function buildGettingStartedForm() {
     })
     .textarea('Church history', {
       placeholder: 'Your story and how you started.',
+    })
+    .pageBreak('Design', pages.design)
+    .heading2('How it should feel')
+    .hint(
+      'Links help. The feeling matters more. We will not copy a site — we will use what you name here as direction.',
+    )
+    .textarea('A first-time visitor lands. After 10 seconds they should feel…', {
+      required: true,
+      placeholder: 'Welcome. Calm. Like someone saved them a seat.',
+    })
+    .multipleChoice('Warm or cool?', ['Warm', 'Cool'], {required: true})
+    .multipleChoice('Quiet or energetic?', ['Quiet', 'Energetic'], {required: true})
+    .multipleChoice('Simple or rich?', ['Simple', 'Rich'], {required: true})
+    .multipleChoice('Sacred or everyday?', ['Sacred', 'Everyday'], {required: true})
+    .heading2('Sites you like')
+    .hint('Three is enough. For each one, tell us the single thing to take.')
+  addSiteReference(b, 1, {required: true})
+  addSiteReference(b, 2)
+  addSiteReference(b, 3)
+  b.heading2('What to avoid')
+    .inputLink('A site or style you do not want', {
+      placeholder: 'https://',
+      hint: 'Optional. A church site, a template, or a vibe that is not you.',
+    })
+    .textarea('Why not?', {
+      placeholder: 'Too plastic. Too corporate. Feels like a different church.',
+    })
+    .checkboxes('Anything we should keep or avoid?', [
+      'Keep our logo and colors as they are',
+      'No stock “churchy” imagery',
+    ])
+    .textarea('Anything else off-limits?', {
+      placeholder: 'Optional.',
     })
     .pageBreak('Voice', pages.voice)
     .heading2('Voice samples')
@@ -1329,10 +1410,10 @@ function buildFaqForm() {
   return b.build()
 }
 
-const KIT_FORM_IDS = {
-  gettingStarted: 'XxPl4P',
-  faq: 'obL6Gb',
-}
+/** Kit form IDs derived from the catalog's church URLs (last path segment). */
+const KIT_FORM_IDS = Object.fromEntries(
+  Object.entries(CATALOG.church ?? {}).map(([key, url]) => [key, url.split('/').pop()]),
+)
 
 const FORMS = [
   {
