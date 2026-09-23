@@ -25,9 +25,7 @@ export function LenisProvider({children}: {children: React.ReactNode}) {
     // Reduced motion OR a coarse (touch) pointer → hand scrolling back to the
     // browser. `pointer: coarse` catches phones and tablets, where native
     // momentum scrolling beats anything we can do on the main thread.
-    const mq = window.matchMedia(
-      '(prefers-reduced-motion: reduce), (pointer: coarse)',
-    )
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce), (pointer: coarse)')
     setNativeScroll(mq.matches)
     const onChange = () => setNativeScroll(mq.matches)
     mq.addEventListener('change', onChange)
