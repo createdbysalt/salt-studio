@@ -93,6 +93,8 @@ export function ConsentProvider({children}: ConsentProviderProps) {
       setConsent(stored)
       setHasConsented(true)
       setShowBanner(false)
+
+      updateGoogleConsent(stored.analytics, stored.marketing)
     } else {
       // Small delay before showing banner to avoid layout shift
       const timer = setTimeout(() => setShowBanner(true), 1000)

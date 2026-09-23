@@ -133,18 +133,14 @@ export function updateGoogleConsent(analytics: boolean, marketing: boolean) {
     event: 'consent_update',
   })
 
-  // Update Google Consent Mode via gtag arguments array
-  window.dataLayer.push([
-    'consent',
-    'update',
-    {
-      ad_storage: marketing ? 'granted' : 'denied',
-      ad_user_data: marketing ? 'granted' : 'denied',
-      ad_personalization: marketing ? 'granted' : 'denied',
-      analytics_storage: analytics ? 'granted' : 'denied',
-      personalization_storage: analytics ? 'granted' : 'denied',
-    },
-  ])
+  // Must go through gtag() - Consent Mode ignores a plain dataLayer array push
+  window.gtag?.('consent', 'update', {
+    ad_storage: marketing ? 'granted' : 'denied',
+    ad_user_data: marketing ? 'granted' : 'denied',
+    ad_personalization: marketing ? 'granted' : 'denied',
+    analytics_storage: analytics ? 'granted' : 'denied',
+    personalization_storage: analytics ? 'granted' : 'denied',
+  })
 }
 
 // Type declaration for dataLayer
@@ -154,5 +150,6 @@ type DataLayerItem = Record<string, unknown> | unknown[]
 declare global {
   interface Window {
     dataLayer: DataLayerItem[]
+    gtag?: (...args: unknown[]) => void
   }
 }

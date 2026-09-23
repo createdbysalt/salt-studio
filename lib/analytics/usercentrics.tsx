@@ -12,7 +12,11 @@ import Script from 'next/script'
 
 const UC_SETTINGS_ID = '3lNRNwFF7b2Anu'
 
-/** Mount in the root layout body. beforeInteractive still lands in head, before GTM. */
+/**
+ * Mount in the root layout body. beforeInteractive still lands in head, before
+ * GTM. Consent Mode governs storage now — the uc-block auto-blocker is gone, so
+ * this no longer rewrites script tags.
+ */
 export function UsercentricsScripts() {
   return (
     <>
