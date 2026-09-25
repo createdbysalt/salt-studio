@@ -849,3 +849,78 @@ export const clientPortalAuthQuery = defineQuery(`
 export const clientPortalSlugsQuery = defineQuery(`
   *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}
 `)
+
+// ---------------------------------------------------------------------------
+// Landing pages (paid-traffic page builder): /churches, /nonprofits
+// ---------------------------------------------------------------------------
+
+export const landingPageBySlugQuery = defineQuery(`
+  *[_type == "landingPage" && slug.current == $slug][0]{
+    _id,
+    _type,
+    title,
+    "slug": slug.current,
+    audience,
+    ctaLabel,
+    ctaLink,
+    ctaSubhead,
+    hideNav,
+    stickyMobileCta,
+    seoTitle,
+    seoDescription,
+    ogImage,
+    speakableSummary,
+    offers[]{ _key, name, price, billing, description },
+    sections[]{
+      _key,
+      _type,
+      enabled,
+      internalName,
+      _type == "lpHeroSection" => {
+        eyebrow, headline, subheadline, proofLine, secondaryLinkLabel, secondaryLinkTarget, image
+      },
+      _type == "lpLogoSection" => {
+        logos{ title, style, grayscale, logos[]{ _key, name, url, image } }
+      },
+      _type == "lpProblemSection" => {
+        headline, scene, pains, statLine, statSourceLabel, statSourceUrl, closingLine
+      },
+      _type == "lpSystemSection" => {
+        systemName, headline, bridgeLine, closingLine,
+        parts[]{ _key, title, body, statLine }
+      },
+      _type == "lpDeliverableSection" => { headline, mockupImage, caption },
+      _type == "lpProcessSection" => {
+        headline, steps[]{ _key, timeframe, label, body }
+      },
+      _type == "lpMeasurementSection" => {
+        headline, intro, limitsLine, bullets[]{ _key, lead, text }
+      },
+      _type == "lpProofSection" => {
+        headline,
+        cases[]{ _key, title, body, number, numberLabel, "projectSlug": project->slug.current },
+        "testimonials": testimonials[]->{ _id, quote, author, role, "client": client->name }
+      },
+      _type == "lpCtaSection" => { headline, subhead },
+      _type == "lpPricingSection" => {
+        headline, launchName, launchPrice, launchPaymentLine, inclusions,
+        monthlyPrice, monthlyTerms, adSpendLine, grantsLine, websiteLine
+      },
+      _type == "lpFitSection" => {
+        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints
+      },
+      _type == "lpTeamSection" => {
+        headline, roles, founderLine,
+        "people": people[]->{ _id, name, shortName, role, photo, "slug": slug.current }
+      },
+      _type == "lpFaqSection" => {
+        faq{ title, description, style, items[]{ _key, question, answer } }
+      },
+      _type == "lpFinalCtaSection" => { headline, subhead, secondaryLinkLabel, secondaryLinkHref },
+    },
+  }
+`)
+
+export const landingPageSlugsQuery = defineQuery(`
+  *[_type == "landingPage" && defined(slug.current)]{"slug": slug.current}
+`)

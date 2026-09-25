@@ -142,15 +142,46 @@ export function generateServiceSchema(
     provider?: string
     areaServed?: string | string[]
     serviceType?: string
+    /** Who the service is for, e.g. "Churches". Becomes schema.org Audience. */
+    audience?: string
+    /** Priced offers shown on the page. Must match the visible price copy exactly. */
+    offers?: {
+      name: string
+      price: number
+      priceCurrency?: string
+      description?: string
+      /** 'monthly' adds a UnitPriceSpecification with billingDuration P1M. */
+      billing?: 'one-time' | 'monthly'
+    }[]
   },
   config: SEOConfig = seoConfig,
 ) {
+  const url = service.url.startsWith('http') ? service.url : `${config.siteUrl}${service.url}`
+  const offers = service.offers?.map((offer) => ({
+    '@type': 'Offer',
+    'name': offer.name,
+    'description': offer.description,
+    'price': offer.price,
+    'priceCurrency': offer.priceCurrency ?? 'USD',
+    'url': url,
+    ...(offer.billing === 'monthly'
+      ? {
+          priceSpecification: {
+            '@type': 'UnitPriceSpecification',
+            'price': offer.price,
+            'priceCurrency': offer.priceCurrency ?? 'USD',
+            'billingDuration': 'P1M',
+          },
+        }
+      : {}),
+  }))
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Service',
     'name': service.name,
     'description': service.description,
-    'url': service.url.startsWith('http') ? service.url : `${config.siteUrl}${service.url}`,
+    'url': url,
     'image': service.image,
     'provider': {
       '@type': config.businessType,
@@ -159,6 +190,10 @@ export function generateServiceSchema(
     },
     'areaServed': service.areaServed,
     'serviceType': service.serviceType,
+    'audience': service.audience
+      ? {'@type': 'Audience', 'audienceType': service.audience}
+      : undefined,
+    'offers': offers && offers.length > 0 ? offers : undefined,
   }
 }
 

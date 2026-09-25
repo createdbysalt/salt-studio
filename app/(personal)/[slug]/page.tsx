@@ -1,16 +1,21 @@
 import {CustomPortableText} from '@/components/CustomPortableText'
 import {Header} from '@/components/Header'
 import {HomePage} from '@/components/HomePage'
+import {LandingPage} from '@/components/LandingPage'
 import {
   BreadcrumbStructuredData,
+  CorePageSchema,
+  generateServiceSchema,
   ogImageUrl,
   PersonStructuredData,
   SpeakableWebPage,
 } from '@/lib/seo'
-import type {PersonBySlugQueryResult} from '@/sanity.types'
+import type {LandingPageBySlugQueryResult, PersonBySlugQueryResult} from '@/sanity.types'
 import {sanityFetch} from '@/sanity/lib/live'
 import {
   homePageQuery,
+  landingPageBySlugQuery,
+  landingPageSlugsQuery,
   pagesBySlugQuery,
   personBySlugQuery,
   personSlugsQuery,
@@ -39,6 +44,16 @@ export async function generateMetadata(
 
   if (person?._id) {
     return personMetadata(person, slug)
+  }
+
+  const {data: landing} = await sanityFetch({
+    query: landingPageBySlugQuery,
+    params: {slug},
+    stega: false,
+  })
+
+  if (landing?._id) {
+    return landingMetadata(landing, slug)
   }
 
   const {data: page} = await sanityFetch({
@@ -82,8 +97,44 @@ function personMetadata(person: NonNullable<PersonBySlugQueryResult>, slug: stri
   }
 }
 
+/** Landing pages carry their own Search & Sharing fields; fall back to the hero headline. */
+function landingMetadata(
+  landing: NonNullable<LandingPageBySlugQueryResult>,
+  slug: string,
+): Metadata {
+  const heroHeadline =
+    landing.sections?.flatMap((section) =>
+      section._type === 'lpHeroSection' && section.headline ? [section.headline] : [],
+    )[0] ?? ''
+  const title =
+    stegaClean(landing.seoTitle ?? '') || stegaClean(heroHeadline) || landing.title || 'Salt Studio'
+  const description =
+    stegaClean(landing.seoDescription ?? '') ||
+    stegaClean(landing.speakableSummary ?? '') ||
+    undefined
+  const shareImage =
+    urlForOpenGraphImage(landing.ogImage) || ogImageUrl({title, eyebrow: 'Salt Studio'})
+
+  return {
+    title,
+    description,
+    alternates: {canonical: `/${slug}`},
+    openGraph: {
+      title,
+      description,
+      images: [{url: shareImage, width: 1200, height: 630}],
+    },
+    twitter: {card: 'summary_large_image', images: [shareImage]},
+  }
+}
+
+const AUDIENCE_LABEL: Record<string, string> = {
+  churches: 'Churches',
+  nonprofits: 'Nonprofits',
+}
+
 export async function generateStaticParams() {
-  const [{data: pages}, {data: people}] = await Promise.all([
+  const [{data: pages}, {data: people}, {data: landingPages}] = await Promise.all([
     sanityFetch({
       query: slugsByTypeQuery,
       params: {type: 'page'},
@@ -95,6 +146,11 @@ export async function generateStaticParams() {
       stega: false,
       perspective: 'published',
     }),
+    sanityFetch({
+      query: landingPageSlugsQuery,
+      stega: false,
+      perspective: 'published',
+    }),
   ])
 
   const slugs = new Set<string>()
@@ -102,6 +158,9 @@ export async function generateStaticParams() {
     if (item.slug) slugs.add(item.slug)
   }
   for (const item of people ?? []) {
+    if (item.slug) slugs.add(item.slug)
+  }
+  for (const item of landingPages ?? []) {
     if (item.slug) slugs.add(item.slug)
   }
   return [...slugs].map((slug) => ({slug}))
@@ -144,6 +203,58 @@ export default async function PageSlugRoute({params}: Props) {
           ]}
         />
         <HomePage data={home} />
+      </>
+    )
+  }
+
+  const {data: landing} = await sanityFetch({query: landingPageBySlugQuery, params: {slug}})
+
+  if (landing?._id) {
+    const heroHeadline =
+      landing.sections?.flatMap((section) =>
+        section._type === 'lpHeroSection' && section.headline ? [section.headline] : [],
+      )[0] ?? ''
+    const name =
+      stegaClean(landing.seoTitle ?? '') ||
+      stegaClean(heroHeadline) ||
+      landing.title ||
+      'Salt Studio'
+    const description =
+      stegaClean(landing.seoDescription ?? '') || stegaClean(landing.speakableSummary ?? '') || name
+    const audience = AUDIENCE_LABEL[stegaClean(landing.audience ?? '')]
+    const offers = (landing.offers ?? [])
+      .filter((offer) => Boolean(offer?.name) && typeof offer?.price === 'number')
+      .map((offer) => ({
+        name: stegaClean(offer.name ?? ''),
+        price: offer.price as number,
+        description: offer.description ? stegaClean(offer.description) : undefined,
+        billing: (offer.billing as 'one-time' | 'monthly' | null) ?? 'one-time',
+      }))
+
+    return (
+      <>
+        <CorePageSchema
+          breadcrumbs={[
+            {name: 'Home', url: '/'},
+            {name, url: `/${slug}`},
+          ]}
+          name={name}
+          description={description}
+          url={`/${slug}`}
+          speakableSelectors={['h1']}
+          primarySchema={generateServiceSchema({
+            name,
+            description,
+            url: `/${slug}`,
+            serviceType: audience
+              ? `Marketing and website design for ${audience.toLowerCase()}`
+              : 'Marketing and website design',
+            audience,
+            areaServed: ['United States', 'Canada'],
+            offers,
+          })}
+        />
+        <LandingPage data={landing} />
       </>
     )
   }

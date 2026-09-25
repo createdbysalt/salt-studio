@@ -47,7 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   // Fetch all dynamic content from Sanity
-  const [pages, projects, legalPages, workCategories, people] = await Promise.all([
+  const [pages, projects, legalPages, workCategories, people, landingPages] = await Promise.all([
     // Regular pages
     client.fetch<{slug: string; _updatedAt: string}[]>(
       `*[_type == "page" && defined(slug.current)]{
@@ -92,6 +92,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       {},
       {next: {revalidate: 3600}},
     ),
+    // Landing pages (/churches, /nonprofits)
+    client.fetch<{slug: string; _updatedAt: string}[]>(
+      `*[_type == "landingPage" && defined(slug.current)]{
+        "slug": slug.current,
+        _updatedAt
+      }`,
+      {},
+      {next: {revalidate: 3600}},
+    ),
   ])
 
   // Map pages to sitemap entries
@@ -130,9 +139,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
+  const landingPageEntries: SitemapEntry[] = landingPages.map((page) => ({
+    url: `${siteUrl}/${page.slug}`,
+    lastModified: new Date(page._updatedAt),
+    changeFrequency: 'weekly',
+    priority: 0.9,
+  }))
+
   return [
     ...staticPages,
     ...pageEntries,
+    ...landingPageEntries,
     ...personEntries,
     ...projectEntries,
     ...legalEntries,

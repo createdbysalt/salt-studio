@@ -20,6 +20,7 @@ import callToAction from '@/sanity/schemas/documents/callToAction'
 import capability from '@/sanity/schemas/documents/capability'
 import client from '@/sanity/schemas/documents/client'
 import clientPortal from '@/sanity/schemas/documents/clientPortal'
+import landingPage from '@/sanity/schemas/documents/landingPage'
 import legalPage from '@/sanity/schemas/documents/legalPage'
 import page from '@/sanity/schemas/documents/page'
 import person from '@/sanity/schemas/documents/person'
@@ -77,6 +78,7 @@ import {
   homeServicesSection,
   homeWorkSection,
 } from '@/sanity/schemas/sections/homeSections'
+import {landingSections} from '@/sanity/schemas/sections/landingSections'
 import {
   projectCreditsSection,
   projectMediaSection,
@@ -151,6 +153,7 @@ export default defineConfig({
       aboutPage,
       // Documents
       callToAction,
+      landingPage,
       legalPage,
       page,
       person,
@@ -186,6 +189,8 @@ export default defineConfig({
       testimonials,
       timeline,
       homeSection,
+      // Landing page sections (paid-traffic pages: /churches, /nonprofits)
+      ...landingSections,
       // Home page sections
       homeHeroSection,
       homeProofSection,

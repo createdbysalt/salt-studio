@@ -33,7 +33,7 @@ export type SanityImageAssetReference = {
 
 export type LogoImage = {
   asset?: SanityImageAssetReference
-  media?: unknown // Unable to locate the referenced type "image.media" in schema
+  media?: unknown // Unable to locate the referenced type "media" in schema
   hotspot?: SanityImageHotspot
   crop?: SanityImageCrop
   _type: 'image'
@@ -448,6 +448,209 @@ export type HomeHeroSection = {
   ctaLabel?: string
   ctaMicrocopy?: string
   bookingQuarter?: string
+}
+
+export type LpFinalCtaSection = {
+  _type: 'lpFinalCtaSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  subhead?: string
+  secondaryLinkLabel?: string
+  secondaryLinkHref?: string
+}
+
+export type LpFaqSection = {
+  _type: 'lpFaqSection'
+  enabled?: boolean
+  internalName?: string
+  faq?: Faq
+}
+
+export type PersonReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'person'
+}
+
+export type LpTeamSection = {
+  _type: 'lpTeamSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  people?: Array<
+    {
+      _key: string
+    } & PersonReference
+  >
+  roles?: Array<string>
+  founderLine?: string
+}
+
+export type LpFitSection = {
+  _type: 'lpFitSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  goodFitLabel?: string
+  goodFitPoints?: Array<string>
+  notFitLabel?: string
+  notFitPoints?: Array<string>
+}
+
+export type LpPricingSection = {
+  _type: 'lpPricingSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  launchName?: string
+  launchPrice?: string
+  launchPaymentLine?: string
+  inclusions?: Array<string>
+  monthlyPrice?: string
+  monthlyTerms?: string
+  adSpendLine?: string
+  grantsLine?: string
+  websiteLine?: string
+}
+
+export type LpCtaSection = {
+  _type: 'lpCtaSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  subhead?: string
+}
+
+export type TestimonialReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'testimonial'
+}
+
+export type LpProofSection = {
+  _type: 'lpProofSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  cases?: Array<{
+    title?: string
+    body?: string
+    number?: string
+    numberLabel?: string
+    project?: ProjectReference
+    _type: 'lpProofCase'
+    _key: string
+  }>
+  testimonials?: Array<
+    {
+      _key: string
+    } & TestimonialReference
+  >
+}
+
+export type LpMeasurementSection = {
+  _type: 'lpMeasurementSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  intro?: string
+  bullets?: Array<{
+    lead?: string
+    text?: string
+    _type: 'lpMeasurementBullet'
+    _key: string
+  }>
+  limitsLine?: string
+}
+
+export type LpProcessSection = {
+  _type: 'lpProcessSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  steps?: Array<{
+    timeframe?: string
+    label?: string
+    body?: string
+    _type: 'lpProcessStep'
+    _key: string
+  }>
+}
+
+export type LpDeliverableSection = {
+  _type: 'lpDeliverableSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  mockupImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  caption?: string
+}
+
+export type LpSystemSection = {
+  _type: 'lpSystemSection'
+  enabled?: boolean
+  internalName?: string
+  systemName?: string
+  headline?: string
+  bridgeLine?: string
+  parts?: Array<{
+    title?: string
+    body?: string
+    statLine?: string
+    _type: 'lpSystemPart'
+    _key: string
+  }>
+  closingLine?: string
+}
+
+export type LpProblemSection = {
+  _type: 'lpProblemSection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  scene?: string
+  pains?: Array<string>
+  statLine?: string
+  statSourceLabel?: string
+  statSourceUrl?: string
+  closingLine?: string
+}
+
+export type LpLogoSection = {
+  _type: 'lpLogoSection'
+  enabled?: boolean
+  internalName?: string
+  logos?: LogoCarousel
+}
+
+export type LpHeroSection = {
+  _type: 'lpHeroSection'
+  enabled?: boolean
+  internalName?: string
+  eyebrow?: string
+  headline?: string
+  subheadline?: string
+  proofLine?: string
+  secondaryLinkLabel?: string
+  secondaryLinkTarget?: 'system' | 'process' | 'pricing'
+  image?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
 }
 
 export type HomeSection = {
@@ -1062,13 +1265,6 @@ export type CapabilityReference = {
   [internalGroqTypeReferenceTo]?: 'capability'
 }
 
-export type TestimonialReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'testimonial'
-}
-
 export type Service = {
   _id: string
   _type: 'service'
@@ -1250,6 +1446,213 @@ export type Person = {
   }
 }
 
+export type Page = {
+  _id: string
+  _type: 'page'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  slug?: Slug
+  overview?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal'
+    listItem?: never
+    markDefs?: null
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
+  body?: Array<
+    | {
+        children?: Array<{
+          marks?: Array<string>
+          text?: string
+          _type: 'span'
+          _key: string
+        }>
+        style?: 'normal' | 'h2' | 'h3'
+        listItem?: 'bullet' | 'number'
+        markDefs?: Array<{
+          href?: string
+          _type: 'link'
+          _key: string
+        }>
+        level?: number
+        _type: 'block'
+        _key: string
+      }
+    | ({
+        _key: string
+      } & Hero)
+    | ({
+        _key: string
+      } & Timeline)
+    | ({
+        _key: string
+      } & Faq)
+    | ({
+        _key: string
+      } & Testimonials)
+    | ({
+        _key: string
+      } & CallToActionReference)
+    | ({
+        _key: string
+      } & LogoCarousel)
+    | ({
+        _key: string
+      } & ContactForm)
+    | {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        caption?: string
+        alt?: string
+        _type: 'image'
+        _key: string
+      }
+  >
+}
+
+export type LegalPage = {
+  _id: string
+  _type: 'legalPage'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  pageType?: 'privacy' | 'terms' | 'cookies' | 'accessibility' | 'disclaimer' | 'custom'
+  title?: string
+  slug?: Slug
+  overview?: string
+  contentSource?: 'managed' | 'custom'
+  policyUrl?: string
+  introText?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote'
+    listItem?: 'bullet' | 'number'
+    markDefs?: Array<{
+      href?: string
+      _type: 'link'
+      _key: string
+    }>
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
+  content?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal' | 'h2' | 'h3' | 'h4'
+    listItem?: 'bullet' | 'number'
+    markDefs?: Array<{
+      href?: string
+      _type: 'link'
+      _key: string
+    }>
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
+  effectiveDate?: string
+  version?: string
+  lastUpdated?: string
+}
+
+export type LandingPage = {
+  _id: string
+  _type: 'landingPage'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  slug?: Slug
+  audience?: 'churches' | 'nonprofits' | 'other'
+  ctaLabel?: string
+  ctaLink?: string
+  ctaSubhead?: string
+  hideNav?: boolean
+  stickyMobileCta?: boolean
+  sections?: Array<
+    | ({
+        _key: string
+      } & LpHeroSection)
+    | ({
+        _key: string
+      } & LpLogoSection)
+    | ({
+        _key: string
+      } & LpProblemSection)
+    | ({
+        _key: string
+      } & LpSystemSection)
+    | ({
+        _key: string
+      } & LpDeliverableSection)
+    | ({
+        _key: string
+      } & LpProcessSection)
+    | ({
+        _key: string
+      } & LpMeasurementSection)
+    | ({
+        _key: string
+      } & LpProofSection)
+    | ({
+        _key: string
+      } & LpCtaSection)
+    | ({
+        _key: string
+      } & LpPricingSection)
+    | ({
+        _key: string
+      } & LpFitSection)
+    | ({
+        _key: string
+      } & LpTeamSection)
+    | ({
+        _key: string
+      } & LpFaqSection)
+    | ({
+        _key: string
+      } & LpFinalCtaSection)
+  >
+  seoTitle?: string
+  seoDescription?: string
+  ogImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  speakableSummary?: string
+  offers?: Array<{
+    name?: string
+    price?: number
+    billing?: 'one-time' | 'monthly'
+    description?: string
+    _type: 'lpOffer'
+    _key: string
+  }>
+}
+
 export type Project = {
   _id: string
   _type: 'project'
@@ -1381,134 +1784,6 @@ export type Client = {
   tier?: 'known' | 'less-known'
   featured?: boolean
   sortOrder?: number
-}
-
-export type Page = {
-  _id: string
-  _type: 'page'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  title?: string
-  slug?: Slug
-  overview?: Array<{
-    children?: Array<{
-      marks?: Array<string>
-      text?: string
-      _type: 'span'
-      _key: string
-    }>
-    style?: 'normal'
-    listItem?: never
-    markDefs?: null
-    level?: number
-    _type: 'block'
-    _key: string
-  }>
-  body?: Array<
-    | {
-        children?: Array<{
-          marks?: Array<string>
-          text?: string
-          _type: 'span'
-          _key: string
-        }>
-        style?: 'normal' | 'h2' | 'h3'
-        listItem?: 'bullet' | 'number'
-        markDefs?: Array<{
-          href?: string
-          _type: 'link'
-          _key: string
-        }>
-        level?: number
-        _type: 'block'
-        _key: string
-      }
-    | ({
-        _key: string
-      } & Hero)
-    | ({
-        _key: string
-      } & Timeline)
-    | ({
-        _key: string
-      } & Faq)
-    | ({
-        _key: string
-      } & Testimonials)
-    | ({
-        _key: string
-      } & CallToActionReference)
-    | ({
-        _key: string
-      } & LogoCarousel)
-    | ({
-        _key: string
-      } & ContactForm)
-    | {
-        asset?: SanityImageAssetReference
-        media?: unknown
-        hotspot?: SanityImageHotspot
-        crop?: SanityImageCrop
-        caption?: string
-        alt?: string
-        _type: 'image'
-        _key: string
-      }
-  >
-}
-
-export type LegalPage = {
-  _id: string
-  _type: 'legalPage'
-  _createdAt: string
-  _updatedAt: string
-  _rev: string
-  pageType?: 'privacy' | 'terms' | 'cookies' | 'accessibility' | 'disclaimer' | 'custom'
-  title?: string
-  slug?: Slug
-  overview?: string
-  contentSource?: 'managed' | 'custom'
-  policyUrl?: string
-  introText?: Array<{
-    children?: Array<{
-      marks?: Array<string>
-      text?: string
-      _type: 'span'
-      _key: string
-    }>
-    style?: 'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote'
-    listItem?: 'bullet' | 'number'
-    markDefs?: Array<{
-      href?: string
-      _type: 'link'
-      _key: string
-    }>
-    level?: number
-    _type: 'block'
-    _key: string
-  }>
-  content?: Array<{
-    children?: Array<{
-      marks?: Array<string>
-      text?: string
-      _type: 'span'
-      _key: string
-    }>
-    style?: 'normal' | 'h2' | 'h3' | 'h4'
-    listItem?: 'bullet' | 'number'
-    markDefs?: Array<{
-      href?: string
-      _type: 'link'
-      _key: string
-    }>
-    level?: number
-    _type: 'block'
-    _key: string
-  }>
-  effectiveDate?: string
-  version?: string
-  lastUpdated?: string
 }
 
 export type CallToAction = {
@@ -2038,6 +2313,22 @@ export type AllSanitySchemaTypes =
   | ClientReference
   | HomeProofSection
   | HomeHeroSection
+  | LpFinalCtaSection
+  | LpFaqSection
+  | PersonReference
+  | LpTeamSection
+  | LpFitSection
+  | LpPricingSection
+  | LpCtaSection
+  | TestimonialReference
+  | LpProofSection
+  | LpMeasurementSection
+  | LpProcessSection
+  | LpDeliverableSection
+  | LpSystemSection
+  | LpProblemSection
+  | LpLogoSection
+  | LpHeroSection
   | HomeSection
   | Timeline
   | Testimonials
@@ -2083,13 +2374,13 @@ export type AllSanitySchemaTypes =
   | QuizSubmission
   | Quiz
   | CapabilityReference
-  | TestimonialReference
   | Service
   | Person
-  | Project
-  | Client
   | Page
   | LegalPage
+  | LandingPage
+  | Project
+  | Client
   | CallToAction
   | AboutPage
   | ServicesPage
@@ -2523,6 +2814,108 @@ export type HomePageQueryResult =
               hidden: boolean | null
             }> | null
             linkLabel: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'home'
+      _type: 'landingPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      hiddenH1: null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'lpCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpDeliverableSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFaqSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFitSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpLogoSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpMeasurementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpPricingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProblemSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProcessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProofSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpSystemSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpTeamSection'
+            enabled: boolean | null
+            internalName: string | null
           }
       > | null
     }
@@ -3053,6 +3446,108 @@ export type ServicesPageQueryResult =
         | {
             _key: string
             _type: 'homeWorkSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'landingPage'
+      capabilitiesHeadline: null
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'lpCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpDeliverableSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFaqSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFitSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpLogoSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpMeasurementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpPricingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProblemSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProcessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProofSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpSystemSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpTeamSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -3634,6 +4129,107 @@ export type AboutPageQueryResult =
         | {
             _key: string
             _type: 'homeWorkSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'landingPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'lpCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpDeliverableSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFaqSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFitSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpLogoSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpMeasurementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpPricingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProblemSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProcessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProofSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpSystemSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpTeamSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -5135,6 +5731,29 @@ export type WorkPageQueryResult =
     }
   | {
       _id: 'workPage'
+      _type: 'landingPage'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+    }
+  | {
+      _id: 'workPage'
       _type: 'legalPage'
       headline: null
       subhead: null
@@ -5761,6 +6380,107 @@ export type ContactPageQueryResult =
     }
   | {
       _id: 'contactPage'
+      _type: 'landingPage'
+      seoTitle: string | null
+      seoDescription: string | null
+      ogImage: {
+        asset?: SanityImageAssetReference
+        media?: unknown
+        hotspot?: SanityImageHotspot
+        crop?: SanityImageCrop
+        alt?: string
+        _type: 'image'
+      } | null
+      speakableSummary: string | null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'lpCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpDeliverableSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFaqSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFinalCtaSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpFitSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpHeroSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpLogoSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpMeasurementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpPricingSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProblemSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProcessSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpProofSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpSystemSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpTeamSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+      > | null
+    }
+  | {
+      _id: 'contactPage'
       _type: 'legalPage'
       seoTitle: null
       seoDescription: null
@@ -6356,6 +7076,265 @@ export type ClientPortalSlugsQueryResult = Array<{
   slug: string | null
 }>
 
+// Source: sanity/lib/queries.ts
+// Variable: landingPageBySlugQuery
+// Query: *[_type == "landingPage" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    audience,    ctaLabel,    ctaLink,    ctaSubhead,    hideNav,    stickyMobileCta,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    offers[]{ _key, name, price, billing, description },    sections[]{      _key,      _type,      enabled,      internalName,      _type == "lpHeroSection" => {        eyebrow, headline, subheadline, proofLine, secondaryLinkLabel, secondaryLinkTarget, image      },      _type == "lpLogoSection" => {        logos{ title, style, grayscale, logos[]{ _key, name, url, image } }      },      _type == "lpProblemSection" => {        headline, scene, pains, statLine, statSourceLabel, statSourceUrl, closingLine      },      _type == "lpSystemSection" => {        systemName, headline, bridgeLine, closingLine,        parts[]{ _key, title, body, statLine }      },      _type == "lpDeliverableSection" => { headline, mockupImage, caption },      _type == "lpProcessSection" => {        headline, steps[]{ _key, timeframe, label, body }      },      _type == "lpMeasurementSection" => {        headline, intro, limitsLine, bullets[]{ _key, lead, text }      },      _type == "lpProofSection" => {        headline,        cases[]{ _key, title, body, number, numberLabel, "projectSlug": project->slug.current },        "testimonials": testimonials[]->{ _id, quote, author, role, "client": client->name }      },      _type == "lpCtaSection" => { headline, subhead },      _type == "lpPricingSection" => {        headline, launchName, launchPrice, launchPaymentLine, inclusions,        monthlyPrice, monthlyTerms, adSpendLine, grantsLine, websiteLine      },      _type == "lpFitSection" => {        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints      },      _type == "lpTeamSection" => {        headline, roles, founderLine,        "people": people[]->{ _id, name, shortName, role, photo, "slug": slug.current }      },      _type == "lpFaqSection" => {        faq{ title, description, style, items[]{ _key, question, answer } }      },      _type == "lpFinalCtaSection" => { headline, subhead, secondaryLinkLabel, secondaryLinkHref },    },  }
+export type LandingPageBySlugQueryResult = {
+  _id: string
+  _type: 'landingPage'
+  title: string | null
+  slug: string | null
+  audience: 'churches' | 'nonprofits' | 'other' | null
+  ctaLabel: string | null
+  ctaLink: string | null
+  ctaSubhead: string | null
+  hideNav: boolean | null
+  stickyMobileCta: boolean | null
+  seoTitle: string | null
+  seoDescription: string | null
+  ogImage: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  } | null
+  speakableSummary: string | null
+  offers: Array<{
+    _key: string
+    name: string | null
+    price: number | null
+    billing: 'monthly' | 'one-time' | null
+    description: string | null
+  }> | null
+  sections: Array<
+    | {
+        _key: string
+        _type: 'lpCtaSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        subhead: string | null
+      }
+    | {
+        _key: string
+        _type: 'lpDeliverableSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        mockupImage: {
+          asset?: SanityImageAssetReference
+          media?: unknown
+          hotspot?: SanityImageHotspot
+          crop?: SanityImageCrop
+          alt?: string
+          _type: 'image'
+        } | null
+        caption: string | null
+      }
+    | {
+        _key: string
+        _type: 'lpFaqSection'
+        enabled: boolean | null
+        internalName: string | null
+        faq: {
+          title: string | null
+          description: string | null
+          style: 'accordion' | 'columns' | 'list' | null
+          items: Array<{
+            _key: string
+            question: string | null
+            answer: string | null
+          }> | null
+        } | null
+      }
+    | {
+        _key: string
+        _type: 'lpFinalCtaSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        subhead: string | null
+        secondaryLinkLabel: string | null
+        secondaryLinkHref: string | null
+      }
+    | {
+        _key: string
+        _type: 'lpFitSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        goodFitLabel: string | null
+        goodFitPoints: Array<string> | null
+        notFitLabel: string | null
+        notFitPoints: Array<string> | null
+      }
+    | {
+        _key: string
+        _type: 'lpHeroSection'
+        enabled: boolean | null
+        internalName: string | null
+        eyebrow: string | null
+        headline: string | null
+        subheadline: string | null
+        proofLine: string | null
+        secondaryLinkLabel: string | null
+        secondaryLinkTarget: 'pricing' | 'process' | 'system' | null
+        image: {
+          asset?: SanityImageAssetReference
+          media?: unknown
+          hotspot?: SanityImageHotspot
+          crop?: SanityImageCrop
+          alt?: string
+          _type: 'image'
+        } | null
+      }
+    | {
+        _key: string
+        _type: 'lpLogoSection'
+        enabled: boolean | null
+        internalName: string | null
+        logos: {
+          title: string | null
+          style: 'grid' | 'row' | 'scrolling' | null
+          grayscale: boolean | null
+          logos: Array<{
+            _key: string
+            name: string | null
+            url: string | null
+            image: LogoImage | null
+          }> | null
+        } | null
+      }
+    | {
+        _key: string
+        _type: 'lpMeasurementSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        intro: string | null
+        limitsLine: string | null
+        bullets: Array<{
+          _key: string
+          lead: string | null
+          text: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpPricingSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        launchName: string | null
+        launchPrice: string | null
+        launchPaymentLine: string | null
+        inclusions: Array<string> | null
+        monthlyPrice: string | null
+        monthlyTerms: string | null
+        adSpendLine: string | null
+        grantsLine: string | null
+        websiteLine: string | null
+      }
+    | {
+        _key: string
+        _type: 'lpProblemSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        scene: string | null
+        pains: Array<string> | null
+        statLine: string | null
+        statSourceLabel: string | null
+        statSourceUrl: string | null
+        closingLine: string | null
+      }
+    | {
+        _key: string
+        _type: 'lpProcessSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        steps: Array<{
+          _key: string
+          timeframe: string | null
+          label: string | null
+          body: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpProofSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        cases: Array<{
+          _key: string
+          title: string | null
+          body: string | null
+          number: string | null
+          numberLabel: string | null
+          projectSlug: string | null
+        }> | null
+        testimonials: Array<{
+          _id: string
+          quote: string | null
+          author: string | null
+          role: string | null
+          client: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpSystemSection'
+        enabled: boolean | null
+        internalName: string | null
+        systemName: string | null
+        headline: string | null
+        bridgeLine: string | null
+        closingLine: string | null
+        parts: Array<{
+          _key: string
+          title: string | null
+          body: string | null
+          statLine: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpTeamSection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        roles: Array<string> | null
+        founderLine: string | null
+        people: Array<{
+          _id: string
+          name: string | null
+          shortName: string | null
+          role: string | null
+          photo: {
+            asset?: SanityImageAssetReference
+            media?: unknown
+            hotspot?: SanityImageHotspot
+            crop?: SanityImageCrop
+            alt?: string
+            _type: 'image'
+          } | null
+          slug: string | null
+        }> | null
+      }
+  > | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: landingPageSlugsQuery
+// Query: *[_type == "landingPage" && defined(slug.current)]{"slug": slug.current}
+export type LandingPageSlugsQueryResult = Array<{
+  slug: string | null
+}>
+
 declare module '@sanity/client' {
   interface SanityQueries {
     '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "homeHeroSection" => {\n        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter,\n        splitPrimaryLeft, splitPrimaryRight, splitSecondaryLeft, splitSecondaryRight\n      },\n      _type == "homeProofSection" => {\n        label,\n        clients[]{ _key, ...@->{ _id, name, website } }\n      },\n      _type == "homeServicesSection" => {\n        label,\n        services[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            headline,\n            shortDescription,\n            priceLine,\n            timelineLine,\n            linkLabel,\n            timeline[]{ _key, label, duration, detail },\n            deliverables[]{ _key, title, detail },\n            plans[]{ _key, name, price, summary, features, highlight },\n            capabilities[]->{ _id, name, kind },\n            idealFor,\n            notAFit,\n            detailEyebrow,\n            detailBody,\n            sceneLine,\n            stepsLabel,\n            steps[]{ _key, lead, text },\n            detailImage{ asset, alt, hotspot, crop },\n            backgroundImage{ asset, alt, hotspot, crop },\n            backgroundVideoUrl,\n            featuredProjects[]->{\n              _id,\n              title,\n              "slug": slug.current,\n              coverImage,\n              "client": client->name,\n              "thought": pt::text(overview),\n              hidden\n            },\n            testimonials[]->{\n              _id,\n              quote,\n              author,\n              role\n            },\n            clients[]->{ _id, name },\n            proofAnchor,\n            nextStep->{\n              _id,\n              subhead,\n              buttonLabel,\n              link,\n              contactSubject\n            },\n            fitCheckLabel,\n            fitCheckHref,\n            routingLine\n          }\n        },\n        cards[]{\n          _key,\n          title,\n          body,\n          priceLine,\n          linkLabel,\n          detailEyebrow,\n          detailBody,\n          detailImage{ asset, alt, hotspot, crop },\n          hoverImage{ asset, alt, hotspot, crop },\n          backgroundVideoUrl,\n        }\n      },\n      _type == "homeWorkSection" => {\n        label,\n        projects[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            overview,\n            coverImage,\n            videoUrl,\n            year,\n            "client": client->name,\n            featured,\n            hidden\n          }\n        },\n        linkLabel\n      },\n      _type == "homeProductSection" => { headline, body, ctaLabel },\n      _type == "homePhilosophySection" => { line1, line2 },\n      _type == "homeFinalCtaSection" => {\n        headline,\n        body,\n        emailLine,\n        cta->{\n          buttonLabel,\n          link,\n          contactSubject\n        }\n      },\n    },\n  }\n': HomePageQueryResult
@@ -6390,5 +7369,7 @@ declare module '@sanity/client' {
     '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    _type,\n    name,\n    "slug": slug.current,\n    serviceType,\n    clientType,\n    "hasOverview": defined(projectPhases),\n    "hasChecklist": defined(checklistTemplate),\n    "hasForms": defined(formsTemplate),\n    "checklistSource": checklistTemplate->{\n      categories[]{\n        _key,\n        title,\n        description,\n        items[]{\n          _key,\n          title,\n          description,\n          required,\n          link,\n          linkLabel\n        }\n      }\n    },\n    "formsSource": formsTemplate->{\n      heading,\n      description,\n      items[]{\n        _key,\n        title,\n        description,\n        required,\n        link,\n        linkLabel\n      }\n    },\n    "projectPhases": projectPhases->{\n      heading,\n      phases[]{ _key, name, note }\n    },\n    activePhase,\n    sharedFolderUrl,\n    brandingFolderUrl,\n    mediaFolderUrl,\n    previewUrl,\n    productionUrl,\n    whatsappGroupUrl,\n    "contentDue": coalesce(contentDue, checklistDue, formsDue),\n    launchEstimate,\n    enabled,\n    checklist[]{\n      _key,\n      title,\n      description,\n      items[]{\n        _key,\n        title,\n        description,\n        required,\n        link,\n        linkLabel,\n        done\n      }\n    }\n  }\n': ClientPortalBySlugQueryResult
     '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    enabled,\n    password\n  }\n': ClientPortalAuthQueryResult
     '\n  *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}\n': ClientPortalSlugsQueryResult
+    '\n  *[_type == "landingPage" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    audience,\n    ctaLabel,\n    ctaLink,\n    ctaSubhead,\n    hideNav,\n    stickyMobileCta,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    offers[]{ _key, name, price, billing, description },\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "lpHeroSection" => {\n        eyebrow, headline, subheadline, proofLine, secondaryLinkLabel, secondaryLinkTarget, image\n      },\n      _type == "lpLogoSection" => {\n        logos{ title, style, grayscale, logos[]{ _key, name, url, image } }\n      },\n      _type == "lpProblemSection" => {\n        headline, scene, pains, statLine, statSourceLabel, statSourceUrl, closingLine\n      },\n      _type == "lpSystemSection" => {\n        systemName, headline, bridgeLine, closingLine,\n        parts[]{ _key, title, body, statLine }\n      },\n      _type == "lpDeliverableSection" => { headline, mockupImage, caption },\n      _type == "lpProcessSection" => {\n        headline, steps[]{ _key, timeframe, label, body }\n      },\n      _type == "lpMeasurementSection" => {\n        headline, intro, limitsLine, bullets[]{ _key, lead, text }\n      },\n      _type == "lpProofSection" => {\n        headline,\n        cases[]{ _key, title, body, number, numberLabel, "projectSlug": project->slug.current },\n        "testimonials": testimonials[]->{ _id, quote, author, role, "client": client->name }\n      },\n      _type == "lpCtaSection" => { headline, subhead },\n      _type == "lpPricingSection" => {\n        headline, launchName, launchPrice, launchPaymentLine, inclusions,\n        monthlyPrice, monthlyTerms, adSpendLine, grantsLine, websiteLine\n      },\n      _type == "lpFitSection" => {\n        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints\n      },\n      _type == "lpTeamSection" => {\n        headline, roles, founderLine,\n        "people": people[]->{ _id, name, shortName, role, photo, "slug": slug.current }\n      },\n      _type == "lpFaqSection" => {\n        faq{ title, description, style, items[]{ _key, question, answer } }\n      },\n      _type == "lpFinalCtaSection" => { headline, subhead, secondaryLinkLabel, secondaryLinkHref },\n    },\n  }\n': LandingPageBySlugQueryResult
+    '\n  *[_type == "landingPage" && defined(slug.current)]{"slug": slug.current}\n': LandingPageSlugsQueryResult
   }
 }
