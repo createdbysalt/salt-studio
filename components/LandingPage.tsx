@@ -1,4 +1,18 @@
 import {
+  LandingBeforeAfterSection,
+  LandingClientGridSection,
+  LandingFaqBand,
+  LandingFounderSection,
+  LandingPackagesSection,
+  LandingQuotesSection,
+  LandingReelsSection,
+  LandingResultsGallerySection,
+  LandingServicesListSection,
+  LandingStatementSection,
+  LandingStatsSection,
+  LandingVideoHeroSection,
+} from '@/components/LandingOfferSections'
+import {
   LandingCtaSection,
   LandingDeliverableSection,
   LandingFaqSection,
@@ -43,6 +57,9 @@ export function LandingPage({data}: {data: Landing}) {
   const hideNav = data.hideNav !== false
   const sticky = data.stickyMobileCta !== false
   const sections = (data.sections ?? []).filter((section) => section.enabled !== false)
+  // The offer layout draws its own ink top band with the wordmark, so skip the
+  // floating logo and render the FAQ on an ink band to match.
+  const offerLayout = sections[0]?._type === 'lpVideoHeroSection'
 
   return (
     <>
@@ -50,9 +67,11 @@ export function LandingPage({data}: {data: Landing}) {
         <>
           {/* Hide the global nav for this route only. The style leaves with the page. */}
           <style>{`[data-site-nav]{display:none !important}`}</style>
-          <div className="page-chrome pointer-events-none fixed top-0 z-[70] w-full pt-4">
-            <SiteLogo className="pointer-events-auto" />
-          </div>
+          {!offerLayout && (
+            <div className="page-chrome pointer-events-none fixed top-0 z-[70] w-full pt-4">
+              <SiteLogo className="pointer-events-auto" />
+            </div>
+          )}
         </>
       )}
       <div className={sticky ? 'pb-20 md:pb-0' : ''}>
@@ -84,7 +103,33 @@ export function LandingPage({data}: {data: Landing}) {
             case 'lpTeamSection':
               return <LandingTeamSection key={section._key} section={section} />
             case 'lpFaqSection':
-              return <LandingFaqSection key={section._key} section={section} />
+              return offerLayout ? (
+                <LandingFaqBand key={section._key} section={section} />
+              ) : (
+                <LandingFaqSection key={section._key} section={section} />
+              )
+            case 'lpVideoHeroSection':
+              return <LandingVideoHeroSection key={section._key} section={section} cta={cta} />
+            case 'lpClientGridSection':
+              return <LandingClientGridSection key={section._key} section={section} />
+            case 'lpServicesListSection':
+              return <LandingServicesListSection key={section._key} section={section} cta={cta} />
+            case 'lpStatementSection':
+              return <LandingStatementSection key={section._key} section={section} />
+            case 'lpStatsSection':
+              return <LandingStatsSection key={section._key} section={section} />
+            case 'lpBeforeAfterSection':
+              return <LandingBeforeAfterSection key={section._key} section={section} />
+            case 'lpReelsSection':
+              return <LandingReelsSection key={section._key} section={section} />
+            case 'lpFounderSection':
+              return <LandingFounderSection key={section._key} section={section} />
+            case 'lpQuotesSection':
+              return <LandingQuotesSection key={section._key} section={section} />
+            case 'lpPackagesSection':
+              return <LandingPackagesSection key={section._key} section={section} cta={cta} />
+            case 'lpResultsGallerySection':
+              return <LandingResultsGallerySection key={section._key} section={section} cta={cta} />
             default:
               return null
           }

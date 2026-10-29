@@ -48,6 +48,60 @@ export type Avatar = {
   _type: 'image'
 }
 
+export type LpClientTileImage = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "lpClientTile.image.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
+
+export type LpServiceRowImage = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "lpServiceRow.image.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
+
+export type BeforeImage = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "beforeImage.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
+
+export type AfterImage = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "afterImage.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
+
+export type Poster = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "lpReelTile.poster.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
+
+export type Photo = {
+  asset?: SanityImageAssetReference
+  media?: unknown // Unable to locate the referenced type "lpQuote.photo.media" in schema
+  hotspot?: SanityImageHotspot
+  crop?: SanityImageCrop
+  alt?: string
+  _type: 'image'
+}
+
 export type DetailImage = {
   asset?: SanityImageAssetReference
   media?: unknown // Unable to locate the referenced type "detailImage.media" in schema
@@ -448,6 +502,172 @@ export type HomeHeroSection = {
   ctaLabel?: string
   ctaMicrocopy?: string
   bookingQuarter?: string
+}
+
+export type LpResultsGallerySection = {
+  _type: 'lpResultsGallerySection'
+  enabled?: boolean
+  internalName?: string
+  headline?: string
+  images?: Array<{
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    caption?: string
+    _type: 'image'
+    _key: string
+  }>
+  showButton?: boolean
+}
+
+export type LpPackagesSection = {
+  _type: 'lpPackagesSection'
+  enabled?: boolean
+  internalName?: string
+  label?: string
+  packages?: Array<{
+    name?: string
+    description?: string
+    features?: Array<string>
+    price?: string
+    note?: string
+    _type: 'lpPackage'
+    _key: string
+  }>
+}
+
+export type LpQuotesSection = {
+  _type: 'lpQuotesSection'
+  enabled?: boolean
+  internalName?: string
+  quotes?: Array<{
+    quote?: string
+    author?: string
+    handle?: string
+    photo?: Photo
+    _type: 'lpQuote'
+    _key: string
+  }>
+}
+
+export type LpFounderSection = {
+  _type: 'lpFounderSection'
+  enabled?: boolean
+  internalName?: string
+  heading?: string
+  photo?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  bio?: string
+}
+
+export type LpReelsSection = {
+  _type: 'lpReelsSection'
+  enabled?: boolean
+  internalName?: string
+  items?: Array<{
+    videoUrl?: string
+    poster?: Poster
+    badge?: string
+    href?: string
+    _type: 'lpReelTile'
+    _key: string
+  }>
+  buttonLabel?: string
+  buttonHref?: string
+}
+
+export type LpBeforeAfterSection = {
+  _type: 'lpBeforeAfterSection'
+  enabled?: boolean
+  internalName?: string
+  rows?: Array<{
+    name?: string
+    metric?: string
+    before?: string
+    after?: string
+    beforeImage?: BeforeImage
+    afterImage?: AfterImage
+    caption?: string
+    _type: 'lpBeforeAfterRow'
+    _key: string
+  }>
+}
+
+export type LpStatsSection = {
+  _type: 'lpStatsSection'
+  enabled?: boolean
+  internalName?: string
+  stats?: Array<{
+    value?: string
+    label?: string
+    _type: 'lpStat'
+    _key: string
+  }>
+}
+
+export type LpStatementSection = {
+  _type: 'lpStatementSection'
+  enabled?: boolean
+  internalName?: string
+  text?: string
+}
+
+export type LpServicesListSection = {
+  _type: 'lpServicesListSection'
+  enabled?: boolean
+  internalName?: string
+  label?: string
+  items?: Array<{
+    image?: LpServiceRowImage
+    titleTop?: string
+    titleBottom?: string
+    blurb?: string
+    _type: 'lpServiceRow'
+    _key: string
+  }>
+  showButton?: boolean
+}
+
+export type LpClientGridSection = {
+  _type: 'lpClientGridSection'
+  enabled?: boolean
+  internalName?: string
+  title?: string
+  clients?: Array<{
+    image?: LpClientTileImage
+    name?: string
+    label?: string
+    _type: 'lpClientTile'
+    _key: string
+  }>
+  featuredLead?: string
+  featuredNames?: string
+}
+
+export type LpVideoHeroSection = {
+  _type: 'lpVideoHeroSection'
+  enabled?: boolean
+  internalName?: string
+  videoUrl?: string
+  poster?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  posterTitle?: string
+  headline?: string
+  ctaText?: string
 }
 
 export type LpFinalCtaSection = {
@@ -1582,7 +1802,7 @@ export type LandingPage = {
   _rev: string
   title?: string
   slug?: Slug
-  audience?: 'churches' | 'nonprofits' | 'other'
+  audience?: 'churches' | 'nonprofits' | 'businesses' | 'other'
   ctaLabel?: string
   ctaLink?: string
   ctaSubhead?: string
@@ -1631,6 +1851,39 @@ export type LandingPage = {
     | ({
         _key: string
       } & LpFinalCtaSection)
+    | ({
+        _key: string
+      } & LpVideoHeroSection)
+    | ({
+        _key: string
+      } & LpClientGridSection)
+    | ({
+        _key: string
+      } & LpServicesListSection)
+    | ({
+        _key: string
+      } & LpStatementSection)
+    | ({
+        _key: string
+      } & LpStatsSection)
+    | ({
+        _key: string
+      } & LpBeforeAfterSection)
+    | ({
+        _key: string
+      } & LpReelsSection)
+    | ({
+        _key: string
+      } & LpFounderSection)
+    | ({
+        _key: string
+      } & LpQuotesSection)
+    | ({
+        _key: string
+      } & LpPackagesSection)
+    | ({
+        _key: string
+      } & LpResultsGallerySection)
   >
   seoTitle?: string
   seoDescription?: string
@@ -2276,6 +2529,12 @@ export type AllSanitySchemaTypes =
   | SanityImageAssetReference
   | LogoImage
   | Avatar
+  | LpClientTileImage
+  | LpServiceRowImage
+  | BeforeImage
+  | AfterImage
+  | Poster
+  | Photo
   | DetailImage
   | HoverImage
   | ProjectCreditsSection
@@ -2313,6 +2572,17 @@ export type AllSanitySchemaTypes =
   | ClientReference
   | HomeProofSection
   | HomeHeroSection
+  | LpResultsGallerySection
+  | LpPackagesSection
+  | LpQuotesSection
+  | LpFounderSection
+  | LpReelsSection
+  | LpBeforeAfterSection
+  | LpStatsSection
+  | LpStatementSection
+  | LpServicesListSection
+  | LpClientGridSection
+  | LpVideoHeroSection
   | LpFinalCtaSection
   | LpFaqSection
   | PersonReference
@@ -2835,6 +3105,18 @@ export type HomePageQueryResult =
       sections: Array<
         | {
             _key: string
+            _type: 'lpBeforeAfterSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpClientGridSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpCtaSection'
             enabled: boolean | null
             internalName: string | null
@@ -2865,6 +3147,12 @@ export type HomePageQueryResult =
           }
         | {
             _key: string
+            _type: 'lpFounderSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpHeroSection'
             enabled: boolean | null
             internalName: string | null
@@ -2878,6 +3166,12 @@ export type HomePageQueryResult =
         | {
             _key: string
             _type: 'lpMeasurementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpPackagesSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -2907,6 +3201,42 @@ export type HomePageQueryResult =
           }
         | {
             _key: string
+            _type: 'lpQuotesSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpReelsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpResultsGallerySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpServicesListSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpStatementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpStatsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpSystemSection'
             enabled: boolean | null
             internalName: string | null
@@ -2914,6 +3244,12 @@ export type HomePageQueryResult =
         | {
             _key: string
             _type: 'lpTeamSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpVideoHeroSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -3469,6 +3805,18 @@ export type ServicesPageQueryResult =
       sections: Array<
         | {
             _key: string
+            _type: 'lpBeforeAfterSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpClientGridSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpCtaSection'
             enabled: boolean | null
             internalName: string | null
@@ -3499,6 +3847,12 @@ export type ServicesPageQueryResult =
           }
         | {
             _key: string
+            _type: 'lpFounderSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpHeroSection'
             enabled: boolean | null
             internalName: string | null
@@ -3512,6 +3866,12 @@ export type ServicesPageQueryResult =
         | {
             _key: string
             _type: 'lpMeasurementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpPackagesSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -3541,6 +3901,42 @@ export type ServicesPageQueryResult =
           }
         | {
             _key: string
+            _type: 'lpQuotesSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpReelsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpResultsGallerySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpServicesListSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpStatementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpStatsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpSystemSection'
             enabled: boolean | null
             internalName: string | null
@@ -3548,6 +3944,12 @@ export type ServicesPageQueryResult =
         | {
             _key: string
             _type: 'lpTeamSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpVideoHeroSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -4151,6 +4553,18 @@ export type AboutPageQueryResult =
       sections: Array<
         | {
             _key: string
+            _type: 'lpBeforeAfterSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpClientGridSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpCtaSection'
             enabled: boolean | null
             internalName: string | null
@@ -4181,6 +4595,12 @@ export type AboutPageQueryResult =
           }
         | {
             _key: string
+            _type: 'lpFounderSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpHeroSection'
             enabled: boolean | null
             internalName: string | null
@@ -4194,6 +4614,12 @@ export type AboutPageQueryResult =
         | {
             _key: string
             _type: 'lpMeasurementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpPackagesSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -4223,6 +4649,42 @@ export type AboutPageQueryResult =
           }
         | {
             _key: string
+            _type: 'lpQuotesSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpReelsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpResultsGallerySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpServicesListSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpStatementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpStatsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpSystemSection'
             enabled: boolean | null
             internalName: string | null
@@ -4230,6 +4692,12 @@ export type AboutPageQueryResult =
         | {
             _key: string
             _type: 'lpTeamSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpVideoHeroSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -6395,6 +6863,18 @@ export type ContactPageQueryResult =
       sections: Array<
         | {
             _key: string
+            _type: 'lpBeforeAfterSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpClientGridSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpCtaSection'
             enabled: boolean | null
             internalName: string | null
@@ -6425,6 +6905,12 @@ export type ContactPageQueryResult =
           }
         | {
             _key: string
+            _type: 'lpFounderSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpHeroSection'
             enabled: boolean | null
             internalName: string | null
@@ -6438,6 +6924,12 @@ export type ContactPageQueryResult =
         | {
             _key: string
             _type: 'lpMeasurementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpPackagesSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -6467,6 +6959,42 @@ export type ContactPageQueryResult =
           }
         | {
             _key: string
+            _type: 'lpQuotesSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpReelsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpResultsGallerySection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpServicesListSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpStatementSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpStatsSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
             _type: 'lpSystemSection'
             enabled: boolean | null
             internalName: string | null
@@ -6474,6 +7002,12 @@ export type ContactPageQueryResult =
         | {
             _key: string
             _type: 'lpTeamSection'
+            enabled: boolean | null
+            internalName: string | null
+          }
+        | {
+            _key: string
+            _type: 'lpVideoHeroSection'
             enabled: boolean | null
             internalName: string | null
           }
@@ -7078,13 +7612,13 @@ export type ClientPortalSlugsQueryResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: landingPageBySlugQuery
-// Query: *[_type == "landingPage" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    audience,    ctaLabel,    ctaLink,    ctaSubhead,    hideNav,    stickyMobileCta,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    offers[]{ _key, name, price, billing, description },    sections[]{      _key,      _type,      enabled,      internalName,      _type == "lpHeroSection" => {        eyebrow, headline, subheadline, proofLine, secondaryLinkLabel, secondaryLinkTarget, image      },      _type == "lpLogoSection" => {        logos{ title, style, grayscale, logos[]{ _key, name, url, image } }      },      _type == "lpProblemSection" => {        headline, scene, pains, statLine, statSourceLabel, statSourceUrl, closingLine      },      _type == "lpSystemSection" => {        systemName, headline, bridgeLine, closingLine,        parts[]{ _key, title, body, statLine }      },      _type == "lpDeliverableSection" => { headline, mockupImage, caption },      _type == "lpProcessSection" => {        headline, steps[]{ _key, timeframe, label, body }      },      _type == "lpMeasurementSection" => {        headline, intro, limitsLine, bullets[]{ _key, lead, text }      },      _type == "lpProofSection" => {        headline,        cases[]{ _key, title, body, number, numberLabel, "projectSlug": project->slug.current },        "testimonials": testimonials[]->{ _id, quote, author, role, "client": client->name }      },      _type == "lpCtaSection" => { headline, subhead },      _type == "lpPricingSection" => {        headline, launchName, launchPrice, launchPaymentLine, inclusions,        monthlyPrice, monthlyTerms, adSpendLine, grantsLine, websiteLine      },      _type == "lpFitSection" => {        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints      },      _type == "lpTeamSection" => {        headline, roles, founderLine,        "people": people[]->{ _id, name, shortName, role, photo, "slug": slug.current }      },      _type == "lpFaqSection" => {        faq{ title, description, style, items[]{ _key, question, answer } }      },      _type == "lpFinalCtaSection" => { headline, subhead, secondaryLinkLabel, secondaryLinkHref },    },  }
+// Query: *[_type == "landingPage" && slug.current == $slug][0]{    _id,    _type,    title,    "slug": slug.current,    audience,    ctaLabel,    ctaLink,    ctaSubhead,    hideNav,    stickyMobileCta,    seoTitle,    seoDescription,    ogImage,    speakableSummary,    offers[]{ _key, name, price, billing, description },    sections[]{      _key,      _type,      enabled,      internalName,      _type == "lpHeroSection" => {        eyebrow, headline, subheadline, proofLine, secondaryLinkLabel, secondaryLinkTarget, image      },      _type == "lpLogoSection" => {        logos{ title, style, grayscale, logos[]{ _key, name, url, image } }      },      _type == "lpProblemSection" => {        headline, scene, pains, statLine, statSourceLabel, statSourceUrl, closingLine      },      _type == "lpSystemSection" => {        systemName, headline, bridgeLine, closingLine,        parts[]{ _key, title, body, statLine }      },      _type == "lpDeliverableSection" => { headline, mockupImage, caption },      _type == "lpProcessSection" => {        headline, steps[]{ _key, timeframe, label, body }      },      _type == "lpMeasurementSection" => {        headline, intro, limitsLine, bullets[]{ _key, lead, text }      },      _type == "lpProofSection" => {        headline,        cases[]{ _key, title, body, number, numberLabel, "projectSlug": project->slug.current },        "testimonials": testimonials[]->{ _id, quote, author, role, "client": client->name }      },      _type == "lpCtaSection" => { headline, subhead },      _type == "lpPricingSection" => {        headline, launchName, launchPrice, launchPaymentLine, inclusions,        monthlyPrice, monthlyTerms, adSpendLine, grantsLine, websiteLine      },      _type == "lpFitSection" => {        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints      },      _type == "lpTeamSection" => {        headline, roles, founderLine,        "people": people[]->{ _id, name, shortName, role, photo, "slug": slug.current }      },      _type == "lpVideoHeroSection" => { videoUrl, poster, posterTitle, headline, ctaText },      _type == "lpClientGridSection" => {        title, featuredLead, featuredNames,        clients[]{ _key, name, label, image }      },      _type == "lpServicesListSection" => {        label, showButton, items[]{ _key, titleTop, titleBottom, blurb, image }      },      _type == "lpStatementSection" => { text },      _type == "lpStatsSection" => { stats[]{ _key, value, label } },      _type == "lpBeforeAfterSection" => {        rows[]{ _key, name, metric, before, after, beforeImage, afterImage, caption }      },      _type == "lpReelsSection" => {        buttonLabel, buttonHref, items[]{ _key, videoUrl, poster, badge, href }      },      _type == "lpFounderSection" => { heading, photo, bio },      _type == "lpQuotesSection" => { quotes[]{ _key, quote, author, handle, photo } },      _type == "lpPackagesSection" => {        label, packages[]{ _key, name, description, features, price, note }      },      _type == "lpResultsGallerySection" => {        headline, showButton, images[]{ _key, asset, hotspot, crop, alt, caption }      },      _type == "lpFaqSection" => {        faq{ title, description, style, items[]{ _key, question, answer } }      },      _type == "lpFinalCtaSection" => { headline, subhead, secondaryLinkLabel, secondaryLinkHref },    },  }
 export type LandingPageBySlugQueryResult = {
   _id: string
   _type: 'landingPage'
   title: string | null
   slug: string | null
-  audience: 'churches' | 'nonprofits' | 'other' | null
+  audience: 'businesses' | 'churches' | 'nonprofits' | 'other' | null
   ctaLabel: string | null
   ctaLink: string | null
   ctaSubhead: string | null
@@ -7109,6 +7643,37 @@ export type LandingPageBySlugQueryResult = {
     description: string | null
   }> | null
   sections: Array<
+    | {
+        _key: string
+        _type: 'lpBeforeAfterSection'
+        enabled: boolean | null
+        internalName: string | null
+        rows: Array<{
+          _key: string
+          name: string | null
+          metric: string | null
+          before: string | null
+          after: string | null
+          beforeImage: BeforeImage | null
+          afterImage: AfterImage | null
+          caption: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpClientGridSection'
+        enabled: boolean | null
+        internalName: string | null
+        title: string | null
+        featuredLead: string | null
+        featuredNames: string | null
+        clients: Array<{
+          _key: string
+          name: string | null
+          label: string | null
+          image: LpClientTileImage | null
+        }> | null
+      }
     | {
         _key: string
         _type: 'lpCtaSection'
@@ -7172,6 +7737,22 @@ export type LandingPageBySlugQueryResult = {
       }
     | {
         _key: string
+        _type: 'lpFounderSection'
+        enabled: boolean | null
+        internalName: string | null
+        heading: string | null
+        photo: {
+          asset?: SanityImageAssetReference
+          media?: unknown
+          hotspot?: SanityImageHotspot
+          crop?: SanityImageCrop
+          alt?: string
+          _type: 'image'
+        } | null
+        bio: string | null
+      }
+    | {
+        _key: string
         _type: 'lpHeroSection'
         enabled: boolean | null
         internalName: string | null
@@ -7219,6 +7800,21 @@ export type LandingPageBySlugQueryResult = {
           _key: string
           lead: string | null
           text: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpPackagesSection'
+        enabled: boolean | null
+        internalName: string | null
+        label: string | null
+        packages: Array<{
+          _key: string
+          name: string | null
+          description: string | null
+          features: Array<string> | null
+          price: string | null
+          note: string | null
         }> | null
       }
     | {
@@ -7287,6 +7883,83 @@ export type LandingPageBySlugQueryResult = {
       }
     | {
         _key: string
+        _type: 'lpQuotesSection'
+        enabled: boolean | null
+        internalName: string | null
+        quotes: Array<{
+          _key: string
+          quote: string | null
+          author: string | null
+          handle: string | null
+          photo: Photo | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpReelsSection'
+        enabled: boolean | null
+        internalName: string | null
+        buttonLabel: string | null
+        buttonHref: string | null
+        items: Array<{
+          _key: string
+          videoUrl: string | null
+          poster: Poster | null
+          badge: string | null
+          href: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpResultsGallerySection'
+        enabled: boolean | null
+        internalName: string | null
+        headline: string | null
+        showButton: boolean | null
+        images: Array<{
+          _key: string
+          asset: SanityImageAssetReference | null
+          hotspot: SanityImageHotspot | null
+          crop: SanityImageCrop | null
+          alt: string | null
+          caption: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpServicesListSection'
+        enabled: boolean | null
+        internalName: string | null
+        label: string | null
+        showButton: boolean | null
+        items: Array<{
+          _key: string
+          titleTop: string | null
+          titleBottom: string | null
+          blurb: string | null
+          image: LpServiceRowImage | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpStatementSection'
+        enabled: boolean | null
+        internalName: string | null
+        text: string | null
+      }
+    | {
+        _key: string
+        _type: 'lpStatsSection'
+        enabled: boolean | null
+        internalName: string | null
+        stats: Array<{
+          _key: string
+          value: string | null
+          label: string | null
+        }> | null
+      }
+    | {
+        _key: string
         _type: 'lpSystemSection'
         enabled: boolean | null
         internalName: string | null
@@ -7324,6 +7997,24 @@ export type LandingPageBySlugQueryResult = {
           } | null
           slug: string | null
         }> | null
+      }
+    | {
+        _key: string
+        _type: 'lpVideoHeroSection'
+        enabled: boolean | null
+        internalName: string | null
+        videoUrl: string | null
+        poster: {
+          asset?: SanityImageAssetReference
+          media?: unknown
+          hotspot?: SanityImageHotspot
+          crop?: SanityImageCrop
+          alt?: string
+          _type: 'image'
+        } | null
+        posterTitle: string | null
+        headline: string | null
+        ctaText: string | null
       }
   > | null
 } | null
@@ -7369,7 +8060,7 @@ declare module '@sanity/client' {
     '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    _type,\n    name,\n    "slug": slug.current,\n    serviceType,\n    clientType,\n    "hasOverview": defined(projectPhases),\n    "hasChecklist": defined(checklistTemplate),\n    "hasForms": defined(formsTemplate),\n    "checklistSource": checklistTemplate->{\n      categories[]{\n        _key,\n        title,\n        description,\n        items[]{\n          _key,\n          title,\n          description,\n          required,\n          link,\n          linkLabel\n        }\n      }\n    },\n    "formsSource": formsTemplate->{\n      heading,\n      description,\n      items[]{\n        _key,\n        title,\n        description,\n        required,\n        link,\n        linkLabel\n      }\n    },\n    "projectPhases": projectPhases->{\n      heading,\n      phases[]{ _key, name, note }\n    },\n    activePhase,\n    sharedFolderUrl,\n    brandingFolderUrl,\n    mediaFolderUrl,\n    previewUrl,\n    productionUrl,\n    whatsappGroupUrl,\n    "contentDue": coalesce(contentDue, checklistDue, formsDue),\n    launchEstimate,\n    enabled,\n    checklist[]{\n      _key,\n      title,\n      description,\n      items[]{\n        _key,\n        title,\n        description,\n        required,\n        link,\n        linkLabel,\n        done\n      }\n    }\n  }\n': ClientPortalBySlugQueryResult
     '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    enabled,\n    password\n  }\n': ClientPortalAuthQueryResult
     '\n  *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}\n': ClientPortalSlugsQueryResult
-    '\n  *[_type == "landingPage" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    audience,\n    ctaLabel,\n    ctaLink,\n    ctaSubhead,\n    hideNav,\n    stickyMobileCta,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    offers[]{ _key, name, price, billing, description },\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "lpHeroSection" => {\n        eyebrow, headline, subheadline, proofLine, secondaryLinkLabel, secondaryLinkTarget, image\n      },\n      _type == "lpLogoSection" => {\n        logos{ title, style, grayscale, logos[]{ _key, name, url, image } }\n      },\n      _type == "lpProblemSection" => {\n        headline, scene, pains, statLine, statSourceLabel, statSourceUrl, closingLine\n      },\n      _type == "lpSystemSection" => {\n        systemName, headline, bridgeLine, closingLine,\n        parts[]{ _key, title, body, statLine }\n      },\n      _type == "lpDeliverableSection" => { headline, mockupImage, caption },\n      _type == "lpProcessSection" => {\n        headline, steps[]{ _key, timeframe, label, body }\n      },\n      _type == "lpMeasurementSection" => {\n        headline, intro, limitsLine, bullets[]{ _key, lead, text }\n      },\n      _type == "lpProofSection" => {\n        headline,\n        cases[]{ _key, title, body, number, numberLabel, "projectSlug": project->slug.current },\n        "testimonials": testimonials[]->{ _id, quote, author, role, "client": client->name }\n      },\n      _type == "lpCtaSection" => { headline, subhead },\n      _type == "lpPricingSection" => {\n        headline, launchName, launchPrice, launchPaymentLine, inclusions,\n        monthlyPrice, monthlyTerms, adSpendLine, grantsLine, websiteLine\n      },\n      _type == "lpFitSection" => {\n        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints\n      },\n      _type == "lpTeamSection" => {\n        headline, roles, founderLine,\n        "people": people[]->{ _id, name, shortName, role, photo, "slug": slug.current }\n      },\n      _type == "lpFaqSection" => {\n        faq{ title, description, style, items[]{ _key, question, answer } }\n      },\n      _type == "lpFinalCtaSection" => { headline, subhead, secondaryLinkLabel, secondaryLinkHref },\n    },\n  }\n': LandingPageBySlugQueryResult
+    '\n  *[_type == "landingPage" && slug.current == $slug][0]{\n    _id,\n    _type,\n    title,\n    "slug": slug.current,\n    audience,\n    ctaLabel,\n    ctaLink,\n    ctaSubhead,\n    hideNav,\n    stickyMobileCta,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    offers[]{ _key, name, price, billing, description },\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "lpHeroSection" => {\n        eyebrow, headline, subheadline, proofLine, secondaryLinkLabel, secondaryLinkTarget, image\n      },\n      _type == "lpLogoSection" => {\n        logos{ title, style, grayscale, logos[]{ _key, name, url, image } }\n      },\n      _type == "lpProblemSection" => {\n        headline, scene, pains, statLine, statSourceLabel, statSourceUrl, closingLine\n      },\n      _type == "lpSystemSection" => {\n        systemName, headline, bridgeLine, closingLine,\n        parts[]{ _key, title, body, statLine }\n      },\n      _type == "lpDeliverableSection" => { headline, mockupImage, caption },\n      _type == "lpProcessSection" => {\n        headline, steps[]{ _key, timeframe, label, body }\n      },\n      _type == "lpMeasurementSection" => {\n        headline, intro, limitsLine, bullets[]{ _key, lead, text }\n      },\n      _type == "lpProofSection" => {\n        headline,\n        cases[]{ _key, title, body, number, numberLabel, "projectSlug": project->slug.current },\n        "testimonials": testimonials[]->{ _id, quote, author, role, "client": client->name }\n      },\n      _type == "lpCtaSection" => { headline, subhead },\n      _type == "lpPricingSection" => {\n        headline, launchName, launchPrice, launchPaymentLine, inclusions,\n        monthlyPrice, monthlyTerms, adSpendLine, grantsLine, websiteLine\n      },\n      _type == "lpFitSection" => {\n        headline, goodFitLabel, goodFitPoints, notFitLabel, notFitPoints\n      },\n      _type == "lpTeamSection" => {\n        headline, roles, founderLine,\n        "people": people[]->{ _id, name, shortName, role, photo, "slug": slug.current }\n      },\n      _type == "lpVideoHeroSection" => { videoUrl, poster, posterTitle, headline, ctaText },\n      _type == "lpClientGridSection" => {\n        title, featuredLead, featuredNames,\n        clients[]{ _key, name, label, image }\n      },\n      _type == "lpServicesListSection" => {\n        label, showButton, items[]{ _key, titleTop, titleBottom, blurb, image }\n      },\n      _type == "lpStatementSection" => { text },\n      _type == "lpStatsSection" => { stats[]{ _key, value, label } },\n      _type == "lpBeforeAfterSection" => {\n        rows[]{ _key, name, metric, before, after, beforeImage, afterImage, caption }\n      },\n      _type == "lpReelsSection" => {\n        buttonLabel, buttonHref, items[]{ _key, videoUrl, poster, badge, href }\n      },\n      _type == "lpFounderSection" => { heading, photo, bio },\n      _type == "lpQuotesSection" => { quotes[]{ _key, quote, author, handle, photo } },\n      _type == "lpPackagesSection" => {\n        label, packages[]{ _key, name, description, features, price, note }\n      },\n      _type == "lpResultsGallerySection" => {\n        headline, showButton, images[]{ _key, asset, hotspot, crop, alt, caption }\n      },\n      _type == "lpFaqSection" => {\n        faq{ title, description, style, items[]{ _key, question, answer } }\n      },\n      _type == "lpFinalCtaSection" => { headline, subhead, secondaryLinkLabel, secondaryLinkHref },\n    },\n  }\n': LandingPageBySlugQueryResult
     '\n  *[_type == "landingPage" && defined(slug.current)]{"slug": slug.current}\n': LandingPageSlugsQueryResult
   }
 }

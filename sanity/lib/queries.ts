@@ -913,6 +913,30 @@ export const landingPageBySlugQuery = defineQuery(`
         headline, roles, founderLine,
         "people": people[]->{ _id, name, shortName, role, photo, "slug": slug.current }
       },
+      _type == "lpVideoHeroSection" => { videoUrl, poster, posterTitle, headline, ctaText },
+      _type == "lpClientGridSection" => {
+        title, featuredLead, featuredNames,
+        clients[]{ _key, name, label, image }
+      },
+      _type == "lpServicesListSection" => {
+        label, showButton, items[]{ _key, titleTop, titleBottom, blurb, image }
+      },
+      _type == "lpStatementSection" => { text },
+      _type == "lpStatsSection" => { stats[]{ _key, value, label } },
+      _type == "lpBeforeAfterSection" => {
+        rows[]{ _key, name, metric, before, after, beforeImage, afterImage, caption }
+      },
+      _type == "lpReelsSection" => {
+        buttonLabel, buttonHref, items[]{ _key, videoUrl, poster, badge, href }
+      },
+      _type == "lpFounderSection" => { heading, photo, bio },
+      _type == "lpQuotesSection" => { quotes[]{ _key, quote, author, handle, photo } },
+      _type == "lpPackagesSection" => {
+        label, packages[]{ _key, name, description, features, price, note }
+      },
+      _type == "lpResultsGallerySection" => {
+        headline, showButton, images[]{ _key, asset, hotspot, crop, alt, caption }
+      },
       _type == "lpFaqSection" => {
         faq{ title, description, style, items[]{ _key, question, answer } }
       },

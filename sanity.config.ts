@@ -78,6 +78,7 @@ import {
   homeServicesSection,
   homeWorkSection,
 } from '@/sanity/schemas/sections/homeSections'
+import {landingOfferSections} from '@/sanity/schemas/sections/landingOfferSections'
 import {landingSections} from '@/sanity/schemas/sections/landingSections'
 import {
   projectCreditsSection,
@@ -191,6 +192,8 @@ export default defineConfig({
       homeSection,
       // Landing page sections (paid-traffic pages: /churches, /nonprofits)
       ...landingSections,
+      // Offer landing sections (video-first "Leave it to us" layout)
+      ...landingOfferSections,
       // Home page sections
       homeHeroSection,
       homeProofSection,

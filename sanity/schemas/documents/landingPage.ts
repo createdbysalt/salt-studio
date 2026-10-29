@@ -66,6 +66,7 @@ export default defineType({
         list: [
           {title: 'Churches', value: 'churches'},
           {title: 'Nonprofits', value: 'nonprofits'},
+          {title: 'Businesses', value: 'businesses'},
           {title: 'Other', value: 'other'},
         ],
         layout: 'radio',
@@ -138,6 +139,18 @@ export default defineType({
         {type: 'lpTeamSection', title: 'Who you will work with'},
         {type: 'lpFaqSection', title: 'FAQ'},
         {type: 'lpFinalCtaSection', title: 'Final call to action'},
+        // Offer layout (video-first "Leave it to us" page)
+        {type: 'lpVideoHeroSection', title: 'Video hero'},
+        {type: 'lpClientGridSection', title: 'Client grid'},
+        {type: 'lpServicesListSection', title: 'Services list'},
+        {type: 'lpStatementSection', title: 'Statement band'},
+        {type: 'lpStatsSection', title: 'Big numbers'},
+        {type: 'lpBeforeAfterSection', title: 'Before / after'},
+        {type: 'lpReelsSection', title: 'Video tiles'},
+        {type: 'lpFounderSection', title: 'Meet the founder'},
+        {type: 'lpQuotesSection', title: 'Client quotes'},
+        {type: 'lpPackagesSection', title: 'Packages'},
+        {type: 'lpResultsGallerySection', title: 'Results gallery'},
       ],
       {
         // The Button section may repeat (after proof, after price). Everything else once.
