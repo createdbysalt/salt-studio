@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
 import test from 'node:test'
 import {
   isRepeatableFormKey,
@@ -26,6 +27,8 @@ import {CHURCH_TALLY_FORMS, CLIENT_GETTING_STARTED_OVERRIDES} from '@/lib/tally/
 
 const ROUTING_SECRET = 'test-routing-secret'
 const WEBHOOK_SECRET = 'test-webhook-secret'
+const HARDENING_MIGRATION_PATH =
+  'supabase/migrations/20261108050100_harden_onboarding_updated_at_function.sql'
 
 const CURRENT_CLC_FORM_MAPPINGS = [
   {itemKey: 'gs-form', formId: 'yP5oEB', title: 'Church Info Form'},
@@ -130,6 +133,19 @@ test('Tally links get stable project routing metadata and signed tokens', () => 
   assert.equal(url.searchParams.get('form_id'), '814oZl')
   assert.equal(url.searchParams.get('item_key'), 'f-staff')
   assert.ok(url.searchParams.get('salt_route'))
+})
+
+test('Supabase function hardening migration pins search_path and revokes execute grants', () => {
+  const sql = readFileSync(HARDENING_MIGRATION_PATH, 'utf8').toLowerCase()
+
+  assert.match(sql, /create or replace function public\.set_onboarding_updated_at\(\)/)
+  assert.match(sql, /set search_path = pg_catalog, public/)
+  assert.match(sql, /revoke all on function public\.set_onboarding_updated_at\(\) from public/)
+  assert.match(sql, /revoke all on function public\.set_onboarding_updated_at\(\) from anon/)
+  assert.match(
+    sql,
+    /revoke all on function public\.set_onboarding_updated_at\(\) from authenticated/,
+  )
 })
 
 test('repo inventory matches the nine current CLC portal Tally forms', () => {

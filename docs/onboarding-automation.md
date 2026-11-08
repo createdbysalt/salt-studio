@@ -41,7 +41,9 @@ Recommended: Supabase/Postgres.
 | Private Sanity dataset | Viable fallback | Reuses existing Sanity client patterns, but private dataset entitlement may require a paid Sanity plan and the actual project plan is unknown. Less natural for relational ledgers/outbox operations.                                                                 |
 | Vercel storage         | Not chosen yet  | Vercel does not provide a native transactional database without selecting a storage provider/integration. Use only if parent provisions a specific Postgres provider and credentials.                                                                                 |
 
-The repo includes the Supabase migration at `supabase/migrations/202611080001_onboarding_automation.sql`. Do not apply it to any project until parent provides authorized Supabase project coordinates.
+The repo includes the Supabase base migration at `supabase/migrations/202611080001_onboarding_automation.sql`. It was applied externally to the dedicated `salt-studio` Supabase project (`jnznsgkkteuuqwtscaxz`) as recorded version `20261108050017` with migration name `onboarding_automation`.
+
+Because that applied version differs from the repo filename, future CLI deploys must treat the base migration as already applied in that project and apply only later forward migrations. Do not destructively reapply or rename the already-applied database migration. The first follow-up hardening migration is `supabase/migrations/20261108050100_harden_onboarding_updated_at_function.sql`.
 
 ## Tally setup
 
