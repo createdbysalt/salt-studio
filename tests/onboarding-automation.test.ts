@@ -10,6 +10,11 @@ import {classifyDriveArrival} from '@/lib/onboarding/drive'
 import {GoogleDriveMetadataChecker} from '@/lib/onboarding/drive-checker'
 import {planInternalTaskSync} from '@/lib/onboarding/internal-tasks'
 import {NotionReviewSink} from '@/lib/onboarding/notion'
+import {hashPortalPassword, verifyPortalPassword} from '@/lib/onboarding/portal-crypto'
+import {
+  getPrivatePortalOverlay,
+  getSupabasePortalCredentials,
+} from '@/lib/onboarding/private-portal'
 import {processTallyWebhook, retryFailedOnboardingSyncs} from '@/lib/onboarding/processor'
 import {
   MemoryOnboardingRepository,
@@ -146,6 +151,107 @@ test('Supabase function hardening migration pins search_path and revokes execute
     sql,
     /revoke all on function public\.set_onboarding_updated_at\(\) from authenticated/,
   )
+})
+
+test('portal password hashing verifies without storing plaintext', () => {
+  const hashed = hashPortalPassword('correct horse battery staple', 'fixed-test-salt')
+
+  assert.notEqual(hashed.hash, 'correct horse battery staple')
+  assert.equal(
+    verifyPortalPassword({
+      password: 'correct horse battery staple',
+      hash: hashed.hash,
+      salt: hashed.salt,
+      iterations: hashed.iterations,
+    }),
+    true,
+  )
+  assert.equal(
+    verifyPortalPassword({
+      password: 'wrong',
+      hash: hashed.hash,
+      salt: hashed.salt,
+      iterations: hashed.iterations,
+    }),
+    false,
+  )
+})
+
+test('Supabase private portal overlay reads private links and submission labels server-side', async () => {
+  const originalFetch = globalThis.fetch
+  const originalStore = process.env.ONBOARDING_PRIVATE_METADATA_STORE
+  const originalUrl = process.env.SUPABASE_URL
+  const originalKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.ONBOARDING_PRIVATE_METADATA_STORE = 'supabase'
+  process.env.SUPABASE_URL = 'https://example.supabase.co'
+  process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role'
+
+  globalThis.fetch = (async (url: string | URL | Request) => {
+    const text = String(url)
+    if (text.includes('select=password_hash')) {
+      const hashed = hashPortalPassword('portal-pass', 'portal-salt')
+      return Response.json([
+        {
+          password_hash: hashed.hash,
+          password_salt: hashed.salt,
+          password_iterations: hashed.iterations,
+        },
+      ])
+    }
+    if (text.includes('portal_private_metadata')) {
+      return Response.json([
+        {
+          shared_folder_url: 'https://drive.example/shared',
+          branding_folder_url: 'https://drive.example/brand',
+          media_folder_url: 'https://drive.example/media',
+          preview_url: null,
+          production_url: null,
+          whatsapp_group_url: null,
+        },
+      ])
+    }
+    if (text.includes('onboarding_submissions')) {
+      return Response.json([
+        {
+          idempotency_key: 'tally:staff-1',
+          provider: 'tally',
+          project_id: churchProject.projectId,
+          form_id: '814oZl',
+          item_key: 'f-staff',
+          submission_id: 'staff-1',
+          entry_title: 'Ada Staff',
+          status: 'received_for_review',
+          review_reason: null,
+          received_at: '2026-01-01T00:00:00.000Z',
+          attempts: 0,
+          last_error: null,
+        },
+      ])
+    }
+    if (text.includes('onboarding_collection_status')) {
+      return Response.json([])
+    }
+    return new Response('{}', {status: 404})
+  }) as typeof fetch
+
+  try {
+    const credentials = await getSupabasePortalCredentials(churchProject.projectId)
+    const overlay = await getPrivatePortalOverlay(churchProject.projectId)
+
+    assert.ok(credentials)
+    assert.equal(overlay?.sharedFolderUrl, 'https://drive.example/shared')
+    assert.equal(overlay?.formSubmissionSummary?.['f-staff'].count, 1)
+    assert.equal(overlay?.formSubmissionSummary?.['f-staff'].entries?.[0].label, 'Ada Staff')
+    assert.equal(
+      overlay?.formSubmissionSummary?.['f-staff'].entries?.[0].receivedAt,
+      '2026-01-01T00:00:00.000Z',
+    )
+  } finally {
+    globalThis.fetch = originalFetch
+    process.env.ONBOARDING_PRIVATE_METADATA_STORE = originalStore
+    process.env.SUPABASE_URL = originalUrl
+    process.env.SUPABASE_SERVICE_ROLE_KEY = originalKey
+  }
 })
 
 test('repo inventory matches the nine current CLC portal Tally forms', () => {

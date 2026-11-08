@@ -98,6 +98,11 @@ export type PrivatePortalOverlay = {
       collectionComplete?: boolean
       completedAt?: string | null
       reopenedAt?: string | null
+      entries?: Array<{
+        label: string
+        receivedAt: string
+        status: 'received' | 'received_after_confirmation'
+      }>
     }
   >
 }

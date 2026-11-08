@@ -1,7 +1,10 @@
 import {isTableAuthenticated, isValidTableSlug} from '@/app/(table)/table/auth'
 import {ClientPortalLogin} from '@/components/ClientPortalLogin'
 import {ClientPortalPage} from '@/components/ClientPortalPage'
-import {getPrivatePortalOverlay} from '@/lib/onboarding/private-portal'
+import {
+  getPrivatePortalOverlay,
+  isSupabasePrivateMetadataEnabled,
+} from '@/lib/onboarding/private-portal'
 import {sanityFetch} from '@/sanity/lib/live'
 import {
   clientPortalBySlugQuery,
@@ -69,9 +72,26 @@ export default async function ProjectSlugRoute({params}: Props) {
   }
 
   const privateOverlay = await getPrivatePortalOverlay(data._id)
+  const privateMode = isSupabasePrivateMetadataEnabled()
+  if (privateMode && !privateOverlay) {
+    return <main className="min-h-svh bg-background" />
+  }
+
+  const publicPrivateFields = privateMode
+    ? {
+        sharedFolderUrl: null,
+        brandingFolderUrl: null,
+        mediaFolderUrl: null,
+        previewUrl: null,
+        productionUrl: null,
+        whatsappGroupUrl: null,
+      }
+    : {}
+
   const mergedData = privateOverlay
     ? ({
         ...data,
+        ...publicPrivateFields,
         ...privateOverlay,
         checklist: (privateOverlay.checklist ?? data.checklist) as typeof data.checklist,
       } as typeof data)

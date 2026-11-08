@@ -15,6 +15,7 @@ ONBOARDING_JOB_SECRET=... # Bearer token for retry jobs
 ONBOARDING_AUTOMATION_STORE=supabase # Recommended production durable store
 SUPABASE_URL=... # Server-side only
 SUPABASE_SERVICE_ROLE_KEY=... # Server-side only; never expose to browser
+ONBOARDING_PRIVATE_METADATA_STORE=supabase # Enables private portal password/link reads
 NOTION_API_KEY=... # Salt-internal blockers only
 NOTION_ONBOARDING_TASKS_DATABASE_ID=... # Database with the properties listed below
 GOOGLE_DRIVE_ACCESS_TOKEN=... # Metadata-only checker; no file contents are fetched
@@ -43,7 +44,22 @@ Recommended: Supabase/Postgres.
 
 The repo includes the Supabase base migration at `supabase/migrations/202611080001_onboarding_automation.sql`. It was applied externally to the dedicated `salt-studio` Supabase project (`jnznsgkkteuuqwtscaxz`) as recorded version `20261108050017` with migration name `onboarding_automation`.
 
-Because that applied version differs from the repo filename, future CLI deploys must treat the base migration as already applied in that project and apply only later forward migrations. Do not destructively reapply or rename the already-applied database migration. The first follow-up hardening migration is `supabase/migrations/20261108050100_harden_onboarding_updated_at_function.sql`.
+Because that applied version differs from the repo filename, future CLI deploys must treat the base migration as already applied in that project and apply only later forward migrations. Do not destructively reapply or rename the already-applied database migration. Follow-up migrations:
+
+- `supabase/migrations/20261108050100_harden_onboarding_updated_at_function.sql`
+- `supabase/migrations/20261108050200_portal_private_metadata.sql`
+
+Private portal metadata migration:
+
+```bash
+# Dry-run, prints field presence only
+npm run plan:onboarding:privacy
+
+# One-time private copy after approval; does not remove public Sanity fields
+CONFIRM_PRIVATE_PORTAL_WRITE=true npm run plan:onboarding:privacy -- --write
+```
+
+Rollback before public cleanup: unset `ONBOARDING_PRIVATE_METADATA_STORE` or set it away from `supabase`. Rollback after public cleanup requires restoring public fields from the approved secure backup, then disabling private mode.
 
 ## Tally setup
 
@@ -109,7 +125,7 @@ Before activating webhooks in production:
 1. Make the Sanity dataset private or move portal secrets/links/statuses to a private store. The current public dataset contains portal-sensitive fields. Sanity private datasets may require paid-plan entitlement; confirm the actual project plan before provisioning or changing visibility.
 2. Provision/authorize the chosen Supabase project and apply `supabase/migrations/202611080001_onboarding_automation.sql` after review. Do not use the service role key outside server-side environment variables.
 3. Run `node scripts/onboarding/privacy-migration-plan.mjs` and review its dry-run output. It prints field presence only, never private values.
-4. Copy private portal fields into `clientPortalPrivate` documents in the private dataset, verify `/project/[slug]` reads overlays, then unset the listed private fields from public portal docs.
+4. Copy private portal fields into `portal_private_metadata` using `CONFIRM_PRIVATE_PORTAL_WRITE=true npm run plan:onboarding:privacy -- --write`, verify `/project/[slug]` reads overlays, then unset the listed private fields from public portal docs.
 5. Configure the Tally signing secret, routing secret, retry job secret, Supabase URL/service role key, and optional private portal store credentials in Vercel. Existing agent/MCP connectors are not deployed app credentials.
 6. Add hidden fields to all nine active Tally forms (`project_id`, `form_id`, `item_key`, `salt_route`) and publish intentionally from Tally. A saved draft hidden field is not necessarily live on the published form.
 7. Configure webhooks with signing secrets in Tally for all nine active forms. There is no Tally connector tool in this environment to manage webhooks automatically.

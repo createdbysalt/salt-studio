@@ -17,6 +17,11 @@ export type PortalChecklistItem = {
   latestReceivedAt?: string | null
   completedAt?: string | null
   reopenedAt?: string | null
+  submissionEntries?: Array<{
+    label: string
+    receivedAt: string
+    status: 'received' | 'received_after_confirmation'
+  }> | null
 }
 
 export type PortalChecklistGroup = {

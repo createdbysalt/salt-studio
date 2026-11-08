@@ -2,9 +2,14 @@
 
 import {isTableAuthenticated, isValidTableSlug, tableAuthCookieName} from '@/app/(table)/table/auth'
 import {setCollectionComplete} from '@/lib/onboarding/collection-store'
+import {verifyPortalPassword} from '@/lib/onboarding/portal-crypto'
+import {
+  getSupabasePortalCredentials,
+  isSupabasePrivateMetadataEnabled,
+} from '@/lib/onboarding/private-portal'
 import {apiVersion, dataset, projectId} from '@/sanity/lib/api'
 import {sanityFetch} from '@/sanity/lib/live'
-import {clientPortalAuthQuery} from '@/sanity/lib/queries'
+import {clientPortalAuthQuery, clientPortalAuthShellQuery} from '@/sanity/lib/queries'
 import {writeToken} from '@/sanity/lib/write-token'
 import {createClient, stegaClean} from 'next-sanity'
 import {revalidatePath} from 'next/cache'
@@ -29,6 +34,40 @@ export async function authenticateTable(slug: string, formData: FormData) {
   }
 
   const submitted = String(formData.get('password') ?? '')
+  if (isSupabasePrivateMetadataEnabled()) {
+    const {data} = await sanityFetch({
+      query: clientPortalAuthShellQuery,
+      params: {slug},
+      stega: false,
+    })
+    const enabled = data?.enabled !== false
+    const credentials = data?._id ? await getSupabasePortalCredentials(data._id) : null
+    if (
+      !data?._id ||
+      !enabled ||
+      !credentials ||
+      !verifyPortalPassword({
+        password: submitted,
+        hash: credentials.hash,
+        salt: credentials.salt,
+        iterations: credentials.iterations,
+      })
+    ) {
+      return {ok: false as const, error: 'That password is not right.'}
+    }
+
+    const cookieStore = await cookies()
+    cookieStore.set(tableAuthCookieName(slug), '1', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: `/project/${slug}`,
+      maxAge: 60 * 60 * 24 * 30,
+    })
+
+    redirect(`/project/${slug}`)
+  }
+
   const {data} = await sanityFetch({
     query: clientPortalAuthQuery,
     params: {slug},

@@ -846,6 +846,13 @@ export const clientPortalAuthQuery = defineQuery(`
   }
 `)
 
+export const clientPortalAuthShellQuery = defineQuery(`
+  *[_type == "clientPortal" && slug.current == $slug][0]{
+    _id,
+    enabled
+  }
+`)
+
 export const clientPortalShellBySlugQuery = defineQuery(`
   *[_type == "clientPortal" && slug.current == $slug][0]{
     _id,

@@ -19,6 +19,11 @@ type SubmissionSummary = {
   collectionComplete?: boolean
   completedAt?: string | null
   reopenedAt?: string | null
+  entries?: Array<{
+    label: string
+    receivedAt: string
+    status: 'received' | 'received_after_confirmation'
+  }>
 }
 
 function splitItems(items: Array<TickItem | null> | null | undefined) {
@@ -195,6 +200,7 @@ function withCategory(
     collectionComplete: summary?.collectionComplete ?? null,
     completedAt: summary?.completedAt ?? null,
     reopenedAt: summary?.reopenedAt ?? null,
+    submissionEntries: summary?.entries ?? null,
   }
 }
 

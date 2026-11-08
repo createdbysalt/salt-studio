@@ -121,6 +121,18 @@ export function ClientPortalForms() {
                             : 'Mark collection complete'}
                       </button>
                     ) : null}
+                    {item.submissionEntries?.length ? (
+                      <ul className="mt-3 space-y-1 text-[13px] leading-relaxed text-muted-foreground">
+                        {item.submissionEntries.slice(0, 5).map((entry) => (
+                          <li key={`${entry.receivedAt}-${entry.label}`}>
+                            {entry.label} · {new Date(entry.receivedAt).toLocaleDateString()}
+                            {entry.status === 'received_after_confirmation'
+                              ? ' · received after completion'
+                              : ''}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                   </div>
                   {item.link ? (
                     <div className="flex shrink-0 items-start gap-2 self-start">
