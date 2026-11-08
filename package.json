@@ -14,13 +14,15 @@
     "import:projects": "sanity exec scripts/import-projects-from-csv.mjs --with-user-token",
     "lint": "eslint .",
     "lint:fix": "npm run format && npm run lint -- --fix",
+    "plan:onboarding:privacy": "node scripts/onboarding/privacy-migration-plan.mjs",
     "prepare": "husky",
     "seed:copy:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "seed:team:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "start": "next start -p 4000",
     "test:onboarding": "tsx --test tests/onboarding-automation.test.ts",
     "type-check": "next typegen && tsc --noEmit",
-    "typegen": "sanity schema extract && sanity typegen generate"
+    "typegen": "sanity schema extract && sanity typegen generate",
+    "verify:onboarding:sandbox": "tsx scripts/onboarding/verify-sandbox.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

@@ -1,6 +1,7 @@
 import {isTableAuthenticated, isValidTableSlug} from '@/app/(table)/table/auth'
 import {ClientPortalLogin} from '@/components/ClientPortalLogin'
 import {ClientPortalPage} from '@/components/ClientPortalPage'
+import {getPrivatePortalOverlay} from '@/lib/onboarding/private-portal'
 import {sanityFetch} from '@/sanity/lib/live'
 import {
   clientPortalBySlugQuery,
@@ -67,5 +68,14 @@ export default async function ProjectSlugRoute({params}: Props) {
     return <main className="min-h-svh bg-background" />
   }
 
-  return <ClientPortalPage data={data} />
+  const privateOverlay = await getPrivatePortalOverlay(data._id)
+  const mergedData = privateOverlay
+    ? ({
+        ...data,
+        ...privateOverlay,
+        checklist: (privateOverlay.checklist ?? data.checklist) as typeof data.checklist,
+      } as typeof data)
+    : data
+
+  return <ClientPortalPage data={mergedData} />
 }

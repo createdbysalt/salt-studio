@@ -95,6 +95,15 @@ export function ClientPortalForms() {
                         {item.description}
                       </p>
                     ) : null}
+                    {typeof item.submissionCount === 'number' ? (
+                      <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
+                        {item.submissionCount}{' '}
+                        {item.submissionCount === 1 ? 'submission' : 'submissions'} received
+                        {item.collectionComplete
+                          ? ' · client marked this collection complete'
+                          : ' · not marked complete'}
+                      </p>
+                    ) : null}
                   </div>
                   {item.link ? (
                     <div className="flex shrink-0 items-start gap-2 self-start">

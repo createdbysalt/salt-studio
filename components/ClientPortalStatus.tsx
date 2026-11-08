@@ -12,6 +12,11 @@ export type PortalChecklistItem = {
   link?: string | null
   linkLabel?: string | null
   done?: boolean | null
+  submissionCount?: number | null
+  collectionComplete?: boolean | null
+  latestReceivedAt?: string | null
+  completedAt?: string | null
+  reopenedAt?: string | null
 }
 
 export type PortalChecklistGroup = {

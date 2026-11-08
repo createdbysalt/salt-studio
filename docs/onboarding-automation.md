@@ -12,10 +12,36 @@ Nothing activates by default. Existing portal links stay unchanged unless `ONBOA
 ONBOARDING_ROUTING_SECRET=... # Signs per-project/per-form route tokens for Tally links
 TALLY_WEBHOOK_SECRET=... # Tally webhook signing secret; validates Tally-Signature
 ONBOARDING_JOB_SECRET=... # Bearer token for retry jobs
+ONBOARDING_AUTOMATION_STORE=supabase # Recommended production durable store
+SUPABASE_URL=... # Server-side only
+SUPABASE_SERVICE_ROLE_KEY=... # Server-side only; never expose to browser
+NOTION_API_KEY=... # Salt-internal blockers only
+NOTION_ONBOARDING_TASKS_DATABASE_ID=... # Database with the properties listed below
+GOOGLE_DRIVE_ACCESS_TOKEN=... # Metadata-only checker; no file contents are fetched
+
+# Optional fallback if Supabase is not approved/provisioned:
+ONBOARDING_AUTOMATION_STORE=sanity
+ONBOARDING_PRIVATE_SANITY_DATASET=... # Private dataset for portal-private data + submissions
+SANITY_API_WRITE_TOKEN=... # Write token scoped to the private dataset
+
 ONBOARDING_AUTOMATION_STORE=memory # Local/sandbox only. Do not use for production.
 ```
 
 Tally hidden fields are routing metadata, not authentication. The automation validates `project_id`, `form_id`, and `item_key` against a signed `salt_route` token and then against the authoritative portal/form mapping.
+
+The Notion database must have these properties: `Name` (title), `Status` (select), `Source` (select), `Reason` (select), `Dedupe Key` (rich text), `Project ID` (rich text), and `Submission ID` (rich text).
+
+## Storage recommendation
+
+Recommended: Supabase/Postgres.
+
+| Option                 | Fit             | Notes                                                                                                                                                                                                                                                                 |
+| ---------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Supabase/Postgres      | Best fit        | Relational submission ledger, unique idempotency keys, collection status rows, and an outbox table are native. Works without storing secrets in the public Sanity dataset. Requires parent to finish Supabase OAuth/project setup and provide server-side env values. |
+| Private Sanity dataset | Viable fallback | Reuses existing Sanity client patterns, but private dataset entitlement may require a paid Sanity plan and the actual project plan is unknown. Less natural for relational ledgers/outbox operations.                                                                 |
+| Vercel storage         | Not chosen yet  | Vercel does not provide a native transactional database without selecting a storage provider/integration. Use only if parent provisions a specific Postgres provider and credentials.                                                                                 |
+
+The repo includes the Supabase migration at `supabase/migrations/202611080001_onboarding_automation.sql`. Do not apply it to any project until parent provides authorized Supabase project coordinates.
 
 ## Tally setup
 
@@ -38,7 +64,10 @@ Do not publish or change client-facing forms from this repo. The Staff form's un
 - Unknown, missing, forwarded, tampered, disabled, or mismatched routing becomes `needs_review`.
 - Duplicate Tally submission IDs are idempotent.
 - A received form does not mark a checklist item done. Manual ticks remain compatible.
-- Multi-entity forms such as staff/ministry are treated as one received submission for review, not as completion of every expected person/ministry.
+- Getting Started is the only single-intake form.
+- Staff, ministry, crew, small group, event, course, story, and FAQ forms are repeatable. They maintain a per-project/form submission ledger with received time and an available entry label from form answers. Email is never used to infer a person's name.
+- `3 submissions received` is not `complete`. A collection becomes complete only when an authenticated project user explicitly confirms it. Confirmation records actor and time, and reopening records actor and time.
+- Submissions received after confirmation are flagged in summaries as received after confirmation so they can be reviewed instead of silently changing completeness.
 - Drive arrivals are evidence only. A file in a known folder can be a candidate signal, but arbitrary file arrival cannot assign a specific asset without routing evidence.
 - Notion is the internal task boundary for Salt blockers. Linear-owned work, including Simcoe House, is not duplicated into Notion.
 
@@ -64,6 +93,7 @@ The older June/Enjoy Life form IDs in `ENJOY_LIFE_TALLY_FORMS` are catalog-prote
 
 ```bash
 npm run test:onboarding
+npm run verify:onboarding:sandbox
 npm run lint
 NEXT_PUBLIC_SANITY_PROJECT_ID=jkqf2ng5 NEXT_PUBLIC_SANITY_DATASET=production SANITY_API_READ_TOKEN=dummy npm run type-check
 ```
@@ -74,9 +104,12 @@ Use only synthetic submissions in tests. Do not paste client submissions, passwo
 
 Before activating webhooks in production:
 
-1. Make the Sanity dataset private or move portal secrets/links/statuses to a private store. The current public dataset contains portal-sensitive fields.
-2. Replace the memory repository with durable private persistence for onboarding records, idempotency keys, and retry state.
-3. Configure the Tally signing secret, routing secret, and retry job secret in Vercel.
-4. Add hidden fields to the remaining Tally kit forms and publish them intentionally from Tally.
-5. Connect a Notion adapter for Salt-internal blockers only, with deterministic dedupe keys.
-6. Add a Google Drive changes/watch integration only after it can verify folder/project evidence without reading unrelated customer contents.
+1. Make the Sanity dataset private or move portal secrets/links/statuses to a private store. The current public dataset contains portal-sensitive fields. Sanity private datasets may require paid-plan entitlement; confirm the actual project plan before provisioning or changing visibility.
+2. Provision/authorize the chosen Supabase project and apply `supabase/migrations/202611080001_onboarding_automation.sql` after review. Do not use the service role key outside server-side environment variables.
+3. Run `node scripts/onboarding/privacy-migration-plan.mjs` and review its dry-run output. It prints field presence only, never private values.
+4. Copy private portal fields into `clientPortalPrivate` documents in the private dataset, verify `/project/[slug]` reads overlays, then unset the listed private fields from public portal docs.
+5. Configure the Tally signing secret, routing secret, retry job secret, Supabase URL/service role key, and optional private portal store credentials in Vercel. Existing agent/MCP connectors are not deployed app credentials.
+6. Add hidden fields to all nine active Tally forms (`project_id`, `form_id`, `item_key`, `salt_route`) and publish intentionally from Tally. A saved draft hidden field is not necessarily live on the published form.
+7. Configure webhooks with signing secrets in Tally for all nine active forms. There is no Tally connector tool in this environment to manage webhooks automatically.
+8. Connect the Notion adapter for Salt-internal blockers only, with deterministic dedupe keys. A verified Salt tasks database ID is still needed.
+9. Connect the Google Drive metadata checker only after server-side Drive credentials are configured for metadata checks without reading unrelated customer contents.

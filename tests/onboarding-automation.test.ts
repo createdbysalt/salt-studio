@@ -1,9 +1,20 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import {
+  isRepeatableFormKey,
+  REPEATABLE_FORM_KEYS,
+  summarizeFormSubmissions,
+} from '@/lib/onboarding/collection-status'
 import {classifyDriveArrival} from '@/lib/onboarding/drive'
+import {GoogleDriveMetadataChecker} from '@/lib/onboarding/drive-checker'
 import {planInternalTaskSync} from '@/lib/onboarding/internal-tasks'
+import {NotionReviewSink} from '@/lib/onboarding/notion'
 import {processTallyWebhook, retryFailedOnboardingSyncs} from '@/lib/onboarding/processor'
-import {MemoryOnboardingRepository} from '@/lib/onboarding/repository'
+import {
+  MemoryOnboardingRepository,
+  onboardingSubmissionDocumentId,
+  SanityOnboardingRepository,
+} from '@/lib/onboarding/repository'
 import {
   appendOnboardingRoutingToTallyUrl,
   createOnboardingRouteToken,
@@ -249,6 +260,126 @@ test('valid Tally submission is received for review and does not complete checkl
   assert.equal(Object.hasOwn(result.record, 'done'), false)
 })
 
+test('all eight repeatable forms keep a submission ledger separate from completion', async () => {
+  assert.deepEqual(REPEATABLE_FORM_KEYS, [
+    'f-staff',
+    'f-ministry',
+    'f-crew',
+    'f-small-group',
+    'f-event',
+    'f-course',
+    'f-testimony',
+    'f-faq',
+  ])
+  assert.equal(isRepeatableFormKey('gs-form'), false)
+
+  for (const itemKey of REPEATABLE_FORM_KEYS) {
+    const form = CURRENT_CLC_FORM_MAPPINGS.find((entry) => entry.itemKey === itemKey)
+    assert.ok(form)
+    const repository = new MemoryOnboardingRepository()
+    const first = tallyPayload({
+      submissionId: `${itemKey}-1`,
+      itemKey,
+      formId: form.formId,
+    })
+    const second = tallyPayload({
+      submissionId: `${itemKey}-2`,
+      itemKey,
+      formId: form.formId,
+    })
+
+    await processTallyWebhook({
+      rawBody: JSON.stringify(first),
+      payload: first,
+      routingSecret: ROUTING_SECRET,
+      repository,
+      getProject,
+      receivedAt: '2026-01-01T00:00:00.000Z',
+    })
+    await processTallyWebhook({
+      rawBody: JSON.stringify(second),
+      payload: second,
+      routingSecret: ROUTING_SECRET,
+      repository,
+      getProject,
+      receivedAt: '2026-01-02T00:00:00.000Z',
+    })
+
+    const summary = summarizeFormSubmissions({
+      projectId: churchProject.projectId,
+      itemKey,
+      records: repository.snapshot(),
+    })
+
+    assert.equal(summary.submissionCount, 2, itemKey)
+    assert.equal(summary.collectionComplete, false, itemKey)
+    assert.equal(summary.entries[0].label, 'Synthetic Person', itemKey)
+  }
+})
+
+test('client collection confirmation, reopening, and late submissions stay separate', () => {
+  const records = [
+    {
+      idempotencyKey: 'tally:staff-1',
+      provider: 'tally' as const,
+      projectId: churchProject.projectId,
+      formId: '814oZl',
+      itemKey: 'f-staff',
+      submissionId: 'staff-1',
+      entryTitle: 'Ada Staff',
+      status: 'received_for_review' as const,
+      receivedAt: '2026-01-01T00:00:00.000Z',
+      attempts: 0,
+    },
+    {
+      idempotencyKey: 'tally:staff-late',
+      provider: 'tally' as const,
+      projectId: churchProject.projectId,
+      formId: '814oZl',
+      itemKey: 'f-staff',
+      submissionId: 'staff-late',
+      entryTitle: null,
+      status: 'received_for_review' as const,
+      receivedAt: '2026-01-03T00:00:00.000Z',
+      attempts: 0,
+    },
+  ]
+
+  const confirmed = summarizeFormSubmissions({
+    projectId: churchProject.projectId,
+    itemKey: 'f-staff',
+    records,
+    status: {
+      projectId: churchProject.projectId,
+      itemKey: 'f-staff',
+      collectionComplete: true,
+      confirmedAt: '2026-01-02T00:00:00.000Z',
+      confirmedBy: 'client-portal:alpha-church',
+    },
+  })
+  const reopened = summarizeFormSubmissions({
+    projectId: churchProject.projectId,
+    itemKey: 'f-staff',
+    records,
+    status: {
+      projectId: churchProject.projectId,
+      itemKey: 'f-staff',
+      collectionComplete: false,
+      confirmedAt: '2026-01-02T00:00:00.000Z',
+      confirmedBy: 'client-portal:alpha-church',
+      reopenedAt: '2026-01-04T00:00:00.000Z',
+      reopenedBy: 'client-portal:alpha-church',
+    },
+  })
+
+  assert.equal(confirmed.collectionComplete, true)
+  assert.equal(confirmed.lateSubmissionCount, 1)
+  assert.equal(confirmed.entries[1].label, 'Unknown submission 2')
+  assert.equal(confirmed.entries[1].status, 'received_after_confirmation')
+  assert.equal(reopened.collectionComplete, false)
+  assert.equal(reopened.reopenedAt, '2026-01-04T00:00:00.000Z')
+})
+
 test('missing, tampered, unknown, and mismatched routing enter review', async () => {
   const cases = [
     {name: 'missing', payload: tallyPayload({token: null}), reason: 'missing_routing'},
@@ -319,6 +450,78 @@ test('duplicate submission ids are idempotent', async () => {
   assert.equal(repository.snapshot().length, 1)
 })
 
+test('Sanity durable repository uses atomic create-if-not-exists for concurrent idempotency', async () => {
+  const documents = new Map<string, any>()
+  const fakeClient = {
+    async createIfNotExists(document: any) {
+      const existing = documents.get(document._id)
+      if (existing) return existing
+      documents.set(document._id, document)
+      return document
+    },
+    async fetch(query: string, params?: Record<string, unknown>) {
+      if (query.includes('status == "queued_for_retry"')) {
+        return [...documents.values()].filter((document) => document.status === 'queued_for_retry')
+      }
+      return documents.get(String(params?.id)) ?? null
+    },
+    patch(id: string) {
+      return {
+        set(attrs: Record<string, unknown>) {
+          return {
+            unset(unsetAttrs: string[]) {
+              return {
+                async commit() {
+                  const document = documents.get(id)
+                  documents.set(id, {...document, ...attrs})
+                  for (const attr of unsetAttrs) delete documents.get(id)?.[attr]
+                },
+              }
+            },
+            async commit() {
+              documents.set(id, {...documents.get(id), ...attrs})
+            },
+          }
+        },
+        inc(attrs: Record<string, number>) {
+          return {
+            set(setAttrs: Record<string, unknown>) {
+              return {
+                async commit() {
+                  const document = documents.get(id) ?? {}
+                  const next = {...document, ...setAttrs}
+                  for (const [key, value] of Object.entries(attrs)) {
+                    next[key] = Number(next[key] ?? 0) + value
+                  }
+                  documents.set(id, next)
+                },
+              }
+            },
+          }
+        },
+      }
+    },
+  }
+  const repository = new SanityOnboardingRepository(fakeClient)
+  const record = {
+    idempotencyKey: 'tally:concurrent-1',
+    provider: 'tally' as const,
+    projectId: churchProject.projectId,
+    formId: '814oZl',
+    itemKey: 'f-staff',
+    submissionId: 'concurrent-1',
+    status: 'received_for_review' as const,
+    receivedAt: '2026-01-01T00:00:00.000Z',
+    attempts: 0,
+  }
+
+  const results = await Promise.all([repository.recordOnce(record), repository.recordOnce(record)])
+
+  assert.equal(results.filter((result) => result.created).length, 1)
+  assert.equal(documents.size, 1)
+  assert.ok(documents.has(onboardingSubmissionDocumentId(record.idempotencyKey)))
+})
+
 test('downstream failures retry without duplicate review records', async () => {
   const repository = new MemoryOnboardingRepository()
   let calls = 0
@@ -380,6 +583,35 @@ test('Drive arrivals are evidence only and arbitrary folders cannot complete ass
   assert.equal(unknown.status, 'needs_review')
 })
 
+test('Google Drive checker reads metadata only and rejects wrong folders', async () => {
+  const requestedUrls: string[] = []
+  const checker = new GoogleDriveMetadataChecker({
+    accessToken: 'sandbox-token',
+    routingSecret: ROUTING_SECRET,
+    fetchImpl: async (url) => {
+      requestedUrls.push(String(url))
+      return new Response(
+        JSON.stringify({
+          id: 'file-1',
+          name: 'Synthetic upload.jpg',
+          parents: ['wrong-folder'],
+          appProperties: {},
+        }),
+        {status: 200},
+      )
+    },
+  })
+
+  const result = await checker.checkFile({fileId: 'file-1', project: churchProject})
+
+  assert.equal(result.status, 'needs_review')
+  assert.equal(
+    requestedUrls[0].includes('fields=id%2Cname%2Cparents%2CappProperties%2Ctrashed'),
+    true,
+  )
+  assert.equal(requestedUrls[0].includes('alt=media'), false)
+})
+
 test('internal blockers go to Notion except Simcoe House Linear-owned work', () => {
   const record = {
     idempotencyKey: 'tally:needs-review-1',
@@ -399,6 +631,56 @@ test('internal blockers go to Notion except Simcoe House Linear-owned work', () 
     system: 'none',
     reason: 'project_owned_elsewhere',
   })
+})
+
+test('Notion adapter dedupes Salt-internal blocker tasks', async () => {
+  const calls: Array<{path: string; body: any}> = []
+  let createdPage = false
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    const path = String(url).replace('https://api.notion.com/v1', '')
+    const body = init?.body ? JSON.parse(String(init.body)) : null
+    calls.push({path, body})
+
+    if (path.endsWith('/query')) {
+      return Response.json({results: createdPage ? [{id: 'page-1'}] : []})
+    }
+    if (path === '/pages') {
+      createdPage = true
+      return Response.json({id: 'page-1'})
+    }
+    if (path === '/pages/page-1') {
+      return Response.json({id: 'page-1'})
+    }
+    return new Response('{}', {status: 404})
+  }) as typeof fetch
+
+  try {
+    const sink = new NotionReviewSink({token: 'notion-token', databaseId: 'database-id'})
+    const record = {
+      idempotencyKey: 'tally:notion-dupe-1',
+      provider: 'tally' as const,
+      projectId: churchProject.projectId,
+      formId: '814oZl',
+      itemKey: 'f-staff',
+      submissionId: 'notion-dupe-1',
+      status: 'needs_review' as const,
+      reviewReason: 'invalid_routing' as const,
+      receivedAt: '2026-01-01T00:00:00.000Z',
+      attempts: 0,
+    }
+
+    await sink.enqueue(record)
+    await sink.enqueue(record)
+
+    assert.equal(calls.filter((call) => call.path === '/pages').length, 1)
+    assert.equal(
+      calls.some((call) => call.path === '/pages/page-1'),
+      true,
+    )
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 })
 
 test('webhook and retry endpoints reject unauthorized requests before processing', async () => {

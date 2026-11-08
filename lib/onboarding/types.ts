@@ -26,6 +26,7 @@ export type NormalizedTallySubmission = {
   projectId: string | null
   itemKey: string | null
   routeToken: string | null
+  entryTitle: string | null
   receivedAt: string
 }
 
@@ -53,6 +54,7 @@ export type OnboardingRecord = {
   formId: string | null
   itemKey: string | null
   submissionId: string | null
+  entryTitle?: string | null
   status: Exclude<OnboardingRecordStatus, 'duplicate'>
   reviewReason?: OnboardingReviewReason
   receivedAt: string
@@ -78,4 +80,24 @@ export type OnboardingRepository = {
 
 export type OnboardingReviewSink = {
   enqueue: (record: OnboardingRecord) => Promise<void>
+}
+
+export type PrivatePortalOverlay = {
+  sharedFolderUrl?: string | null
+  brandingFolderUrl?: string | null
+  mediaFolderUrl?: string | null
+  previewUrl?: string | null
+  productionUrl?: string | null
+  whatsappGroupUrl?: string | null
+  checklist?: unknown
+  formSubmissionSummary?: Record<
+    string,
+    {
+      count: number
+      latestReceivedAt?: string | null
+      collectionComplete?: boolean
+      completedAt?: string | null
+      reopenedAt?: string | null
+    }
+  >
 }

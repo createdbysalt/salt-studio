@@ -13,6 +13,13 @@ type Portal = NonNullable<ClientPortalBySlugQueryResult>
 type Category = NonNullable<NonNullable<Portal['checklist']>[number]>
 type Item = NonNullable<NonNullable<Category['items']>[number]>
 type TickItem = Omit<Item, 'done'> & {done?: boolean | null}
+type SubmissionSummary = {
+  count?: number
+  latestReceivedAt?: string | null
+  collectionComplete?: boolean
+  completedAt?: string | null
+  reopenedAt?: string | null
+}
 
 function splitItems(items: Array<TickItem | null> | null | undefined) {
   const list = (items ?? []).filter((item): item is TickItem => Boolean(item?.title))
@@ -160,10 +167,12 @@ function withCategory(
   local?: Category[],
   slug?: string | null,
   projectId?: string | null,
+  submissionSummary?: Record<string, SubmissionSummary> | null,
 ) {
   const stored = findLocalItem(local, item._key)
   const override = item._key === 'gs-form' && slug ? CLIENT_GETTING_STARTED_OVERRIDES[slug] : null
   const rawLink = override?.link ?? item.link
+  const summary = item._key ? submissionSummary?.[item._key] : null
   return {
     _key: item._key,
     categoryKey: stored?.category._key ?? category._key,
@@ -181,6 +190,11 @@ function withCategory(
         : rawLink,
     linkLabel: item.linkLabel,
     done: Boolean(stored?.item.done ?? item.done),
+    submissionCount: summary?.count ?? null,
+    latestReceivedAt: summary?.latestReceivedAt ?? null,
+    collectionComplete: summary?.collectionComplete ?? null,
+    completedAt: summary?.completedAt ?? null,
+    reopenedAt: summary?.reopenedAt ?? null,
   }
 }
 
@@ -189,13 +203,18 @@ export function ClientPortalPage({data}: {data: Portal}) {
     Boolean(category?.title),
   )
   const categories = mergeChecklist(data.checklistSource, data.checklist)
+  const submissionSummary =
+    (data as Portal & {formSubmissionSummary?: Record<string, SubmissionSummary> | null})
+      .formSubmissionSummary ?? null
   const tableHref = data.slug ? `/project/${data.slug}` : '#'
   const forms = categories.find((category) => category._key === 'forms')
   const startItems = categories
     .flatMap((category) =>
       splitItems(category.items)
         .all.filter((item) => item._key === 'gs-form' || item._key === 'gs-kickoff')
-        .map((item) => withCategory(category, item, localChecklist, data.slug, data._id)),
+        .map((item) =>
+          withCategory(category, item, localChecklist, data.slug, data._id, submissionSummary),
+        ),
     )
     .filter((item, index, list) => list.findIndex((entry) => entry._key === item._key) === index)
   const startCategory = categories.find((category) =>
@@ -232,7 +251,9 @@ export function ClientPortalPage({data}: {data: Portal}) {
           folderLabel: 'Open branding folder',
           items: splitItems(brand.items)
             .all.filter((item) => item._key !== 'gs-form')
-            .map((item) => withCategory(brand, item, localChecklist, data.slug, data._id)),
+            .map((item) =>
+              withCategory(brand, item, localChecklist, data.slug, data._id, submissionSummary),
+            ),
         }
       : null,
     photos
@@ -247,7 +268,9 @@ export function ClientPortalPage({data}: {data: Portal}) {
           folderLabel: 'Open photos folder',
           items: splitItems(photos.items)
             .all.filter((item) => item._key !== 'gs-form')
-            .map((item) => withCategory(photos, item, localChecklist, data.slug, data._id)),
+            .map((item) =>
+              withCategory(photos, item, localChecklist, data.slug, data._id, submissionSummary),
+            ),
         }
       : null,
     ...leftover.map((category) => ({
@@ -256,7 +279,9 @@ export function ClientPortalPage({data}: {data: Portal}) {
       description: category.description,
       items: splitItems(category.items)
         .all.filter((item) => item._key !== 'gs-form' && item._key !== 'gs-kickoff')
-        .map((item) => withCategory(category, item, localChecklist, data.slug, data._id)),
+        .map((item) =>
+          withCategory(category, item, localChecklist, data.slug, data._id, submissionSummary),
+        ),
     })),
   ].filter((group): group is NonNullable<typeof group> => Boolean(group && group.items.length))
   const sourceFormItems = data.formsSource?.items
@@ -270,7 +295,7 @@ export function ClientPortalPage({data}: {data: Portal}) {
       items: formList,
     } as Category)
   const formItems = splitItems(formList).all.map((item) =>
-    withCategory(formsCategory, item, localChecklist, data.slug, data._id),
+    withCategory(formsCategory, item, localChecklist, data.slug, data._id, submissionSummary),
   )
   const showOverview = Boolean(data.hasOverview)
   const showChecklist = Boolean(data.hasChecklist)
