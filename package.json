@@ -18,6 +18,7 @@
     "seed:copy:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "seed:team:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "start": "next start -p 4000",
+    "test:onboarding": "tsx --test tests/onboarding-automation.test.ts",
     "type-check": "next typegen && tsc --noEmit",
     "typegen": "sanity schema extract && sanity typegen generate"
   },
@@ -84,6 +85,7 @@
     "prettier": "3.8.1",
     "prettier-plugin-tailwindcss": "0.7.2",
     "tailwindcss": "^4.2.2",
+    "tsx": "^4.23.15",
     "typescript": "5.9.3"
   }
 }
