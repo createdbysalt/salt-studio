@@ -16,6 +16,7 @@
     "lint:fix": "npm run format && npm run lint -- --fix",
     "plan:onboarding:privacy": "node scripts/onboarding/privacy-migration-plan.mjs",
     "prepare": "husky",
+    "preview:onboarding:isolated": "tsx scripts/onboarding/preview-isolated-request.ts",
     "seed:copy:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "seed:team:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "start": "next start -p 4000",

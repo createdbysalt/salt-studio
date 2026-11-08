@@ -24,6 +24,10 @@ export function planInternalTaskSync({
     return {system: 'none', reason: 'project_owned_elsewhere'}
   }
 
+  if (project.isolation === 'preview-fixture') {
+    return {system: 'none', reason: 'preview_fixture'}
+  }
+
   if (project.internalTaskSystem === 'none' || !shouldCreateInternalTask(record)) {
     return {system: 'none', reason: 'no_internal_blocker'}
   }

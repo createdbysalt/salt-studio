@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import {spawnSync} from 'node:child_process'
 import {readFileSync} from 'node:fs'
 import test from 'node:test'
 import {
@@ -8,9 +9,16 @@ import {
 } from '@/lib/onboarding/collection-status'
 import {classifyDriveArrival} from '@/lib/onboarding/drive'
 import {GoogleDriveMetadataChecker} from '@/lib/onboarding/drive-checker'
+import {GoogleDriveFolderScanner, parseDriveScanRequest} from '@/lib/onboarding/drive-scanner'
 import {planInternalTaskSync} from '@/lib/onboarding/internal-tasks'
 import {NotionReviewSink} from '@/lib/onboarding/notion'
 import {hashPortalPassword, verifyPortalPassword} from '@/lib/onboarding/portal-crypto'
+import {
+  getPreviewFixtureProject,
+  isPreviewIsolationEnabled,
+  PREVIEW_FIXTURE_PROJECT_ID,
+  resolveOnboardingProject,
+} from '@/lib/onboarding/preview-fixtures'
 import {
   getPrivatePortalOverlay,
   getSupabasePortalCredentials,
@@ -1013,4 +1021,467 @@ test('webhook and retry endpoints reject unauthorized requests before processing
 
   assert.equal(webhookResponse.status, 401)
   assert.equal(retryResponse.status, 401)
+})
+
+function restoreEnv(previous: Record<string, string | undefined>) {
+  for (const [key, value] of Object.entries(previous)) {
+    if (value === undefined) delete process.env[key]
+    else process.env[key] = value
+  }
+}
+
+test('preview fixture recognition is isolated and fails closed in production', async () => {
+  const previous = {
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    ONBOARDING_PREVIEW_ISOLATION: process.env.ONBOARDING_PREVIEW_ISOLATION,
+  }
+  const calls: string[] = []
+  const sink: OnboardingReviewSink = {
+    async enqueue(record) {
+      calls.push(record.projectId ?? '')
+    },
+  }
+
+  try {
+    process.env.VERCEL_ENV = 'production'
+    process.env.ONBOARDING_PREVIEW_ISOLATION = 'enabled'
+    assert.equal(isPreviewIsolationEnabled(), false)
+    assert.equal(getPreviewFixtureProject(PREVIEW_FIXTURE_PROJECT_ID), null)
+
+    process.env.VERCEL_ENV = 'preview'
+    delete process.env.ONBOARDING_PREVIEW_ISOLATION
+    assert.equal(getPreviewFixtureProject(PREVIEW_FIXTURE_PROJECT_ID), null)
+
+    process.env.ONBOARDING_PREVIEW_ISOLATION = 'enabled'
+    const resolvedReal = await resolveOnboardingProject(
+      churchProject.projectId,
+      async () => churchProject,
+    )
+    assert.equal(resolvedReal?.projectId, churchProject.projectId)
+    assert.equal(resolvedReal?.isolation, undefined)
+    const resolvedFixture = await resolveOnboardingProject(
+      PREVIEW_FIXTURE_PROJECT_ID,
+      async () => null,
+    )
+    assert.equal(resolvedFixture?.isolation, 'preview-fixture')
+    assert.equal(resolvedFixture?.forms.length, 9)
+
+    const repository = new MemoryOnboardingRepository()
+    const fixturePayload = tallyPayload({
+      submissionId: 'shared-submission-id',
+      projectId: PREVIEW_FIXTURE_PROJECT_ID,
+      token: createOnboardingRouteToken(
+        {projectId: PREVIEW_FIXTURE_PROJECT_ID, itemKey: 'f-staff', formId: '814oZl'},
+        ROUTING_SECRET,
+      ),
+    })
+    const realPayload = tallyPayload({submissionId: 'shared-submission-id'})
+    const fixtureResult = await processTallyWebhook({
+      rawBody: JSON.stringify(fixturePayload),
+      payload: fixturePayload,
+      routingSecret: ROUTING_SECRET,
+      repository,
+      getProject: async (projectId) =>
+        projectId === churchProject.projectId ? churchProject : getPreviewFixtureProject(projectId),
+      reviewSink: sink,
+    })
+    const realResult = await processTallyWebhook({
+      rawBody: JSON.stringify(realPayload),
+      payload: realPayload,
+      routingSecret: ROUTING_SECRET,
+      repository,
+      getProject,
+      reviewSink: sink,
+    })
+    const fixtureReview = tallyPayload({
+      submissionId: 'fixture-review',
+      projectId: PREVIEW_FIXTURE_PROJECT_ID,
+      token: 'tampered-token',
+    })
+    await processTallyWebhook({
+      rawBody: JSON.stringify(fixtureReview),
+      payload: fixtureReview,
+      routingSecret: ROUTING_SECRET,
+      repository,
+      getProject: async () => null,
+      reviewSink: sink,
+    })
+
+    assert.equal(fixtureResult.status, 'received_for_review')
+    assert.equal(fixtureResult.record.idempotencyKey, 'tally:preview-fixture:shared-submission-id')
+    assert.equal(Object.hasOwn(fixtureResult.record, 'done'), false)
+    assert.equal(realResult.status, 'received_for_review')
+    assert.equal(realResult.record.idempotencyKey, 'tally:shared-submission-id')
+    assert.deepEqual(calls, [churchProject.projectId])
+    assert.equal(repository.snapshot().length, 3)
+  } finally {
+    restoreEnv(previous)
+  }
+})
+
+test('preview cleanup removes only fixture rows and production cleanup fails closed', async () => {
+  const previous = {
+    ONBOARDING_AUTOMATION_STORE: process.env.ONBOARDING_AUTOMATION_STORE,
+    ONBOARDING_JOB_SECRET: process.env.ONBOARDING_JOB_SECRET,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    ONBOARDING_PREVIEW_ISOLATION: process.env.ONBOARDING_PREVIEW_ISOLATION,
+  }
+  process.env.ONBOARDING_AUTOMATION_STORE = 'memory'
+  process.env.ONBOARDING_JOB_SECRET = 'job-secret'
+  process.env.VERCEL_ENV = 'preview'
+  process.env.ONBOARDING_PREVIEW_ISOLATION = 'enabled'
+
+  const {getOnboardingRepository} = await import('@/lib/onboarding/runtime')
+  const repository = getOnboardingRepository()
+  assert.ok(repository instanceof MemoryOnboardingRepository)
+  await repository.recordOnce({
+    idempotencyKey: 'tally:preview-fixture:cleanup-1',
+    provider: 'tally',
+    projectId: PREVIEW_FIXTURE_PROJECT_ID,
+    formId: '814oZl',
+    itemKey: 'f-staff',
+    submissionId: 'cleanup-1',
+    status: 'received_for_review',
+    receivedAt: '2026-01-01T00:00:00.000Z',
+    attempts: 0,
+  })
+  await repository.recordOnce({
+    idempotencyKey: 'tally:cleanup-real',
+    provider: 'tally',
+    projectId: churchProject.projectId,
+    formId: '814oZl',
+    itemKey: 'f-staff',
+    submissionId: 'cleanup-real',
+    status: 'received_for_review',
+    receivedAt: '2026-01-01T00:00:00.000Z',
+    attempts: 0,
+  })
+
+  const route = await import('@/app/api/onboarding/jobs/preview-cleanup/route')
+  try {
+    const unauthorized = await route.POST(
+      new Request('http://localhost/api/onboarding/jobs/preview-cleanup', {method: 'POST'}),
+    )
+    assert.equal(unauthorized.status, 401)
+
+    process.env.VERCEL_ENV = 'production'
+    const production = await route.POST(
+      new Request('http://localhost/api/onboarding/jobs/preview-cleanup', {
+        method: 'POST',
+        headers: {authorization: 'Bearer job-secret'},
+      }),
+    )
+    assert.equal(production.status, 404)
+    assert.equal(
+      repository
+        .snapshot()
+        .some((record) => record.idempotencyKey === 'tally:preview-fixture:cleanup-1'),
+      true,
+    )
+
+    process.env.VERCEL_ENV = 'preview'
+    const cleaned = await route.POST(
+      new Request('http://localhost/api/onboarding/jobs/preview-cleanup', {
+        method: 'POST',
+        headers: {authorization: 'Bearer job-secret'},
+      }),
+    )
+    const body = await cleaned.json()
+    assert.equal(cleaned.status, 200)
+    assert.equal(body.deleted, 1)
+    assert.equal(
+      repository.snapshot().some((record) => record.projectId === PREVIEW_FIXTURE_PROJECT_ID),
+      false,
+    )
+    assert.equal(
+      repository.snapshot().some((record) => record.idempotencyKey === 'tally:cleanup-real'),
+      true,
+    )
+  } finally {
+    await repository.deleteIsolatedPreviewSubmissions()
+    restoreEnv(previous)
+  }
+})
+
+test('isolated request script refuses production and does not print secrets', () => {
+  const production = spawnSync('npm', ['run', 'preview:onboarding:isolated'], {
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      VERCEL_ENV: 'production',
+      ONBOARDING_PREVIEW_ISOLATION: 'enabled',
+      ONBOARDING_ROUTING_SECRET: 'routing-secret-value',
+      TALLY_WEBHOOK_SECRET: 'tally-webhook-secret-value',
+    },
+  })
+  assert.notEqual(production.status, 0)
+  assert.equal(production.stdout.includes('routing-secret-value'), false)
+  assert.equal(production.stdout.includes('Tally-Signature'), false)
+
+  const productionHost = spawnSync('npm', ['run', 'preview:onboarding:isolated'], {
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      VERCEL_ENV: 'preview',
+      ONBOARDING_PREVIEW_ISOLATION: 'enabled',
+      ONBOARDING_ROUTING_SECRET: 'routing-secret-value',
+      TALLY_WEBHOOK_SECRET: 'tally-webhook-secret-value',
+      ONBOARDING_PREVIEW_ORIGIN: 'https://www.createdbysalt.com',
+    },
+  })
+  assert.notEqual(productionHost.status, 0)
+  assert.equal(productionHost.stdout.includes('Tally-Signature'), false)
+  assert.equal(productionHost.stdout.includes('routing-secret-value'), false)
+})
+
+test('Drive scanner dedupes mapped folders, keeps unknown categories, and does not auto-complete', async () => {
+  assert.equal(parseDriveScanRequest({projectId: 'fixture', mappings: []}).ok, false)
+  assert.equal(
+    parseDriveScanRequest({
+      projectId: 'fixture',
+      mappings: [{itemKey: 'photos-baptisms', folderIds: ["folder'injection"]}],
+    }).ok,
+    false,
+  )
+
+  const requests: Array<{url: string; method: string}> = []
+  const pages = new Map<string, Array<{files: unknown[]; nextPageToken?: string}>>([
+    [
+      'fixtureBaptismFolderA',
+      [
+        {
+          files: [
+            {
+              id: 'shared-file',
+              name: 'Shared.jpg',
+              mimeType: 'image/jpeg',
+              parents: ['fixtureBaptismFolderA'],
+            },
+            {
+              id: 'subfolder-unknown',
+              name: 'Misc',
+              mimeType: 'application/vnd.google-apps.folder',
+              parents: ['fixtureBaptismFolderA'],
+            },
+          ],
+          nextPageToken: 'page-2',
+        },
+        {
+          files: [
+            {
+              id: 'baptism-file',
+              name: 'Baptism.jpg',
+              mimeType: 'image/jpeg',
+              parents: ['fixtureBaptismFolderA'],
+            },
+          ],
+        },
+      ],
+    ],
+    [
+      'fixtureBaptismFolderB',
+      [
+        {
+          files: [
+            {
+              id: 'shared-file',
+              name: 'Shared.jpg',
+              mimeType: 'image/jpeg',
+              parents: ['fixtureBaptismFolderB'],
+            },
+            {
+              id: 'second-baptism',
+              name: 'Second.jpg',
+              mimeType: 'image/jpeg',
+              parents: ['fixtureBaptismFolderB'],
+            },
+          ],
+        },
+      ],
+    ],
+    [
+      'fixtureDedicationFolder',
+      [
+        {
+          files: [
+            {
+              id: 'shared-file',
+              name: 'Shared.jpg',
+              mimeType: 'image/jpeg',
+              parents: ['fixtureDedicationFolder'],
+            },
+            {
+              id: 'dedication-file',
+              name: 'Dedication.jpg',
+              mimeType: 'image/jpeg',
+              parents: ['fixtureDedicationFolder'],
+            },
+          ],
+        },
+      ],
+    ],
+    [
+      'subfolder-unknown',
+      [
+        {
+          files: [
+            {
+              id: 'unknown-file',
+              name: 'Unsorted.jpg',
+              mimeType: 'image/jpeg',
+              parents: ['subfolder-unknown'],
+            },
+          ],
+        },
+      ],
+    ],
+  ])
+  const cursors = new Map<string, number>()
+  const fetchImpl: typeof fetch = async (url, init) => {
+    const text = String(url)
+    requests.push({url: text, method: init?.method ?? 'GET'})
+    const parsed = new URL(text)
+    const query = parsed.searchParams.get('q') ?? ''
+    const folderId = query.match(/^'([^']+)' in parents/)?.[1]
+    assert.ok(folderId)
+    const pageIndex = cursors.get(folderId) ?? 0
+    cursors.set(folderId, pageIndex + 1)
+    const page = pages.get(folderId)?.[pageIndex]
+    assert.ok(page)
+    return Response.json(page)
+  }
+
+  const scanner = new GoogleDriveFolderScanner({accessToken: 'read-only-token', fetchImpl})
+  const request = {
+    projectId: 'fixture-project',
+    mappings: [
+      {itemKey: 'photos-baptisms', folderIds: ['fixtureBaptismFolderA', 'fixtureBaptismFolderB']},
+      {itemKey: 'photos-dedications', folderIds: ['fixtureDedicationFolder']},
+    ],
+  }
+  const first = await scanner.scan(request)
+  cursors.clear()
+  const second = await scanner.scan(request)
+  const baptisms = first.items.find((item) => item.itemKey === 'photos-baptisms')
+  const dedications = first.items.find((item) => item.itemKey === 'photos-dedications')
+
+  assert.equal(baptisms?.fileCount, 2)
+  assert.deepEqual(baptisms?.files.map((file) => file.fileId).sort(), [
+    'baptism-file',
+    'second-baptism',
+  ])
+  assert.equal(dedications?.fileCount, 1)
+  assert.equal(dedications?.files[0].fileId, 'dedication-file')
+  assert.equal(first.unknown[0].category, 'unknown')
+  assert.equal(first.unknown[0].fileId, 'unknown-file')
+  assert.deepEqual(first.ambiguous, [
+    {fileId: 'shared-file', itemKeys: ['photos-baptisms', 'photos-dedications']},
+  ])
+  assert.equal(first.autoCompletedItemKeys.length, 0)
+  assert.equal(baptisms?.autoCompleted, false)
+  assert.equal(baptisms?.countRole, 'guidance_only')
+  assert.equal(first.formatValid, null)
+  assert.equal(first.qualityApproved, null)
+  assert.equal(first.clientConfirmed, null)
+  assert.deepEqual(
+    second.items.map((item) => item.fileCount),
+    first.items.map((item) => item.fileCount),
+  )
+  assert.equal(
+    requests.every((request) => request.method === 'GET'),
+    true,
+  )
+  assert.equal(
+    requests.every((request) => request.url.includes('supportsAllDrives=true')),
+    true,
+  )
+  assert.equal(
+    requests.every((request) => request.url.includes('includeItemsFromAllDrives=true')),
+    true,
+  )
+  assert.equal(
+    requests.every((request) => request.url.includes('alt=media')),
+    false,
+  )
+  assert.equal(
+    requests.some((request) => request.url.includes('pageToken=page-2')),
+    true,
+  )
+})
+
+test('Drive scanner stops on rate limits and the job route stays disabled by default', async () => {
+  let calls = 0
+  const scanner = new GoogleDriveFolderScanner({
+    accessToken: 'read-only-token',
+    fetchImpl: async () => {
+      calls += 1
+      return new Response('rate limited', {status: 429})
+    },
+  })
+  const summary = await scanner.scan({
+    projectId: 'fixture-project',
+    mappings: [
+      {itemKey: 'photos-baptisms', folderIds: ['fixtureBaptismFolderA']},
+      {itemKey: 'photos-dedications', folderIds: ['fixtureDedicationFolder']},
+    ],
+  })
+  assert.equal(summary.stoppedReason, 'rate_limited')
+  assert.equal(calls, 1)
+  assert.equal(
+    summary.items.every((item) => item.autoCompleted === false),
+    true,
+  )
+
+  const previous = {
+    ONBOARDING_JOB_SECRET: process.env.ONBOARDING_JOB_SECRET,
+    ONBOARDING_DRIVE_SCAN: process.env.ONBOARDING_DRIVE_SCAN,
+    GOOGLE_DRIVE_ACCESS_TOKEN: process.env.GOOGLE_DRIVE_ACCESS_TOKEN,
+  }
+  process.env.ONBOARDING_JOB_SECRET = 'job-secret'
+  delete process.env.ONBOARDING_DRIVE_SCAN
+  delete process.env.GOOGLE_DRIVE_ACCESS_TOKEN
+  const originalFetch = globalThis.fetch
+  let routedCalls = 0
+  globalThis.fetch = (async () => {
+    routedCalls += 1
+    return new Response('{}', {status: 200})
+  }) as typeof fetch
+  const route = await import('@/app/api/onboarding/jobs/drive-scan/route')
+
+  try {
+    const unauthorized = await route.POST(
+      new Request('http://localhost/api/onboarding/jobs/drive-scan', {method: 'POST', body: '{}'}),
+    )
+    assert.equal(unauthorized.status, 401)
+
+    const disabled = await route.POST(
+      new Request('http://localhost/api/onboarding/jobs/drive-scan', {
+        method: 'POST',
+        headers: {authorization: 'Bearer job-secret'},
+        body: JSON.stringify({
+          projectId: 'fixture-project',
+          mappings: [{itemKey: 'photos-baptisms', folderIds: ['fixtureBaptismFolderA']}],
+        }),
+      }),
+    )
+    assert.equal(disabled.status, 503)
+    assert.equal(routedCalls, 0)
+
+    process.env.ONBOARDING_DRIVE_SCAN = 'enabled'
+    const missingCredentials = await route.POST(
+      new Request('http://localhost/api/onboarding/jobs/drive-scan', {
+        method: 'POST',
+        headers: {authorization: 'Bearer job-secret'},
+        body: JSON.stringify({
+          projectId: 'fixture-project',
+          mappings: [{itemKey: 'photos-baptisms', folderIds: ['fixtureBaptismFolderA']}],
+        }),
+      }),
+    )
+    assert.equal(missingCredentials.status, 503)
+    assert.equal(routedCalls, 0)
+  } finally {
+    globalThis.fetch = originalFetch
+    restoreEnv(previous)
+  }
 })
