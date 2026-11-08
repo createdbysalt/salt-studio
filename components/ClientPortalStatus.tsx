@@ -1,6 +1,6 @@
 'use client'
 
-import {toggleChecklistItem} from '@/app/(table)/table/actions'
+import {setFormCollectionComplete, toggleChecklistItem} from '@/app/(table)/table/actions'
 import {createContext, useContext, useMemo, useState, useTransition, type ReactNode} from 'react'
 
 export type PortalChecklistItem = {
@@ -35,8 +35,10 @@ type PortalStatus = {
   done: Record<string, boolean>
   pendingKey: string | null
   error: string | null
+  collectionPendingKey: string | null
   currentPhase: number
   toggle: (item: PortalChecklistItem) => void
+  setCollectionComplete: (item: PortalChecklistItem, complete: boolean) => void
 }
 
 const PortalStatusContext = createContext<PortalStatus | null>(null)
@@ -101,6 +103,7 @@ export function ClientPortalStatusProvider({
 }) {
   const [done, setDone] = useState(() => initialDoneMap(groups, formItems))
   const [pendingKey, setPendingKey] = useState<string | null>(null)
+  const [collectionPendingKey, setCollectionPendingKey] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [, startTransition] = useTransition()
 
@@ -131,9 +134,34 @@ export function ClientPortalStatusProvider({
     })
   }
 
+  const setCollectionState = (item: PortalChecklistItem, complete: boolean) => {
+    const key = itemDoneKey(item)
+    setCollectionPendingKey(key)
+    setError(null)
+    startTransition(async () => {
+      const result = await setFormCollectionComplete({
+        slug,
+        itemKey: item._key,
+        complete,
+      })
+      if (!result.ok) setError(result.error)
+      setCollectionPendingKey(null)
+    })
+  }
+
   return (
     <PortalStatusContext.Provider
-      value={{groups, formItems, done, pendingKey, error, currentPhase, toggle}}
+      value={{
+        groups,
+        formItems,
+        done,
+        pendingKey,
+        error,
+        collectionPendingKey,
+        currentPhase,
+        toggle,
+        setCollectionComplete: setCollectionState,
+      }}
     >
       {children}
     </PortalStatusContext.Provider>

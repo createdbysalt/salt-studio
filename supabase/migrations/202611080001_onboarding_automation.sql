@@ -1,5 +1,15 @@
 create extension if not exists pgcrypto;
 
+create or replace function public.set_onboarding_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
 create table if not exists public.onboarding_submissions (
   id uuid primary key default gen_random_uuid(),
   idempotency_key text not null unique,
@@ -26,6 +36,12 @@ create index if not exists onboarding_submissions_project_form_idx
 create index if not exists onboarding_submissions_retry_idx
   on public.onboarding_submissions (status, received_at)
   where status = 'queued_for_retry';
+
+drop trigger if exists set_onboarding_submissions_updated_at on public.onboarding_submissions;
+create trigger set_onboarding_submissions_updated_at
+  before update on public.onboarding_submissions
+  for each row
+  execute function public.set_onboarding_updated_at();
 
 create table if not exists public.onboarding_collection_status (
   id uuid primary key default gen_random_uuid(),
@@ -54,9 +70,33 @@ create table if not exists public.onboarding_outbox (
   updated_at timestamptz not null default now()
 );
 
+create index if not exists onboarding_outbox_submission_id_idx
+  on public.onboarding_outbox (submission_id);
+
+create index if not exists onboarding_outbox_worker_idx
+  on public.onboarding_outbox (status, available_at)
+  where status in ('pending', 'failed');
+
+drop trigger if exists set_onboarding_collection_status_updated_at on public.onboarding_collection_status;
+create trigger set_onboarding_collection_status_updated_at
+  before update on public.onboarding_collection_status
+  for each row
+  execute function public.set_onboarding_updated_at();
+
+drop trigger if exists set_onboarding_outbox_updated_at on public.onboarding_outbox;
+create trigger set_onboarding_outbox_updated_at
+  before update on public.onboarding_outbox
+  for each row
+  execute function public.set_onboarding_updated_at();
+
 alter table public.onboarding_submissions enable row level security;
 alter table public.onboarding_collection_status enable row level security;
 alter table public.onboarding_outbox enable row level security;
+
+revoke all on table public.onboarding_submissions from anon, authenticated;
+revoke all on table public.onboarding_collection_status from anon, authenticated;
+revoke all on table public.onboarding_outbox from anon, authenticated;
+revoke all on function public.set_onboarding_updated_at() from public;
 
 comment on table public.onboarding_submissions is
   'Private Salt onboarding submission ledger. Access from deployed app uses server-side service role only.';
