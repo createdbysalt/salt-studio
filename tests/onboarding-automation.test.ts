@@ -26,6 +26,7 @@ import {
   createOnboardingRouteToken,
   ONBOARDING_PROJECT_ID_PARAM,
 } from '@/lib/onboarding/routing'
+import {SupabaseOnboardingRepository} from '@/lib/onboarding/supabase-repository'
 import {createTallySignature, verifyTallySignature} from '@/lib/onboarding/tally-signature'
 import type {OnboardingProjectMapping, OnboardingReviewSink} from '@/lib/onboarding/types'
 import {CHURCH_TALLY_FORMS, CLIENT_GETTING_STARTED_OVERRIDES} from '@/lib/tally/church-forms'
@@ -570,6 +571,191 @@ test('duplicate submission ids are idempotent', async () => {
   assert.equal(first.status, 'received_for_review')
   assert.equal(second.status, 'duplicate')
   assert.equal(repository.snapshot().length, 1)
+})
+
+function idempotencyKeyFromSupabaseUrl(url: string) {
+  const match = url.match(/idempotency_key=eq\.([^&]+)/)
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+function supabaseHttpResponse(status: number, body = '') {
+  // The Fetch Response constructor rejects null-body statuses. Real fetch responses can still be 204.
+  if (status === 204 || status === 205 || status === 304) {
+    return {
+      ok: status >= 200 && status < 300,
+      status,
+      text: async () => '',
+    } as Response
+  }
+  return new Response(body, {status})
+}
+
+test('Supabase repository accepts empty successful PATCH responses for unknown-project review records', async () => {
+  const originalFetch = globalThis.fetch
+
+  for (const emptySuccess of [204, 200] as const) {
+    const rows = new Map<string, any>()
+    const patchBodies: any[] = []
+    const submissionId = `unknown-empty-patch-${emptySuccess}`
+
+    globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+      const text = String(url)
+      const method = init?.method ?? 'GET'
+
+      if (method === 'POST' && text.includes('/rest/v1/onboarding_submissions')) {
+        const row = JSON.parse(String(init?.body))
+        if (rows.has(row.idempotency_key)) return Response.json([])
+        rows.set(row.idempotency_key, row)
+        return Response.json([row])
+      }
+
+      if (method === 'PATCH' && text.includes('/rest/v1/onboarding_submissions')) {
+        const key = idempotencyKeyFromSupabaseUrl(text)
+        assert.ok(key)
+        const patch = JSON.parse(String(init?.body))
+        patchBodies.push(patch)
+        rows.set(key, {...rows.get(key), ...patch})
+        return supabaseHttpResponse(emptySuccess, '')
+      }
+
+      if (method === 'GET' && text.includes('/rest/v1/onboarding_submissions')) {
+        const key = idempotencyKeyFromSupabaseUrl(text)
+        const row = key ? rows.get(key) : null
+        return Response.json(row ? [row] : [])
+      }
+
+      return new Response('not found', {status: 404})
+    }) as typeof fetch
+
+    try {
+      const repository = new SupabaseOnboardingRepository({
+        url: 'https://example.supabase.co',
+        serviceRoleKey: 'service-role',
+      })
+      const unknownProjectId = 'portal-unknown-404'
+      const payload = tallyPayload({
+        submissionId,
+        projectId: unknownProjectId,
+        token: createOnboardingRouteToken(
+          {projectId: unknownProjectId, itemKey: 'f-staff', formId: '814oZl'},
+          ROUTING_SECRET,
+        ),
+      })
+
+      const first = await processTallyWebhook({
+        rawBody: JSON.stringify(payload),
+        payload,
+        routingSecret: ROUTING_SECRET,
+        repository,
+        getProject: async () => null,
+      })
+      const duplicate = await processTallyWebhook({
+        rawBody: JSON.stringify(payload),
+        payload,
+        routingSecret: ROUTING_SECRET,
+        repository,
+        getProject: async () => null,
+      })
+      const stored = rows.get(`tally:${submissionId}`)
+
+      assert.equal(first.httpStatus, 202, String(emptySuccess))
+      assert.equal(first.status, 'needs_review', String(emptySuccess))
+      assert.equal(first.record.reviewReason, 'unknown_project', String(emptySuccess))
+      assert.equal(duplicate.httpStatus, 200, String(emptySuccess))
+      assert.equal(duplicate.status, 'duplicate', String(emptySuccess))
+      assert.equal(duplicate.record.reviewReason, 'unknown_project', String(emptySuccess))
+      assert.equal(patchBodies.length, 1, String(emptySuccess))
+      assert.equal(stored.status, 'needs_review', String(emptySuccess))
+      assert.equal(stored.last_error, null, String(emptySuccess))
+      assert.notEqual(stored.status, 'queued_for_retry', String(emptySuccess))
+    } finally {
+      globalThis.fetch = originalFetch
+    }
+  }
+})
+
+test('Supabase repository preserves malformed JSON and non-ok response failures', async () => {
+  const originalFetch = globalThis.fetch
+
+  globalThis.fetch = (async () => new Response('not-json', {status: 200})) as typeof fetch
+  try {
+    const repository = new SupabaseOnboardingRepository({
+      url: 'https://example.supabase.co',
+      serviceRoleKey: 'service-role',
+    })
+    const payload = tallyPayload({submissionId: 'malformed-json-1'})
+
+    await assert.rejects(
+      () =>
+        processTallyWebhook({
+          rawBody: JSON.stringify(payload),
+          payload,
+          routingSecret: ROUTING_SECRET,
+          repository,
+          getProject,
+        }),
+      /Supabase response was not valid JSON/,
+    )
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+
+  const rows = new Map<string, any>()
+  let patchCalls = 0
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    const text = String(url)
+    const method = init?.method ?? 'GET'
+
+    if (method === 'POST' && text.includes('/rest/v1/onboarding_submissions')) {
+      const row = JSON.parse(String(init?.body))
+      rows.set(row.idempotency_key, row)
+      return Response.json([row])
+    }
+
+    if (method === 'GET' && text.includes('/rest/v1/onboarding_submissions')) {
+      const key = idempotencyKeyFromSupabaseUrl(text)
+      const row = key ? rows.get(key) : null
+      return Response.json(row ? [row] : [])
+    }
+
+    if (method === 'PATCH' && text.includes('/rest/v1/onboarding_submissions')) {
+      patchCalls += 1
+      if (patchCalls === 1) return new Response('write refused', {status: 500})
+
+      const key = idempotencyKeyFromSupabaseUrl(text)
+      assert.ok(key)
+      rows.set(key, {...rows.get(key), ...JSON.parse(String(init?.body))})
+      return supabaseHttpResponse(204)
+    }
+
+    return new Response('not found', {status: 404})
+  }) as typeof fetch
+
+  try {
+    const repository = new SupabaseOnboardingRepository({
+      url: 'https://example.supabase.co',
+      serviceRoleKey: 'service-role',
+    })
+    const payload = tallyPayload({submissionId: 'non-ok-patch-1'})
+
+    const result = await processTallyWebhook({
+      rawBody: JSON.stringify(payload),
+      payload,
+      routingSecret: ROUTING_SECRET,
+      repository,
+      getProject,
+    })
+    const stored = rows.get('tally:non-ok-patch-1')
+
+    assert.equal(result.status, 'queued_for_retry')
+    assert.equal(result.record.attempts, 1)
+    assert.match(result.record.lastError ?? '', /Supabase request failed with 500: write refused/)
+    assert.equal(stored.status, 'queued_for_retry')
+    assert.equal(stored.attempts, 1)
+    assert.match(stored.last_error, /Supabase request failed with 500: write refused/)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 })
 
 test('Sanity durable repository uses atomic create-if-not-exists for concurrent idempotency', async () => {

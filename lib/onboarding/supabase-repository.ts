@@ -52,7 +52,12 @@ function fromRow(row: SupabaseRecordRow): OnboardingRecord {
 export class SupabaseOnboardingRepository implements OnboardingRepository {
   constructor(private readonly config: {url: string; serviceRoleKey: string}) {}
 
-  private async request<T>(path: string, init: RequestInit = {}) {
+  private async request<T>(
+    path: string,
+    init: RequestInit = {},
+    options: {expectJson?: boolean} = {},
+  ) {
+    const expectJson = options.expectJson ?? true
     const response = await fetch(`${this.config.url.replace(/\/$/, '')}${path}`, {
       ...init,
       headers: {
@@ -62,8 +67,18 @@ export class SupabaseOnboardingRepository implements OnboardingRepository {
         ...init.headers,
       },
     })
-    if (!response.ok) throw new Error(`Supabase request failed with ${response.status}`)
-    return response.json() as Promise<T>
+    const body = await response.text()
+    if (!response.ok) {
+      throw new Error(`Supabase request failed with ${response.status}${body ? `: ${body}` : ''}`)
+    }
+    if (!expectJson) return undefined as T
+    if (!body) throw new Error('Supabase response was empty when JSON was expected')
+    try {
+      return JSON.parse(body) as T
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown JSON parse error'
+      throw new Error(`Supabase response was not valid JSON: ${message}`)
+    }
   }
 
   private async getByKey(idempotencyKey: string) {
@@ -103,6 +118,7 @@ export class SupabaseOnboardingRepository implements OnboardingRepository {
           last_synced_at: new Date().toISOString(),
         }),
       },
+      {expectJson: false},
     )
   }
 
@@ -121,6 +137,7 @@ export class SupabaseOnboardingRepository implements OnboardingRepository {
           last_failed_at: new Date().toISOString(),
         }),
       },
+      {expectJson: false},
     )
   }
 
