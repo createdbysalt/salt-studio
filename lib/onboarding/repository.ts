@@ -1,4 +1,5 @@
 import {createHash, randomUUID} from 'node:crypto'
+import {PREVIEW_FIXTURE_PROJECT_ID} from '@/lib/onboarding/preview-fixtures'
 import type {OnboardingRecord, OnboardingRepository} from '@/lib/onboarding/types'
 
 type StoredOnboardingDocument = OnboardingRecord & {
@@ -70,6 +71,16 @@ export class MemoryOnboardingRepository implements OnboardingRepository {
     return [...this.records.values()].filter((record) => record.status === 'queued_for_retry')
   }
 
+  async deleteIsolatedPreviewSubmissions() {
+    let deleted = 0
+    for (const [key, record] of this.records) {
+      if (record.projectId !== PREVIEW_FIXTURE_PROJECT_ID) continue
+      this.records.delete(key)
+      deleted += 1
+    }
+    return deleted
+  }
+
   snapshot() {
     return [...this.records.values()]
   }
@@ -125,5 +136,9 @@ export class SanityOnboardingRepository implements OnboardingRepository {
     return this.client.fetch<OnboardingRecord[]>(
       '*[_type == "onboardingSubmission" && status == "queued_for_retry"] | order(receivedAt asc)',
     )
+  }
+
+  async deleteIsolatedPreviewSubmissions(): Promise<number> {
+    throw new Error('Isolated preview cleanup is not available for the Sanity store')
   }
 }

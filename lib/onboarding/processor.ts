@@ -1,4 +1,5 @@
 import {createHash} from 'node:crypto'
+import {isPreviewFixtureProjectId} from '@/lib/onboarding/preview-fixtures'
 import {validateOnboardingRouteToken} from '@/lib/onboarding/routing'
 import {normalizeTallyWebhookPayload} from '@/lib/onboarding/tally-payload'
 import type {
@@ -20,8 +21,11 @@ function payloadDigest(rawBody: string) {
 }
 
 function idempotencyKey(submission: NormalizedTallySubmission, rawBody: string) {
-  if (submission.submissionId) return `tally:${submission.submissionId}`
-  return `tally:missing-submission:${payloadDigest(rawBody)}`
+  const prefix = isPreviewFixtureProjectId(submission.projectId)
+    ? 'tally:preview-fixture:'
+    : 'tally:'
+  if (submission.submissionId) return `${prefix}${submission.submissionId}`
+  return `${prefix}missing-submission:${payloadDigest(rawBody)}`
 }
 
 function reviewRecord(
@@ -126,7 +130,8 @@ export async function processTallyWebhook({
   }
 
   try {
-    await reviewSink?.enqueue(record)
+    const sink = isPreviewFixtureProjectId(record.projectId) ? undefined : reviewSink
+    await sink?.enqueue(record)
     await repository.markSyncSucceeded(record.idempotencyKey)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown downstream error'

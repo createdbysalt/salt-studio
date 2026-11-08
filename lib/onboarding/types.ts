@@ -17,6 +17,7 @@ export type OnboardingProjectMapping = {
     media?: string | null
   }
   internalTaskSystem?: 'notion' | 'linear' | 'none'
+  isolation?: 'preview-fixture'
 }
 
 export type NormalizedTallySubmission = {
@@ -76,6 +77,7 @@ export type OnboardingRepository = {
   markSyncSucceeded: (idempotencyKey: string) => Promise<void>
   markSyncFailed: (idempotencyKey: string, error: string) => Promise<void>
   listRetryable: () => Promise<OnboardingRecord[]>
+  deleteIsolatedPreviewSubmissions: () => Promise<number>
 }
 
 export type OnboardingReviewSink = {

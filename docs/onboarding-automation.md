@@ -18,7 +18,10 @@ SUPABASE_SERVICE_ROLE_KEY=... # Server-side only; never expose to browser
 ONBOARDING_PRIVATE_METADATA_STORE=supabase # Enables private portal password/link reads
 NOTION_API_KEY=... # Salt-internal blockers only
 NOTION_ONBOARDING_TASKS_DATABASE_ID=... # Database with the properties listed below
-GOOGLE_DRIVE_ACCESS_TOKEN=... # Metadata-only checker; no file contents are fetched
+GOOGLE_DRIVE_ACCESS_TOKEN=... # Server-only read-only Drive token. Scanner stays off without the flag below.
+ONBOARDING_DRIVE_SCAN=enabled # Manual Drive scan route. Leave unset until a separate approval.
+ONBOARDING_PREVIEW_ISOLATION=enabled # Preview deployments only. Ignored in production.
+ONBOARDING_PREVIEW_ORIGIN=https://...vercel.app # Optional. The isolated-request script refuses production hosts.
 
 # Optional fallback if Supabase is not approved/provisioned:
 ONBOARDING_AUTOMATION_STORE=sanity
@@ -131,3 +134,42 @@ Before activating webhooks in production:
 7. Configure webhooks with signing secrets in Tally for all nine active forms. There is no Tally connector tool in this environment to manage webhooks automatically.
 8. Connect the Notion adapter for Salt-internal blockers only, with deterministic dedupe keys. A verified Salt tasks database ID is still needed.
 9. Connect the Google Drive metadata checker only after server-side Drive credentials are configured for metadata checks without reading unrelated customer contents.
+
+## Isolated preview verification
+
+The reserved project id `salt-preview-isolated-onboarding` is not a client portal. It is recognized only when both `VERCEL_ENV=preview` and `ONBOARDING_PREVIEW_ISOLATION=enabled`. Production ignores that flag. Real Sanity project matches always win, so the fixture cannot hide or reroute a client submission. Signature checks stay required.
+
+Fixture submission ids are stored under `tally:preview-fixture:` and do not consume a real submission idempotency key. Fixture rows do not enqueue Notion tasks, do not change collection completion, and do not send client messages. Cleanup deletes only rows for the reserved project id.
+
+```bash
+VERCEL_ENV=preview ONBOARDING_PREVIEW_ISOLATION=enabled \
+ONBOARDING_ROUTING_SECRET=... TALLY_WEBHOOK_SECRET=... \
+ONBOARDING_PREVIEW_ORIGIN=https://<preview-host> \
+npm run preview:onboarding:isolated
+```
+
+Post the printed webhook to the preview host, then clean it up:
+
+```bash
+curl -X POST "$ONBOARDING_PREVIEW_ORIGIN/api/onboarding/jobs/preview-cleanup" \
+  -H "Authorization: Bearer $ONBOARDING_JOB_SECRET"
+```
+
+Do not target `createdbysalt.com`. Do not enable this flag in production.
+
+## Read-only Drive folder scan
+
+`POST /api/onboarding/jobs/drive-scan` is disabled unless `ONBOARDING_DRIVE_SCAN=enabled` and `GOOGLE_DRIVE_ACCESS_TOKEN` is set. There is no schedule. The token needs only `https://www.googleapis.com/auth/drive.readonly`, must stay server-side, and should be granted access only to the folders an operator passes in the request. The scanner lists metadata with shared-drive support, follows pagination inside those folders, and reads one level of category subfolders. It does not write, share, move, or download files, and it does not traverse an arbitrary drive.
+
+Counts are guidance. A scan never marks checklist items complete, never decides format validity, quality approval, or that every submitter has finished. Files in an unmapped subfolder stay `unknown`. A checklist item may map to multiple folders, such as separate Baptisms and Dedications folders, and file ids are counted once. The same file in two different checklist items is ambiguous and is not counted for either item.
+
+```bash
+curl -X POST "$ONBOARDING_PREVIEW_ORIGIN/api/onboarding/jobs/drive-scan" \
+  -H "Authorization: Bearer $ONBOARDING_JOB_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"projectId":"fixture-project","mappings":[{"itemKey":"photos-baptisms","folderIds":["<fixture-folder-id>"]}]}'
+```
+
+Use fixture folder ids until a separate approval names real client folders. Expected responses before that approval: `401` without the job secret, `503` with `drive_scan_disabled` or `drive_credentials_missing`.
+
+Not verified against live services: Tally hidden fields and webhook delivery, Notion task creation, real Drive folder scans, private-metadata cutover, and production activation.

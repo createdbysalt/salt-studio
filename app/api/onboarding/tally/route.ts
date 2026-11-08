@@ -40,13 +40,13 @@ export async function POST(request: Request) {
     return json(400, {ok: false, error: 'invalid_json'})
   }
 
-  const {getSanityOnboardingProject} = await import('@/lib/onboarding/sanity-projects')
+  const {resolveOnboardingProject} = await import('@/lib/onboarding/preview-fixtures')
   const result = await processTallyWebhook({
     rawBody,
     payload,
     routingSecret,
     repository,
-    getProject: getSanityOnboardingProject,
+    getProject: resolveOnboardingProject,
     reviewSink: getOnboardingReviewSink(),
   })
 

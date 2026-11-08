@@ -1,3 +1,4 @@
+import {PREVIEW_FIXTURE_PROJECT_ID} from '@/lib/onboarding/preview-fixtures'
 import type {OnboardingRecord, OnboardingRepository} from '@/lib/onboarding/types'
 
 type SupabaseRecordRow = {
@@ -146,5 +147,16 @@ export class SupabaseOnboardingRepository implements OnboardingRepository {
       '/rest/v1/onboarding_submissions?status=eq.queued_for_retry&order=received_at.asc',
     )
     return rows.map(fromRow)
+  }
+
+  async deleteIsolatedPreviewSubmissions() {
+    const rows = await this.request<Array<{id: string}>>(
+      `/rest/v1/onboarding_submissions?project_id=eq.${encodeURIComponent(PREVIEW_FIXTURE_PROJECT_ID)}&select=id`,
+      {
+        method: 'DELETE',
+        headers: {Prefer: 'return=representation'},
+      },
+    )
+    return rows.length
   }
 }
