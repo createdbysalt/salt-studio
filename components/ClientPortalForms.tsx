@@ -58,7 +58,8 @@ function CheckControl({
 }
 
 export function ClientPortalForms() {
-  const {formItems, done, pendingKey, error, toggle} = usePortalStatus()
+  const {formItems, done, pendingKey, collectionPendingKey, error, toggle, setCollectionComplete} =
+    usePortalStatus()
 
   return (
     <div className="mt-10">
@@ -68,6 +69,8 @@ export function ClientPortalForms() {
           const key = itemDoneKey(item)
           const checked = Boolean(done[key])
           const formLabel = item.linkLabel?.trim().replace(' →', '') || 'Open form'
+          const hasSubmissionLedger = typeof item.submissionCount === 'number'
+          const collectionPending = collectionPendingKey === key
           return (
             <li
               key={item._key}
@@ -94,6 +97,41 @@ export function ClientPortalForms() {
                       <p className="mt-1 text-[15px] leading-relaxed text-secondary">
                         {item.description}
                       </p>
+                    ) : null}
+                    {typeof item.submissionCount === 'number' ? (
+                      <p className="mt-2 text-[13px] leading-relaxed text-muted-foreground">
+                        {item.submissionCount}{' '}
+                        {item.submissionCount === 1 ? 'submission' : 'submissions'} received
+                        {item.collectionComplete
+                          ? ' · client marked this collection complete'
+                          : ' · not marked complete'}
+                      </p>
+                    ) : null}
+                    {hasSubmissionLedger ? (
+                      <button
+                        type="button"
+                        disabled={collectionPending}
+                        onClick={() => setCollectionComplete(item, !item.collectionComplete)}
+                        className="mt-3 text-[13px] font-medium text-foreground underline underline-offset-4 disabled:opacity-50"
+                      >
+                        {collectionPending
+                          ? 'Saving…'
+                          : item.collectionComplete
+                            ? 'Reopen for more submissions'
+                            : 'Mark collection complete'}
+                      </button>
+                    ) : null}
+                    {item.submissionEntries?.length ? (
+                      <ul className="mt-3 space-y-1 text-[13px] leading-relaxed text-muted-foreground">
+                        {item.submissionEntries.slice(0, 5).map((entry) => (
+                          <li key={`${entry.receivedAt}-${entry.label}`}>
+                            {entry.label} · {new Date(entry.receivedAt).toLocaleDateString()}
+                            {entry.status === 'received_after_confirmation'
+                              ? ' · received after completion'
+                              : ''}
+                          </li>
+                        ))}
+                      </ul>
                     ) : null}
                   </div>
                   {item.link ? (

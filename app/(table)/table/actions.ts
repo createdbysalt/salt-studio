@@ -1,9 +1,15 @@
 'use server'
 
 import {isTableAuthenticated, isValidTableSlug, tableAuthCookieName} from '@/app/(table)/table/auth'
+import {setCollectionComplete} from '@/lib/onboarding/collection-store'
+import {verifyPortalPassword} from '@/lib/onboarding/portal-crypto'
+import {
+  getSupabasePortalCredentials,
+  isSupabasePrivateMetadataEnabled,
+} from '@/lib/onboarding/private-portal'
 import {apiVersion, dataset, projectId} from '@/sanity/lib/api'
 import {sanityFetch} from '@/sanity/lib/live'
-import {clientPortalAuthQuery} from '@/sanity/lib/queries'
+import {clientPortalAuthQuery, clientPortalAuthShellQuery} from '@/sanity/lib/queries'
 import {writeToken} from '@/sanity/lib/write-token'
 import {createClient, stegaClean} from 'next-sanity'
 import {revalidatePath} from 'next/cache'
@@ -28,6 +34,40 @@ export async function authenticateTable(slug: string, formData: FormData) {
   }
 
   const submitted = String(formData.get('password') ?? '')
+  if (isSupabasePrivateMetadataEnabled()) {
+    const {data} = await sanityFetch({
+      query: clientPortalAuthShellQuery,
+      params: {slug},
+      stega: false,
+    })
+    const enabled = data?.enabled !== false
+    const credentials = data?._id ? await getSupabasePortalCredentials(data._id) : null
+    if (
+      !data?._id ||
+      !enabled ||
+      !credentials ||
+      !verifyPortalPassword({
+        password: submitted,
+        hash: credentials.hash,
+        salt: credentials.salt,
+        iterations: credentials.iterations,
+      })
+    ) {
+      return {ok: false as const, error: 'That password is not right.'}
+    }
+
+    const cookieStore = await cookies()
+    cookieStore.set(tableAuthCookieName(slug), '1', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: `/project/${slug}`,
+      maxAge: 60 * 60 * 24 * 30,
+    })
+
+    redirect(`/project/${slug}`)
+  }
+
   const {data} = await sanityFetch({
     query: clientPortalAuthQuery,
     params: {slug},
@@ -148,6 +188,43 @@ export async function toggleChecklistItem(input: {
     console.error('toggleChecklistItem failed', error)
     return {ok: false as const, error: 'Could not save that check.'}
   }
+
+  revalidatePath(`/project/${slug}`)
+  return {ok: true as const}
+}
+
+export async function setFormCollectionComplete(input: {
+  slug: string
+  itemKey: string
+  complete: boolean
+}) {
+  const {slug, itemKey, complete} = input
+  if (!isValidTableSlug(slug)) {
+    return {ok: false as const, error: 'That link is not valid.'}
+  }
+  if (!KEY_PATTERN.test(itemKey)) {
+    return {ok: false as const, error: 'That form is not valid.'}
+  }
+  if (!(await isTableAuthenticated(slug))) {
+    return {ok: false as const, error: 'Sign in again to update this form.'}
+  }
+
+  const {data} = await sanityFetch({
+    query: clientPortalAuthQuery,
+    params: {slug},
+    stega: false,
+  })
+  if (!data?._id || data.enabled === false) {
+    return {ok: false as const, error: 'That page is not available.'}
+  }
+
+  const result = await setCollectionComplete({
+    projectId: data._id,
+    itemKey,
+    complete,
+    actor: `client-portal:${slug}`,
+  })
+  if (!result.ok) return {ok: false as const, error: result.error}
 
   revalidatePath(`/project/${slug}`)
   return {ok: true as const}

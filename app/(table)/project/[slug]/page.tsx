@@ -1,8 +1,16 @@
 import {isTableAuthenticated, isValidTableSlug} from '@/app/(table)/table/auth'
 import {ClientPortalLogin} from '@/components/ClientPortalLogin'
 import {ClientPortalPage} from '@/components/ClientPortalPage'
+import {
+  getPrivatePortalOverlay,
+  isSupabasePrivateMetadataEnabled,
+} from '@/lib/onboarding/private-portal'
 import {sanityFetch} from '@/sanity/lib/live'
-import {clientPortalBySlugQuery, clientPortalSlugsQuery} from '@/sanity/lib/queries'
+import {
+  clientPortalBySlugQuery,
+  clientPortalShellBySlugQuery,
+  clientPortalSlugsQuery,
+} from '@/sanity/lib/queries'
 import type {Metadata} from 'next'
 import {draftMode} from 'next/headers'
 import {notFound} from 'next/navigation'
@@ -12,7 +20,7 @@ type Props = {
 }
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
-  const {data} = await sanityFetch({query: clientPortalBySlugQuery, params, stega: false})
+  const {data} = await sanityFetch({query: clientPortalShellBySlugQuery, params, stega: false})
   return {
     title: data?.name ?? 'Your project',
     robots: {index: false, follow: false},
@@ -34,31 +42,60 @@ export default async function ProjectSlugRoute({params}: Props) {
     notFound()
   }
 
-  const {data} = await sanityFetch({query: clientPortalBySlugQuery, params, stega: false})
+  const {data: shell} = await sanityFetch({
+    query: clientPortalShellBySlugQuery,
+    params,
+    stega: false,
+  })
   const draft = (await draftMode()).isEnabled
 
-  if (!data?._id && !draft) {
+  if (!shell?._id && !draft) {
     notFound()
   }
 
-  if (data && data.enabled === false && !draft) {
+  if (shell && shell.enabled === false && !draft) {
     notFound()
   }
 
-  if (!data) {
+  if (!shell) {
     return <main className="min-h-svh bg-background" />
   }
 
   const authenticated = await isTableAuthenticated(slug)
   if (!authenticated) {
-    return (
-      <ClientPortalLogin
-        slug={slug}
-        name={data.name || 'Your project'}
-        contactHref={data.whatsappGroupUrl}
-      />
-    )
+    return <ClientPortalLogin slug={slug} name={shell.name || 'Your project'} />
   }
 
-  return <ClientPortalPage data={data} />
+  const {data} = await sanityFetch({query: clientPortalBySlugQuery, params, stega: false})
+  if (!data) {
+    return <main className="min-h-svh bg-background" />
+  }
+
+  const privateOverlay = await getPrivatePortalOverlay(data._id)
+  const privateMode = isSupabasePrivateMetadataEnabled()
+  if (privateMode && !privateOverlay) {
+    return <main className="min-h-svh bg-background" />
+  }
+
+  const publicPrivateFields = privateMode
+    ? {
+        sharedFolderUrl: null,
+        brandingFolderUrl: null,
+        mediaFolderUrl: null,
+        previewUrl: null,
+        productionUrl: null,
+        whatsappGroupUrl: null,
+      }
+    : {}
+
+  const mergedData = privateOverlay
+    ? ({
+        ...data,
+        ...publicPrivateFields,
+        ...privateOverlay,
+        checklist: (privateOverlay.checklist ?? data.checklist) as typeof data.checklist,
+      } as typeof data)
+    : data
+
+  return <ClientPortalPage data={mergedData} />
 }

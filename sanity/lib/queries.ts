@@ -846,6 +846,47 @@ export const clientPortalAuthQuery = defineQuery(`
   }
 `)
 
+export const clientPortalAuthShellQuery = defineQuery(`
+  *[_type == "clientPortal" && slug.current == $slug][0]{
+    _id,
+    enabled
+  }
+`)
+
+export const clientPortalShellBySlugQuery = defineQuery(`
+  *[_type == "clientPortal" && slug.current == $slug][0]{
+    _id,
+    name,
+    enabled
+  }
+`)
+
+export const clientPortalAutomationByIdQuery = defineQuery(`
+  *[_type == "clientPortal" && _id == $projectId][0]{
+    _id,
+    name,
+    enabled,
+    "slug": slug.current,
+    "clientRef": client._ref,
+    "checklistSource": checklistTemplate->{
+      categories[]{
+        items[]{
+          _key,
+          title,
+          link
+        }
+      }
+    },
+    "formsSource": formsTemplate->{
+      items[]{
+        _key,
+        title,
+        link
+      }
+    }
+  }
+`)
+
 export const clientPortalSlugsQuery = defineQuery(`
   *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}
 `)
