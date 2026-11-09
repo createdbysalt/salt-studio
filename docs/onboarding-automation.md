@@ -51,14 +51,17 @@ Because that applied version differs from the repo filename, future CLI deploys 
 
 - `supabase/migrations/20261108050100_harden_onboarding_updated_at_function.sql`
 - `supabase/migrations/20261108050200_portal_private_metadata.sql`
+- `supabase/migrations/20261109060000_portal_private_metadata_checklist.sql` — adds `checklist jsonb`. Apply this before a private copy. The pull request that adds the file does not apply it.
 
 Private portal metadata migration:
 
 ```bash
-# Dry-run, prints field presence only
+# Dry-run, prints field presence only. The public dataset does not need a read token.
 npm run plan:onboarding:privacy
 
-# One-time private copy after approval; does not remove public Sanity fields
+# One-time private copy after approval. Copies every field it lists for a later unset,
+# including checklist. Passwords are stored as PBKDF2 hashes. Does not unset Sanity fields.
+# Refuses any Supabase host other than the preview project jnznsgkkteuuqwtscaxz.
 CONFIRM_PRIVATE_PORTAL_WRITE=true npm run plan:onboarding:privacy -- --write
 ```
 
@@ -127,8 +130,8 @@ Before activating webhooks in production:
 
 1. Make the Sanity dataset private or move portal secrets/links/statuses to a private store. The current public dataset contains portal-sensitive fields. Sanity private datasets may require paid-plan entitlement; confirm the actual project plan before provisioning or changing visibility.
 2. Provision/authorize the chosen Supabase project and apply `supabase/migrations/202611080001_onboarding_automation.sql` after review. Do not use the service role key outside server-side environment variables.
-3. Run `node scripts/onboarding/privacy-migration-plan.mjs` and review its dry-run output. It prints field presence only, never private values.
-4. Copy private portal fields into `portal_private_metadata` using `CONFIRM_PRIVATE_PORTAL_WRITE=true npm run plan:onboarding:privacy -- --write`, verify `/project/[slug]` reads overlays, then unset the listed private fields from public portal docs.
+3. Run `npm run plan:onboarding:privacy` and review its dry-run output. It prints field presence only, never private values. A read token is optional when the dataset is public.
+4. Apply `supabase/migrations/20261109060000_portal_private_metadata_checklist.sql` on the preview project, then copy private portal fields into `portal_private_metadata` using `CONFIRM_PRIVATE_PORTAL_WRITE=true npm run plan:onboarding:privacy -- --write`. That write copies every field it lists for a later unset, including checklist, and does not unset Sanity. Verify `/project/[slug]` reads overlays, then unset the listed private fields from public portal docs in a separate approved step.
 5. Configure the Tally signing secret, routing secret, retry job secret, Supabase URL/service role key, and optional private portal store credentials in Vercel. Existing agent/MCP connectors are not deployed app credentials.
 6. Add hidden fields to all nine active Tally forms (`project_id`, `form_id`, `item_key`, `salt_route`) and publish intentionally from Tally. A saved draft hidden field is not necessarily live on the published form.
 7. Configure webhooks with signing secrets in Tally for all nine active forms. There is no Tally connector tool in this environment to manage webhooks automatically.

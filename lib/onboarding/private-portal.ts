@@ -46,11 +46,12 @@ async function getSupabasePrivatePortalOverlay(
         preview_url: string | null
         production_url: string | null
         whatsapp_group_url: string | null
+        checklist: unknown[] | null
       }>
     >(
       `/rest/v1/portal_private_metadata?portal_id=eq.${encodeURIComponent(
         portalId,
-      )}&select=shared_folder_url,branding_folder_url,media_folder_url,preview_url,production_url,whatsapp_group_url&limit=1`,
+      )}&select=shared_folder_url,branding_folder_url,media_folder_url,preview_url,production_url,whatsapp_group_url,checklist&limit=1`,
     ),
     supabaseRequest<
       Array<{
@@ -149,6 +150,7 @@ async function getSupabasePrivatePortalOverlay(
     previewUrl: metadata.preview_url,
     productionUrl: metadata.production_url,
     whatsappGroupUrl: metadata.whatsapp_group_url,
+    checklist: metadata.checklist,
     formSubmissionSummary,
   }
 }
