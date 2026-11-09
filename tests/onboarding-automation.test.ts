@@ -216,6 +216,21 @@ test('Supabase private portal overlay reads private links and submission labels 
           preview_url: null,
           production_url: null,
           whatsapp_group_url: null,
+          checklist: [
+            {
+              _key: 'fixture-group',
+              _type: 'portalChecklistCategory',
+              title: 'Fixture group',
+              items: [
+                {
+                  _key: 'fixture-item',
+                  _type: 'portalChecklistItem',
+                  title: 'Fixture item',
+                  done: false,
+                },
+              ],
+            },
+          ],
         },
       ])
     }
@@ -249,6 +264,10 @@ test('Supabase private portal overlay reads private links and submission labels 
 
     assert.ok(credentials)
     assert.equal(overlay?.sharedFolderUrl, 'https://drive.example/shared')
+    assert.equal(
+      (overlay?.checklist as Array<{title?: string}> | undefined)?.[0]?.title,
+      'Fixture group',
+    )
     assert.equal(overlay?.formSubmissionSummary?.['f-staff'].count, 1)
     assert.equal(overlay?.formSubmissionSummary?.['f-staff'].entries?.[0].label, 'Ada Staff')
     assert.equal(
