@@ -11,17 +11,27 @@ type Props = {
     package?: string | string[]
     addon?: string | string[]
     kickoff?: string | string[]
+    cards?: string | string[]
   }>
 }
 
-async function loadProposal(token: string) {
+function previewCardCount(value: string | string[] | undefined) {
+  const raw = Array.isArray(value) ? value[0] : value
+  const count = Number(raw)
+  if (count === 2 || count === 4) return count
+  return undefined
+}
+
+async function loadProposal(token: string, cardCount?: number) {
   const {data} = await sanityFetch({
     query: proposalByTokenQuery,
     params: {key: token},
     stega: false,
   })
   if (data?._id) return data
-  if (process.env.NODE_ENV === 'development' && token === 'preview') return previewProposal()
+  if (process.env.NODE_ENV === 'development' && token === 'preview') {
+    return previewProposal(cardCount)
+  }
   return null
 }
 
@@ -38,7 +48,8 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 
 export default async function ProposalRoute({params, searchParams}: Props) {
   const {token} = await params
-  const proposal = await loadProposal(token)
+  const query = await searchParams
+  const proposal = await loadProposal(token, previewCardCount(query.cards))
   if (!proposal?._id) notFound()
 
   return (

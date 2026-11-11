@@ -1,6 +1,10 @@
+import {ProposalApproach} from '@/components/ProposalApproach'
+import {ProposalCoverDots} from '@/components/ProposalCoverDots'
 import {ProposalCoverFrame} from '@/components/ProposalCoverFrame'
 import {ProposalLockup} from '@/components/ProposalLockup'
+import {ProposalOutcomes, ProposalSwirlField} from '@/components/ProposalOutcomes'
 import {ProposalRail, type ProposalRailItem} from '@/components/ProposalRail'
+import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import type {ProposalByTokenQueryResult} from '@/sanity.types'
 import {urlForImage} from '@/sanity/lib/utils'
 import {stegaClean} from 'next-sanity'
@@ -102,20 +106,11 @@ export function ProposalPage({
         client={clientName}
         logoUrl={clientLogoUrl}
         logoAlt={line(clientLogo?.alt) || clientName}
+        acceptHref={view.accepted ? '#signed' : '#accept'}
       />
-      <ProposalActions acceptHref={view.accepted ? '#signed' : '#accept'} />
       <ProposalRail items={slides.map((slide) => slide.anchor)} />
 
-      {slides.map((slide) => (
-        <div
-          key={slide.key}
-          id={slide.anchor.id}
-          data-theme={slide.field.dark ? 'dark' : undefined}
-          className={`flex min-h-dvh flex-col justify-center ${slide.field.className}`}
-        >
-          {slide.content}
-        </div>
-      ))}
+      {renderProposalSlides(slides)}
 
       <footer className="border-t border-border">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-[max(4.5rem,var(--spacing-gutter))] py-8 font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
@@ -124,6 +119,80 @@ export function ProposalPage({
         </div>
       </footer>
     </article>
+  )
+}
+
+type ProposalSlide = {
+  key: string
+  anchor: ProposalRailItem
+  content: ReactNode
+  field: {className: string; dark: boolean}
+}
+
+/**
+ * Outcome and approach share one shader. The field is one viewport tall
+ * and sticks while those two sections are on screen, then leaves with them.
+ * Proof stays on its own paper ground.
+ */
+function renderProposalSlides(slides: ProposalSlide[]) {
+  const nodes: ReactNode[] = []
+  let index = 0
+  while (index < slides.length) {
+    const slide = slides[index]
+    const next = slides[index + 1]
+    if (slide?.anchor.id === 'outcome') {
+      const band = next?.anchor.id === 'approach' ? [slide, next] : [slide]
+      nodes.push(
+        <div key={`${slide.key}-field`} className="relative">
+          <div aria-hidden className="pointer-events-none sticky top-0 z-0 h-dvh">
+            <div className="relative h-full overflow-hidden">
+              <ProposalSwirlField />
+            </div>
+          </div>
+          <div className="relative z-[1] -mt-[100dvh]">
+            {band.map((item) => proposalSlide(item))}
+          </div>
+        </div>,
+      )
+      index += band.length
+      continue
+    }
+    if (slide) nodes.push(proposalSlide(slide))
+    index += 1
+  }
+  return nodes
+}
+
+function proposalSlide(slide: ProposalSlide) {
+  const shell =
+    slide.anchor.id === 'situation'
+      ? 'relative z-10 -mt-10 -mb-10 overflow-hidden rounded-[40px]'
+      : slide.anchor.id === 'cover'
+        ? 'relative flex flex-col'
+        : slide.anchor.id === 'outcome'
+          ? 'relative z-10'
+          : slide.anchor.id === 'approach'
+            ? 'relative z-10'
+            : 'flex min-h-dvh flex-col justify-center'
+
+  return (
+    <div
+      key={slide.key}
+      id={slide.anchor.id}
+      data-theme={slide.field.dark ? 'dark' : undefined}
+      style={
+        slide.anchor.id === 'cover'
+          ? {backgroundColor: '#ffffff', backgroundImage: 'none'}
+          : undefined
+      }
+      className={`${shell} ${slide.field.className}`}
+    >
+      {slide.anchor.id === 'cover' ? <ProposalCoverDots /> : null}
+      {slide.content}
+      {slide.anchor.id === 'cover' ? (
+        <div aria-hidden className="h-[calc(var(--spacing-6)+2.5rem)] shrink-0" />
+      ) : null}
+    </div>
   )
 }
 
@@ -140,12 +209,14 @@ function slideField(type: Section['_type']): {className: string; dark: boolean} 
   switch (type) {
     case 'proposalCoverSection':
       return {
-        className: 'bg-[radial-gradient(85%_75%_at_100%_0%,#eaeaea_0%,#ffffff_58%)]',
+        className: 'proposal-cover-ground',
         dark: false,
       }
     case 'proposalSituationSection':
+      return {className: 'bg-[#f3f3f3]', dark: false}
     case 'proposalOutcomesSection':
     case 'proposalPhasesSection':
+      return {className: 'bg-transparent', dark: false}
     case 'proposalProofSection':
     case 'proposalAddOnsSection':
     case 'proposalScheduleSection':
@@ -223,10 +294,10 @@ function Cover({
   return (
     <section
       data-proposal-enter="cover"
-      className="relative flex min-h-dvh flex-1 flex-col justify-end px-[max(3.5rem,var(--spacing-gutter))] pb-6 pt-28 md:px-[max(4.5rem,var(--spacing-gutter))]"
+      className="relative z-[1] flex min-h-dvh flex-1 flex-col justify-end px-[max(2.5rem,var(--spacing-gutter))] pb-6 pt-28 md:px-[max(3rem,var(--spacing-gutter))] lg:px-[max(4.5rem,var(--spacing-gutter))]"
     >
       <div className="relative z-10 mb-2 flex justify-center">
-        <h1 className="max-w-4xl text-center text-[clamp(2.25rem,6.2vw,2.85rem)] font-[560] leading-[0.92] tracking-[var(--tracking-display)] md:text-[clamp(3rem,7.2vw,8.5rem)] md:leading-[0.9]">
+        <h1 className="max-w-4xl text-center text-[clamp(2.85rem,8.6vw,3.75rem)] font-[560] leading-[0.92] tracking-[var(--tracking-display)] md:text-[clamp(3.75rem,7vw,5.5rem)] md:leading-[0.9] lg:text-[clamp(3rem,7.2vw,8.5rem)]">
           {withEmphasis(headline, emphasis)}
         </h1>
       </div>
@@ -236,80 +307,6 @@ function Cover({
         caption={line(section.effectPhrase)}
       />
     </section>
-  )
-}
-
-const SALT_EMAIL = 'mailto:hello@createdbysalt.com'
-const SALT_WHATSAPP = 'https://wa.me/19712052186'
-
-function ProposalActions({acceptHref}: {acceptHref: string}) {
-  const link =
-    'flex size-10 items-center justify-center rounded-full text-foreground opacity-45 transition-opacity duration-200 hover:opacity-100 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-foreground'
-  const icon = 'h-4 w-4'
-  return (
-    <nav
-      aria-label="Talk to Salt"
-      data-proposal-enter="chrome"
-      className="pointer-events-none fixed inset-y-0 left-3 z-30 flex items-center"
-    >
-      <ul className="pointer-events-auto flex flex-col gap-1">
-        <li>
-          <a href={SALT_EMAIL} aria-label="Email Salt Studio" className={link}>
-            <svg viewBox="0 0 24 24" aria-hidden className={icon} fill="none" focusable="false">
-              <rect
-                x="3"
-                y="5"
-                width="18"
-                height="14"
-                rx="2"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-              <path
-                d="M3 7.5l9 6 9-6"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </a>
-        </li>
-        <li>
-          <a
-            href={SALT_WHATSAPP}
-            aria-label="WhatsApp Salt Studio"
-            target="_blank"
-            rel="noreferrer"
-            className={link}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden className={icon} focusable="false">
-              <path
-                fill="currentColor"
-                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
-              />
-            </svg>
-          </a>
-        </li>
-        <li>
-          <a href={acceptHref} aria-label="Accept and pay" className={link}>
-            <svg viewBox="0 0 24 24" aria-hidden className={icon} fill="none" focusable="false">
-              <rect
-                x="2.5"
-                y="5.5"
-                width="19"
-                height="13"
-                rx="2"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              />
-              <path d="M2.5 9.5h19" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M6 14.5h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </a>
-        </li>
-      </ul>
-    </nav>
   )
 }
 
@@ -350,60 +347,83 @@ function railAnchor(type: Section['_type']): ProposalRailItem {
   }
 }
 
+/**
+ * A light gray sheet after the cover. The eyebrow is the same on every
+ * proposal. The problem line is large and regular, and each card keeps
+ * the same height. The sheet ends with the same padding it opens with.
+ */
 function Situation({section}: {section: Extract<Section, {_type: 'proposalSituationSection'}>}) {
-  const cards = (section.cards ?? []).filter((card) => line(card.title) || line(card.body))
+  const cards = (section.cards ?? []).filter((card) => line(card.title) || line(card.quote))
   if (cards.length === 0) return null
 
+  const problem = line(section.problemLine)
+  const columns = cards.length === 3 ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'
+
   return (
-    <SectionBlock heading={line(section.heading) || 'The situation'} panel>
-      <div className="divide-y divide-border">
-        {cards.map((card) => (
-          <article key={card._key} className="p-6 md:p-10">
-            <h3 className="text-[length:var(--text-h3)] leading-[var(--text-h3--line-height)] tracking-[var(--tracking-heading)]">
-              {line(card.title)}
-            </h3>
-            <p className="mt-4 max-w-prose text-lg leading-relaxed text-foreground/80">
-              {line(card.body)}
-            </p>
-          </article>
-        ))}
-      </div>
-    </SectionBlock>
+    <section className="flex min-h-dvh w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:py-32">
+      <header>
+        <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+          The situation
+        </p>
+        {problem ? (
+          <h2 className="mt-3 max-w-[9em] text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
+            {problem}
+          </h2>
+        ) : null}
+      </header>
+
+      <ul className={`mt-6 grid grid-cols-1 gap-3 md:mt-7 ${columns}`}>
+        {cards.map((card) => {
+          const quote = line(card.quote)
+          return (
+            <li
+              key={card._key}
+              className="flex h-[350px] flex-col rounded-[20px] bg-[#e6e6e6] px-4 py-5 md:px-5"
+            >
+              <ProposalSituationIcon name={card.icon} />
+              <div className="mt-auto">
+                <h3 className="text-[1.15rem] font-medium leading-snug md:text-[1.25rem]">
+                  {line(card.title)}
+                </h3>
+                {quote ? (
+                  <p className="mt-2 text-[1.15rem] font-medium leading-snug text-[#8f8f8f] md:text-[1.25rem]">
+                    {quote}
+                  </p>
+                ) : null}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+    </section>
   )
 }
 
 function Outcomes({section}: {section: Extract<Section, {_type: 'proposalOutcomesSection'}>}) {
-  const cards = (section.cards ?? []).filter((card) => line(card.title) || line(card.body))
+  const cards = (section.cards ?? [])
+    .map((card) => ({
+      key: card._key,
+      title: line(card.title),
+      body: line(card.body),
+    }))
+    .filter((card) => card.title || card.body)
   if (cards.length === 0) return null
 
-  return (
-    <SectionBlock heading={line(section.heading) || 'What changes'} panel>
-      <ol className="grid md:grid-cols-3 md:divide-x md:divide-border">
-        {cards.map((card, index) => (
-          <li key={card._key} className="p-6 md:p-8">
-            <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-              {String(index + 1).padStart(2, '0')}
-            </p>
-            <h3 className="mt-3 text-[length:var(--text-h3)] leading-[var(--text-h3--line-height)] tracking-[var(--tracking-heading)]">
-              {line(card.title)}
-            </h3>
-            <p className="mt-3 text-lg leading-relaxed text-foreground/80">{line(card.body)}</p>
-          </li>
-        ))}
-      </ol>
-    </SectionBlock>
-  )
+  return <ProposalOutcomes heading={line(section.heading)} cards={cards} />
 }
 
 function Phases({section}: {section: Extract<Section, {_type: 'proposalPhasesSection'}>}) {
-  const phases = (section.phases ?? []).filter((phase) => line(phase.name))
+  const phases = (section.phases ?? [])
+    .map((phase) => ({
+      key: phase._key,
+      name: line(phase.name),
+      summary: line(phase.summary),
+      weeks: line(phase.weeks),
+    }))
+    .filter((phase) => phase.name)
   if (phases.length === 0) return null
 
-  return (
-    <SectionBlock heading={line(section.heading) || 'How we get there'} panel>
-      <PhaseList phases={phases} />
-    </SectionBlock>
-  )
+  return <ProposalApproach heading={line(section.heading) || 'How we get there'} phases={phases} />
 }
 
 function Proof({section}: {section: Extract<Section, {_type: 'proposalProofSection'}>}) {

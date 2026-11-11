@@ -97,49 +97,86 @@ export const proposalSituationSection = defineType({
   fields: [
     shownField(),
     defineField({
-      name: 'heading',
-      title: 'Heading',
+      name: 'problemLine',
+      title: 'Problem',
       type: 'string',
-      initialValue: 'The situation',
-      description: 'Section heading. Keep their problem in their words in the cards below.',
+      initialValue: 'One answer lives in three places.',
+      description:
+        'The large title. The problem, in one catchy line. The eyebrow above it always says The situation. This line does not summarise the cards.',
+      validation: (rule) => rule.max(80).warning('A short line holds the screen better'),
     }),
     defineField({
       name: 'cards',
       title: 'Cards',
       type: 'array',
-      description: 'Two to four short cards. Use their words, and say what is at stake.',
+      description:
+        'What you heard on the call. Three is the sweet spot. Two is the floor, four is the ceiling. Each card is one theme and one line they said.',
       of: [
         defineArrayMember({
           type: 'object',
           name: 'proposalSituationCard',
           fields: [
             defineField({
-              name: 'title',
-              title: 'Title',
+              name: 'icon',
+              title: 'Icon',
               type: 'string',
-              description: 'A short label for this part of the situation.',
-              validation: (rule) => rule.required().error('Each card needs a title'),
+              description:
+                'A small stroke mark for the theme. Pick the closest one. Every card uses the same weight of icon, so the row stays quiet.',
+              options: {
+                list: [
+                  {title: 'Scattered — one fact in many places', value: 'scattered'},
+                  {title: 'Waiting — stuck on someone else', value: 'waiting'},
+                  {title: 'Arrival — a first visit', value: 'arrival'},
+                  {title: 'Missing — they cannot find it', value: 'missing'},
+                  {title: 'Calling — they still phone or email', value: 'calling'},
+                  {title: 'Document — it lives in a file', value: 'document'},
+                  {title: 'People — the room, the team, the visitors', value: 'people'},
+                  {title: 'Friction — something keeps snagging', value: 'friction'},
+                ],
+              },
+              initialValue: 'scattered',
             }),
             defineField({
-              name: 'body',
-              title: 'Body',
+              name: 'title',
+              title: 'Theme',
+              type: 'string',
+              description:
+                'A short summary of one theme from the call. Not the quote, and not the client’s name.',
+              validation: (rule) => rule.required().max(48).error('Name the theme in a few words'),
+            }),
+            defineField({
+              name: 'quote',
+              title: 'Quote',
               type: 'text',
-              rows: 4,
-              description: 'Their problem, in their words.',
-              validation: (rule) => rule.required().error('Write what they told you'),
+              rows: 3,
+              description:
+                'A line they said on the call, or the closest true sentence from the notes. The page adds the quotation marks. One sentence.',
+              validation: (rule) =>
+                rule
+                  .required()
+                  .max(140)
+                  .warning('One sentence fits the card. Two becomes a paragraph.'),
             }),
           ],
-          preview: {select: {title: 'title', subtitle: 'body'}},
+          preview: {select: {title: 'title', subtitle: 'quote'}},
         }),
       ],
       validation: (rule) =>
-        rule.max(4).warning('Two to four cards is enough. More than that becomes a document.'),
+        rule
+          .min(2)
+          .max(4)
+          .warning('Three cards is the sweet spot. Two is the floor and four is the ceiling.'),
     }),
   ],
   preview: {
-    select: {enabled: 'enabled'},
-    prepare({enabled}) {
-      return {title: 'The situation', subtitle: enabled === false ? 'Hidden' : 'Shown'}
+    select: {enabled: 'enabled', problem: 'problemLine', cards: 'cards'},
+    prepare({enabled, problem, cards}) {
+      const count = Array.isArray(cards) ? cards.length : 0
+      const detail = count === 1 ? '1 card' : `${count} cards`
+      return {
+        title: 'The situation',
+        subtitle: enabled === false ? 'Hidden' : [problem, detail].filter(Boolean).join(' · '),
+      }
     },
   },
 })
@@ -152,16 +189,18 @@ export const proposalOutcomesSection = defineType({
     shownField(),
     defineField({
       name: 'heading',
-      title: 'Heading',
+      title: 'Goal',
       type: 'string',
-      initialValue: 'What changes',
-      description: 'Heading above the three result cards.',
+      description:
+        'One line. The outcome we are delivering, in their words. This is the large type.',
+      validation: (rule) => rule.required().error('Write the goal in one line'),
     }),
     defineField({
       name: 'cards',
-      title: 'Result cards',
+      title: 'Deliverables',
       type: 'array',
-      description: 'Three results. Use a real number only when you have a source for it.',
+      description:
+        'The pieces of that goal. Three is the usual set. Add another only when it is a real deliverable. No invented metrics.',
       of: [
         defineArrayMember({
           type: 'object',
@@ -169,30 +208,35 @@ export const proposalOutcomesSection = defineType({
           fields: [
             defineField({
               name: 'title',
-              title: 'Result',
+              title: 'Deliverable',
               type: 'string',
-              description: 'The change, in a few words.',
-              validation: (rule) => rule.required().error('Name the result'),
+              description: 'The piece, in a few words. This is also the pill under the goal.',
+              validation: (rule) => rule.required().error('Name the deliverable'),
             }),
             defineField({
               name: 'body',
               title: 'Detail',
               type: 'text',
               rows: 3,
-              description: 'What that change means for them. No invented metrics.',
-              validation: (rule) => rule.required().error('Explain the result'),
+              description: 'What that piece does for them.',
+              validation: (rule) => rule.required().error('Explain the deliverable'),
             }),
           ],
-          preview: {select: {title: 'title'}},
+          preview: {select: {title: 'title', subtitle: 'body'}},
         }),
       ],
-      validation: (rule) => rule.max(3).error('Keep this to three results'),
+      validation: (rule) => rule.min(1).max(6).error('Use one to six deliverables'),
     }),
   ],
   preview: {
-    select: {enabled: 'enabled'},
-    prepare({enabled}) {
-      return {title: 'The outcome', subtitle: enabled === false ? 'Hidden' : 'Shown'}
+    select: {enabled: 'enabled', heading: 'heading', cards: 'cards'},
+    prepare({enabled, heading, cards}) {
+      const count = Array.isArray(cards) ? cards.length : 0
+      const detail = count === 1 ? '1 deliverable' : `${count} deliverables`
+      return {
+        title: 'The outcome',
+        subtitle: enabled === false ? 'Hidden' : [heading, detail].filter(Boolean).join(' · '),
+      }
     },
   },
 })
@@ -215,15 +259,18 @@ export const proposalPhasesSection = defineType({
       title: 'Phases',
       type: 'array',
       description:
-        'The timeline the client reads. The signed scope uses the phases on the selected package, so keep these in step.',
+        'The page timeline, in order. Add a phase for each stretch of the work. The signed scope uses the phases on the selected package, so keep these in step.',
       of: [defineArrayMember({type: 'proposalPhaseItem'})],
-      validation: (rule) => rule.max(6).warning('Three to five phases usually reads clearer'),
+      validation: (rule) =>
+        rule.min(1).warning('Add the phases. The timeline grows with this list.'),
     }),
   ],
   preview: {
-    select: {enabled: 'enabled'},
-    prepare({enabled}) {
-      return {title: 'Approach', subtitle: enabled === false ? 'Hidden' : 'Shown'}
+    select: {enabled: 'enabled', phases: 'phases'},
+    prepare({enabled, phases}) {
+      const count = Array.isArray(phases) ? phases.length : 0
+      const detail = count === 1 ? '1 phase' : `${count} phases`
+      return {title: 'Approach', subtitle: enabled === false ? 'Hidden' : detail}
     },
   },
 })

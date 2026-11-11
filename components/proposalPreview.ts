@@ -4,7 +4,37 @@ import type {ProposalByTokenQueryResult} from '@/sanity.types'
  * In-memory sample for local design at /p/preview.
  * It is not written to Sanity.
  */
-export function previewProposal(): NonNullable<ProposalByTokenQueryResult> {
+const SITUATION_CARDS = [
+  {
+    _key: 'sit1',
+    icon: 'scattered',
+    title: 'Three places for one fact',
+    quote: 'Service times live on a PDF, in a Facebook post, and in the Friday email.',
+  },
+  {
+    _key: 'sit2',
+    icon: 'waiting',
+    title: 'Updates wait on someone else',
+    quote: 'Updating a page means emailing someone outside the parish and waiting.',
+  },
+  {
+    _key: 'sit3',
+    icon: 'arrival',
+    title: 'A first Sunday stalls',
+    quote: 'They can find the address. They cannot tell what Sunday feels like.',
+  },
+  {
+    _key: 'sit4',
+    icon: 'calling',
+    title: 'They still call the office',
+    quote: 'If the times are not on the site, someone phones and a person has to answer.',
+  },
+]
+
+/** Preview only. 2 or 4 swap the sample card count. Anything else stays at 3. */
+export function previewProposal(cardCount?: number): NonNullable<ProposalByTokenQueryResult> {
+  const count = cardCount === 2 || cardCount === 4 ? cardCount : 3
+  const situationCards = SITUATION_CARDS.slice(0, count)
   return {
     _id: 'preview',
     status: 'draft',
@@ -214,30 +244,14 @@ export function previewProposal(): NonNullable<ProposalByTokenQueryResult> {
         _key: 'sec-situation',
         _type: 'proposalSituationSection',
         enabled: true,
-        heading: 'The situation',
-        cards: [
-          {
-            _key: 'sit1',
-            title: 'Three places for one answer',
-            body: 'Service times live on a PDF, in a Facebook post, and in the Friday email. Visitors still call the office to ask.',
-          },
-          {
-            _key: 'sit2',
-            title: 'The site is stuck',
-            body: 'Updating a page means emailing someone outside the parish and waiting. Events go up late, or not at all.',
-          },
-          {
-            _key: 'sit3',
-            title: 'First visits stall',
-            body: 'A new person can find the address. They cannot tell what Sunday feels like, or what to do when they arrive.',
-          },
-        ],
+        problemLine: 'One answer lives in three places.',
+        cards: situationCards,
       },
       {
         _key: 'sec-outcomes',
         _type: 'proposalOutcomesSection',
         enabled: true,
-        heading: 'What changes',
+        heading: 'A site the office can publish.',
         cards: [
           {
             _key: 'out1',

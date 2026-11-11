@@ -1,5 +1,6 @@
 'use client'
 
+import {ProposalSwirlField} from '@/components/ProposalOutcomes'
 import Image from 'next/image'
 import {useEffect, useLayoutEffect, useRef} from 'react'
 
@@ -73,7 +74,7 @@ export function ProposalCoverFrame({
       const x = (event.clientX - rect.left) / rect.width - 0.5
       const y = (event.clientY - rect.top) / rect.height - 0.5
       hovering = true
-      apply(-y * 3.5, x * 4)
+      apply(-y * 1.6, x * 1.8)
     }
 
     const onLeave = () => {
@@ -99,7 +100,7 @@ export function ProposalCoverFrame({
   return (
     <div
       ref={frame}
-      className={`relative z-0 mx-auto aspect-[4/5] w-full max-h-[74vh] max-w-6xl origin-center overflow-hidden rounded-[16px] border-0 shadow-none transition-transform duration-300 ease-out will-change-transform md:aspect-[3/2] md:max-h-[56vh] lg:aspect-[2/1] lg:max-h-[70vh] ${src ? 'bg-paper' : 'proposal-cover-field'}`}
+      className={`relative z-0 mx-auto h-[66vh] max-h-[66vh] w-full max-w-6xl origin-center overflow-hidden rounded-[16px] border-0 shadow-none transition-transform duration-300 ease-out will-change-transform md:h-[64vh] md:max-h-[64vh] lg:aspect-[2/1] lg:h-auto lg:max-h-[70vh] ${src ? 'bg-paper' : ''}`}
     >
       {src ? (
         <Image
@@ -109,9 +110,12 @@ export function ProposalCoverFrame({
           height={1400}
           className="h-full w-full object-cover"
         />
-      ) : caption ? (
-        <p className="absolute inset-x-0 bottom-0 z-[1] px-4 pb-4 text-paper md:px-5 md:pb-5 lg:px-12 lg:pb-10">
-          <span className="block text-balance text-[1.5rem] font-[560] leading-[1.1] tracking-[var(--tracking-display)] md:max-w-md md:text-[2rem] md:leading-[1.05] lg:max-w-xl lg:text-[clamp(2rem,4vw,3.75rem)] lg:leading-[0.95]">
+      ) : (
+        <ProposalSwirlField pace="slow" />
+      )}
+      {!src && caption ? (
+        <p className="absolute inset-x-0 bottom-0 z-[1] px-4 pb-4 text-foreground md:px-5 md:pb-5 lg:px-12 lg:pb-10">
+          <span className="block text-balance text-[clamp(1.75rem,6vw,2.25rem)] font-[560] leading-[1.05] tracking-[var(--tracking-display)] md:max-w-md md:text-[2.35rem] lg:max-w-xl lg:text-[clamp(2rem,4vw,3.75rem)] lg:leading-[0.95]">
             {caption}
           </span>
         </p>

@@ -5086,7 +5086,7 @@
           },
           "optional": true
         },
-        "heading": {
+        "problemLine": {
           "type": "objectAttribute",
           "value": {
             "type": "string"
@@ -5100,6 +5100,47 @@
             "of": {
               "type": "object",
               "attributes": {
+                "icon": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "union",
+                    "of": [
+                      {
+                        "type": "string",
+                        "value": "scattered"
+                      },
+                      {
+                        "type": "string",
+                        "value": "waiting"
+                      },
+                      {
+                        "type": "string",
+                        "value": "arrival"
+                      },
+                      {
+                        "type": "string",
+                        "value": "missing"
+                      },
+                      {
+                        "type": "string",
+                        "value": "calling"
+                      },
+                      {
+                        "type": "string",
+                        "value": "document"
+                      },
+                      {
+                        "type": "string",
+                        "value": "people"
+                      },
+                      {
+                        "type": "string",
+                        "value": "friction"
+                      }
+                    ]
+                  },
+                  "optional": true
+                },
                 "title": {
                   "type": "objectAttribute",
                   "value": {
@@ -5107,7 +5148,7 @@
                   },
                   "optional": true
                 },
-                "body": {
+                "quote": {
                   "type": "objectAttribute",
                   "value": {
                     "type": "string"

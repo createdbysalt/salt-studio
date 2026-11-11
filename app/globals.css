@@ -238,9 +238,21 @@
   }
 }
 
+/* Cover ground. Flat site white under the animated dot field. */
+.proposal-cover-ground {
+  background-color: #ffffff;
+  background-image: none;
+}
+
+.proposal-cover-dots-fallback {
+  background-image: radial-gradient(circle, rgba(140, 140, 140, 0.22) 0.7px, transparent 1.05px);
+  background-size: 12px 12px;
+}
+
 /* Empty proposal cover. Called only from ProposalCoverFrame when src is absent.
    No other class paints a drifting field. Reads no data.
-   Cool stone light into blue-black. The accent red is not used here. */
+   A still of the outcome shader: sky on the left, gold on the right.
+   The drift is slow. The accent red is not used here. */
 @keyframes proposal-cover-drift {
   0% {
     background-position:
@@ -260,14 +272,12 @@
   border: 0;
   outline: none;
   box-shadow: none;
-  background-color: #d7e1ec;
+  background-color: #a9c4ef;
   background-image: linear-gradient(
-    180deg,
-    transparent 8%,
-    rgba(90, 120, 158, 0.08) 34%,
-    rgba(46, 68, 96, 0.28) 58%,
-    rgba(22, 34, 50, 0.72) 82%,
-    rgba(16, 24, 32, 0.88) 100%
+    100deg,
+    rgba(126, 168, 234, 0.2) 0%,
+    rgba(126, 168, 234, 0) 42%,
+    rgba(228, 186, 120, 0.15) 100%
   );
 }
 
@@ -282,22 +292,22 @@
   inset: -24%;
   background-image:
     radial-gradient(
-      100% 80% at 30% -8%,
-      rgba(86, 126, 178, 0.5) 0%,
-      rgba(86, 126, 178, 0.22) 32%,
-      rgba(70, 100, 140, 0.08) 58%,
-      transparent 78%
+      90% 120% at -10% 50%,
+      rgba(126, 168, 234, 0.95) 0%,
+      rgba(150, 186, 236, 0.55) 42%,
+      transparent 72%
     ),
     radial-gradient(
-      150% 110% at 70% 120%,
-      rgba(16, 28, 42, 0.55) 0%,
-      rgba(40, 64, 96, 0.28) 36%,
-      rgba(86, 120, 164, 0.1) 62%,
-      transparent 84%
-    );
+      80% 110% at 110% 20%,
+      rgba(232, 186, 112, 0.95) 0%,
+      rgba(228, 196, 150, 0.45) 40%,
+      transparent 70%
+    ),
+    radial-gradient(70% 80% at 80% 110%, rgba(210, 168, 130, 0.55) 0%, transparent 68%);
   background-repeat: no-repeat;
   background-size:
     160% 160%,
+    140% 140%,
     170% 170%;
   filter: blur(40px);
   animation: proposal-cover-drift 8s ease-in-out infinite alternate;
@@ -308,6 +318,25 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2.4' intercept='-0.7'/%3E%3CfeFuncG type='linear' slope='2.4' intercept='-0.7'/%3E%3CfeFuncB type='linear' slope='2.4' intercept='-0.7'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
   opacity: 0.55;
+  mix-blend-mode: overlay;
+}
+
+/* Still of the live shader, shown until the canvas is ready and when motion
+   is reduced. Same sky and gold. The earlier sunrise radials are gone. */
+.proposal-outcome-field {
+  background-color: #c5d8f2;
+  background-image: linear-gradient(
+    105deg,
+    rgba(126, 168, 234, 0.85) 0%,
+    rgba(186, 206, 232, 0.35) 46%,
+    rgba(232, 196, 140, 0.9) 100%
+  );
+}
+
+.proposal-outcome-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='linear' slope='2.4' intercept='-0.7'/%3E%3CfeFuncG type='linear' slope='2.4' intercept='-0.7'/%3E%3CfeFuncB type='linear' slope='2.4' intercept='-0.7'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  opacity: 0.4;
   mix-blend-mode: overlay;
 }
 

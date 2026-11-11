@@ -947,7 +947,10 @@ export const proposalByTokenQuery = defineQuery(`
         preparedBy,
         coverImage{ asset, alt, hotspot, crop }
       },
-      _type == "proposalSituationSection" => { heading, cards[]{ _key, title, body } },
+      _type == "proposalSituationSection" => {
+        problemLine,
+        cards[]{ _key, icon, title, quote }
+      },
       _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },
       _type == "proposalPhasesSection" => { heading, phases[]{ _key, name, summary, weeks } },
       _type == "proposalProofSection" => {
