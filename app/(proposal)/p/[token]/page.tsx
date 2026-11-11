@@ -1,0 +1,51 @@
+import {ProposalPage, resolveProposalSelection} from '@/components/ProposalPage'
+import {previewProposal} from '@/components/proposalPreview'
+import {sanityFetch} from '@/sanity/lib/live'
+import {proposalByTokenQuery} from '@/sanity/lib/queries'
+import type {Metadata} from 'next'
+import {notFound} from 'next/navigation'
+
+type Props = {
+  params: Promise<{token: string}>
+  searchParams: Promise<{
+    package?: string | string[]
+    addon?: string | string[]
+    kickoff?: string | string[]
+  }>
+}
+
+async function loadProposal(token: string) {
+  const {data} = await sanityFetch({
+    query: proposalByTokenQuery,
+    params: {key: token},
+    stega: false,
+  })
+  if (data?._id) return data
+  if (process.env.NODE_ENV === 'development' && token === 'preview') return previewProposal()
+  return null
+}
+
+export async function generateMetadata({params}: Props): Promise<Metadata> {
+  const {token} = await params
+  const proposal = await loadProposal(token)
+  const name = proposal?.clientDisplayName?.trim()
+
+  return {
+    title: name ? `Proposal for ${name}` : 'Proposal',
+    robots: {index: false, follow: false},
+  }
+}
+
+export default async function ProposalRoute({params, searchParams}: Props) {
+  const {token} = await params
+  const proposal = await loadProposal(token)
+  if (!proposal?._id) notFound()
+
+  return (
+    <ProposalPage
+      token={token}
+      proposal={proposal}
+      selection={resolveProposalSelection(proposal, await searchParams)}
+    />
+  )
+}

@@ -22,11 +22,16 @@ import client from '@/sanity/schemas/documents/client'
 import clientPortal from '@/sanity/schemas/documents/clientPortal'
 import legalPage from '@/sanity/schemas/documents/legalPage'
 import page from '@/sanity/schemas/documents/page'
+import paymentSchedule from '@/sanity/schemas/documents/paymentSchedule'
 import person from '@/sanity/schemas/documents/person'
 import portalChecklist from '@/sanity/schemas/documents/portalChecklist'
 import portalForms from '@/sanity/schemas/documents/portalForms'
 import project from '@/sanity/schemas/documents/project'
 import projectPhases from '@/sanity/schemas/documents/projectPhases'
+import proposal from '@/sanity/schemas/documents/proposal'
+import proposalAddOn from '@/sanity/schemas/documents/proposalAddOn'
+import proposalMsa from '@/sanity/schemas/documents/proposalMsa'
+import proposalPackage from '@/sanity/schemas/documents/proposalPackage'
 import quiz from '@/sanity/schemas/documents/quiz'
 import quizSubmission from '@/sanity/schemas/documents/quizSubmission'
 import service from '@/sanity/schemas/documents/service'
@@ -49,6 +54,8 @@ import {
   projectGalleryVideo,
 } from '@/sanity/schemas/objects/projectGallery'
 import projectPhase from '@/sanity/schemas/objects/projectPhase'
+import {proposalContentTypes} from '@/sanity/schemas/objects/proposalContent'
+import {proposalSectionTypes} from '@/sanity/schemas/objects/proposalSections'
 import serviceBlock from '@/sanity/schemas/objects/serviceBlock'
 import testimonials from '@/sanity/schemas/objects/testimonials'
 import timeline from '@/sanity/schemas/objects/timeline'
@@ -166,7 +173,14 @@ export default defineConfig({
       portalForms,
       projectPhases,
       testimonial,
+      proposal,
+      proposalPackage,
+      proposalAddOn,
+      paymentSchedule,
+      proposalMsa,
       // Objects
+      ...proposalContentTypes,
+      ...proposalSectionTypes,
       contactForm,
       portalChecklistItem,
       portalChecklistCategory,

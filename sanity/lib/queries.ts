@@ -890,3 +890,87 @@ export const clientPortalAutomationByIdQuery = defineQuery(`
 export const clientPortalSlugsQuery = defineQuery(`
   *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}
 `)
+
+/**
+ * One proposal, loaded by its unguessable link key.
+ * Dollar amounts stay out of this query. The page sends selected ids
+ * and the server recomputes the total.
+ */
+export const proposalByTokenQuery = defineQuery(`
+  *[_type == "proposal" && token == $key][0]{
+    _id,
+    status,
+    clientDisplayName,
+    clientLegalName,
+    signerName,
+    signerEmail,
+    clientLogo{ asset, alt, hotspot, crop },
+    validUntil,
+    kickoffOptions[]{ _key, label, date },
+    sameDayOffer{ enabled, bonusTitle, bonusDetail, deadline },
+    packages[]->{
+      _id,
+      name,
+      summary,
+      includedItems,
+      deliverables[]{ _key, name, description, phase, acceptanceCriteria },
+      outOfScope[]{ _key, text },
+      phases[]{ _key, name, summary, weeks }
+    },
+    "recommendedPackageId": recommendedPackage._ref,
+    addOns[]->{
+      _id,
+      name,
+      line,
+      deliverables[]{ _key, name, description, phase, acceptanceCriteria },
+      outOfScope[]{ _key, text }
+    },
+    paymentSchedule->{
+      _id,
+      name,
+      steps[]{ _key, percent, trigger }
+    },
+    msa->{
+      _id,
+      version,
+      effectiveDate,
+      "pdfUrl": pdf.asset->url
+    },
+    sections[]{
+      _key,
+      _type,
+      enabled,
+      _type == "proposalCoverSection" => {
+        outcomeHeadline,
+        headlineEmphasis,
+        effectPhrase,
+        preparedBy,
+        coverImage{ asset, alt, hotspot, crop }
+      },
+      _type == "proposalSituationSection" => { heading, cards[]{ _key, title, body } },
+      _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },
+      _type == "proposalPhasesSection" => { heading, phases[]{ _key, name, summary, weeks } },
+      _type == "proposalProofSection" => {
+        heading,
+        projects[]->{ _id, title, "slug": slug.current, year, coverImage },
+        testimonials[]->{ _id, quote, author, role }
+      },
+      _type == "proposalPackagesSection" => { heading, intro },
+      _type == "proposalAddOnsSection" => { heading, intro },
+      _type == "proposalOfferSection" => { heading },
+      _type == "proposalInvestmentSection" => { heading },
+      _type == "proposalSowSection" => {
+        overview,
+        clientResponsibilities,
+        assumptions,
+        acceptanceProcess,
+        ownership,
+        postLaunch
+      },
+      _type == "proposalScheduleSection" => { heading, excludedNote },
+      _type == "proposalTermsSection" => { validityNote, changeOrderRule },
+      _type == "proposalAcceptSection" => { prompt, checkboxLabel },
+      _type == "proposalSignedSection" => { heading, nextSteps }
+    }
+  }
+`)

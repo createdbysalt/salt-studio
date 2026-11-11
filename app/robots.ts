@@ -33,6 +33,7 @@ export default function robots(): MetadataRoute.Robots {
           '/edit', // Sanity Studio (current mount)
           '/project', // Client project pages
           '/table', // Old client project URLs
+          '/p/', // Private proposals
           '/api/', // API routes
           '/_next/', // Next.js internals
         ],

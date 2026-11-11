@@ -25,6 +25,9 @@ export function PageViewTracker() {
   const lastTrackedUrl = useRef<string>('')
 
   useEffect(() => {
+    // Proposal links carry an unguessable key. Keep that path out of analytics.
+    if (pathname.startsWith('/p/')) return
+
     // Build full URL
     const url = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname
 

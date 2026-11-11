@@ -15,7 +15,7 @@ import {ogImageUrl, seoConfig} from '@/lib/seo'
 import {sanityFetch} from '@/sanity/lib/live'
 import {developerSettingsQuery} from '@/sanity/lib/queries'
 import type {Metadata} from 'next'
-import {Geist, Geist_Mono} from 'next/font/google'
+import {Geist, Geist_Mono, Instrument_Serif} from 'next/font/google'
 import Script from 'next/script'
 import {Suspense} from 'react'
 
@@ -50,6 +50,15 @@ const mono = Geist_Mono({
   display: 'swap',
 })
 
+// Cover headline stress only. The phrase lives in Sanity as headlineEmphasis.
+const emphasis = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: 'italic',
+  variable: '--font-emphasis',
+  display: 'swap',
+})
+
 export default async function RootLayout({children}: {children: React.ReactNode}) {
   // Fetch client's GA4 ID from Sanity (if configured)
   const {data: devSettings} = await sanityFetch({
@@ -58,11 +67,11 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   })
 
   return (
-    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+    <html lang="en" className={`${sans.variable} ${mono.variable} ${emphasis.variable}`}>
       <body className="bg-background text-foreground">
         {/* beforeInteractive still injects into head. Do not nest Script in <head>. */}
         <Script id="salt-intro-boot" strategy="beforeInteractive">
-          {`(function(){try{if(location.pathname!=="/")return;if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;try{sessionStorage.removeItem("salt-intro")}catch(e){}window.__SALT_INTRO__=true;var s=document.createElement("style");s.id="salt-intro-boot-style";s.textContent="html,body{background:#08090a!important}[data-intro-hide]{opacity:0!important;pointer-events:none!important}[data-home-hero] [data-phrase-a],[data-home-hero] [data-phrase-b]{opacity:0!important}";(document.head||document.documentElement).appendChild(s);var d=document.createElement("div");d.id="salt-intro-boot";d.setAttribute("aria-hidden","true");d.style.cssText="position:fixed;inset:0;z-index:199;background:#08090a;pointer-events:none";(document.body||document.documentElement).appendChild(d);}catch(e){}})();`}
+          {`(function(){try{var path=location.pathname;if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;if(path.indexOf("/p/")===0){var cover=document.createElement("div");cover.id="proposal-open-boot";cover.setAttribute("aria-hidden","true");cover.style.cssText="position:fixed;inset:0;z-index:220;background:#08090a;pointer-events:none";(document.body||document.documentElement).appendChild(cover);return;}if(path!=="/")return;try{sessionStorage.removeItem("salt-intro")}catch(e){}window.__SALT_INTRO__=true;var s=document.createElement("style");s.id="salt-intro-boot-style";s.textContent="html,body{background:#08090a!important}[data-intro-hide]{opacity:0!important;pointer-events:none!important}[data-home-hero] [data-phrase-a],[data-home-hero] [data-phrase-b]{opacity:0!important}";(document.head||document.documentElement).appendChild(s);var d=document.createElement("div");d.id="salt-intro-boot";d.setAttribute("aria-hidden","true");d.style.cssText="position:fixed;inset:0;z-index:199;background:#08090a;pointer-events:none";(document.body||document.documentElement).appendChild(d);}catch(e){}})();`}
         </Script>
         <UsercentricsScripts />
         <GoogleTagManagerScript />

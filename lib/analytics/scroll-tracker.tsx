@@ -20,6 +20,8 @@ export function ScrollTracker() {
   const firedMilestones = useRef<Set<ScrollMilestone>>(new Set())
 
   useEffect(() => {
+    if (pathname.startsWith('/p/')) return
+
     // Reset milestones on route change
     firedMilestones.current.clear()
 

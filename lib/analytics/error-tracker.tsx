@@ -21,6 +21,8 @@ export function ErrorTracker() {
   const pathname = usePathname()
 
   useEffect(() => {
+    if (pathname.startsWith('/p/')) return
+
     function handleError(event: ErrorEvent) {
       trackError({
         error_type: 'js_error',
