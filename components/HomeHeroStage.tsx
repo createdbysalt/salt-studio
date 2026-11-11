@@ -6,7 +6,7 @@ import {isIntroBlocking, waitForIntroPhase} from '@/components/motion/intro'
 import {WordSwap, type SwapFace} from '@/components/motion/WordSwap'
 import type {WorkProjectCard} from '@/components/ProjectGrid'
 import {useGSAP} from '@gsap/react'
-import {useEffect, useMemo, useRef, useState} from 'react'
+import {useMemo, useRef, useState} from 'react'
 
 type HomeHeroStageProps = {
   projects: WorkProjectCard[]
@@ -33,16 +33,7 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
   const triggerRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const [autoplay, setAutoplay] = useState(true)
-  const [coarsePointer, setCoarsePointer] = useState(false)
   const scrubPastRef = useRef(false)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(pointer: coarse)')
-    const sync = () => setCoarsePointer(mq.matches)
-    sync()
-    mq.addEventListener('change', sync)
-    return () => mq.removeEventListener('change', sync)
-  }, [])
 
   const roster = useMemo(() => {
     const usable = projects.filter((p) => p._id && (p.coverImage?.asset?._ref || p.videoUrl))
@@ -89,7 +80,7 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
           frozenStartX = null
         },
         onUpdate: (self) => {
-          const past = self.progress > 0.18
+          const past = self.progress > 0.001
           if (past !== scrubPastRef.current) {
             scrubPastRef.current = past
             setAutoplay(!past)
@@ -99,8 +90,10 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
           const t = self.progress
 
           if (t <= 0.001) {
+            const startX = frozenStartX ?? (Number(gsap.getProperty(track, 'x')) || 0)
             frozenStartX = null
-            gsap.set(track, {scale: 1, transformOrigin: '50% 100%'})
+            gsap.killTweensOf(track)
+            gsap.set(track, {x: startX, scale: 1, transformOrigin: '50% 100%'})
             return
           }
 
@@ -160,7 +153,7 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
     <section
       ref={triggerRef}
       data-home-hero
-      className="relative flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden bg-background"
+      className="relative flex h-[100svh] min-h-[100svh] flex-col overflow-hidden bg-background lg:h-[100dvh] lg:min-h-[100dvh]"
     >
       {/* Paper band — TinyWins per-word mask reveal + looping phrase swap */}
       <div className="relative flex min-h-0 flex-1 flex-col px-3 pb-3 pt-[5.75rem] sm:px-4 sm:pb-6 sm:pt-[6.5rem]">
@@ -173,12 +166,12 @@ export function HomeHeroStage({projects, primary, secondary}: HomeHeroStageProps
       <div
         ref={stageRef}
         data-nav-surface="color"
-        className="relative h-[min(38dvh,26rem)] shrink-0 overflow-x-clip sm:h-[min(48dvh,36rem)]"
+        className="relative h-[min(38svh,26rem)] shrink-0 overflow-x-clip sm:h-[min(48svh,36rem)] lg:h-[min(48dvh,36rem)]"
       >
         <HomeProjectSlider
           projects={roster}
           autoplay={autoplay}
-          interactionLock={!autoplay && !coarsePointer}
+          interactionLock={!autoplay}
           bleed
           fillHeight
         />

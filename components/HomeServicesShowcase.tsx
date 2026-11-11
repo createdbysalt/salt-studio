@@ -189,7 +189,7 @@ function TypeBeatBridge({lead, headline}: {lead: string; headline: string}) {
     <div ref={triggerRef} data-ink-dome-trigger className={INK_DOME_TRIGGER_CLASS}>
       <section
         ref={panelRef}
-        className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-3 text-center text-foreground sm:px-4 md:px-12"
+        className="sticky top-0 flex h-[100svh] min-h-[100svh] flex-col items-center justify-center overflow-hidden px-3 text-center text-foreground sm:px-4 md:px-12 lg:h-[100dvh] lg:min-h-[100dvh]"
         style={{backgroundColor: PAPER}}
       >
         {/* Wide dome — rises from below on scrub; oversized so arch corners stay off-screen. */}
@@ -280,14 +280,14 @@ function WhatWeDoBand({
     <section
       id="how-we-can-help"
       data-theme="dark"
-      className="relative flex min-h-[85dvh] scroll-mt-24 flex-col justify-center overflow-hidden bg-background pt-0 pb-4 text-foreground sm:pb-5 md:min-h-[100dvh] md:pb-6"
+      className="relative flex min-h-[85svh] scroll-mt-24 flex-col justify-center overflow-hidden bg-background pt-0 pb-4 text-foreground sm:pb-5 md:min-h-[100svh] md:pb-6 lg:min-h-[100dvh]"
       style={{backgroundColor: INK}}
       onMouseLeave={() => {
         if (!panelOpen && !tapMode) setActive(null)
       }}
     >
       <div
-        className="relative flex min-h-[85dvh] flex-col justify-center md:min-h-[100dvh]"
+        className="relative flex min-h-[85svh] flex-col justify-center md:min-h-[100svh] lg:min-h-[100dvh]"
         style={{backgroundColor: INK}}
       >
         {/* Full-bleed media — each layer already darkened so nothing flashes bright */}
