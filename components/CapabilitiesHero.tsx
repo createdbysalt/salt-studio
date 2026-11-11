@@ -73,7 +73,7 @@ export function CapabilitiesHero({headline}: {headline?: string | null}) {
         ref={panelRef}
         aria-label="Capabilities"
         data-nav-surface="paper"
-        className="sticky top-0 flex h-[100dvh] min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-3 text-center text-foreground sm:px-4 md:px-12"
+        className="sticky top-0 flex h-[100svh] min-h-[100svh] flex-col items-center justify-center overflow-hidden px-3 text-center text-foreground sm:px-4 md:px-12 lg:h-[100dvh] lg:min-h-[100dvh]"
         style={{backgroundColor: PAPER}}
       >
         <div

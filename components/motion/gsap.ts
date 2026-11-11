@@ -27,6 +27,7 @@ if (typeof window !== 'undefined') {
     InertiaPlugin,
     MorphSVGPlugin,
   )
+  ScrollTrigger.config({ignoreMobileResize: true})
 }
 
 export const EASE = {
