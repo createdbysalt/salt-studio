@@ -1,8 +1,8 @@
+import {expireOtherSessions} from '@/lib/payments/sessions'
 import {getStripe, stripeIsLive, stripeWebhookSecret} from '@/lib/payments/stripe'
 import {
   findPaymentBySessionId,
   forgetPaymentEvent,
-  openCheckoutPayments,
   paymentsStoreConfigured,
   recordPaymentEvent,
   updatePayment,
@@ -32,20 +32,6 @@ async function markProposalPaid(proposalId: string) {
   if (!token) return
   const client = createClient({projectId, dataset, apiVersion, token, useCdn: false})
   await client.patch(proposalId).set({status: 'paid'}).commit()
-}
-
-async function closeOtherSessions(stripe: Stripe, proposalId: string, keepId: string) {
-  try {
-    const others = await openCheckoutPayments(proposalId, keepId)
-    for (const row of others) {
-      if (row.stripe_checkout_session_id) {
-        await stripe.checkout.sessions.expire(row.stripe_checkout_session_id).catch(() => undefined)
-      }
-      await updatePayment(row.id, {status: 'expired'}).catch(() => undefined)
-    }
-  } catch (error) {
-    console.error('[stripe webhook] could not close the other open sessions', error)
-  }
 }
 
 /** A quiet note to the studio that someone signed and then walked away. */
@@ -157,7 +143,7 @@ export async function POST(request: Request) {
   // open for this proposal must stop being payable. Two live sessions, say
   // one left on a laptop and one on a phone, could otherwise both be paid.
   if (decision.status === 'paid' || decision.status === 'processing') {
-    await closeOtherSessions(stripe, payment.proposal_id, payment.id)
+    await expireOtherSessions(stripe, payment.proposal_id, payment.id)
   }
 
   if (decision.status === 'paid') {

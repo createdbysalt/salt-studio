@@ -86,7 +86,7 @@ const stickerStar =
 /** The star is too big for a phone, so there it becomes a small badge. */
 function SameDayBadge({percent}: {percent: number}) {
   return (
-    <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#f08a3a] px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] leading-none text-white md:hidden">
+    <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#f08a3a] px-3 py-1.5 font-mono text-[11px] font-medium uppercase leading-none tracking-[0.08em] text-white md:hidden">
       <span aria-hidden="true" className="size-1.5 rounded-full bg-white/90" />
       {percent}% off, sign within 24 hours
     </p>
@@ -134,8 +134,10 @@ export function ProposalPackages({
 
   return (
     <section className="w-full px-[max(3.5rem,var(--spacing-gutter))] pt-40 pb-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:pt-48 lg:pb-32">
-      <header className="flex flex-nowrap items-start justify-between gap-x-4 md:gap-x-6">
-        <div className="min-w-0">
+      {/* The star sits beside this from md up. On a phone it is a badge
+          under the intro instead, so the whole block reads centered. */}
+      <header className="flex flex-nowrap items-start justify-center gap-x-4 md:justify-between md:gap-x-6">
+        <div className="w-full min-w-0 text-center md:w-auto md:text-left">
           <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
             The work
           </p>
@@ -143,7 +145,7 @@ export function ProposalPackages({
             {heading}
           </h2>
           {intro ? (
-            <p className="mt-4 max-w-[22rem] text-[1.05rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
+            <p className="mx-auto mt-4 max-w-[22rem] text-[1.05rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c] md:mx-0">
               {intro}
             </p>
           ) : null}
@@ -152,7 +154,7 @@ export function ProposalPackages({
         {discountPercent != null ? <SameDaySticker percent={discountPercent} /> : null}
       </header>
 
-      <div className="mt-6 grid grid-cols-1 items-stretch gap-3 md:grid-cols-12">
+      <div className="mt-4 grid grid-cols-1 items-stretch gap-3 md:mt-6 md:grid-cols-12">
         {offers.map((pkg, index) => (
           <div key={pkg.id} className={`h-full ${packageSpan(offers, index)}`}>
             <article

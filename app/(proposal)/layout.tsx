@@ -1,6 +1,5 @@
 import '../globals.css'
 import '@/styles/index.css'
-import {ProposalOpen} from '@/components/motion/ProposalOpen'
 import type {Metadata} from 'next'
 
 export const metadata: Metadata = {
@@ -9,10 +8,5 @@ export const metadata: Metadata = {
 }
 
 export default function ProposalLayout({children}: {children: React.ReactNode}) {
-  return (
-    <>
-      <ProposalOpen />
-      {children}
-    </>
-  )
+  return <>{children}</>
 }
