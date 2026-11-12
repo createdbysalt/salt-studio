@@ -3,12 +3,12 @@ import {ProposalCoverDots} from '@/components/ProposalCoverDots'
 import {ProposalCoverFrame} from '@/components/ProposalCoverFrame'
 import {ProposalLockup} from '@/components/ProposalLockup'
 import {ProposalOutcomes, ProposalSwirlField} from '@/components/ProposalOutcomes'
+import {ProposalProof} from '@/components/ProposalProof'
 import {ProposalRail, type ProposalRailItem} from '@/components/ProposalRail'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import type {ProposalByTokenQueryResult} from '@/sanity.types'
 import {urlForImage} from '@/sanity/lib/utils'
 import {stegaClean} from 'next-sanity'
-import Image from 'next/image'
 import Link from 'next/link'
 import type {ReactNode} from 'react'
 
@@ -132,7 +132,7 @@ type ProposalSlide = {
 /**
  * Outcome and approach share one shader. The field is one viewport tall
  * and sticks while those two sections are on screen, then leaves with them.
- * Proof stays on its own paper ground.
+ * Proof is the gray sheet after them.
  */
 function renderProposalSlides(slides: ProposalSlide[]) {
   const nodes: ReactNode[] = []
@@ -173,7 +173,9 @@ function proposalSlide(slide: ProposalSlide) {
           ? 'relative z-10'
           : slide.anchor.id === 'approach'
             ? 'relative z-10'
-            : 'flex min-h-dvh flex-col justify-center'
+            : slide.anchor.id === 'proof'
+              ? 'relative z-10 -mt-10 -mb-10 overflow-hidden rounded-[40px]'
+              : 'flex min-h-dvh flex-col justify-center'
 
   return (
     <div
@@ -218,6 +220,7 @@ function slideField(type: Section['_type']): {className: string; dark: boolean} 
     case 'proposalPhasesSection':
       return {className: 'bg-transparent', dark: false}
     case 'proposalProofSection':
+      return {className: 'bg-[#f3f3f3]', dark: false}
     case 'proposalAddOnsSection':
     case 'proposalScheduleSection':
       return {className: 'bg-paper', dark: false}
@@ -321,7 +324,7 @@ function railAnchor(type: Section['_type']): ProposalRailItem {
     case 'proposalPhasesSection':
       return {id: 'approach', label: 'Approach'}
     case 'proposalProofSection':
-      return {id: 'proof', label: 'Proof'}
+      return {id: 'proof', label: 'Work'}
     case 'proposalPackagesSection':
       return {id: 'packages', label: 'Packages'}
     case 'proposalAddOnsSection':
@@ -360,10 +363,10 @@ function Situation({section}: {section: Extract<Section, {_type: 'proposalSituat
   const columns = cards.length === 3 ? 'md:grid-cols-2 lg:grid-cols-3' : 'md:grid-cols-2'
 
   return (
-    <section className="flex min-h-dvh w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:py-32">
+    <section className="flex min-h-dvh w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-32 md:px-[max(4.5rem,var(--spacing-gutter))] lg:py-40">
       <header>
         <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-          The situation
+          What we heard
         </p>
         {problem ? (
           <h2 className="mt-3 max-w-[9em] text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
@@ -378,7 +381,7 @@ function Situation({section}: {section: Extract<Section, {_type: 'proposalSituat
           return (
             <li
               key={card._key}
-              className="flex h-[350px] flex-col rounded-[20px] bg-[#e6e6e6] px-4 py-5 md:px-5"
+              className="flex h-[300px] flex-col rounded-[20px] bg-[#e6e6e6] px-4 py-5 md:px-5"
             >
               <ProposalSituationIcon name={card.icon} />
               <div className="mt-auto">
@@ -423,69 +426,52 @@ function Phases({section}: {section: Extract<Section, {_type: 'proposalPhasesSec
     .filter((phase) => phase.name)
   if (phases.length === 0) return null
 
-  return <ProposalApproach heading={line(section.heading) || 'How we get there'} phases={phases} />
+  const questions = (section.questions ?? []).flatMap((item) => {
+    const question = line(item.question)
+    const answer = line(item.answer)
+    if (!question || !answer) return []
+    return [{key: item._key, question, answer}]
+  })
+
+  return (
+    <ProposalApproach
+      heading={line(section.heading) || 'How we get there'}
+      intro={line(section.intro)}
+      phases={phases}
+      questionsHeading={line(section.questionsHeading) || 'How this gets built.'}
+      questions={questions}
+    />
+  )
 }
 
 function Proof({section}: {section: Extract<Section, {_type: 'proposalProofSection'}>}) {
-  const projects = (section.projects ?? []).filter((project) => line(project.title))
-  const quotes = (section.testimonials ?? []).filter((quote) => line(quote.quote))
-  if (projects.length === 0 && quotes.length === 0) return null
+  const quote = (section.testimonials ?? []).find((item) => line(item.quote))
+  const projects = (section.projects ?? []).flatMap((item) => {
+    const project = item.project
+    const title = line(project?.title)
+    if (!project || !title) return []
+    const imageUrl = project.coverImage
+      ? urlForImage(project.coverImage)?.width(1600).height(900).url()
+      : undefined
+    return [
+      {
+        key: item._key,
+        title,
+        note: line(item.note),
+        imageUrl,
+        videoUrl: line(project.videoUrl),
+      },
+    ]
+  })
+  if (projects.length === 0 && !quote) return null
 
   return (
-    <SectionBlock heading={line(section.heading) || 'Proof'}>
-      <div className="grid gap-4">
-        {quotes.length > 0 ? (
-          <div className="flex min-h-[28rem] flex-col justify-end overflow-hidden rounded-[16px] bg-ink px-8 py-12 text-paper md:min-h-[36rem] md:px-12 md:py-16">
-            {quotes.map((quote) => (
-              <blockquote key={quote._id}>
-                <p className="max-w-3xl text-[length:var(--text-h3)] leading-[var(--text-h3--line-height)] tracking-[var(--tracking-heading)]">
-                  “{line(quote.quote)}”
-                </p>
-                <footer className="mt-4 font-mono text-[12px] uppercase tracking-[0.08em] text-paper/60">
-                  {[line(quote.author), line(quote.role)].filter(Boolean).join(' · ')}
-                </footer>
-              </blockquote>
-            ))}
-          </div>
-        ) : null}
-        {projects.length > 0 ? (
-          <ul className="grid gap-px bg-border sm:grid-cols-2">
-            {projects.map((project) => {
-              const imageUrl = project.coverImage
-                ? urlForImage(project.coverImage)?.width(1200).height(800).url()
-                : undefined
-              const href = project.slug ? `/projects/${project.slug}` : undefined
-              const body = (
-                <>
-                  {imageUrl ? (
-                    <Image
-                      src={imageUrl}
-                      alt=""
-                      width={1200}
-                      height={800}
-                      className="aspect-[3/2] w-full object-cover"
-                    />
-                  ) : null}
-                  <div className="p-6">
-                    <p className="text-lg">{line(project.title)}</p>
-                    {line(project.year) ? (
-                      <p className="mt-2 font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-                        {line(project.year)}
-                      </p>
-                    ) : null}
-                  </div>
-                </>
-              )
-              return (
-                <li key={project._id} className="bg-background">
-                  {href ? <Link href={href}>{body}</Link> : body}
-                </li>
-              )
-            })}
-          </ul>
-        ) : null}
-      </div>
-    </SectionBlock>
+    <ProposalProof
+      eyebrow="What we make"
+      line="A few projects we're proud of."
+      attribution={[line(quote?.author), line(quote?.role)].filter(Boolean).join(' · ')}
+      projects={projects}
+    />
   )
 }
 

@@ -4886,6 +4886,13 @@
           },
           "optional": true
         },
+        "eyebrow": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        },
         "heading": {
           "type": "objectAttribute",
           "value": {
@@ -4900,16 +4907,39 @@
             "of": {
               "type": "object",
               "attributes": {
-                "_key": {
+                "project": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "inline",
+                    "name": "project.reference"
+                  },
+                  "optional": true
+                },
+                "note": {
                   "type": "objectAttribute",
                   "value": {
                     "type": "string"
+                  },
+                  "optional": true
+                },
+                "_type": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string",
+                    "value": "proposalProofProject"
                   }
                 }
               },
               "rest": {
-                "type": "inline",
-                "name": "project.reference"
+                "type": "object",
+                "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
               }
             }
           },
@@ -4967,6 +4997,13 @@
           },
           "optional": true
         },
+        "intro": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        },
         "phases": {
           "type": "objectAttribute",
           "value": {
@@ -4984,6 +5021,57 @@
               "rest": {
                 "type": "inline",
                 "name": "proposalPhaseItem"
+              }
+            }
+          },
+          "optional": true
+        },
+        "questionsHeading": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "string"
+          },
+          "optional": true
+        },
+        "questions": {
+          "type": "objectAttribute",
+          "value": {
+            "type": "array",
+            "of": {
+              "type": "object",
+              "attributes": {
+                "question": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "answer": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string"
+                  },
+                  "optional": true
+                },
+                "_type": {
+                  "type": "objectAttribute",
+                  "value": {
+                    "type": "string",
+                    "value": "proposalApproachQuestion"
+                  }
+                }
+              },
+              "rest": {
+                "type": "object",
+                "attributes": {
+                  "_key": {
+                    "type": "objectAttribute",
+                    "value": {
+                      "type": "string"
+                    }
+                  }
+                }
               }
             }
           },

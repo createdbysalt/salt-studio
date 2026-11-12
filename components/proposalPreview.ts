@@ -1,4 +1,4 @@
-import type {ProposalByTokenQueryResult} from '@/sanity.types'
+import type {PreviewProofProjectsQueryResult, ProposalByTokenQueryResult} from '@/sanity.types'
 
 /**
  * In-memory sample for local design at /p/preview.
@@ -30,6 +30,45 @@ const SITUATION_CARDS = [
     quote: 'If the times are not on the site, someone phones and a person has to answer.',
   },
 ]
+
+/**
+ * Real projects for the Harbor Parish preview, in order.
+ * The note is written for this client. The picture and the numbers come from the project.
+ */
+export const previewProofPicks = [
+  {
+    slug: 'one-youth-conference',
+    note: 'A conference site the room could use. The schedule lived in one place, and people stopped having to ask.',
+  },
+  {
+    slug: 'mfi-canada',
+    note: 'One person publishes the whole site. Updating a page no longer waits on a team.',
+  },
+  {
+    slug: 'playground',
+    note: 'New work goes up without a developer in the middle.',
+  },
+] as const
+
+export function withPreviewProofProjects(
+  proposal: NonNullable<ProposalByTokenQueryResult>,
+  found: PreviewProofProjectsQueryResult,
+): NonNullable<ProposalByTokenQueryResult> {
+  const bySlug = new Map(found.map((project) => [project.slug, project]))
+  const projects = previewProofPicks.flatMap((pick) => {
+    const project = bySlug.get(pick.slug)
+    if (!project) return []
+    return [{_key: project._id, note: pick.note, project}]
+  })
+  if (projects.length === 0) return proposal
+
+  return {
+    ...proposal,
+    sections: (proposal.sections ?? []).map((section) =>
+      section._type === 'proposalProofSection' ? {...section, projects} : section,
+    ),
+  }
+}
 
 /** Preview only. 2 or 4 swap the sample card count. Anything else stays at 3. */
 export function previewProposal(cardCount?: number): NonNullable<ProposalByTokenQueryResult> {
@@ -275,6 +314,8 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         _type: 'proposalPhasesSection',
         enabled: true,
         heading: 'How we get there',
+        intro:
+          'Three stretches. We learn how the parish works, build the site, and leave the office able to publish it.',
         phases: [
           {
             _key: 'ph1',
@@ -295,21 +336,35 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
             weeks: 'Week 5',
           },
         ],
+        questionsHeading: 'How this gets built.',
+        questions: [
+          {
+            _key: 'aq1',
+            question: 'Next.js and Sanity.',
+            answer:
+              'The pages the office edits live in Sanity. You change a service time or an event in the browser, and the site updates.',
+          },
+          {
+            _key: 'aq2',
+            question: 'The office changes the words.',
+            answer:
+              'The structure of the site stays put. A page builder would hand that structure to a template. This keeps the pages we design, and lets the parish publish them.',
+          },
+          {
+            _key: 'aq3',
+            question: 'One session at launch.',
+            answer: 'After that, publishing a page does not wait on us.',
+          },
+        ],
       },
       {
         _key: 'sec-proof',
         _type: 'proposalProofSection',
         enabled: true,
-        heading: 'Proof',
+        eyebrow: 'What we make',
+        heading: "A few projects we're proud of.",
         projects: [],
-        testimonials: [
-          {
-            _id: 'quote-1',
-            quote: 'We stopped answering the same three questions every Monday.',
-            author: 'Sample quote',
-            role: 'For layout only',
-          },
-        ],
+        testimonials: [],
       },
       {
         _key: 'sec-packages',

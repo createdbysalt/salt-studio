@@ -952,10 +952,34 @@ export const proposalByTokenQuery = defineQuery(`
         cards[]{ _key, icon, title, quote }
       },
       _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },
-      _type == "proposalPhasesSection" => { heading, phases[]{ _key, name, summary, weeks } },
-      _type == "proposalProofSection" => {
+      _type == "proposalPhasesSection" => {
         heading,
-        projects[]->{ _id, title, "slug": slug.current, year, coverImage },
+        intro,
+        phases[]{ _key, name, summary, weeks },
+        questionsHeading,
+        questions[]{ _key, question, answer }
+      },
+      _type == "proposalProofSection" => {
+        eyebrow,
+        heading,
+        projects[]{
+          _key,
+          note,
+          project->{
+            _id,
+            title,
+            "slug": slug.current,
+            year,
+            coverImage,
+            videoUrl,
+            "clientName": client->name,
+            "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{
+              _key,
+              value,
+              label
+            }
+          }
+        },
         testimonials[]->{ _id, quote, author, role }
       },
       _type == "proposalPackagesSection" => { heading, intro },
@@ -974,6 +998,24 @@ export const proposalByTokenQuery = defineQuery(`
       _type == "proposalTermsSection" => { validityNote, changeOrderRule },
       _type == "proposalAcceptSection" => { prompt, checkboxLabel },
       _type == "proposalSignedSection" => { heading, nextSteps }
+    }
+  }
+`)
+
+/** Projects for the local proposal preview. The notes are written in the preview, not here. */
+export const previewProofProjectsQuery = defineQuery(`
+  *[_type == "project" && slug.current in $slugs && hidden != true]{
+    _id,
+    title,
+    "slug": slug.current,
+    year,
+    coverImage,
+    videoUrl,
+    "clientName": client->name,
+    "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{
+      _key,
+      value,
+      label
     }
   }
 `)

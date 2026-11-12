@@ -102,7 +102,7 @@ export const proposalSituationSection = defineType({
       type: 'string',
       initialValue: 'One answer lives in three places.',
       description:
-        'The large title. The problem, in one catchy line. The eyebrow above it always says The situation. This line does not summarise the cards.',
+        'The large title. The problem, in one catchy line. The eyebrow above it always says What we heard. This line does not summarise the cards.',
       validation: (rule) => rule.max(80).warning('A short line holds the screen better'),
     }),
     defineField({
@@ -192,7 +192,7 @@ export const proposalOutcomesSection = defineType({
       title: 'Goal',
       type: 'string',
       description:
-        'One line. The outcome we are delivering, in their words. This is the large type.',
+        'One line. The outcome we are delivering. This is the large type. The eyebrow above it always says How Salt comes in.',
       validation: (rule) => rule.required().error('Write the goal in one line'),
     }),
     defineField({
@@ -252,7 +252,16 @@ export const proposalPhasesSection = defineType({
       title: 'Heading',
       type: 'string',
       initialValue: 'How we get there',
-      description: 'Heading for the timeline.',
+      description: 'The large title above the timeline.',
+    }),
+    defineField({
+      name: 'intro',
+      title: 'Summary',
+      type: 'text',
+      rows: 3,
+      description:
+        'A short paragraph under the title. One or two sentences about how the work is shaped. Leave it empty to show the title alone.',
+      validation: (rule) => rule.max(280).warning('Two sentences fit under the title'),
     }),
     defineField({
       name: 'phases',
@@ -264,12 +273,54 @@ export const proposalPhasesSection = defineType({
       validation: (rule) =>
         rule.min(1).warning('Add the phases. The timeline grows with this list.'),
     }),
+    defineField({
+      name: 'questionsHeading',
+      title: 'Line',
+      type: 'string',
+      initialValue: 'How this gets built.',
+      description:
+        'The large line under the timeline. Say what you are doing and building. The eyebrow above it always says Our approach.',
+    }),
+    defineField({
+      name: 'questions',
+      title: 'Specifics',
+      type: 'array',
+      description:
+        'Specific notes about the build. The stack, what the client edits, what they learn. Each one is a fact, then a short explanation. Add as many as this proposal needs. Leave the list empty to hide the block.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'proposalApproachQuestion',
+          fields: [
+            defineField({
+              name: 'question',
+              title: 'Line',
+              type: 'string',
+              description: 'The line on the closed card. A fact about the work, not a question.',
+              validation: (rule) => rule.required().max(140).error('Write the line'),
+            }),
+            defineField({
+              name: 'answer',
+              title: 'Detail',
+              type: 'text',
+              rows: 4,
+              description:
+                'The text that opens under the line. A few sentences about what you are building.',
+              validation: (rule) =>
+                rule.required().max(500).warning('A few sentences fit the open card.'),
+            }),
+          ],
+          preview: {select: {title: 'question', subtitle: 'answer'}},
+        }),
+      ],
+    }),
   ],
   preview: {
-    select: {enabled: 'enabled', phases: 'phases'},
-    prepare({enabled, phases}) {
+    select: {enabled: 'enabled', phases: 'phases', questions: 'questions'},
+    prepare({enabled, phases, questions}) {
       const count = Array.isArray(phases) ? phases.length : 0
-      const detail = count === 1 ? '1 phase' : `${count} phases`
+      const notes = Array.isArray(questions) ? questions.length : 0
+      const detail = `${count === 1 ? '1 phase' : `${count} phases`} · ${notes === 1 ? '1 note' : `${notes} notes`}`
       return {title: 'Approach', subtitle: enabled === false ? 'Hidden' : detail}
     },
   },
@@ -277,36 +328,77 @@ export const proposalPhasesSection = defineType({
 
 export const proposalProofSection = defineType({
   name: 'proposalProofSection',
-  title: 'Proof',
+  title: 'Work',
   type: 'object',
   fields: [
     shownField(),
     defineField({
-      name: 'heading',
-      title: 'Heading',
+      name: 'eyebrow',
+      title: 'Eyebrow',
       type: 'string',
-      initialValue: 'Proof',
-      description: 'Heading above the work and quotes. Leave the lists empty to hide the content.',
+      initialValue: 'What we make',
+      description: 'Kept on the document. The page always shows What we make above the line.',
+    }),
+    defineField({
+      name: 'heading',
+      title: 'Line',
+      type: 'string',
+      initialValue: "A few projects we're proud of.",
+      description:
+        "Kept on the document. The page always shows A few projects we're proud of. The eyebrow above it always says What we make.",
+      validation: (rule) => rule.max(120).warning('One sentence holds the screen'),
     }),
     defineField({
       name: 'projects',
       title: 'Projects',
       type: 'array',
-      description: 'Case studies already on the site. Optional.',
-      of: [defineArrayMember({type: 'reference', to: [{type: 'project'}]})],
+      description:
+        'Work already on the site. Pick the project, then write why it matters for this client. The card uses that project’s picture and results. Add as many as this proposal needs. Drag to set the order.',
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'proposalProofProject',
+          fields: [
+            defineField({
+              name: 'project',
+              title: 'Project',
+              type: 'reference',
+              to: [{type: 'project'}],
+              description: 'A project already on the site. The card uses its picture and results.',
+              validation: (rule) => rule.required().error('Pick a project'),
+            }),
+            defineField({
+              name: 'note',
+              title: 'Why it matters here',
+              type: 'text',
+              rows: 3,
+              description:
+                'One or two sentences for this client. Say what this project shows them. Do not repeat the case study, and do not invent a number.',
+              validation: (rule) =>
+                rule.required().max(200).warning('Two sentences fit on the card'),
+            }),
+          ],
+          preview: {
+            select: {title: 'project.title', subtitle: 'note', media: 'project.coverImage'},
+          },
+        }),
+      ],
     }),
     defineField({
       name: 'testimonials',
-      title: 'Testimonials',
+      title: 'Quotes',
       type: 'array',
-      description: 'Quotes already in the studio. Optional.',
+      description:
+        'Optional. The first quote’s name and role sit under the line. If Line is empty, that quote is the large sentence.',
       of: [defineArrayMember({type: 'reference', to: [{type: 'testimonial'}]})],
     }),
   ],
   preview: {
-    select: {enabled: 'enabled'},
-    prepare({enabled}) {
-      return {title: 'Proof', subtitle: enabled === false ? 'Hidden' : 'Shown'}
+    select: {enabled: 'enabled', projects: 'projects'},
+    prepare({enabled, projects}) {
+      const count = Array.isArray(projects) ? projects.length : 0
+      const detail = count === 1 ? '1 project' : `${count} projects`
+      return {title: 'Work', subtitle: enabled === false ? 'Hidden' : detail}
     },
   },
 })

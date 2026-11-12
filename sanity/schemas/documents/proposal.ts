@@ -142,7 +142,7 @@ export default defineType({
         },
         {_type: 'proposalOutcomesSection', enabled: true},
         {_type: 'proposalPhasesSection', enabled: true, heading: 'How we get there'},
-        {_type: 'proposalProofSection', enabled: true, heading: 'Proof'},
+        {_type: 'proposalProofSection', enabled: true},
         {_type: 'proposalPackagesSection', enabled: true, heading: 'The engagement'},
         {_type: 'proposalAddOnsSection', enabled: true, heading: 'Add-ons'},
         {_type: 'proposalOfferSection', enabled: true, heading: 'If you sign today'},

@@ -1,7 +1,11 @@
 import {ProposalPage, resolveProposalSelection} from '@/components/ProposalPage'
-import {previewProposal} from '@/components/proposalPreview'
+import {
+  previewProofPicks,
+  previewProposal,
+  withPreviewProofProjects,
+} from '@/components/proposalPreview'
 import {sanityFetch} from '@/sanity/lib/live'
-import {proposalByTokenQuery} from '@/sanity/lib/queries'
+import {previewProofProjectsQuery, proposalByTokenQuery} from '@/sanity/lib/queries'
 import type {Metadata} from 'next'
 import {notFound} from 'next/navigation'
 
@@ -30,7 +34,13 @@ async function loadProposal(token: string, cardCount?: number) {
   })
   if (data?._id) return data
   if (process.env.NODE_ENV === 'development' && token === 'preview') {
-    return previewProposal(cardCount)
+    const preview = previewProposal(cardCount)
+    const {data: projects} = await sanityFetch({
+      query: previewProofProjectsQuery,
+      params: {slugs: previewProofPicks.map((pick) => pick.slug)},
+      stega: false,
+    })
+    return withPreviewProofProjects(preview, projects ?? [])
   }
   return null
 }

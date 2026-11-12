@@ -858,12 +858,14 @@ export type TestimonialReference = {
 export type ProposalProofSection = {
   _type: 'proposalProofSection'
   enabled?: boolean
+  eyebrow?: string
   heading?: string
-  projects?: Array<
-    {
-      _key: string
-    } & ProjectReference
-  >
+  projects?: Array<{
+    project?: ProjectReference
+    note?: string
+    _type: 'proposalProofProject'
+    _key: string
+  }>
   testimonials?: Array<
     {
       _key: string
@@ -875,11 +877,19 @@ export type ProposalPhasesSection = {
   _type: 'proposalPhasesSection'
   enabled?: boolean
   heading?: string
+  intro?: string
   phases?: Array<
     {
       _key: string
     } & ProposalPhaseItem
   >
+  questionsHeading?: string
+  questions?: Array<{
+    question?: string
+    answer?: string
+    _type: 'proposalApproachQuestion'
+    _key: string
+  }>
 }
 
 export type ProposalOutcomesSection = {
@@ -7419,7 +7429,7 @@ export type ClientPortalSlugsQueryResult = Array<{
 
 // Source: sanity/lib/queries.ts
 // Variable: proposalByTokenQuery
-// Query: *[_type == "proposal" && token == $key][0]{    _id,    status,    clientDisplayName,    clientLegalName,    signerName,    signerEmail,    clientLogo{ asset, alt, hotspot, crop },    validUntil,    kickoffOptions[]{ _key, label, date },    sameDayOffer{ enabled, bonusTitle, bonusDetail, deadline },    packages[]->{      _id,      name,      summary,      includedItems,      deliverables[]{ _key, name, description, phase, acceptanceCriteria },      outOfScope[]{ _key, text },      phases[]{ _key, name, summary, weeks }    },    "recommendedPackageId": recommendedPackage._ref,    addOns[]->{      _id,      name,      line,      deliverables[]{ _key, name, description, phase, acceptanceCriteria },      outOfScope[]{ _key, text }    },    paymentSchedule->{      _id,      name,      steps[]{ _key, percent, trigger }    },    msa->{      _id,      version,      effectiveDate,      "pdfUrl": pdf.asset->url    },    sections[]{      _key,      _type,      enabled,      _type == "proposalCoverSection" => {        outcomeHeadline,        headlineEmphasis,        effectPhrase,        preparedBy,        coverImage{ asset, alt, hotspot, crop }      },      _type == "proposalSituationSection" => {        problemLine,        cards[]{ _key, icon, title, quote }      },      _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },      _type == "proposalPhasesSection" => { heading, phases[]{ _key, name, summary, weeks } },      _type == "proposalProofSection" => {        heading,        projects[]->{ _id, title, "slug": slug.current, year, coverImage },        testimonials[]->{ _id, quote, author, role }      },      _type == "proposalPackagesSection" => { heading, intro },      _type == "proposalAddOnsSection" => { heading, intro },      _type == "proposalOfferSection" => { heading },      _type == "proposalInvestmentSection" => { heading },      _type == "proposalSowSection" => {        overview,        clientResponsibilities,        assumptions,        acceptanceProcess,        ownership,        postLaunch      },      _type == "proposalScheduleSection" => { heading, excludedNote },      _type == "proposalTermsSection" => { validityNote, changeOrderRule },      _type == "proposalAcceptSection" => { prompt, checkboxLabel },      _type == "proposalSignedSection" => { heading, nextSteps }    }  }
+// Query: *[_type == "proposal" && token == $key][0]{    _id,    status,    clientDisplayName,    clientLegalName,    signerName,    signerEmail,    clientLogo{ asset, alt, hotspot, crop },    validUntil,    kickoffOptions[]{ _key, label, date },    sameDayOffer{ enabled, bonusTitle, bonusDetail, deadline },    packages[]->{      _id,      name,      summary,      includedItems,      deliverables[]{ _key, name, description, phase, acceptanceCriteria },      outOfScope[]{ _key, text },      phases[]{ _key, name, summary, weeks }    },    "recommendedPackageId": recommendedPackage._ref,    addOns[]->{      _id,      name,      line,      deliverables[]{ _key, name, description, phase, acceptanceCriteria },      outOfScope[]{ _key, text }    },    paymentSchedule->{      _id,      name,      steps[]{ _key, percent, trigger }    },    msa->{      _id,      version,      effectiveDate,      "pdfUrl": pdf.asset->url    },    sections[]{      _key,      _type,      enabled,      _type == "proposalCoverSection" => {        outcomeHeadline,        headlineEmphasis,        effectPhrase,        preparedBy,        coverImage{ asset, alt, hotspot, crop }      },      _type == "proposalSituationSection" => {        problemLine,        cards[]{ _key, icon, title, quote }      },      _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },      _type == "proposalPhasesSection" => {        heading,        intro,        phases[]{ _key, name, summary, weeks },        questionsHeading,        questions[]{ _key, question, answer }      },      _type == "proposalProofSection" => {        eyebrow,        heading,        projects[]{          _key,          note,          project->{            _id,            title,            "slug": slug.current,            year,            coverImage,            videoUrl,            "clientName": client->name,            "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{              _key,              value,              label            }          }        },        testimonials[]->{ _id, quote, author, role }      },      _type == "proposalPackagesSection" => { heading, intro },      _type == "proposalAddOnsSection" => { heading, intro },      _type == "proposalOfferSection" => { heading },      _type == "proposalInvestmentSection" => { heading },      _type == "proposalSowSection" => {        overview,        clientResponsibilities,        assumptions,        acceptanceProcess,        ownership,        postLaunch      },      _type == "proposalScheduleSection" => { heading, excludedNote },      _type == "proposalTermsSection" => { validityNote, changeOrderRule },      _type == "proposalAcceptSection" => { prompt, checkboxLabel },      _type == "proposalSignedSection" => { heading, nextSteps }    }  }
 export type ProposalByTokenQueryResult = {
   _id: string
   status: 'draft' | 'expired' | 'paid' | 'sent' | 'signed' | 'viewed' | null
@@ -7565,30 +7575,49 @@ export type ProposalByTokenQueryResult = {
         _type: 'proposalPhasesSection'
         enabled: boolean | null
         heading: string | null
+        intro: string | null
         phases: Array<{
           _key: string
           name: string | null
           summary: string | null
           weeks: string | null
         }> | null
+        questionsHeading: string | null
+        questions: Array<{
+          _key: string
+          question: string | null
+          answer: string | null
+        }> | null
       }
     | {
         _key: string
         _type: 'proposalProofSection'
         enabled: boolean | null
+        eyebrow: string | null
         heading: string | null
         projects: Array<{
-          _id: string
-          title: string | null
-          slug: string | null
-          year: string | null
-          coverImage: {
-            asset?: SanityImageAssetReference
-            media?: unknown
-            hotspot?: SanityImageHotspot
-            crop?: SanityImageCrop
-            alt?: string
-            _type: 'image'
+          _key: string
+          note: string | null
+          project: {
+            _id: string
+            title: string | null
+            slug: string | null
+            year: string | null
+            coverImage: {
+              asset?: SanityImageAssetReference
+              media?: unknown
+              hotspot?: SanityImageHotspot
+              crop?: SanityImageCrop
+              alt?: string
+              _type: 'image'
+            } | null
+            videoUrl: string | null
+            clientName: string | null
+            stats: Array<{
+              _key: string
+              value: string | null
+              label: string | null
+            }> | null
           } | null
         }> | null
         testimonials: Array<{
@@ -7654,6 +7683,31 @@ export type ProposalByTokenQueryResult = {
   > | null
 } | null
 
+// Source: sanity/lib/queries.ts
+// Variable: previewProofProjectsQuery
+// Query: *[_type == "project" && slug.current in $slugs && hidden != true]{    _id,    title,    "slug": slug.current,    year,    coverImage,    videoUrl,    "clientName": client->name,    "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{      _key,      value,      label    }  }
+export type PreviewProofProjectsQueryResult = Array<{
+  _id: string
+  title: string | null
+  slug: string | null
+  year: string | null
+  coverImage: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  } | null
+  videoUrl: string | null
+  clientName: string | null
+  stats: Array<{
+    _key: string
+    value: string | null
+    label: string | null
+  }> | null
+}>
+
 declare module '@sanity/client' {
   interface SanityQueries {
     '\n  *[_id == "home"][0]{\n    _id,\n    _type,\n    seoTitle,\n    seoDescription,\n    ogImage,\n    speakableSummary,\n    hiddenH1,\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      internalName,\n      _type == "homeHeroSection" => {\n        headline, swapLine, subheadline, ctaLabel, ctaMicrocopy, bookingQuarter,\n        splitPrimaryLeft, splitPrimaryRight, splitSecondaryLeft, splitSecondaryRight\n      },\n      _type == "homeProofSection" => {\n        label,\n        clients[]{ _key, ...@->{ _id, name, website } }\n      },\n      _type == "homeServicesSection" => {\n        label,\n        services[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            headline,\n            shortDescription,\n            priceLine,\n            timelineLine,\n            linkLabel,\n            timeline[]{ _key, label, duration, detail },\n            deliverables[]{ _key, title, detail },\n            plans[]{ _key, name, price, summary, features, highlight },\n            capabilities[]->{ _id, name, kind },\n            idealFor,\n            notAFit,\n            detailEyebrow,\n            detailBody,\n            sceneLine,\n            stepsLabel,\n            steps[]{ _key, lead, text },\n            detailImage{ asset, alt, hotspot, crop },\n            backgroundImage{ asset, alt, hotspot, crop },\n            backgroundVideoUrl,\n            featuredProjects[]->{\n              _id,\n              title,\n              "slug": slug.current,\n              coverImage,\n              "client": client->name,\n              "thought": pt::text(overview),\n              hidden\n            },\n            testimonials[]->{\n              _id,\n              quote,\n              author,\n              role\n            },\n            clients[]->{ _id, name },\n            proofAnchor,\n            nextStep->{\n              _id,\n              subhead,\n              buttonLabel,\n              link,\n              contactSubject\n            },\n            fitCheckLabel,\n            fitCheckHref,\n            routingLine\n          }\n        },\n        cards[]{\n          _key,\n          title,\n          body,\n          priceLine,\n          linkLabel,\n          detailEyebrow,\n          detailBody,\n          detailImage{ asset, alt, hotspot, crop },\n          hoverImage{ asset, alt, hotspot, crop },\n          backgroundVideoUrl,\n        }\n      },\n      _type == "homeWorkSection" => {\n        label,\n        projects[]{\n          _key,\n          ...@->{\n            _id,\n            title,\n            "slug": slug.current,\n            overview,\n            coverImage,\n            videoUrl,\n            year,\n            "client": client->name,\n            featured,\n            hidden\n          }\n        },\n        linkLabel\n      },\n      _type == "homeProductSection" => { headline, body, ctaLabel },\n      _type == "homePhilosophySection" => { line1, line2 },\n      _type == "homeFinalCtaSection" => {\n        headline,\n        body,\n        emailLine,\n        cta->{\n          buttonLabel,\n          link,\n          contactSubject\n        }\n      },\n    },\n  }\n': HomePageQueryResult
@@ -7691,6 +7745,7 @@ declare module '@sanity/client' {
     '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    name,\n    enabled\n  }\n': ClientPortalShellBySlugQueryResult
     '\n  *[_type == "clientPortal" && _id == $projectId][0]{\n    _id,\n    name,\n    enabled,\n    "slug": slug.current,\n    "clientRef": client._ref,\n    "checklistSource": checklistTemplate->{\n      categories[]{\n        items[]{\n          _key,\n          title,\n          link\n        }\n      }\n    },\n    "formsSource": formsTemplate->{\n      items[]{\n        _key,\n        title,\n        link\n      }\n    }\n  }\n': ClientPortalAutomationByIdQueryResult
     '\n  *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}\n': ClientPortalSlugsQueryResult
-    '\n  *[_type == "proposal" && token == $key][0]{\n    _id,\n    status,\n    clientDisplayName,\n    clientLegalName,\n    signerName,\n    signerEmail,\n    clientLogo{ asset, alt, hotspot, crop },\n    validUntil,\n    kickoffOptions[]{ _key, label, date },\n    sameDayOffer{ enabled, bonusTitle, bonusDetail, deadline },\n    packages[]->{\n      _id,\n      name,\n      summary,\n      includedItems,\n      deliverables[]{ _key, name, description, phase, acceptanceCriteria },\n      outOfScope[]{ _key, text },\n      phases[]{ _key, name, summary, weeks }\n    },\n    "recommendedPackageId": recommendedPackage._ref,\n    addOns[]->{\n      _id,\n      name,\n      line,\n      deliverables[]{ _key, name, description, phase, acceptanceCriteria },\n      outOfScope[]{ _key, text }\n    },\n    paymentSchedule->{\n      _id,\n      name,\n      steps[]{ _key, percent, trigger }\n    },\n    msa->{\n      _id,\n      version,\n      effectiveDate,\n      "pdfUrl": pdf.asset->url\n    },\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      _type == "proposalCoverSection" => {\n        outcomeHeadline,\n        headlineEmphasis,\n        effectPhrase,\n        preparedBy,\n        coverImage{ asset, alt, hotspot, crop }\n      },\n      _type == "proposalSituationSection" => {\n        problemLine,\n        cards[]{ _key, icon, title, quote }\n      },\n      _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },\n      _type == "proposalPhasesSection" => { heading, phases[]{ _key, name, summary, weeks } },\n      _type == "proposalProofSection" => {\n        heading,\n        projects[]->{ _id, title, "slug": slug.current, year, coverImage },\n        testimonials[]->{ _id, quote, author, role }\n      },\n      _type == "proposalPackagesSection" => { heading, intro },\n      _type == "proposalAddOnsSection" => { heading, intro },\n      _type == "proposalOfferSection" => { heading },\n      _type == "proposalInvestmentSection" => { heading },\n      _type == "proposalSowSection" => {\n        overview,\n        clientResponsibilities,\n        assumptions,\n        acceptanceProcess,\n        ownership,\n        postLaunch\n      },\n      _type == "proposalScheduleSection" => { heading, excludedNote },\n      _type == "proposalTermsSection" => { validityNote, changeOrderRule },\n      _type == "proposalAcceptSection" => { prompt, checkboxLabel },\n      _type == "proposalSignedSection" => { heading, nextSteps }\n    }\n  }\n': ProposalByTokenQueryResult
+    '\n  *[_type == "proposal" && token == $key][0]{\n    _id,\n    status,\n    clientDisplayName,\n    clientLegalName,\n    signerName,\n    signerEmail,\n    clientLogo{ asset, alt, hotspot, crop },\n    validUntil,\n    kickoffOptions[]{ _key, label, date },\n    sameDayOffer{ enabled, bonusTitle, bonusDetail, deadline },\n    packages[]->{\n      _id,\n      name,\n      summary,\n      includedItems,\n      deliverables[]{ _key, name, description, phase, acceptanceCriteria },\n      outOfScope[]{ _key, text },\n      phases[]{ _key, name, summary, weeks }\n    },\n    "recommendedPackageId": recommendedPackage._ref,\n    addOns[]->{\n      _id,\n      name,\n      line,\n      deliverables[]{ _key, name, description, phase, acceptanceCriteria },\n      outOfScope[]{ _key, text }\n    },\n    paymentSchedule->{\n      _id,\n      name,\n      steps[]{ _key, percent, trigger }\n    },\n    msa->{\n      _id,\n      version,\n      effectiveDate,\n      "pdfUrl": pdf.asset->url\n    },\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      _type == "proposalCoverSection" => {\n        outcomeHeadline,\n        headlineEmphasis,\n        effectPhrase,\n        preparedBy,\n        coverImage{ asset, alt, hotspot, crop }\n      },\n      _type == "proposalSituationSection" => {\n        problemLine,\n        cards[]{ _key, icon, title, quote }\n      },\n      _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },\n      _type == "proposalPhasesSection" => {\n        heading,\n        intro,\n        phases[]{ _key, name, summary, weeks },\n        questionsHeading,\n        questions[]{ _key, question, answer }\n      },\n      _type == "proposalProofSection" => {\n        eyebrow,\n        heading,\n        projects[]{\n          _key,\n          note,\n          project->{\n            _id,\n            title,\n            "slug": slug.current,\n            year,\n            coverImage,\n            videoUrl,\n            "clientName": client->name,\n            "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{\n              _key,\n              value,\n              label\n            }\n          }\n        },\n        testimonials[]->{ _id, quote, author, role }\n      },\n      _type == "proposalPackagesSection" => { heading, intro },\n      _type == "proposalAddOnsSection" => { heading, intro },\n      _type == "proposalOfferSection" => { heading },\n      _type == "proposalInvestmentSection" => { heading },\n      _type == "proposalSowSection" => {\n        overview,\n        clientResponsibilities,\n        assumptions,\n        acceptanceProcess,\n        ownership,\n        postLaunch\n      },\n      _type == "proposalScheduleSection" => { heading, excludedNote },\n      _type == "proposalTermsSection" => { validityNote, changeOrderRule },\n      _type == "proposalAcceptSection" => { prompt, checkboxLabel },\n      _type == "proposalSignedSection" => { heading, nextSteps }\n    }\n  }\n': ProposalByTokenQueryResult
+    '\n  *[_type == "project" && slug.current in $slugs && hidden != true]{\n    _id,\n    title,\n    "slug": slug.current,\n    year,\n    coverImage,\n    videoUrl,\n    "clientName": client->name,\n    "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{\n      _key,\n      value,\n      label\n    }\n  }\n': PreviewProofProjectsQueryResult
   }
 }

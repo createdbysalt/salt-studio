@@ -114,7 +114,7 @@ export function ProposalCoverFrame({
         <ProposalSwirlField pace="slow" />
       )}
       {!src && caption ? (
-        <p className="absolute inset-x-0 bottom-0 z-[1] px-4 pb-4 text-foreground md:px-5 md:pb-5 lg:px-12 lg:pb-10">
+        <p className="absolute inset-x-0 bottom-0 z-[1] px-4 pb-4 text-foreground/80 md:px-5 md:pb-5 lg:px-12 lg:pb-10">
           <span className="block text-balance text-[clamp(1.75rem,6vw,2.25rem)] font-[560] leading-[1.05] tracking-[var(--tracking-display)] md:max-w-md md:text-[2.35rem] lg:max-w-xl lg:text-[clamp(2rem,4vw,3.75rem)] lg:leading-[0.95]">
             {caption}
           </span>
