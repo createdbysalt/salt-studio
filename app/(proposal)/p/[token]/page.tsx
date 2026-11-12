@@ -4,10 +4,24 @@ import {previewProposal} from '@/components/proposalPreview'
 import {latestPaymentForProposal} from '@/lib/proposal/acceptances'
 import {isDevPreview, isProposalUnlocked, loadProposal} from '@/lib/proposal/load'
 import {resolveProposalSelection} from '@/lib/proposal/quote'
-import {sanityFetch} from '@/sanity/lib/live'
+import {sanityFetchLive as sanityFetch} from '@/sanity/lib/live'
 import {footerLegalPagesQuery, proposalGateIdentityQuery, settingsQuery} from '@/sanity/lib/queries'
 import type {Metadata} from 'next'
 import {notFound} from 'next/navigation'
+
+/**
+ * Always render this route per request, never from a cached copy.
+ *
+ * Reading cookies for the password gate already forces that, so this is here
+ * to state the intent rather than to change behaviour.
+ *
+ * It is NOT what makes a published edit show up on refresh. That is the
+ * import above: proposal reads go through `sanityFetchLive`, which does not
+ * cache. The plain `sanityFetch` passes an explicit `next.revalidate` of
+ * `false` in production, and an explicit value on the fetch beats this
+ * export, so setting it here alone changed nothing. See `sanity/lib/live.ts`.
+ */
+export const revalidate = 0
 
 type Props = {
   params: Promise<{token: string}>
