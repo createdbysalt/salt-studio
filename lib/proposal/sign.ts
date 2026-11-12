@@ -91,7 +91,7 @@ export async function prepareSigning(
   if (token === 'preview' && !isDevPreview(token)) {
     return {ok: false, error: 'This proposal is no longer available.'}
   }
-  if (!isDevPreview(token) && !(await isProposalUnlocked(token))) {
+  if (!(await isProposalUnlocked(token))) {
     return {ok: false, error: 'This proposal is locked. Enter the password first.'}
   }
 
