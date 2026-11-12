@@ -60,6 +60,7 @@ export type LatestPayment = PaymentRow & {
     signer_name: string
     signer_email: string
     first_cents: number
+    kickoff_date: string | null
   } | null
 }
 
@@ -94,7 +95,7 @@ function eq(value: string) {
 export async function latestPaymentForProposal(proposalId: string): Promise<LatestPayment | null> {
   if (!paymentsStoreConfigured()) return null
   const rows = await supabaseRequest<LatestPayment[]>(
-    `/rest/v1/proposal_payments?proposal_id=${eq(proposalId)}&select=${PAYMENT_COLUMNS},proposal_acceptances(selection_key,signer_name,signer_email,first_cents)&order=created_at.desc&limit=1`,
+    `/rest/v1/proposal_payments?proposal_id=${eq(proposalId)}&select=${PAYMENT_COLUMNS},proposal_acceptances(selection_key,signer_name,signer_email,first_cents,kickoff_date)&order=created_at.desc&limit=1`,
   )
   return rows[0] ?? null
 }

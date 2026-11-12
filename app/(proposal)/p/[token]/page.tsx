@@ -67,7 +67,9 @@ async function loadPayment(proposalId: string): Promise<ProposalPaymentView | nu
       status: row.status,
       method: row.method,
       amountCents: row.amount_cents,
+      signerName: row.proposal_acceptances?.signer_name ?? null,
       signerEmail: row.proposal_acceptances?.signer_email ?? null,
+      kickoffDate: row.proposal_acceptances?.kickoff_date ?? null,
     }
   } catch (error) {
     console.error('[proposal] could not read the payment state', error)

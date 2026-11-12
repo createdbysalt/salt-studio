@@ -43,7 +43,10 @@ export type ProposalPaymentView = {
   status: PaymentStatus
   method: PaymentMethod
   amountCents: number
+  signerName: string | null
   signerEmail: string | null
+  /** The kickoff date frozen on the acceptance, YYYY-MM-DD. */
+  kickoffDate: string | null
 }
 
 type View = {
@@ -938,9 +941,24 @@ function Signed({
 }) {
   if (!view.accepted) return null
   const steps = (section.nextSteps ?? []).map((step) => line(step)).filter(Boolean)
+  const kickoff = line(section.kickoffUrl) ? `/p/${encodeURIComponent(view.token)}/kickoff` : null
+  const kickoffLabel = line(section.kickoffLabel) || 'Book your kickoff call'
 
   return (
     <SectionBlock heading={line(section.heading) || 'Signed.'}>
+      {kickoff ? (
+        <div className="mb-10 max-w-2xl">
+          <Link
+            href={kickoff}
+            className="btn-solid inline-flex min-h-[48px] items-center justify-center px-6"
+          >
+            {kickoffLabel}
+          </Link>
+          <p className="mt-3 text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
+            Pick a time in the week you chose. Your name and email are already filled in.
+          </p>
+        </div>
+      ) : null}
       {steps.length > 0 ? (
         <ol className="grid max-w-2xl gap-4">
           {steps.map((step, index) => (

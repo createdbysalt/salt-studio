@@ -728,6 +728,21 @@ export const proposalSignedSection = defineType({
       description: 'The first things they should expect after payment.',
       of: [defineArrayMember({type: 'string'})],
     }),
+    defineField({
+      name: 'kickoffUrl',
+      title: 'Kickoff booking link',
+      type: 'url',
+      initialValue: 'https://cal.com/createdbysalt/kickoff?overlayCalendar=true',
+      description:
+        'The Cal.com event embedded on the kickoff page at /p/<key>/kickoff, which the client reaches once the first payment is confirmed. The kickoff date they chose and their name and email are filled in for them.',
+      validation: (rule) => rule.uri({scheme: ['https']}).error('Use an https Cal.com link'),
+    }),
+    defineField({
+      name: 'kickoffLabel',
+      title: 'Kickoff button label',
+      type: 'string',
+      initialValue: 'Book your kickoff call',
+    }),
   ],
   preview: {
     select: {enabled: 'enabled'},

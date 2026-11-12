@@ -488,6 +488,8 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
           'We send the kickoff questions.',
           'Work starts on the date you chose.',
         ],
+        kickoffUrl: 'https://cal.com/createdbysalt/kickoff?overlayCalendar=true',
+        kickoffLabel: 'Book your kickoff call',
       },
     ],
   }

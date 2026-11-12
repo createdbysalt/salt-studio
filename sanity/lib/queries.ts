@@ -1010,7 +1010,7 @@ export const proposalByTokenQuery = defineQuery(`
       _type == "proposalScheduleSection" => { heading, excludedNote },
       _type == "proposalTermsSection" => { validityNote, changeOrderRule },
       _type == "proposalAcceptSection" => { prompt, checkboxLabel },
-      _type == "proposalSignedSection" => { heading, nextSteps }
+      _type == "proposalSignedSection" => { heading, nextSteps, kickoffUrl, kickoffLabel }
     }
   }
 `)
