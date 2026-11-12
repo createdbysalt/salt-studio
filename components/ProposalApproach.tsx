@@ -106,15 +106,34 @@ function PhaseScrub({
    * on screen at once, so the squeeze is in height, not in scroll distance.
    */
   const dense = count >= 5
+  /**
+   * The dense sizes are in vh, not vw.
+   *
+   * Everything here competes for one screen's height: the heading, the intro,
+   * the gap below it and the phases themselves. A short laptop screen is the
+   * hard case, and it is short rather than narrow, so sizing off the width
+   * misses it entirely. In vh the whole block gives way together as the
+   * screen gets shorter, which is what keeps the last phase on screen.
+   */
   const headingSize = dense
-    ? 'text-[clamp(2.5rem,4.4vw,3.75rem)]'
+    ? 'text-[clamp(1.75rem,4.2vh,3.25rem)]'
     : 'text-[clamp(3.25rem,6.4vw,5.75rem)]'
   const phaseNameSize = dense
-    ? 'text-[clamp(1.3rem,1.9vw,1.7rem)]'
+    ? 'text-[clamp(1.15rem,2.3vh,1.6rem)]'
     : 'text-[clamp(1.85rem,3vw,2.75rem)]'
-  // Clamped so one long summary cannot push its card into the next one. A
-  // card's height has to be predictable when the count sets the spacing.
-  const phaseBodySize = dense ? 'line-clamp-2 text-[0.9rem]' : 'text-[1.02rem]'
+  const phaseBodySize = dense ? 'text-[clamp(0.85rem,1.6vh,0.95rem)]' : 'text-[1.02rem]'
+
+  /**
+   * A card gets wider rather than shorter when the phases are tight.
+   *
+   * Clamping the summary to two lines did keep a card inside its spacing, but
+   * it did so by hiding the end of a sentence the client is meant to read.
+   * Nothing on this page should be truncated. There is room to spare either
+   * side of the centre line, so a wider card wraps the same words into fewer
+   * lines and comes out shorter on its own.
+   */
+  const phaseCardWidth = dense ? 'w-[min(24rem,34vw)]' : 'w-[min(18rem,30vw)]'
+  const phaseBodyWidth = dense ? 'max-w-full' : 'max-w-[22em]'
 
   useEffect(() => {
     const root = rootRef.current
@@ -219,7 +238,7 @@ function PhaseScrub({
     >
       <div
         className={`sticky top-0 flex h-dvh flex-col overflow-x-clip px-[max(3.5rem,var(--spacing-gutter))] md:px-[max(4.5rem,var(--spacing-gutter))] ${
-          dense ? 'pb-[3vh] pt-[4rem]' : 'pb-[5vh] pt-[5.5rem]'
+          dense ? 'pb-[4vh] pt-[2.5rem]' : 'pb-[5vh] pt-[5.5rem]'
         }`}
       >
         <p className="text-center font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
@@ -240,7 +259,14 @@ function PhaseScrub({
           </p>
         ) : null}
 
-        <div className={`relative min-h-0 flex-1 ${dense ? 'mt-5' : 'mt-7'}`}>
+        {/* The intro has to breathe before the first phase. This gap comes out
+            of the track, which the cards then share, so it is smaller when
+            there are more phases rather than the same at every count. */}
+        <div
+          className={`relative min-h-0 flex-1 ${
+            dense ? 'mt-[clamp(1.5rem,4.5vh,3.25rem)]' : 'mt-[6.5rem]'
+          }`}
+        >
           <svg
             viewBox={`0 0 ${VIEW.w} ${VIEW.h}`}
             preserveAspectRatio="none"
@@ -288,7 +314,7 @@ function PhaseScrub({
                   className="absolute left-0 top-0 size-5 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-full border border-ink bg-white/85"
                 />
                 <article
-                  className={`absolute top-1/2 w-[min(18rem,30vw)] -translate-y-1/2 ${
+                  className={`absolute top-1/2 -translate-y-1/2 ${phaseCardWidth} ${
                     onRight
                       ? 'left-[calc(100%+1.75rem)] text-left'
                       : 'right-[calc(100%+1.75rem)] text-right'
@@ -305,7 +331,7 @@ function PhaseScrub({
                   </h3>
                   {phase.summary ? (
                     <p
-                      className={`mt-2 max-w-[22em] font-medium leading-snug text-foreground/75 ${phaseBodySize} ${
+                      className={`mt-2 font-medium leading-snug text-foreground/75 ${phaseBodyWidth} ${phaseBodySize} ${
                         onRight ? '' : 'ml-auto'
                       }`}
                     >
@@ -524,7 +550,9 @@ function PhaseList({
           {intro}
         </p>
       ) : null}
-      <div className="relative mt-6">
+      {/* Matches the gap the scrubbed version uses, so the two read the same.
+          Nothing is competing for height here, so it is a plain margin. */}
+      <div className="relative mt-[5.5rem] md:mt-[6.5rem]">
         <div
           ref={trackRef}
           aria-hidden
