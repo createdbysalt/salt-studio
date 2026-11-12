@@ -706,14 +706,15 @@ function Investment({
             </SignCardNote>
           ) : view.payment?.status === 'processing' ? (
             <SignCardNote title="Your payment is on its way.">
-              Bank payments take a few business days to clear. We email{' '}
-              {view.payment.signerEmail || 'you'} the moment it does, with the signed scope and the
-              receipt.
+              Bank payments take a few business days to clear. The signed scope and receipt go to
+              your email the moment it does.
+              <KickoffLink token={view.token} />
             </SignCardNote>
           ) : view.payment?.status === 'pending_wire' ? (
             <SignCardNote title="Wire instructions are on their way.">
-              We send them to {view.payment.signerEmail || 'you'} for{' '}
-              {formatCents(view.payment.amountCents)}. The scope is yours as soon as it lands.
+              They go to your email for {formatCents(view.payment.amountCents)}. The scope is yours
+              as soon as the payment lands.
+              <KickoffLink token={view.token} />
             </SignCardNote>
           ) : quote ? (
             <ProposalSignForm
@@ -730,6 +731,9 @@ function Investment({
             >
               <AgreementLine
                 label="I agree to the Master Services Agreement and this Statement of Work."
+                clientName={line(view.proposal.clientDisplayName)}
+                version={version}
+                pdfUrl={view.proposal.msa?.pdfUrl ?? null}
                 statement={
                   scope ? (
                     <Statement
@@ -760,6 +764,19 @@ function Investment({
         </div>
       ) : null}
     </section>
+  )
+}
+
+function KickoffLink({token}: {token: string}) {
+  return (
+    <span className="mt-6 block">
+      <Link
+        href={`/p/${encodeURIComponent(token)}/kickoff`}
+        className="btn-solid inline-flex min-h-[48px] items-center justify-center px-6"
+      >
+        Book your kickoff call
+      </Link>
+    </span>
   )
 }
 
@@ -811,22 +828,32 @@ function AgreementLine({
   label,
   statement,
   agreement,
+  clientName,
+  version,
+  pdfUrl,
 }: {
   label: string
   statement: ReactNode
   agreement: ReactNode
+  clientName: string
+  version: string
+  pdfUrl: string | null
 }) {
   return (
     <>
       {splitAgreement(label).map((part, index) => {
         if (part.kind === 'text') return <span key={index}>{part.text}</span>
         if (part.kind === 'sow' && !statement) return <span key={index}>{part.text}</span>
+        const title = part.kind === 'msa' ? 'Master Services Agreement' : 'Statement of Work'
+        const note = [clientName, part.kind === 'msa' && version ? `Version ${version}` : '']
+          .filter(Boolean)
+          .join(' · ')
         return (
           <ProposalScopePanel
             key={index}
             appearance="inline"
             label={part.text}
-            title={part.kind === 'msa' ? 'Master Services Agreement' : 'Statement of Work'}
+            title={title}
             dismissLabel={
               part.kind === 'msa'
                 ? 'Dismiss the Master Services Agreement'
@@ -835,6 +862,13 @@ function AgreementLine({
             closeLabel={
               part.kind === 'msa' ? 'Close the Master Services Agreement' : 'Close scope of work'
             }
+            downloadName={
+              part.kind === 'msa'
+                ? 'Salt-Studio-Master-Services-Agreement.pdf'
+                : 'Salt-Studio-Statement-of-Work.pdf'
+            }
+            downloadNote={note || null}
+            pdfUrl={part.kind === 'msa' ? pdfUrl : null}
           >
             {part.kind === 'msa' ? agreement : statement}
           </ProposalScopePanel>

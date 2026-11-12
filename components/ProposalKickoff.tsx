@@ -7,16 +7,24 @@ import {useEffect} from 'react'
 
 const NAMESPACE = 'kickoff'
 
+const THANKS: Record<'paid' | 'processing' | 'wire', string> = {
+  paid: 'Your payment went through. The signed scope and your receipt are on their way to your email.',
+  processing:
+    'Your bank payment is on its way. It takes a few business days to clear, and the signed scope and receipt go to your email once it does.',
+  wire: 'Wire instructions are on their way to your email. The signed scope follows as soon as the payment lands.',
+}
+
 /**
- * The kickoff booking page, on our domain. Cal.com's calendar sits inline
- * with the day they chose and their details already filled in. Everything
- * around it is ours to design.
+ * The page after payment: a thank you, then the kickoff booking on our own
+ * domain. Cal.com's calendar sits inline with their details already filled
+ * in. Everything around it is ours to design.
  */
 export function ProposalKickoff({
   token,
   clientName,
   calLink,
   fallbackHref,
+  paymentState,
   heading,
   intro,
   dateLabel,
@@ -27,6 +35,7 @@ export function ProposalKickoff({
   clientName: string
   calLink: string
   fallbackHref: string
+  paymentState: 'paid' | 'processing' | 'wire'
   heading: string
   intro: string
   dateLabel: string | null
@@ -72,10 +81,10 @@ export function ProposalKickoff({
             {clientName}
           </p>
           <h1 className="mt-3 text-balance text-[clamp(2.5rem,6vw,4.5rem)] font-medium leading-[1.0] tracking-[-0.04em]">
-            {heading}
+            Thank you so much.
           </h1>
           <p className="mt-4 max-w-[32rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
-            {intro}
+            {THANKS[paymentState]}
           </p>
           {dateLabel ? (
             <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#f3f3f3] px-3 py-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#08090a]">
@@ -85,7 +94,16 @@ export function ProposalKickoff({
           ) : null}
         </header>
 
-        <div className="mt-8 overflow-hidden rounded-[32px] border border-[#08090a]/10 bg-white shadow-[0_30px_80px_rgba(40,30,10,0.08)]">
+        <div className="mt-12 max-w-[40rem] md:mt-16">
+          <h2 className="text-balance text-[clamp(1.75rem,3.6vw,2.5rem)] font-medium leading-[1.05] tracking-[-0.035em]">
+            {heading}
+          </h2>
+          <p className="mt-3 max-w-[32rem] text-[1.05rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
+            {intro}
+          </p>
+        </div>
+
+        <div className="mt-6 overflow-hidden rounded-[32px] border border-[#08090a]/10 bg-white shadow-[0_30px_80px_rgba(40,30,10,0.08)]">
           <Cal
             namespace={NAMESPACE}
             calLink={calLink}

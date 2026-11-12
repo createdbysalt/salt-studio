@@ -1,7 +1,7 @@
 import {ProposalKickoff} from '@/components/ProposalKickoff'
 import {latestPaymentForProposal, type LatestPayment} from '@/lib/proposal/acceptances'
 import {kickoffLink} from '@/lib/proposal/kickoff'
-import {isProposalUnlocked, loadProposal} from '@/lib/proposal/load'
+import {isDevPreview, isProposalUnlocked, loadProposal} from '@/lib/proposal/load'
 import {proposalIsAccepted} from '@/lib/proposal/quote'
 import type {Metadata} from 'next'
 import {stegaClean} from 'next-sanity'
@@ -44,8 +44,22 @@ export default async function ProposalKickoffRoute({params}: Props) {
   } catch (error) {
     console.error('[kickoff] could not read the payment state', error)
   }
-  const paid = proposalIsAccepted(proposal) || payment?.status === 'paid'
-  if (!paid) redirect(`${proposalPath}#investment`)
+  // The development preview is for looking at the page. A real client still
+  // has to pay before this calendar opens. A bank debit that is processing
+  // counts: the signature is recorded and the call should not wait days.
+  const paymentState: 'paid' | 'processing' | 'wire' =
+    payment?.status === 'processing'
+      ? 'processing'
+      : payment?.status === 'pending_wire'
+        ? 'wire'
+        : 'paid'
+  const open =
+    isDevPreview(token) ||
+    proposalIsAccepted(proposal) ||
+    payment?.status === 'paid' ||
+    payment?.status === 'processing' ||
+    payment?.status === 'pending_wire'
+  if (!open) redirect(`${proposalPath}#investment`)
 
   const signed = (proposal.sections ?? []).find(
     (section) => section._type === 'proposalSignedSection' && section.enabled !== false,
@@ -69,6 +83,7 @@ export default async function ProposalKickoffRoute({params}: Props) {
       clientName={clientName}
       calLink={link.calLink}
       fallbackHref={link.href}
+      paymentState={paymentState}
       heading="Let's book the kickoff call."
       intro="Grab the earliest time that works for you, ideally in the next day or two. The sooner we talk, the sooner the work starts."
       dateLabel={dateLabel(acceptance?.kickoff_date ?? proposal.kickoffOptions?.[0]?.date ?? null)}

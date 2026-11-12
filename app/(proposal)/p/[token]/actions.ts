@@ -5,9 +5,11 @@ import {
   hashToken,
   insertAcceptance,
   insertPayment,
+  latestPaymentForProposal,
   paymentsStoreConfigured,
   updatePayment,
   type NewAcceptance,
+  type PaymentStatus,
 } from '@/lib/proposal/acceptances'
 import {
   PROPOSAL_GATE_COOKIE,
@@ -16,8 +18,11 @@ import {
   proposalPasswordsMatch,
   signProposalGate,
 } from '@/lib/proposal/gate'
+import {isDevPreview, isProposalUnlocked} from '@/lib/proposal/load'
 import {formatCents, selectionKey} from '@/lib/proposal/quote'
 import {prepareSigning, type SigningContext} from '@/lib/proposal/sign'
+import {sanityFetch} from '@/sanity/lib/live'
+import {proposalGateIdentityQuery} from '@/sanity/lib/queries'
 import {revalidatePath} from 'next/cache'
 import {cookies, headers} from 'next/headers'
 import {redirect} from 'next/navigation'
@@ -63,6 +68,35 @@ export async function unlockProposal(
   })
 
   redirect(`/p/${encodeURIComponent(token)}${safeSearch(search)}`)
+}
+
+/**
+ * The latest payment status for a proposal, polled by the sign form after
+ * Stripe reports the payment complete. Gate-checked like everything else.
+ * Reads only the slim identity query, not the whole proposal.
+ */
+export async function proposalPaymentStatus(
+  token: string,
+): Promise<{status: PaymentStatus | null}> {
+  if (!(await isProposalUnlocked(token))) return {status: null}
+  let proposalId: string | null = null
+  if (isDevPreview(token)) {
+    proposalId = 'preview'
+  } else {
+    const {data} = await sanityFetch({
+      query: proposalGateIdentityQuery,
+      params: {key: token},
+      stega: false,
+    })
+    proposalId = data?._id ?? null
+  }
+  if (!proposalId) return {status: null}
+  try {
+    const latest = await latestPaymentForProposal(proposalId)
+    return {status: latest?.status ?? null}
+  } catch {
+    return {status: null}
+  }
 }
 
 export type SignActionState =
@@ -193,15 +227,6 @@ async function beginCheckout(token: string, context: SigningContext): Promise<Si
     ui_mode: 'embedded_page',
     redirect_on_completion: 'never',
     customer: customer.id,
-    // Black on white, rounded, to sit inside the proposal. Inter is the
-    // closest Stripe font to Geist.
-    branding_settings: {
-      background_color: '#ffffff',
-      button_color: '#08090a',
-      border_style: 'rounded',
-      font_family: 'inter',
-      display_name: 'Salt Studio',
-    },
     line_items: [
       {
         quantity: 1,
