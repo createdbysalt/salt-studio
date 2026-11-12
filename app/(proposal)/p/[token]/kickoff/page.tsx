@@ -72,7 +72,15 @@ export default async function ProposalKickoffRoute({params, searchParams}: Props
         : payment?.status === 'pending_wire'
           ? ('wire' as const)
           : null
-  const state = fromRow ?? (await checkoutState(sessionId, proposal._id))
+  // Ask Stripe only when the row cannot answer yet: no row at all, or the
+  // row is still open on this very session. A failed or expired row must
+  // never be overridden by a session that merely reached Stripe.
+  const rowCanBeAheadOfUs =
+    !payment ||
+    (payment.status === 'open' &&
+      sessionId != null &&
+      payment.stripe_checkout_session_id === sessionId)
+  const state = fromRow ?? (rowCanBeAheadOfUs ? await checkoutState(sessionId, proposal._id) : null)
   const open = isDevPreview(token) || proposalIsAccepted(proposal) || state != null
   if (!open) redirect(`${proposalPath}#investment`)
   const paymentState = state ?? 'paid'

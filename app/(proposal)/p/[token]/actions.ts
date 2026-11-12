@@ -107,12 +107,23 @@ export type SignActionState =
 
 const NOT_READY = 'Payments are not switched on yet. Write back and we will take it from here.'
 
-/** Where Stripe should send them back to, taken from this request. */
+/**
+ * Where Stripe sends them back to. A Host header is something the caller
+ * controls, so outside development this is the configured site URL and
+ * nothing else. Otherwise a crafted header could point the return at
+ * another domain, carrying the proposal key with it.
+ */
 async function requestOrigin() {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '')
+  if (process.env.NODE_ENV === 'production') {
+    return configured || 'https://www.createdbysalt.com'
+  }
   const list = await headers()
-  const host = list.get('x-forwarded-host') ?? list.get('host') ?? 'www.createdbysalt.com'
-  const proto = list.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https')
-  return `${proto}://${host}`
+  const host = list.get('host')
+  if (!host || !/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host)) {
+    return configured || 'https://www.createdbysalt.com'
+  }
+  return `http://${host}`
 }
 
 async function requestFacts() {
