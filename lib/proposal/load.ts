@@ -19,8 +19,9 @@ export function isDevPreview(token: string) {
   return process.env.NODE_ENV === 'development' && token === 'preview'
 }
 
-/** Studio draft mode skips the password. The preview link uses the same gate. */
+/** Studio draft mode and the development preview skip the password. */
 export async function isProposalUnlocked(token: string) {
+  if (isDevPreview(token)) return true
   if ((await draftMode()).isEnabled) return true
   const cookieStore = await cookies()
   return verifyProposalGate(token, cookieStore.get(PROPOSAL_GATE_COOKIE)?.value)

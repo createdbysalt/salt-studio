@@ -408,7 +408,7 @@ export function ProposalCoverDots() {
         const t = e.target as HTMLElement
         overInteractive =
           t instanceof HTMLElement &&
-          !!t.closest('a, button, input, select, textarea, label, [role=button], form, video')
+          !!t.closest('a, button, input, select, textarea, label, [role=button], video')
         lastInteractiveTs = e.timeStamp
       }
       if (overInteractive) {
