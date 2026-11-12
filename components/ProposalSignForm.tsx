@@ -2,6 +2,7 @@
 
 import {signProposal, type SignActionState} from '@/app/(proposal)/p/[token]/actions'
 import {ProposalPayButton} from '@/components/ProposalPayButton'
+import {addressLooksComplete} from '@/lib/proposal/frozenDocument'
 import type {ProposalSelection} from '@/lib/proposal/quote'
 import {useRouter} from 'next/navigation'
 import {useActionState, useEffect, useState, type ReactNode} from 'react'
@@ -70,7 +71,7 @@ export function ProposalSignForm({
     resume != null ||
     (name.trim().length >= 2 &&
       legalName.trim().length >= 2 &&
-      address.trim().length >= 10 &&
+      addressLooksComplete(address) &&
       email.trim().includes('@') &&
       agreed)
   const leaving = checkoutUrl != null

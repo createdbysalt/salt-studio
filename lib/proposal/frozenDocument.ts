@@ -110,14 +110,31 @@ export function cleanText(value: string | null | undefined) {
   return (value ?? '').trim().replace(/\s+/g, ' ')
 }
 
+/** Three parts is what the form asks for: street, city line, country. */
+export const MIN_ADDRESS_PARTS = 3
+
+/**
+ * Three parts, not four.
+ *
+ * The field's own placeholder asks for street, city line, and country. Typing
+ * exactly that without commas gives three parts, and requiring four refused
+ * it. The client only found out after clicking Pay, because the form checked
+ * nothing but the length, and the message did not say what was missing. On
+ * the signing step that reads as the payment being broken.
+ */
 export function parseFrozenAddress(value: string | null | undefined): FrozenAddress | null {
   const formatted = (value ?? '').trim()
   const lines = formatted
     .split(/\n|,/)
     .map((line) => cleanText(line))
     .filter(Boolean)
-  if (formatted.length > 1000 || lines.length < 4) return null
+  if (formatted.length > 1000 || lines.length < MIN_ADDRESS_PARTS) return null
   return {formatted, lines}
+}
+
+/** The same rule the server applies, so the form can agree with it. */
+export function addressLooksComplete(value: string) {
+  return parseFrozenAddress(value) != null
 }
 
 export function validSignerEmail(value: string | null | undefined) {
