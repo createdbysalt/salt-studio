@@ -12,7 +12,7 @@ import {ProposalSignForm} from '@/components/ProposalSignForm'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import {SiteFooter} from '@/components/SiteFooter'
 import type {PaymentMethod, PaymentStatus} from '@/lib/proposal/acceptances'
-import {INVESTMENT_INTRO, PACKAGES_INTRO} from '@/lib/proposal/copy'
+import {PACKAGES_INTRO, proposalInvestmentIntro} from '@/lib/proposal/copy'
 import {
   discountedAmount,
   formatAmount,
@@ -582,8 +582,8 @@ function Packages({
   return (
     <ProposalPackages
       heading="The investment."
-      // Editable per proposal, with the shared default when it is left empty.
-      intro={line(section.intro) || PACKAGES_INTRO}
+      intro={line(proposalInvestmentIntro(view.proposal.sections))}
+      packageIntro={line(section.intro) || PACKAGES_INTRO}
       packages={packages}
       addOnHeading="Add-ons"
       addOns={addOns}
@@ -652,7 +652,6 @@ function AddOns({
 }
 
 function Investment({
-  section,
   view,
 }: {
   section: Extract<Section, {_type: 'proposalInvestmentSection'}>
@@ -680,11 +679,6 @@ function Investment({
     (item): item is Extract<Section, {_type: 'proposalAcceptSection'}> =>
       item._type === 'proposalAcceptSection' && item.enabled !== false,
   )
-  // Editable per proposal, with the shared default when it is left empty.
-  // The split is deliberately not part of this line: it is printed under the
-  // total, worked out from the package selected, so there is no sentence here
-  // to keep in step when a schedule changes.
-  const lead = line(section.intro) || INVESTMENT_INTRO
   const version = line(view.proposal.msa?.version)
   return (
     <section className="w-full px-[max(3.5rem,var(--spacing-gutter))] pt-16 pb-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:pt-24 lg:pb-32">
@@ -695,11 +689,6 @@ function Investment({
         <h2 className="mx-auto mt-3 max-w-[9em] text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
           We can't wait to work together.
         </h2>
-        {lead ? (
-          <p className="mx-auto mt-4 max-w-[36rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
-            {lead}
-          </p>
-        ) : null}
       </header>
 
       <ProposalChoices

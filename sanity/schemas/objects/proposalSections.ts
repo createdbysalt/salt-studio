@@ -537,7 +537,7 @@ export const proposalOfferSection = defineType({
 
 export const proposalInvestmentSection = defineType({
   name: 'proposalInvestmentSection',
-  title: 'Investment',
+  title: 'Investment intro and Accept & Sign',
   type: 'object',
   fields: [
     shownField(),
@@ -559,22 +559,25 @@ export const proposalInvestmentSection = defineType({
     }),
     defineField({
       name: 'intro',
-      title: 'Line under the heading',
+      title: 'Intro under The investment',
       type: 'text',
       rows: 2,
       initialValue: INVESTMENT_INTRO,
       description:
-        'The sentence under “We can’t wait to work together.” Leave it empty and the page uses the default: “' +
+        'The sentence shown directly under The investment. Leave it empty and the page uses the default: "' +
         INVESTMENT_INTRO +
-        '” Do not restate the payment split here. The share taken today is printed under the total, worked out from the package they pick, so a sentence saying it would go stale the moment a package changes.',
+        '" Do not restate the payment split here. The share taken today is printed under the total, worked out from the package they pick, so a sentence saying it would go stale the moment a package changes.',
       validation: (rule) =>
-        rule.max(200).warning('Keep it to a sentence or two, or it crowds the packages below'),
+        rule.max(200).warning('Keep it to a sentence or two, or it crowds the package cards'),
     }),
   ],
   preview: {
     select: {enabled: 'enabled'},
     prepare({enabled}) {
-      return {title: 'Investment', subtitle: enabled === false ? 'Hidden' : 'Shown'}
+      return {
+        title: 'Investment intro and Accept & Sign',
+        subtitle: enabled === false ? 'Hidden' : 'Shown',
+      }
     },
   },
 })

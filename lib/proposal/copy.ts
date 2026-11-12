@@ -17,3 +17,18 @@ export const PACKAGES_INTRO =
 /** The sentence under "We can't wait to work together." */
 export const INVESTMENT_INTRO =
   'Select a package, then any add-ons. The total and the scope of work update as you go.'
+
+type ProposalSectionIntro = {
+  _type?: string | null
+  intro?: string | null
+}
+
+export function proposalInvestmentIntro(
+  sections: readonly ProposalSectionIntro[] | null | undefined,
+) {
+  const investment = (sections ?? []).find(
+    (section) => section._type === 'proposalInvestmentSection',
+  )
+  const intro = investment?.intro?.trim()
+  return intro || INVESTMENT_INTRO
+}

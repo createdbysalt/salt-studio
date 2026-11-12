@@ -116,6 +116,7 @@ function SameDaySticker({percent}: {percent: number}) {
 export function ProposalPackages({
   heading,
   intro,
+  packageIntro,
   packages,
   addOnHeading,
   addOns,
@@ -123,6 +124,7 @@ export function ProposalPackages({
 }: {
   heading: string
   intro: string
+  packageIntro: string
   packages: ProposalPackageOffer[]
   addOnHeading: string
   addOns: ProposalAddOnOffer[]
@@ -147,6 +149,11 @@ export function ProposalPackages({
           {intro ? (
             <p className="mx-auto mt-4 max-w-[22rem] text-[1.05rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c] md:mx-0">
               {intro}
+            </p>
+          ) : null}
+          {packageIntro ? (
+            <p className="mx-auto mt-3 max-w-[22rem] text-[1.05rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c] md:mx-0">
+              {packageIntro}
             </p>
           ) : null}
           {discountPercent != null ? <SameDayBadge percent={discountPercent} /> : null}
