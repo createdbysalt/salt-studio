@@ -974,41 +974,39 @@ function Signed({
   view: View
 }) {
   if (!view.accepted) return null
-  const steps = (section.nextSteps ?? []).map((step) => line(step)).filter(Boolean)
+  const clientName = line(view.proposal.clientDisplayName)
   const kickoff = line(section.kickoffUrl) ? `/p/${encodeURIComponent(view.token)}/kickoff` : null
   const kickoffLabel = line(section.kickoffLabel) || 'Book your kickoff call'
 
   return (
-    <SectionBlock heading={line(section.heading) || 'Signed.'}>
-      {kickoff ? (
-        <div className="mb-10 max-w-2xl">
-          <Link
-            href={kickoff}
-            className="btn-solid inline-flex min-h-[48px] items-center justify-center px-6"
-          >
-            {kickoffLabel}
-          </Link>
-          <p className="mt-3 text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
-            The sooner the better, ideally in the next day or two. Your name and email are already
-            filled in.
+    <section className="mx-auto w-full max-w-[36rem] px-[1.5rem]">
+      <div className="relative overflow-hidden rounded-[32px] border border-white/70 bg-[rgba(228,228,228,0.62)] px-[2rem] py-[2.25rem] text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_30px_80px_rgba(40,30,10,0.12)] backdrop-blur-[42px]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-[linear-gradient(180deg,rgba(255,255,255,0.5),transparent)]"
+        />
+        <div className="relative grid gap-5">
+          <p className="text-[2.5rem] font-medium leading-[1.05] tracking-[-0.04em]">
+            {clientName ? `${clientName}, thank you so much.` : 'Thank you so much.'}
           </p>
+          <p className="text-[1.15rem] font-medium leading-snug text-[#5c5c5c]">
+            Your payment went through, and the signed scope and your receipt are on their way to
+            your email.
+          </p>
+          {kickoff ? (
+            <>
+              <p className="text-[1.15rem] font-medium leading-snug text-[#5c5c5c]">
+                If you haven't booked the kickoff call yet, grab the earliest time that works for
+                you, ideally in the next day or two.
+              </p>
+              <Link href={kickoff} className="btn-solid w-full justify-center">
+                {kickoffLabel}
+              </Link>
+            </>
+          ) : null}
         </div>
-      ) : null}
-      {steps.length > 0 ? (
-        <ol className="grid max-w-2xl gap-4">
-          {steps.map((step, index) => (
-            <li key={step} className="grid grid-cols-[3rem_minmax(0,1fr)] gap-3 text-lg">
-              <span className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <span>{step}</span>
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <p className="text-lg">The scope is signed. What happens next is on its way.</p>
-      )}
-    </SectionBlock>
+      </div>
+    </section>
   )
 }
 
