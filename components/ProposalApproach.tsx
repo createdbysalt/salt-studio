@@ -95,6 +95,27 @@ function PhaseScrub({
   const path = lineThrough(points)
   const origin = points[0] ?? {x: LINE_X, y: 36}
 
+  /**
+   * Every phase shares one sticky screen, so the room each one gets is the
+   * track height divided by the count. At five phases the cards were taller
+   * than their own spacing and the last one ran to the bottom edge, which is
+   * what read as crowded. Past four, the heading and the cards step down to
+   * give the track more of the screen and each card less of the track.
+   *
+   * Making the section scroll longer would not have helped. The cards are all
+   * on screen at once, so the squeeze is in height, not in scroll distance.
+   */
+  const dense = count >= 5
+  const headingSize = dense
+    ? 'text-[clamp(2.5rem,4.4vw,3.75rem)]'
+    : 'text-[clamp(3.25rem,6.4vw,5.75rem)]'
+  const phaseNameSize = dense
+    ? 'text-[clamp(1.3rem,1.9vw,1.7rem)]'
+    : 'text-[clamp(1.85rem,3vw,2.75rem)]'
+  // Clamped so one long summary cannot push its card into the next one. A
+  // card's height has to be predictable when the count sets the spacing.
+  const phaseBodySize = dense ? 'line-clamp-2 text-[0.9rem]' : 'text-[1.02rem]'
+
   useEffect(() => {
     const root = rootRef.current
     const draw = drawRef.current
@@ -196,20 +217,30 @@ function PhaseScrub({
       className="relative hidden h-auto motion-reduce:!hidden [@media(pointer:coarse)]:!hidden md:block motion-safe:h-[calc(100dvh+(var(--approach-steps)-1)*48dvh)]"
       style={{'--approach-steps': count} as CSSProperties}
     >
-      <div className="sticky top-0 flex h-dvh flex-col overflow-x-clip px-[max(3.5rem,var(--spacing-gutter))] pb-[5vh] pt-[5.5rem] md:px-[max(4.5rem,var(--spacing-gutter))]">
+      <div
+        className={`sticky top-0 flex h-dvh flex-col overflow-x-clip px-[max(3.5rem,var(--spacing-gutter))] md:px-[max(4.5rem,var(--spacing-gutter))] ${
+          dense ? 'pb-[3vh] pt-[4rem]' : 'pb-[5vh] pt-[5.5rem]'
+        }`}
+      >
         <p className="text-center font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
           The timeline
         </p>
-        <h2 className="mx-auto mt-3 max-w-[8em] text-center text-[clamp(3.25rem,6.4vw,5.75rem)] font-normal leading-[0.92] tracking-[-0.05em]">
+        <h2
+          className={`mx-auto mt-3 max-w-[8em] text-center font-normal leading-[0.92] tracking-[-0.05em] ${headingSize}`}
+        >
           {heading}
         </h2>
         {intro ? (
-          <p className="mx-auto mt-3 max-w-[34em] text-center text-[1.05rem] font-medium leading-snug text-foreground/75">
+          <p
+            className={`mx-auto max-w-[34em] text-center font-medium leading-snug text-foreground/75 ${
+              dense ? 'mt-2 text-[0.95rem]' : 'mt-3 text-[1.05rem]'
+            }`}
+          >
             {intro}
           </p>
         ) : null}
 
-        <div className="relative mt-7 min-h-0 flex-1">
+        <div className={`relative min-h-0 flex-1 ${dense ? 'mt-5' : 'mt-7'}`}>
           <svg
             viewBox={`0 0 ${VIEW.w} ${VIEW.h}`}
             preserveAspectRatio="none"
@@ -267,12 +298,14 @@ function PhaseScrub({
                     {String(index + 1).padStart(2, '0')}
                     {phase.weeks ? ` · ${phase.weeks}` : ''}
                   </p>
-                  <h3 className="mt-1 text-[clamp(1.85rem,3vw,2.75rem)] font-medium leading-[0.95] tracking-[-0.04em]">
+                  <h3
+                    className={`mt-1 font-medium leading-[0.95] tracking-[-0.04em] ${phaseNameSize}`}
+                  >
                     {phase.name}
                   </h3>
                   {phase.summary ? (
                     <p
-                      className={`mt-2 max-w-[22em] text-[1.02rem] font-medium leading-snug text-foreground/75 ${
+                      className={`mt-2 max-w-[22em] font-medium leading-snug text-foreground/75 ${phaseBodySize} ${
                         onRight ? '' : 'ml-auto'
                       }`}
                     >

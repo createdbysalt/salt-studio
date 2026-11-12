@@ -449,7 +449,7 @@ function GoalCopy({
         How Salt comes in
       </p>
       {heading ? (
-        <h2 className="mt-3 max-w-[7em] text-[clamp(3.25rem,6.4vw,5.75rem)] font-normal leading-[0.92] tracking-[-0.05em]">
+        <h2 className="mt-3 max-w-[7em] text-[clamp(2.6rem,5.2vw,4.5rem)] font-normal leading-[0.92] tracking-[-0.05em]">
           {heading}
         </h2>
       ) : null}

@@ -22,7 +22,7 @@ import {
 import {isDevPreview, isProposalUnlocked} from '@/lib/proposal/load'
 import {formatCents, selectionKey} from '@/lib/proposal/quote'
 import {prepareSigning, type SigningContext} from '@/lib/proposal/sign'
-import {sanityFetch} from '@/sanity/lib/live'
+import {sanityFetchLive as sanityFetch} from '@/sanity/lib/live'
 import {proposalGateIdentityQuery} from '@/sanity/lib/queries'
 import {revalidatePath} from 'next/cache'
 import {cookies, headers} from 'next/headers'

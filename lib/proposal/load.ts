@@ -5,7 +5,7 @@ import {
   withPreviewProofProjects,
 } from '@/components/proposalPreview'
 import {PROPOSAL_GATE_COOKIE, verifyProposalGate} from '@/lib/proposal/gate'
-import {sanityFetch} from '@/sanity/lib/live'
+import {sanityFetchLive as sanityFetch} from '@/sanity/lib/live'
 import {previewProofProjectsQuery, proposalByTokenQuery} from '@/sanity/lib/queries'
 import {cookies, draftMode} from 'next/headers'
 
