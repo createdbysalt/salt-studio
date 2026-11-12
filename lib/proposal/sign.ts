@@ -32,6 +32,7 @@ import {
 } from '@/lib/proposal/quote'
 import {validateSigningFields} from '@/lib/proposal/signingFields'
 import {stegaClean} from 'next-sanity'
+import {headers} from 'next/headers'
 
 /**
  * Everything the signing actions check before any row is written or any
@@ -107,6 +108,7 @@ function signedSowBlocks(input: {
   acceptedAt: string
   quote: ProposalQuote
   msaVersion: string | null
+  msaPdf?: FrozenMsaPdf | null
   agreedHash: string | null
   ip: string | null
 }) {
@@ -163,11 +165,34 @@ function signedSowBlocks(input: {
       text: `Selected kickoff date: ${input.selection.kickoffDate ?? 'Not selected'}.`,
     },
     {kind: 'part', text: 'Acceptance block'},
+    {
+      kind: 'paragraph',
+      text: `${input.signerLegalName} agreed to the Master Services Agreement and this Statement of Work. Both documents were sent as attachments with the confirmation email and together form the agreement.`,
+    },
     {kind: 'paragraph', text: `Accepted by: ${input.signerName}`},
     {kind: 'paragraph', text: `Email: ${input.signerEmail}`},
     {kind: 'paragraph', text: `Accepted at: ${dateTimeLabel(input.acceptedAt)}`},
     {kind: 'paragraph', text: `IP address: ${input.ip ?? 'Not recorded'}`},
     {kind: 'paragraph', text: `MSA version: ${input.msaVersion ?? 'Not recorded'}`},
+    // Which agreement, provably. Printing the checksum here means the
+    // document the client holds carries its own proof, instead of that
+    // living only in our database where it is no use to them.
+    ...(input.msaPdf?.status === 'frozen'
+      ? [
+          {kind: 'paragraph' as const, text: `Agreement file: ${input.msaPdf.filename}`},
+          {
+            kind: 'paragraph' as const,
+            text: `Agreement checksum (SHA-256): ${input.msaPdf.sha256}`,
+          },
+        ]
+      : input.msaPdf?.status === 'missing'
+        ? [
+            {
+              kind: 'paragraph' as const,
+              text: `Agreement PDF: not captured at signing (${input.msaPdf.reason}). The agreement text of record is MSA version ${input.msaVersion ?? 'not recorded'}.`,
+            },
+          ]
+        : []),
   )
   if (input.agreedHash) blocks.push({kind: 'paragraph', text: `Record hash: ${input.agreedHash}`})
 
@@ -183,6 +208,27 @@ function dateTimeLabel(value: string) {
     timeStyle: 'short',
     timeZone: 'UTC',
   }).format(date)
+}
+
+/** The booking link set on the After signing section, if there is one. */
+function signedKickoffUrl(proposal: ProposalDocument) {
+  const signed = (proposal.sections ?? []).find(
+    (section) => section._type === 'proposalSignedSection',
+  )
+  if (!signed || !('kickoffUrl' in signed)) return null
+  return clean(signed.kickoffUrl) || null
+}
+
+/** The client's address at signing, read the way the acceptance row reads it. */
+async function signerIpAddress() {
+  try {
+    const list = await headers()
+    const forwarded = list.get('x-forwarded-for')
+    if (forwarded) return forwarded.split(',')[0]?.trim() || null
+    return list.get('x-real-ip')
+  } catch {
+    return null
+  }
 }
 
 function money(cents: number) {
@@ -306,6 +352,14 @@ export async function prepareSigning(
   if (!fields.ok) return fields
 
   const acceptedAt = new Date().toISOString()
+  /**
+   * The same address recorded on the acceptance row.
+   *
+   * The document used to print "Not recorded" while the row beside it held
+   * the real value, which is the wrong way round for a signature record:
+   * the copy the client keeps is the one that has to stand on its own.
+   */
+  const signerIp = await signerIpAddress()
   const msaPdf = await freezeMsaPdf(proposal.msa?.pdfUrl, proposal.msa?.pdfFilename)
   const sowBlocks = signedSowBlocks({
     proposal,
@@ -319,8 +373,9 @@ export async function prepareSigning(
     acceptedAt,
     quote,
     msaVersion: clean(proposal.msa?.version) || null,
+    msaPdf,
     agreedHash: null,
-    ip: null,
+    ip: signerIp,
   })
   const agreedDocument = buildFrozenAgreementDocument({
     signerFullName: fields.signerName,
@@ -338,6 +393,7 @@ export async function prepareSigning(
     selection,
     quote,
     contentSha256: contentHash,
+    kickoffUrl: signedKickoffUrl(proposal),
     scheduleName: quote.scheduleName ?? proposal.paymentSchedule?.name ?? null,
     msaId: proposal.msa?._id ?? null,
     msaVersion: clean(proposal.msa?.version) || null,
@@ -359,8 +415,9 @@ export async function prepareSigning(
     acceptedAt,
     quote,
     msaVersion: clean(proposal.msa?.version) || null,
+    msaPdf,
     agreedHash,
-    ip: null,
+    ip: signerIp,
   })
 
   return {

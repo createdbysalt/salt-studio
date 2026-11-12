@@ -17,6 +17,7 @@ import {buildProposalPdf, type PdfBlock} from '@/lib/proposal/documentPdf'
 import {bytesFromBase64, sha256Bytes, type FrozenMsaPdf} from '@/lib/proposal/frozenDocument'
 import {freezeMsaPdf} from '@/lib/proposal/msaPdf'
 import {formatCents} from '@/lib/proposal/quote'
+import {signerEmailHtml, signerEmailText} from '@/lib/proposal/signedEmailTemplate'
 import {client} from '@/sanity/lib/client'
 import {proposalByIdForLegacyAcceptanceQuery} from '@/sanity/lib/queries'
 import {token} from '@/sanity/lib/token'
@@ -217,6 +218,18 @@ function preShipSowBlocks(
   ]
 }
 
+/** "November 12, 2026 at 2:21 PM", the same way the signed document reads. */
+function acceptedAtLabel(value: string | null | undefined) {
+  if (!value) return 'Not recorded'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+  }).format(date)
+}
+
 function signerMessage(input: {
   acceptance: AcceptanceRow
   payment: PaymentRow
@@ -227,34 +240,41 @@ function signerMessage(input: {
   config: EmailConfig
   liveMode: boolean
 }) {
-  const legalName = input.acceptance.signer_legal_name
-  const address = input.acceptance.signer_address?.lines.join(', ')
-  const cover = [
-    legalName ? `Legal name: ${legalName}` : null,
-    address ? `Address: ${address}` : null,
-  ]
-    .filter(Boolean)
-    .join('\n')
-  const text = [
-    `Hi ${input.acceptance.signer_name},`,
-    '',
-    'Your first payment is marked paid. Attached are the signed Statement of Work and the Master Services Agreement PDF frozen at signing.',
-    cover ? `\n${cover}` : '',
-    '',
-    `Stripe receipt: ${input.paymentReceiptUrl}`,
-  ].join('\n')
-  const html = `<p>Hi ${escapeHtml(input.acceptance.signer_name)},</p><p>Your first payment is marked paid. Attached are the signed Statement of Work and the Master Services Agreement PDF frozen at signing.</p>${
-    cover ? `<pre>${escapeHtml(cover)}</pre>` : ''
-  }<p>Stripe receipt: <a href="${escapeHtml(input.paymentReceiptUrl)}">${escapeHtml(
-    input.paymentReceiptUrl,
-  )}</a></p>`
+  const document = input.acceptance.agreed_document
+  const fields = {
+    greetingName:
+      (input.acceptance.signer_name || '').split(' ')[0] || input.acceptance.signer_name,
+    clientLegalName:
+      input.acceptance.signer_legal_name || input.acceptance.client_name || 'your organisation',
+    packageName: input.acceptance.package_name || document?.proposal.packageName || 'Your package',
+    addOnNames: document?.proposal.addonNames ?? [],
+    totalLabel: formatCents(input.acceptance.total_cents),
+    paidLabel: formatCents(input.payment.amount_cents),
+    steps: (input.acceptance.steps ?? []).map((step) => ({
+      percent: step.percent,
+      amount: formatCents(step.amountCents),
+      trigger: step.trigger,
+    })),
+    acceptedAtLabel: acceptedAtLabel(document?.signer.acceptedAt ?? input.acceptance.created_at),
+    signerEmail: input.acceptance.signer_email,
+    signerIp: input.acceptance.ip ?? null,
+    msaVersion: input.acceptance.msa_version ?? null,
+    msaFilename: input.msaPdf.filename,
+    msaSha256: input.msaPdf.sha256,
+    recordHash: input.acceptance.agreed_text_sha256 ?? null,
+    receiptUrl: input.paymentReceiptUrl || null,
+    // Only an https link is offered, so a bad value in the Studio cannot
+    // turn the one button in this email into something else.
+    kickoffUrl: safeKickoffUrl(document?.kickoffUrl),
+    addressLines: input.acceptance.signer_address?.lines ?? [],
+  }
   return {
     from: input.config.from,
     to: input.to,
     replyTo: input.config.replyTo,
     subject: subject('Your signed Salt Studio documents', input.liveMode),
-    text,
-    html,
+    text: signerEmailText(fields),
+    html: signerEmailHtml(fields),
     idempotencyKey: `signed-docs/${input.payment.id}`,
     attachments: signedDocsAttachments(
       input.acceptance,
@@ -263,6 +283,16 @@ function signerMessage(input: {
       input.paymentReceiptUrl,
       input.legacyScopeBlocks,
     ),
+  }
+}
+
+function safeKickoffUrl(value: string | null | undefined) {
+  if (!value) return null
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' ? url.toString() : null
+  } catch {
+    return null
   }
 }
 

@@ -33,6 +33,13 @@ export type FrozenAgreementDocument = {
    * and re-sign, which is the safe direction.
    */
   contentSha256?: string
+  /**
+   * The booking link as it stood at signing, so the email that goes out
+   * after payment can offer the kickoff without re-reading the proposal.
+   * Absent on documents frozen before this existed; the email then simply
+   * leaves the button out.
+   */
+  kickoffUrl?: string | null
   signer: {
     fullName: string
     legalName: string
@@ -160,6 +167,7 @@ export function buildFrozenAgreementDocument(input: {
   selection: ProposalSelection
   quote: ProposalQuote
   contentSha256: string
+  kickoffUrl: string | null
   scheduleName: string | null
   msaId: string | null
   msaVersion: string | null
@@ -171,6 +179,7 @@ export function buildFrozenAgreementDocument(input: {
   return {
     version: 3,
     contentSha256: input.contentSha256,
+    kickoffUrl: input.kickoffUrl,
     signer: {
       fullName: input.signerFullName,
       legalName: input.signerLegalName,
