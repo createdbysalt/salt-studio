@@ -13,14 +13,6 @@ function clean(value: string | null | undefined) {
   return stegaClean(value ?? '').trim()
 }
 
-function dateLabel(date: string | null) {
-  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null
-  const [year, month, day] = date.split('-').map(Number)
-  return new Intl.DateTimeFormat('en-US', {month: 'long', day: 'numeric', year: 'numeric'}).format(
-    new Date(Date.UTC(year, month - 1, day, 12)),
-  )
-}
-
 export const metadata: Metadata = {
   title: 'Book your kickoff',
   robots: {index: false, follow: false},
@@ -79,14 +71,12 @@ export default async function ProposalKickoffRoute({params}: Props) {
 
   return (
     <ProposalKickoff
-      token={token}
       clientName={clientName}
       calLink={link.calLink}
       fallbackHref={link.href}
       paymentState={paymentState}
       heading="Let's book the kickoff call."
       intro="Grab the earliest time that works for you, ideally in the next day or two. The sooner we talk, the sooner the work starts."
-      dateLabel={dateLabel(acceptance?.kickoff_date ?? proposal.kickoffOptions?.[0]?.date ?? null)}
       name={acceptance?.signer_name || clean(proposal.signerName) || null}
       email={acceptance?.signer_email || clean(proposal.signerEmail) || null}
     />

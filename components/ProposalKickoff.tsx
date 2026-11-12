@@ -20,25 +20,21 @@ const THANKS: Record<'paid' | 'processing' | 'wire', string> = {
  * in. Everything around it is ours to design.
  */
 export function ProposalKickoff({
-  token,
   clientName,
   calLink,
   fallbackHref,
   paymentState,
   heading,
   intro,
-  dateLabel,
   name,
   email,
 }: {
-  token: string
   clientName: string
   calLink: string
   fallbackHref: string
   paymentState: 'paid' | 'processing' | 'wire'
   heading: string
   intro: string
-  dateLabel: string | null
   name: string | null
   email: string | null
 }) {
@@ -63,15 +59,9 @@ export function ProposalKickoff({
 
   return (
     <main className="min-h-svh bg-white text-[#08090a]">
-      <div className="flex items-center justify-between px-[max(1.5rem,var(--spacing-gutter))] pt-[1.5rem]">
+      <div className="px-[max(1.5rem,var(--spacing-gutter))] pt-[1.5rem]">
         <Link href="/" aria-label="Salt Studio" className="inline-flex text-[#08090a]">
           <SaltWordmark className="h-[26px] w-auto" />
-        </Link>
-        <Link
-          href={`/p/${encodeURIComponent(token)}#signed`}
-          className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f] hover:text-[#08090a]"
-        >
-          Back to the proposal
         </Link>
       </div>
 
@@ -86,12 +76,6 @@ export function ProposalKickoff({
           <p className="mt-4 max-w-[32rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
             {THANKS[paymentState]}
           </p>
-          {dateLabel ? (
-            <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#f3f3f3] px-3 py-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#08090a]">
-              <span className="size-1.5 rounded-full bg-[#f08a3a]" aria-hidden="true" />
-              Work starts the week of {dateLabel}
-            </p>
-          ) : null}
         </header>
 
         <div className="mt-12 max-w-[40rem] md:mt-16">
