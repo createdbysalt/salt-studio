@@ -162,7 +162,10 @@ async function writeAcceptance(token: string, context: SigningContext) {
     total_cents: quote.totalCents,
     first_cents: quote.firstCents,
     steps: quote.steps,
-    schedule_name: proposal.paymentSchedule?.name ?? null,
+    // The split actually applied to the package they chose, which is the
+    // package's own when it sets one. Reading it off the proposal here would
+    // have recorded the wrong plan on the signed row.
+    schedule_name: quote.scheduleName ?? proposal.paymentSchedule?.name ?? null,
     msa_version: proposal.msa?.version ?? null,
     agreed_text_sha256: context.agreedHash,
     ip,

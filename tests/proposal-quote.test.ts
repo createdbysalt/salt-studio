@@ -200,3 +200,138 @@ test('discounted whole dollars round half up, matching the card', () => {
   assert.equal(discountedAmount(5, 10), 5)
   assert.equal(discountedAmount(5500, null), 5500)
 })
+
+// --- per-package payment schedules ---------------------------------------
+//
+// The first step of the split is what checkout charges, so a package picking
+// up the wrong split is a wrong charge, not a wrong label.
+
+const THIRTY_FORTY_THIRTY = {
+  name: '30/40/30',
+  steps: [
+    {_key: 'c1', percent: 30, trigger: 'On signing'},
+    {_key: 'c2', percent: 40, trigger: 'When the build starts'},
+    {_key: 'c3', percent: 30, trigger: 'When the work is accepted'},
+  ],
+}
+
+/** The two packages, where only the larger one sets its own split. */
+function mixedSchedules(completeSchedule: unknown = THIRTY_FORTY_THIRTY) {
+  return proposal({
+    sameDayOffer: {deadline: null},
+    packages: [
+      {_id: 'pkg-foundation', amount: 5500},
+      {
+        _id: 'pkg-complete',
+        amount: 8500,
+        paymentSchedule: completeSchedule as never,
+      },
+    ],
+  })
+}
+
+test('a package without its own schedule follows the proposal', () => {
+  const quote = quoteProposal(
+    mixedSchedules(),
+    {packageId: 'pkg-foundation', addonIds: [], kickoffDate: null},
+    NOW,
+  )
+  assert.ok(quote)
+  assert.equal(quote.totalCents, 550_000)
+  assert.deepEqual(
+    quote.steps.map((step) => step.percent),
+    [50, 50],
+  )
+  assert.equal(quote.firstCents, 275_000)
+  assert.equal(quote.scheduleName, '50/50')
+})
+
+test('a package with its own schedule uses it instead of the proposal', () => {
+  const quote = quoteProposal(
+    mixedSchedules(),
+    {packageId: 'pkg-complete', addonIds: [], kickoffDate: null},
+    NOW,
+  )
+  assert.ok(quote)
+  assert.equal(quote.totalCents, 850_000)
+  assert.deepEqual(
+    quote.steps.map((step) => step.percent),
+    [30, 40, 30],
+  )
+  assert.equal(quote.firstCents, 255_000)
+  assert.equal(quote.scheduleName, '30/40/30')
+})
+
+test('two packages on one proposal charge different amounts today', () => {
+  const doc = mixedSchedules()
+  const small = quoteProposal(
+    doc,
+    {packageId: 'pkg-foundation', addonIds: [], kickoffDate: null},
+    NOW,
+  )
+  const large = quoteProposal(
+    doc,
+    {packageId: 'pkg-complete', addonIds: [], kickoffDate: null},
+    NOW,
+  )
+  assert.ok(small && large)
+  // Half of 5500 against three tenths of 8500.
+  assert.equal(small.firstCents, 275_000)
+  assert.equal(large.firstCents, 255_000)
+  assert.notEqual(small.steps.length, large.steps.length)
+})
+
+test("a package's broken schedule falls back rather than charging a wrong share", () => {
+  // These sum to 90. Honouring them would undercharge by a tenth.
+  const quote = quoteProposal(
+    mixedSchedules({
+      name: 'broken',
+      steps: [
+        {_key: 'x', percent: 60, trigger: 'On signing'},
+        {_key: 'y', percent: 30, trigger: 'Later'},
+      ],
+    }),
+    {packageId: 'pkg-complete', addonIds: [], kickoffDate: null},
+    NOW,
+  )
+  assert.ok(quote)
+  assert.deepEqual(
+    quote.steps.map((step) => step.percent),
+    [50, 50],
+  )
+  assert.equal(quote.firstCents, 425_000)
+  assert.equal(quote.scheduleName, '50/50')
+})
+
+test("an add-on is split by the selected package's schedule", () => {
+  const quote = quoteProposal(
+    mixedSchedules(),
+    {packageId: 'pkg-complete', addonIds: ['addon-copy'], kickoffDate: null},
+    NOW,
+  )
+  assert.ok(quote)
+  assert.equal(quote.totalCents, 1_030_000)
+  // Thirty percent of the package and the add-on together, not of the package alone.
+  assert.equal(quote.firstCents, 309_000)
+  assert.equal(
+    quote.steps.reduce((sum, step) => sum + step.amountCents, 0),
+    quote.totalCents,
+  )
+})
+
+test('a per-package split still sums to the total exactly', () => {
+  // 8499 splits three ways with a remainder, which the last step absorbs.
+  const quote = quoteProposal(
+    proposal({
+      sameDayOffer: {deadline: null},
+      packages: [{_id: 'pkg-complete', amount: 8499, paymentSchedule: THIRTY_FORTY_THIRTY}],
+    }),
+    {packageId: 'pkg-complete', addonIds: [], kickoffDate: null},
+    NOW,
+  )
+  assert.ok(quote)
+  assert.equal(
+    quote.steps.reduce((sum, step) => sum + step.amountCents, 0),
+    quote.totalCents,
+  )
+})

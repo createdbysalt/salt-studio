@@ -678,12 +678,11 @@ function Investment({
     (item): item is Extract<Section, {_type: 'proposalAcceptSection'}> =>
       item._type === 'proposalAcceptSection' && item.enabled !== false,
   )
-  const lead = [
-    'Select a package, then any add-ons. The total and the scope of work update as you go.',
-    paymentSentence(view),
-  ]
-    .filter(Boolean)
-    .join(' ')
+  // The split used to be spelled out here, which meant a sentence to keep in
+  // step with the schedule every time it changed. It now lives next to the
+  // total, where it is derived from the package actually selected.
+  const lead =
+    'Select a package, then any add-ons. The total and the scope of work update as you go.'
   const version = line(view.proposal.msa?.version)
   return (
     <section className="w-full px-[max(3.5rem,var(--spacing-gutter))] pt-16 pb-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:pt-24 lg:pb-32">
@@ -844,24 +843,6 @@ function restLine(totalCents: number, steps: Array<{amountCents: number; trigger
     return `The remaining ${formatCents(rest)} is invoiced ${trigger.charAt(0).toLowerCase()}${trigger.slice(1)}.`
   }
   return `The remaining ${formatCents(rest)} is invoiced in ${steps.length - 1} later payments.`
-}
-
-function paymentSentence(view: View) {
-  const steps = (view.proposal.paymentSchedule?.steps ?? []).flatMap((step) => {
-    const trigger = line(step.trigger)
-    if (!trigger) return []
-    const when = `${trigger.charAt(0).toLowerCase()}${trigger.slice(1)}`
-    return [step.percent ? `${step.percent}% ${when}` : when]
-  })
-  const split =
-    steps.length === 0
-      ? ''
-      : steps.length === 1
-        ? `You pay ${steps[0]}.`
-        : `You pay ${steps.slice(0, -1).join(', ')} and ${steps[steps.length - 1]}.`
-  return [split, 'The first payment is collected here, and later payments are invoiced.']
-    .filter(Boolean)
-    .join(' ')
 }
 
 function AgreementLine({

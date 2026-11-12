@@ -43,6 +43,15 @@ export default defineType({
         rule.required().integer().positive().error('Enter the price in whole US dollars'),
     }),
     defineField({
+      name: 'paymentSchedule',
+      title: 'Payment schedule for this package',
+      type: 'reference',
+      group: 'card',
+      to: [{type: 'paymentSchedule'}],
+      description:
+        'Optional. Leave this empty and the package uses the split set on the proposal, which is the usual case. Set it when this package is paid differently from the other one, for example 50/50 on the smaller package and 30/40/30 on the larger. The first step is what the client is charged on signing, so this changes the amount taken today.',
+    }),
+    defineField({
       name: 'includedItems',
       title: 'Included on the card',
       type: 'array',
