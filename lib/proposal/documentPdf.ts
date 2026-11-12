@@ -11,6 +11,8 @@ export type PdfBlock =
   | {kind: 'kicker'; text: string}
   | {kind: 'title'; text: string}
   | {kind: 'note'; text: string}
+  /** A whole part of the agreement: the package, an add-on, standing terms. */
+  | {kind: 'part'; text: string}
   | {kind: 'heading'; text: string}
   | {kind: 'paragraph'; text: string}
   | {kind: 'bullet'; text: string; marker: string}
@@ -35,6 +37,10 @@ const STYLES: Record<PdfBlock['kind'], Style> = {
   kicker: {font: 'F1', size: 9, leading: 12, gapBefore: 0, indent: 0, color: 'muted'},
   title: {font: 'F2', size: 26, leading: 32, gapBefore: 16, indent: 0, color: 'ink'},
   note: {font: 'F1', size: 11, leading: 16, gapBefore: 8, indent: 0, color: 'muted'},
+  // A part sits clearly above the sections inside it. Without the step in
+  // size, an add-on's own Fees heading looked the same as the package's, and
+  // nothing told the reader which one they were looking at.
+  part: {font: 'F2', size: 18, leading: 24, gapBefore: 34, indent: 0, color: 'ink'},
   heading: {font: 'F2', size: 13, leading: 18, gapBefore: 18, indent: 0, color: 'ink'},
   paragraph: {font: 'F1', size: 11, leading: 16, gapBefore: 10, indent: 0, color: 'ink'},
   bullet: {font: 'F1', size: 11, leading: 16, gapBefore: 3, indent: 16, color: 'ink'},
@@ -79,6 +85,13 @@ function layout(blocks: PdfBlock[]): Drawn[][] {
 
   blocks.forEach((block, index) => {
     const style = STYLES[block.kind]
+    // A part heading left near the foot of a page reads as a caption on the
+    // section above it. Break first when there is not enough room for the
+    // heading and a couple of lines under it.
+    if (block.kind === 'part' && index > 0 && y - style.gapBefore - style.leading * 3 < BOTTOM) {
+      pages.push([])
+      y = PAGE_H - TOP
+    }
     const width = CONTENT_W - style.indent
     const lines =
       block.kind === 'bullet'

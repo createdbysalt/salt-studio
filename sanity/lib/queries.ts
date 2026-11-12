@@ -955,6 +955,7 @@ export const proposalByTokenQuery = defineQuery(`
       version,
       effectiveDate,
       "pdfUrl": pdf.asset->url,
+      "pdfFilename": pdf.asset->originalFilename,
       body
     },
     sections[]{

@@ -314,6 +314,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       version: '1.0',
       effectiveDate: '2026-11-01',
       pdfUrl: null,
+      pdfFilename: null,
       body: [
         sowBlock(
           'msa-1',

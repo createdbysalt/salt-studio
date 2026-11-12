@@ -120,12 +120,12 @@ function signedSowBlocks(input: {
     {kind: 'note', text: `Client legal name: ${input.signerLegalName}`},
     {kind: 'note', text: `Mailing address: ${formatAddress(input.signerAddress)}`},
     {kind: 'note', text: `Signed date: ${dateLabel(input.acceptedAt)}`},
-    {kind: 'heading', text: 'Parties'},
+    {kind: 'part', text: 'Parties'},
     {
       kind: 'paragraph',
       text: `This Statement of Work is between Salt Studio and ${input.signerLegalName}.`,
     },
-    {kind: 'heading', text: input.pkg.name ? clean(input.pkg.name) : 'Selected package'},
+    {kind: 'part', text: input.pkg.name ? clean(input.pkg.name) : 'Selected package'},
     ...portableBlocksToPdf(input.pkg.scope),
     ...(input.pkg.includedItems ?? [])
       .map((item) => clean(item))
@@ -134,17 +134,17 @@ function signedSowBlocks(input: {
   ]
 
   for (const addOn of input.addOns) {
-    const name = clean(addOn.name)
-    if (name) blocks.push({kind: 'heading', text: name})
+    const name = clean(addOn.name) || 'Add-on'
+    blocks.push({kind: 'part', text: name})
     blocks.push(...portableBlocksToPdf(addOn.scope))
     const line = clean(addOn.line)
     if (line) blocks.push({kind: 'bullet', text: line, marker: '•'})
   }
 
   blocks.push(
-    {kind: 'heading', text: 'Standing terms'},
+    {kind: 'part', text: 'Standing terms'},
     ...portableBlocksToPdf(standing),
-    {kind: 'heading', text: 'Fees and payment steps'},
+    {kind: 'part', text: 'Fees and payment steps'},
     {kind: 'paragraph', text: `Total fee: ${money(input.quote.totalCents)}.`},
     {kind: 'paragraph', text: `Payment made now: ${money(input.quote.firstCents)}.`},
     ...input.quote.steps.map(
@@ -157,21 +157,32 @@ function signedSowBlocks(input: {
   )
 
   blocks.push(
-    {kind: 'heading', text: 'Kickoff date'},
+    {kind: 'part', text: 'Kickoff date'},
     {
       kind: 'paragraph',
       text: `Selected kickoff date: ${input.selection.kickoffDate ?? 'Not selected'}.`,
     },
-    {kind: 'heading', text: 'Acceptance block'},
+    {kind: 'part', text: 'Acceptance block'},
     {kind: 'paragraph', text: `Accepted by: ${input.signerName}`},
     {kind: 'paragraph', text: `Email: ${input.signerEmail}`},
-    {kind: 'paragraph', text: `Accepted at: ${input.acceptedAt}`},
+    {kind: 'paragraph', text: `Accepted at: ${dateTimeLabel(input.acceptedAt)}`},
     {kind: 'paragraph', text: `IP address: ${input.ip ?? 'Not recorded'}`},
     {kind: 'paragraph', text: `MSA version: ${input.msaVersion ?? 'Not recorded'}`},
   )
   if (input.agreedHash) blocks.push({kind: 'paragraph', text: `Record hash: ${input.agreedHash}`})
 
   return blocks
+}
+
+/** "November 12, 2026 at 2:14 PM UTC", matching the other dates. */
+function dateTimeLabel(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'long',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+  }).format(date)
 }
 
 function money(cents: number) {
@@ -295,7 +306,7 @@ export async function prepareSigning(
   if (!fields.ok) return fields
 
   const acceptedAt = new Date().toISOString()
-  const msaPdf = await freezeMsaPdf(proposal.msa?.pdfUrl)
+  const msaPdf = await freezeMsaPdf(proposal.msa?.pdfUrl, proposal.msa?.pdfFilename)
   const sowBlocks = signedSowBlocks({
     proposal,
     pkg,
