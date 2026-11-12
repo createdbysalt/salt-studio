@@ -1,7 +1,7 @@
 import 'server-only'
 import {createHash, createHmac, timingSafeEqual} from 'node:crypto'
 
-export const PROPOSAL_GATE_COOKIE = 'proposal_gate'
+export const PROPOSAL_GATE_COOKIE = 'proposal_entry'
 export const PROPOSAL_GATE_MAX_AGE = 60 * 60 * 24 * 14
 
 const TOKEN_PATH = /^[A-Za-z0-9_-]{1,128}$/
