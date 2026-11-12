@@ -12,6 +12,7 @@ import {ProposalSignForm} from '@/components/ProposalSignForm'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import {SiteFooter} from '@/components/SiteFooter'
 import type {PaymentMethod, PaymentStatus} from '@/lib/proposal/acceptances'
+import {INVESTMENT_INTRO} from '@/lib/proposal/copy'
 import {
   discountedAmount,
   formatAmount,
@@ -678,11 +679,11 @@ function Investment({
     (item): item is Extract<Section, {_type: 'proposalAcceptSection'}> =>
       item._type === 'proposalAcceptSection' && item.enabled !== false,
   )
-  // The split used to be spelled out here, which meant a sentence to keep in
-  // step with the schedule every time it changed. It now lives next to the
-  // total, where it is derived from the package actually selected.
-  const lead =
-    'Select a package, then any add-ons. The total and the scope of work update as you go.'
+  // Editable per proposal, with the shared default when it is left empty.
+  // The split is deliberately not part of this line: it is printed under the
+  // total, worked out from the package selected, so there is no sentence here
+  // to keep in step when a schedule changes.
+  const lead = line(section.intro) || INVESTMENT_INTRO
   const version = line(view.proposal.msa?.version)
   return (
     <section className="w-full px-[max(3.5rem,var(--spacing-gutter))] pt-16 pb-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:pt-24 lg:pb-32">
