@@ -306,7 +306,7 @@ export default defineType({
           title: 'Deadline',
           type: 'datetime',
           description:
-            'The clock for the whole same-day offer: this bonus and the package discount on the Packages section. The discount shows and charges only while this is in the future. Leave it empty and no discount applies, even if the sticker is switched on.',
+            'The clock for the whole same-day offer: this bonus and the package discount on the Packages section. The discount shows and charges only while this is in the future. Leave it empty and no discount applies, even if the sticker is switched on. Once someone signs, the price they signed at is held for that exact choice even after this passes, so they can finish paying. If they come back later and switch package or add an add-on, that new choice is at full price — push this deadline out to give them the discount again.',
         }),
       ],
     }),
