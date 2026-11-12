@@ -193,6 +193,15 @@ async function beginCheckout(token: string, context: SigningContext): Promise<Si
     ui_mode: 'embedded_page',
     redirect_on_completion: 'never',
     customer: customer.id,
+    // Black on white, rounded, to sit inside the proposal. Inter is the
+    // closest Stripe font to Geist.
+    branding_settings: {
+      background_color: '#ffffff',
+      button_color: '#08090a',
+      border_style: 'rounded',
+      font_family: 'inter',
+      display_name: 'Salt Studio',
+    },
     line_items: [
       {
         quantity: 1,
