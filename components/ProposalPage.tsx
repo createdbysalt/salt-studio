@@ -351,7 +351,7 @@ function Cover({
       className="relative z-[1] flex min-h-dvh flex-1 flex-col justify-end px-[max(2.5rem,var(--spacing-gutter))] pb-6 pt-28 md:px-[max(3rem,var(--spacing-gutter))] lg:px-[max(4.5rem,var(--spacing-gutter))]"
     >
       <div className="relative z-10 mb-2 flex justify-center">
-        <h1 className="max-w-4xl text-center text-[clamp(2.85rem,8.6vw,3.75rem)] font-[560] leading-[0.92] tracking-[var(--tracking-display)] md:text-[clamp(3.75rem,7vw,5.5rem)] md:leading-[0.9] lg:text-[clamp(3rem,7.2vw,8.5rem)]">
+        <h1 className="max-w-4xl text-center text-[clamp(2.6rem,8vw,3.5rem)] font-[560] leading-[0.92] tracking-[var(--tracking-display)] md:text-[clamp(3.75rem,7vw,5.5rem)] md:leading-[0.9] lg:text-[clamp(4.4rem,6.2vw,7.25rem)]">
           {withEmphasis(headline, emphasis)}
         </h1>
       </div>

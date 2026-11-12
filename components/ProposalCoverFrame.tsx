@@ -133,7 +133,7 @@ export function ProposalCoverFrame({
   return (
     <div
       ref={frame}
-      className={`relative z-0 mx-auto h-[66vh] max-h-[66vh] w-full max-w-6xl origin-center overflow-hidden rounded-[16px] border-0 shadow-none will-change-transform md:h-[64vh] md:max-h-[64vh] lg:aspect-[2/1] lg:h-auto lg:max-h-[70vh] ${src ? 'bg-paper' : ''}`}
+      className={`relative z-0 mx-auto h-[56vh] max-h-[56vh] w-full max-w-6xl origin-center overflow-hidden rounded-[16px] border-0 shadow-none will-change-transform md:h-[64vh] md:max-h-[64vh] lg:aspect-[1.75/1] lg:h-auto lg:max-h-[80vh] ${src ? 'bg-paper' : ''}`}
     >
       {src ? (
         // The cover is the largest thing above the fold, so it is the LCP.
@@ -154,7 +154,7 @@ export function ProposalCoverFrame({
       )}
       {!src && caption ? (
         <p className="absolute inset-x-0 bottom-0 z-[1] px-4 pb-4 text-foreground/80 md:px-5 md:pb-5 lg:px-12 lg:pb-10">
-          <span className="block text-balance text-[clamp(1.75rem,6vw,2.25rem)] font-[560] leading-[1.05] tracking-[var(--tracking-display)] md:max-w-md md:text-[2.35rem] lg:max-w-xl lg:text-[clamp(2rem,4vw,3.75rem)] lg:leading-[0.95]">
+          <span className="block text-balance text-[clamp(1.75rem,6vw,2.25rem)] font-[560] leading-[1.05] tracking-[var(--tracking-display)] md:max-w-xl md:text-[2.1rem] lg:max-w-3xl lg:text-[clamp(1.75rem,3.2vw,3rem)] lg:leading-[0.95]">
             {caption}
           </span>
         </p>
