@@ -31,10 +31,38 @@ lib/analytics/
 ├── scroll-tracker.tsx    # Scroll depth tracking
 ├── error-tracker.tsx     # JS error tracking
 ├── debug-overlay.tsx     # Dev mode debug panel
+├── site-only.tsx         # Route gate — renders nothing on a private proposal
+├── private-routes.ts     # The one definition of "this is a private proposal"
 ├── events.ts             # Typed event helpers
 ├── types.ts              # TypeScript definitions
 └── CLAUDE.md             # This file
 ```
+
+## Nothing tracks a private proposal
+
+A proposal at `/p/<key>` is one private document for one client. It is
+`noindex`, it sits behind a password, and nothing about it belongs in site
+analytics or in an ad network.
+
+Two layers enforce that, and both matter:
+
+1. **`SiteOnly`** wraps the tag scripts in the root layout. It returns `null`
+   on a `/p/` route, so `next/script` never injects and nothing is fetched.
+2. **The trackers** (`PageViewTracker`, `ScrollTracker`, `ErrorTracker`) each
+   return early on those routes, and the consent banner does not render.
+
+Layer 1 exists because the trackers alone were not enough. They refused to
+_report_, but the scripts still loaded: the Usercentrics consent bundle,
+Google Tag Manager, gtag and an ad conversion ping. That was sixteen
+third-party endpoints and about 1.5 MB of JavaScript on a page meant for one
+person, and the cookie banner sat at `z-50` over the Accept and Sign pill.
+
+Both layers test the route through `isPrivateProposalPath` in
+`private-routes.ts`. **Use that helper rather than writing the prefix again** —
+three separate copies of the test is how the scripts came to be missed.
+
+If you add anything site-wide that loads a third party or phones home, put it
+inside `SiteOnly` unless it genuinely has to run on a proposal.
 
 ## Setup (already done in this template)
 
@@ -46,6 +74,8 @@ import {
   ConsentProvider,
   GoogleTagManagerNoScript,
   GoogleTagManagerScript,
+  SiteOnly,
+  UsercentricsScripts,
   // ... other imports
 } from '@/lib/analytics'
 import {sanityFetch} from '@/sanity/lib/live'
@@ -60,18 +90,23 @@ export default async function RootLayout({children}) {
 
   return (
     <html>
-      <head>
-        <GoogleTagManagerScript />
-        <ClientGoogleAnalyticsScript measurementId={devSettings?.clientGoogleAnalyticsId} />
-      </head>
       <body>
-        <GoogleTagManagerNoScript />
+        {/* SiteOnly renders nothing on a /p/ proposal, so none of this loads there */}
+        <SiteOnly>
+          <UsercentricsScripts />
+          <GoogleTagManagerScript />
+          <ClientGoogleAnalyticsScript measurementId={devSettings?.clientGoogleAnalyticsId} />
+          <GoogleTagManagerNoScript />
+        </SiteOnly>
         <ConsentProvider>{/* ... trackers and children */}</ConsentProvider>
       </body>
     </html>
   )
 }
 ```
+
+The scripts live in `<body>`, not `<head>`. `beforeInteractive` still lands in
+the head, and nesting `next/script` inside `<head>` is not supported.
 
 ## Client onboarding
 
