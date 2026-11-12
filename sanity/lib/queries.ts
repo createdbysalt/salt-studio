@@ -955,6 +955,7 @@ export const proposalByTokenQuery = defineQuery(`
       version,
       effectiveDate,
       "pdfUrl": pdf.asset->url,
+      "pdfFilename": pdf.asset->originalFilename,
       body
     },
     sections[]{
@@ -1016,6 +1017,40 @@ export const proposalByTokenQuery = defineQuery(`
       _type == "proposalTermsSection" => { validityNote, changeOrderRule },
       _type == "proposalAcceptSection" => { prompt, checkboxLabel },
       _type == "proposalSignedSection" => { heading, nextSteps, kickoffUrl, kickoffLabel }
+    }
+  }
+`)
+
+/** Current proposal text for pre-v3 acceptance compatibility checks only. */
+export const proposalByIdForLegacyAcceptanceQuery = defineQuery(`
+  *[_type == "proposal" && _id == $id][0]{
+    _id,
+    clientDisplayName,
+    clientLegalName,
+    packages[]->{
+      _id,
+      name,
+      scope,
+      includedItems
+    },
+    addOns[]->{
+      _id,
+      name,
+      line,
+      scope
+    },
+    msa->{
+      _id,
+      version,
+      effectiveDate,
+      "pdfUrl": pdf.asset->url,
+      body
+    },
+    sections[]{
+      _key,
+      _type,
+      enabled,
+      _type == "proposalSowSection" => { body }
     }
   }
 `)

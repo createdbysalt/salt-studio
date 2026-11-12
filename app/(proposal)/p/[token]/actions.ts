@@ -12,6 +12,7 @@ import {
   type NewAcceptance,
   type PaymentStatus,
 } from '@/lib/proposal/acceptances'
+import {acceptanceDocumentHash} from '@/lib/proposal/frozenDocument'
 import {
   PROPOSAL_GATE_COOKIE,
   PROPOSAL_GATE_MAX_AGE,
@@ -147,11 +148,36 @@ async function acceptanceFor(token: string, context: SigningContext) {
 async function writeAcceptance(token: string, context: SigningContext) {
   const {ip, userAgent} = await requestFacts()
   const {proposal, selection, quote} = context
+  const withoutGeneratedHash = context.agreedDocument?.sow.blocks ?? []
+  const last = withoutGeneratedHash.at(-1)
+  const blocks =
+    last?.kind === 'paragraph' && last.text.startsWith('Record hash: ')
+      ? withoutGeneratedHash.slice(0, -1)
+      : withoutGeneratedHash
+  const agreedDocument = context.agreedDocument
+    ? {
+        ...context.agreedDocument,
+        sow: {
+          blocks: blocks.map((block) =>
+            block.kind === 'paragraph' && block.text === 'IP address: Not recorded'
+              ? {...block, text: `IP address: ${ip ?? 'Not recorded'}`}
+              : block,
+          ),
+        },
+      }
+    : null
+  const agreedHash = agreedDocument ? acceptanceDocumentHash(agreedDocument) : context.agreedHash
+  if (agreedDocument) {
+    agreedDocument.sow.blocks.push({kind: 'paragraph', text: `Record hash: ${agreedHash}`})
+  }
+  const msaPdf = context.msaPdf
   const row: NewAcceptance = {
     proposal_id: proposal._id,
     token_hash: hashToken(token),
     signer_name: context.signerName,
     signer_email: context.signerEmail,
+    signer_legal_name: context.signerLegalName || null,
+    signer_address: context.signerAddress.lines.length > 0 ? context.signerAddress : null,
     client_name: context.clientName || null,
     package_id: quote.packageId,
     package_name: context.packageName || null,
@@ -167,7 +193,13 @@ async function writeAcceptance(token: string, context: SigningContext) {
     // have recorded the wrong plan on the signed row.
     schedule_name: quote.scheduleName ?? proposal.paymentSchedule?.name ?? null,
     msa_version: proposal.msa?.version ?? null,
-    agreed_text_sha256: context.agreedHash,
+    msa_pdf_sha256: msaPdf?.status === 'frozen' ? msaPdf.sha256 : null,
+    msa_pdf_bytes_base64: msaPdf?.status === 'frozen' ? msaPdf.bytesBase64 : null,
+    msa_pdf_filename: msaPdf?.status === 'frozen' ? msaPdf.filename : null,
+    msa_pdf_content_type: msaPdf?.status === 'frozen' ? msaPdf.contentType : null,
+    msa_pdf_missing_reason: msaPdf?.status === 'missing' ? msaPdf.reason : null,
+    agreed_document: agreedDocument,
+    agreed_text_sha256: agreedHash,
     ip,
     user_agent: userAgent,
   }

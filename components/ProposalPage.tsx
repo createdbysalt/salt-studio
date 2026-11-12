@@ -751,6 +751,10 @@ function Investment({
               restLine={restLine(quote.totalCents, quote.steps)}
               wireAvailable={quote.firstCents >= 1_000_000}
               resume={resumeFor(view, quote)}
+              defaults={{
+                legalName: line(view.proposal.clientLegalName),
+                email: line(view.proposal.signerEmail),
+              }}
               note={
                 view.payment?.status === 'failed'
                   ? 'That payment did not go through, and nothing was charged. Try again below.'

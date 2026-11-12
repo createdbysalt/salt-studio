@@ -2,6 +2,7 @@
 
 import {signProposal, type SignActionState} from '@/app/(proposal)/p/[token]/actions'
 import {ProposalPayButton} from '@/components/ProposalPayButton'
+import {addressLooksComplete} from '@/lib/proposal/frozenDocument'
 import type {ProposalSelection} from '@/lib/proposal/quote'
 import {useRouter} from 'next/navigation'
 import {useActionState, useEffect, useState, type ReactNode} from 'react'
@@ -25,6 +26,7 @@ export function ProposalSignForm({
   restLine,
   wireAvailable,
   resume,
+  defaults,
   note,
   children,
 }: {
@@ -35,6 +37,7 @@ export function ProposalSignForm({
   wireAvailable: boolean
   /** Set when they already signed and a payment of theirs is still open. */
   resume: {signerName: string} | null
+  defaults: {legalName: string; email: string}
   note: string | null
   children: ReactNode
 }) {
@@ -45,6 +48,9 @@ export function ProposalSignForm({
     null,
   )
   const [name, setName] = useState('')
+  const [legalName, setLegalName] = useState(defaults.legalName)
+  const [address, setAddress] = useState('')
+  const [email, setEmail] = useState(defaults.email)
   const [agreed, setAgreed] = useState(false)
 
   const checkoutUrl = state?.ok && 'url' in state ? state.url : null
@@ -61,7 +67,13 @@ export function ProposalSignForm({
     window.location.assign(checkoutUrl)
   }, [checkoutUrl])
 
-  const ready = resume != null || (name.trim().length >= 2 && agreed)
+  const ready =
+    resume != null ||
+    (name.trim().length >= 2 &&
+      legalName.trim().length >= 2 &&
+      addressLooksComplete(address) &&
+      email.trim().includes('@') &&
+      agreed)
   const leaving = checkoutUrl != null
 
   return (
@@ -111,7 +123,8 @@ export function ProposalSignForm({
                 <input type="hidden" name="agree" value="yes" />
                 <p className="text-center text-[1.05rem] font-medium leading-snug text-[#5c5c5c]">
                   Signed as {resume.signerName}. The payment was not finished, so it is still
-                  waiting for you.
+                  waiting for you. We will reuse the legal name, address, and email already frozen
+                  on that signature.
                 </p>
               </>
             ) : (
@@ -129,6 +142,54 @@ export function ProposalSignForm({
                     value={name}
                     disabled={leaving}
                     onChange={(event) => setName(event.target.value)}
+                    className="mt-2 w-full bg-transparent text-[1.35rem] font-medium tracking-[-0.03em] text-[#08090a] outline-none placeholder:font-normal placeholder:text-[#a3a3a3] disabled:opacity-70"
+                  />
+                </label>
+                <label className={fieldClass}>
+                  <span className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+                    Legal name
+                  </span>
+                  <input
+                    name="legalName"
+                    autoComplete="organization"
+                    placeholder="Legal party name"
+                    required
+                    minLength={2}
+                    value={legalName}
+                    disabled={leaving}
+                    onChange={(event) => setLegalName(event.target.value)}
+                    className="mt-2 w-full bg-transparent text-[1.35rem] font-medium tracking-[-0.03em] text-[#08090a] outline-none placeholder:font-normal placeholder:text-[#a3a3a3] disabled:opacity-70"
+                  />
+                </label>
+                <label className={fieldClass}>
+                  <span className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+                    Address
+                  </span>
+                  <textarea
+                    name="address"
+                    autoComplete="street-address"
+                    placeholder={'Street address\nCity, state or region, postal code\nCountry'}
+                    required
+                    rows={4}
+                    value={address}
+                    disabled={leaving}
+                    onChange={(event) => setAddress(event.target.value)}
+                    className="mt-2 w-full resize-none bg-transparent text-[1.12rem] font-medium tracking-[-0.02em] text-[#08090a] outline-none placeholder:font-normal placeholder:text-[#a3a3a3] disabled:opacity-70"
+                  />
+                </label>
+                <label className={fieldClass}>
+                  <span className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+                    Email
+                  </span>
+                  <input
+                    type="email"
+                    name="email"
+                    autoComplete="email"
+                    placeholder="name@example.com"
+                    required
+                    value={email}
+                    disabled={leaving}
+                    onChange={(event) => setEmail(event.target.value)}
                     className="mt-2 w-full bg-transparent text-[1.35rem] font-medium tracking-[-0.03em] text-[#08090a] outline-none placeholder:font-normal placeholder:text-[#a3a3a3] disabled:opacity-70"
                   />
                 </label>

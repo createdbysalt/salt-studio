@@ -71,4 +71,4 @@ npm run lint
 - Client proposals are served at `/p/[token]` from `app/(proposal)/`, outside the public `(personal)` site. `token` is the unguessable private link key on the Sanity `proposal` document.
 - The shared gate password and cookie signing secret are `PROPOSAL_GATE_PASSWORD` and `PROPOSAL_GATE_SECRET` on the 1Password item `salt-studio-sanity`. Unlock sets an httpOnly `proposal_gate` cookie scoped to that proposal path. The sign-in page may show the client name; prices, scope, and legal text load only after the cookie is valid.
 - Proposal content uses Sanity types `proposal`, `proposalPackage`, `proposalAddOn`, and `proposalMsa`. A proposal has at most two packages. The page sends selected ids and the server recomputes the total.
-- The production Sanity dataset is still public. Do not store a real client's legal details on a proposal until proposals move to a private dataset.
+- The production Sanity dataset is private, and server reads use `SANITY_API_READ_TOKEN`. Proposal legal details still belong in proposal records only when they are needed for a real signed workflow.

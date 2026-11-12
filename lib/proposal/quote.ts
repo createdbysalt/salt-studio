@@ -174,6 +174,65 @@ export function sameDayPercent(proposal: QuoteProposal, now = Date.now()): numbe
  * not signed. A signature keeps the percent frozen on it, so the price
  * cannot climb while they were away from a payment they already agreed to.
  */
+/** The parts of a signature the carry-over decision looks at. */
+export type SignedRecord = {
+  selection_key: string
+  total_cents: number
+  first_cents: number
+  agreed_text_sha256: string | null
+  agreed_document?: {contentSha256?: string} | null
+}
+
+/**
+ * The content hash recorded on a signature, wherever it was kept.
+ *
+ * A frozen v3 document carries it inside the document, because that row's
+ * `agreed_text_sha256` holds the hash of the document itself, which includes
+ * the signer's name and the moment they signed and so differs on every visit.
+ * Older rows kept the content hash in `agreed_text_sha256` directly. A v3
+ * document frozen before the field existed has neither, and returning null
+ * means the signature will not carry over, which is the safe direction.
+ */
+export function signedContentHash(signed: SignedRecord | null | undefined) {
+  if (!signed) return null
+  return signed.agreed_document?.contentSha256 ?? signed.agreed_text_sha256 ?? null
+}
+
+/**
+ * Whether a signature is for the deal in front of us.
+ *
+ * Same package and add-ons, and the proposal has not been edited since. An
+ * edit to the wording or the scope makes this false, so the client signs
+ * again against what the proposal says now.
+ */
+export function sameSignedDeal(
+  signed: SignedRecord | null | undefined,
+  currentSelectionKey: string,
+  currentContentHash: string,
+) {
+  if (!signed) return false
+  if (signed.selection_key !== currentSelectionKey) return false
+  const recorded = signedContentHash(signed)
+  return recorded != null && recorded === currentContentHash
+}
+
+/**
+ * Whether re-pricing today lands on the figures the client signed.
+ *
+ * This is the guard that protects the charge. The amount taken must never
+ * come from the stored row alone; it is recomputed from the live proposal
+ * and only honoured when it agrees to the cent. If a price was corrected
+ * after someone signed and walked away, this is false, and they are re-priced
+ * rather than charged the old number.
+ */
+export function matchesSignedFigures(
+  frozen: {totalCents: number; firstCents: number} | null | undefined,
+  signed: SignedRecord | null | undefined,
+) {
+  if (!frozen || !signed) return false
+  return frozen.totalCents === signed.total_cents && frozen.firstCents === signed.first_cents
+}
+
 export function honoredPercent(
   live: number | null,
   signed: {same_day_percent: number | null} | null,
