@@ -52,8 +52,10 @@ export default async function ProposalKickoffRoute({params}: Props) {
   )
   const base = signed && 'kickoffUrl' in signed ? clean(signed.kickoffUrl) : ''
   const acceptance = payment?.proposal_acceptances ?? null
+  // No date: the call should happen in the next day or two, so Cal.com opens
+  // on the earliest slot. The project start they chose is shown as context.
   const link = kickoffLink(base, {
-    date: acceptance?.kickoff_date ?? proposal.kickoffOptions?.[0]?.date ?? null,
+    date: null,
     name: acceptance?.signer_name || clean(proposal.signerName) || null,
     email: acceptance?.signer_email || clean(proposal.signerEmail) || null,
   })
@@ -67,8 +69,8 @@ export default async function ProposalKickoffRoute({params}: Props) {
       clientName={clientName}
       calLink={link.calLink}
       fallbackHref={link.href}
-      heading="Let's set the kickoff."
-      intro="Pick the time that suits you. We'll bring the questions, you bring the office's answers, and the work starts from there."
+      heading="Let's book the kickoff call."
+      intro="Grab the earliest time that works for you, ideally in the next day or two. The sooner we talk, the sooner the work starts."
       dateLabel={dateLabel(acceptance?.kickoff_date ?? proposal.kickoffOptions?.[0]?.date ?? null)}
       name={acceptance?.signer_name || clean(proposal.signerName) || null}
       email={acceptance?.signer_email || clean(proposal.signerEmail) || null}

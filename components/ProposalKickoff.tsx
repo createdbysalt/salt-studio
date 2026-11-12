@@ -80,7 +80,7 @@ export function ProposalKickoff({
           {dateLabel ? (
             <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#f3f3f3] px-3 py-1.5 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#08090a]">
               <span className="size-1.5 rounded-full bg-[#f08a3a]" aria-hidden="true" />
-              Kickoff week of {dateLabel}
+              Work starts the week of {dateLabel}
             </p>
           ) : null}
         </header>

@@ -955,7 +955,8 @@ function Signed({
             {kickoffLabel}
           </Link>
           <p className="mt-3 text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
-            Pick a time in the week you chose. Your name and email are already filled in.
+            The sooner the better, ideally in the next day or two. Your name and email are already
+            filled in.
           </p>
         </div>
       ) : null}
