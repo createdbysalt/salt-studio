@@ -31,7 +31,11 @@ export function ProposalProof({
   projects: ProposalProofProject[]
 }) {
   return (
-    <section className="flex min-h-[85dvh] w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-10 md:min-h-[88dvh] md:px-[max(4.5rem,var(--spacing-gutter))] md:py-16 lg:min-h-dvh lg:py-32">
+    // The phone needed more air above the eyebrow and below the slider. The
+    // minimum height rises with the padding, otherwise the section stays at
+    // 85dvh, the extra padding is absorbed by justify-center, and nothing
+    // moves. Tablet and desktop are unchanged.
+    <section className="flex min-h-[94dvh] w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-[4.5rem] md:min-h-[88dvh] md:px-[max(4.5rem,var(--spacing-gutter))] md:py-16 lg:min-h-dvh lg:py-32">
       <header>
         <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
           {eyebrow}
@@ -215,12 +219,19 @@ function ProjectCard({project, playing}: {project: ProposalProofProject; playing
       <div className="px-3 pt-3">
         <ProofMedia imageUrl={project.imageUrl} videoUrl={project.videoUrl} playing={playing} />
       </div>
-      <div className="flex flex-col px-5 pb-5 pt-4 md:px-6 md:pb-6 md:pt-5">
+      {/* The text block takes the height the media leaves, and the note is
+          pushed to the bottom of it. Cards in the slider are all the same
+          height, but a note is one to five lines, so without this each one
+          floated at a different distance from the bottom: measured at 32px,
+          90px and 115px across three cards. Now every note ends on the same
+          line. mt-auto collapses when there is no slack, and the pt keeps the
+          original gap under the title in that case. */}
+      <div className="flex flex-1 flex-col px-5 pb-5 pt-4 md:px-6 md:pb-6 md:pt-5">
         <h3 className="text-[1.5rem] font-medium leading-snug tracking-[-0.03em]">
           {project.title}
         </h3>
         {project.note ? (
-          <p className="mt-2 text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
+          <p className="mt-auto pt-2 text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
             {project.note}
           </p>
         ) : null}
