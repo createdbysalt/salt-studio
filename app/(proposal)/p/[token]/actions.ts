@@ -1,5 +1,6 @@
 'use server'
 
+import {expireOtherSessions} from '@/lib/payments/sessions'
 import {getStripe} from '@/lib/payments/stripe'
 import {
   hashToken,
@@ -291,7 +292,7 @@ async function beginCheckout(token: string, context: SigningContext): Promise<Si
     return {ok: false, error: 'Stripe did not open a payment page. Try again in a moment.'}
   }
 
-  await insertPayment({
+  const row = await insertPayment({
     acceptance_id: acceptance.id,
     proposal_id: acceptance.proposal_id,
     step_index: 0,
@@ -303,6 +304,11 @@ async function beginCheckout(token: string, context: SigningContext): Promise<Si
     status: 'open',
     expires_at: new Date(expiresAt * 1000).toISOString(),
   })
+
+  // Changing the package or an add-on starts a new session. The old page
+  // must stop being payable, or they could still pay the old price for a
+  // selection they have moved on from.
+  await expireOtherSessions(stripe, acceptance.proposal_id, row.id)
 
   return {ok: true, url: session.url, amountCents: acceptance.first_cents}
 }
