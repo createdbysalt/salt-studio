@@ -1,5 +1,9 @@
-import {client} from '@/sanity/lib/client'
+import {client as publicClient} from '@/sanity/lib/client'
+import {token} from '@/sanity/lib/token'
 import type {MetadataRoute} from 'next'
+
+// The dataset is private, so even published slugs need the read token.
+const client = publicClient.withConfig({token, useCdn: false})
 
 // Site URL from environment - set during client onboarding
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:4000'
