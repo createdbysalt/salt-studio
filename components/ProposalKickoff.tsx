@@ -2,6 +2,7 @@
 
 import {SaltWordmark} from '@/components/SaltWordmark'
 import Cal, {getCalApi} from '@calcom/embed-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import {useEffect} from 'react'
 
@@ -21,6 +22,8 @@ const THANKS: Record<'paid' | 'processing' | 'wire', string> = {
  */
 export function ProposalKickoff({
   clientName,
+  logoUrl,
+  logoAlt,
   calLink,
   fallbackHref,
   paymentState,
@@ -30,6 +33,8 @@ export function ProposalKickoff({
   email,
 }: {
   clientName: string
+  logoUrl?: string
+  logoAlt?: string
   calLink: string
   fallbackHref: string
   paymentState: 'paid' | 'processing' | 'wire'
@@ -60,17 +65,32 @@ export function ProposalKickoff({
   return (
     <main className="min-h-svh bg-white text-[#08090a]">
       <div className="px-[max(1.5rem,var(--spacing-gutter))] pt-[1.5rem]">
-        <Link href="/" aria-label="Salt Studio" className="inline-flex text-[#08090a]">
-          <SaltWordmark className="h-[26px] w-auto" />
-        </Link>
+        <div className="flex items-center gap-3 text-[#08090a]">
+          <Link href="/" aria-label="Salt Studio" className="inline-flex">
+            <SaltWordmark className="h-[22px] w-auto" />
+          </Link>
+          <span aria-hidden="true" className="font-mono text-[12px] text-[#8f8f8f]">
+            ×
+          </span>
+          {logoUrl ? (
+            <Image
+              src={logoUrl}
+              alt={logoAlt || clientName}
+              width={180}
+              height={72}
+              className="h-[22px] w-auto object-contain"
+            />
+          ) : (
+            <p className="mb-0 shrink-0 whitespace-nowrap font-mono text-[12px] font-medium uppercase tracking-[0.08em]">
+              {clientName}
+            </p>
+          )}
+        </div>
       </div>
 
       <section className="mx-auto w-full max-w-[72rem] px-[1.5rem] pb-[4rem] pt-[3rem] md:pt-[4.5rem]">
         <header className="max-w-[40rem]">
-          <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-            {clientName}
-          </p>
-          <h1 className="mt-3 text-balance text-[clamp(2.5rem,6vw,4.5rem)] font-medium leading-[1.0] tracking-[-0.04em]">
+          <h1 className="text-balance text-[clamp(2.5rem,6vw,4.5rem)] font-medium leading-[1.0] tracking-[-0.04em]">
             Thank you so much.
           </h1>
           <p className="mt-4 max-w-[32rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">

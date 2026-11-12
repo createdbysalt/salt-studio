@@ -3,6 +3,7 @@ import {latestPaymentForProposal, type LatestPayment} from '@/lib/proposal/accep
 import {kickoffLink} from '@/lib/proposal/kickoff'
 import {isDevPreview, isProposalUnlocked, loadProposal} from '@/lib/proposal/load'
 import {proposalIsAccepted} from '@/lib/proposal/quote'
+import {urlForImage} from '@/sanity/lib/utils'
 import type {Metadata} from 'next'
 import {stegaClean} from 'next-sanity'
 import {notFound, redirect} from 'next/navigation'
@@ -68,10 +69,16 @@ export default async function ProposalKickoffRoute({params}: Props) {
   if (!link) redirect(`${proposalPath}#signed`)
 
   const clientName = clean(proposal.clientDisplayName) || 'You'
+  const clientLogo = proposal.clientLogo
+  const logoUrl = clientLogo?.asset?._ref
+    ? urlForImage({asset: clientLogo.asset})?.height(160).url()
+    : undefined
 
   return (
     <ProposalKickoff
       clientName={clientName}
+      logoUrl={logoUrl}
+      logoAlt={clean(clientLogo?.alt) || clientName}
       calLink={link.calLink}
       fallbackHref={link.href}
       paymentState={paymentState}
