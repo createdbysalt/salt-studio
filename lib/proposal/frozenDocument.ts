@@ -60,6 +60,10 @@ export type FrozenAgreementDocument = {
   quote: {
     totalCents: number
     firstCents: number
+    /** The package at list price, before any same-day discount. */
+    packageAmountCents?: number
+    /** The package after the discount, which is what went into the total. */
+    packageDueCents?: number
     sameDayPercent: number | null
     scheduleName: string | null
     steps: QuoteStep[]
@@ -200,6 +204,8 @@ export function buildFrozenAgreementDocument(input: {
     quote: {
       totalCents: input.quote.totalCents,
       firstCents: input.quote.firstCents,
+      packageAmountCents: input.quote.packageAmountCents,
+      packageDueCents: input.quote.packageDueCents,
       sameDayPercent: input.quote.percent,
       scheduleName: input.scheduleName,
       steps: input.quote.steps,

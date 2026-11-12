@@ -45,6 +45,8 @@ export function signerEmailHtml(input: {
   receiptUrl: string | null
   kickoffUrl: string | null
   addressLines: string[]
+  sameDayPercent: number | null
+  savedLabel: string | null
 }) {
   const scope = [input.packageName, ...input.addOnNames].filter(Boolean)
   const scopeList = scope
@@ -60,8 +62,16 @@ export function signerEmailHtml(input: {
     )
     .join('')
 
+  /**
+   * Nothing records whether they have booked yet. The calendar is embedded
+   * from Cal.com with no hook back, so the honest wording is conditional,
+   * the same way the proposal page already puts it.
+   */
   const action = input.kickoffUrl
-    ? `<tr><td style="padding:28px 0 0 0;">
+    ? `<tr><td style="padding:26px 0 0 0;font-family:${SANS};font-size:15px;line-height:23px;color:${MUTED};">
+        If you have not booked the kickoff call yet, pick a time that suits you and we will start.
+      </td></tr>
+      <tr><td style="padding:16px 0 0 0;">
         <a href="${escapeHtml(input.kickoffUrl)}" style="display:inline-block;background:${INK};color:#ffffff;font-family:${SANS};font-size:14px;font-weight:500;line-height:20px;text-decoration:none;padding:13px 22px;border-radius:999px;">Book the kickoff call</a>
       </td></tr>`
     : ''
@@ -84,7 +94,9 @@ export function signerEmailHtml(input: {
 <tr><td align="center" style="padding:40px 20px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
 
-  <tr><td style="padding:0 0 36px 0;font-family:${SANS};font-size:15px;font-weight:700;letter-spacing:0.22em;color:${INK};">SALT</td></tr>
+  <tr><td style="padding:0 0 36px 0;">
+    <img src="https://www.createdbysalt.com/salt-studio-logo.png" width="92" height="23" alt="Salt Studio" style="display:block;border:0;outline:none;text-decoration:none;width:92px;height:23px;" />
+  </td></tr>
 
   <tr><td style="padding:0 0 10px 0;font-family:${MONO};font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:${FAINT};">Signed and paid</td></tr>
 
@@ -94,12 +106,6 @@ export function signerEmailHtml(input: {
     Your first payment of ${escapeHtml(input.paidLabel)} has gone through, and the agreement is signed. The signed Statement of Work and the Master Services Agreement are attached to this email. They are yours to keep.
   </td></tr>
 
-  <tr><td style="padding:14px 0 0 0;font-family:${SANS};font-size:15px;line-height:23px;color:${MUTED};">
-    The last thing is the kickoff call. Pick a time that suits you and we will start.
-  </td></tr>
-
-  ${action}
-
   <tr><td style="padding:34px 0 0 0;"><div style="height:1px;background:${RULE};line-height:1px;font-size:0;">&nbsp;</div></td></tr>
 
   <tr><td style="padding:24px 0 10px 0;font-family:${MONO};font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:${FAINT};">What you agreed to</td></tr>
@@ -107,6 +113,11 @@ export function signerEmailHtml(input: {
 
   <tr><td style="padding:18px 0 10px 0;font-family:${MONO};font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:${FAINT};">Total ${escapeHtml(input.totalLabel)}</td></tr>
   <tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0">${stepList}</table></td></tr>
+  ${
+    input.sameDayPercent
+      ? `<tr><td style="padding:4px 0 0 0;font-family:${SANS};font-size:13px;line-height:19px;color:${INK};">Same-day discount applied: ${input.sameDayPercent}% off the package${input.savedLabel ? `, saving ${escapeHtml(input.savedLabel)}` : ''}. The total above is after it.</td></tr>`
+      : ''
+  }
   <tr><td style="padding:4px 0 0 0;font-family:${SANS};font-size:13px;line-height:19px;color:${MUTED};">The first payment was taken today. The rest are invoiced, never charged automatically.</td></tr>
 
   <tr><td style="padding:34px 0 0 0;"><div style="height:1px;background:${RULE};line-height:1px;font-size:0;">&nbsp;</div></td></tr>
@@ -122,6 +133,8 @@ export function signerEmailHtml(input: {
       ? `<tr><td style="padding:18px 0 0 0;font-family:${SANS};font-size:13px;line-height:19px;color:${MUTED};">Your Stripe receipt: <a href="${escapeHtml(input.receiptUrl)}" style="color:${INK};text-decoration:underline;">view it here</a>.</td></tr>`
       : ''
   }
+
+  ${action}
 
   <tr><td style="padding:34px 0 0 0;"><div style="height:1px;background:${RULE};line-height:1px;font-size:0;">&nbsp;</div></td></tr>
   <tr><td style="padding:20px 0 0 0;font-family:${SANS};font-size:13px;line-height:19px;color:${FAINT};">
@@ -142,14 +155,14 @@ export function signerEmailText(input: Parameters<typeof signerEmailHtml>[0]) {
     '',
     `Your first payment of ${input.paidLabel} has gone through, and the agreement is signed. The signed Statement of Work and the Master Services Agreement are attached to this email. They are yours to keep.`,
     '',
-    'The last thing is the kickoff call. Pick a time that suits you and we will start.',
-    input.kickoffUrl ? `Book the kickoff call: ${input.kickoffUrl}` : null,
-    '',
     'WHAT YOU AGREED TO',
     ...scope.map((name) => `  ${name}`),
     '',
     `TOTAL ${input.totalLabel}`,
     ...input.steps.map((s) => `  ${s.percent}%  ${s.amount}  ${s.trigger}`),
+    input.sameDayPercent
+      ? `Same-day discount applied: ${input.sameDayPercent}% off the package${input.savedLabel ? `, saving ${input.savedLabel}` : ''}. The total above is after it.`
+      : null,
     'The first payment was taken today. The rest are invoiced, never charged automatically.',
     '',
     'THE RECORD',
@@ -165,6 +178,11 @@ export function signerEmailText(input: Parameters<typeof signerEmailHtml>[0]) {
     '',
     `The two attached documents together form the agreement between Salt Studio and ${input.clientLegalName}. The checksums above identify those exact files, so either of us can show later that nothing has changed.`,
     input.receiptUrl ? `Your Stripe receipt: ${input.receiptUrl}` : null,
+    '',
+    input.kickoffUrl
+      ? 'If you have not booked the kickoff call yet, pick a time that suits you and we will start.'
+      : null,
+    input.kickoffUrl ? `Book the kickoff call: ${input.kickoffUrl}` : null,
     '',
     'Salt Studio · hello@createdbysalt.com',
     'Reply to this email and it comes straight to us.',

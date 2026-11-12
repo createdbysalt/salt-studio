@@ -267,6 +267,8 @@ function signerMessage(input: {
     // turn the one button in this email into something else.
     kickoffUrl: safeKickoffUrl(document?.kickoffUrl),
     addressLines: input.acceptance.signer_address?.lines ?? [],
+    sameDayPercent: input.acceptance.same_day_percent ?? null,
+    savedLabel: savedLabel(document?.quote),
   }
   return {
     from: input.config.from,
@@ -284,6 +286,14 @@ function signerMessage(input: {
       input.legacyScopeBlocks,
     ),
   }
+}
+
+/** What the same-day discount took off, when the record kept both figures. */
+function savedLabel(quote: {packageAmountCents?: number; packageDueCents?: number} | undefined) {
+  const list = quote?.packageAmountCents
+  const due = quote?.packageDueCents
+  if (typeof list !== 'number' || typeof due !== 'number' || list <= due) return null
+  return formatCents(list - due)
 }
 
 function safeKickoffUrl(value: string | null | undefined) {
