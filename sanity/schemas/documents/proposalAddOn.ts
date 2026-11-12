@@ -3,7 +3,7 @@ import {defineArrayMember, defineField, defineType} from 'sanity'
 
 /**
  * An optional add-on. The card shows `amount`.
- * `priceId` is the payments-table key. Charging reads that table on the server.
+ * Charging reads the same `amount` on the server. There is no second price table.
  */
 export default defineType({
   name: 'proposalAddOn',
@@ -40,19 +40,6 @@ export default defineType({
         'The price on the proposal card, in US dollars. Whole dollars, no cents. This is the figure the client reads.',
       validation: (rule) =>
         rule.required().integer().positive().error('Enter the price in whole US dollars'),
-    }),
-    defineField({
-      name: 'priceId',
-      title: 'Price id',
-      type: 'string',
-      group: 'card',
-      description:
-        'The id of this add-on in the payments table. Charging uses this id on the server. It is not shown on the card.',
-      validation: (rule) =>
-        rule
-          .required()
-          .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-          .error('Use a lowercase id with hyphens, matching the payments table'),
     }),
     defineField({
       name: 'scope',

@@ -1,6 +1,7 @@
 'use client'
 
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {formatCents, quoteSelection, type QuoteInputs} from '@/lib/proposal/quote'
 import {useGSAP} from '@gsap/react'
 import {useRouter} from 'next/navigation'
 import {useEffect, useRef, useState, type MouseEvent} from 'react'
@@ -10,19 +11,22 @@ type PackageChoice = {
   name: string
   price: string
   sale: string | null
-  due: number
 }
 
 type AddOnChoice = {
   id: string
   name: string
-  amount: number
   price: string
 }
 
 const rowClass =
   'flex items-center justify-between gap-4 rounded-[20px] border border-white/70 bg-[rgba(228,228,228,0.72)] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[24px]'
 
+/**
+ * Package and add-on rows with the running total. The total is
+ * `quoteSelection` on the inputs the server resolved, the same function
+ * the charge uses, so the two cannot disagree.
+ */
 export function ProposalChoices({
   token,
   kickoff,
@@ -30,7 +34,7 @@ export function ProposalChoices({
   addOns,
   packageId,
   addonIds,
-  percent,
+  inputs,
 }: {
   token: string
   kickoff: string | null
@@ -38,7 +42,7 @@ export function ProposalChoices({
   addOns: AddOnChoice[]
   packageId: string | null
   addonIds: string[]
-  percent: number | null
+  inputs: QuoteInputs
 }) {
   const router = useRouter()
   const [currentPackage, setCurrentPackage] = useState(packageId)
@@ -64,10 +68,9 @@ export function ProposalChoices({
     router.replace(`/p/${encodeURIComponent(token)}${query ? `?${query}` : ''}`, {scroll: false})
   }
 
-  const chosen = packages.find((pkg) => pkg.id === currentPackage)
-  const due =
-    (chosen?.due ?? 0) +
-    addOns.reduce((sum, addOn) => (currentAddOns.includes(addOn.id) ? sum + addOn.amount : sum), 0)
+  const quote = quoteSelection(inputs, {packageId: currentPackage, addonIds: currentAddOns})
+  const totalCents = quote?.totalCents ?? 0
+  const firstStep = quote && quote.steps.length > 1 ? quote.steps[0] : null
 
   return (
     <div className="mt-6 grid gap-5">
@@ -79,9 +82,9 @@ export function ProposalChoices({
                 <span className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
                   Choose your package
                 </span>
-                {percent != null ? (
+                {inputs.percent != null ? (
                   <span className="rounded-full bg-[#f08a3a] px-2.5 py-1 text-[12px] font-medium leading-none tracking-[-0.01em] text-white">
-                    {percent}% off for 24 hours only
+                    {inputs.percent}% off for 24 hours only
                   </span>
                 ) : null}
               </span>
@@ -199,19 +202,29 @@ export function ProposalChoices({
       </div>
 
       <div className="flex justify-end pr-5">
-        <div className="border-t border-[#08090a]/30 pt-3">
+        <div className="border-t border-[#08090a]/30 pt-3 text-right">
           <p className="flex items-end justify-end gap-4">
             <span className="pb-[1.1em] font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
               Total
             </span>
             <span className="text-[clamp(3rem,6vw,5rem)] font-medium leading-none tracking-[-0.06em]">
-              <FlipTotal value={money(due)} />
+              <FlipTotal value={formatCents(totalCents)} />
             </span>
           </p>
+          {firstStep ? (
+            <p className="mt-2 text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
+              {formatCents(firstStep.amountCents)} {lowerFirst(firstStep.trigger)}. The rest is
+              invoiced later.
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
   )
+}
+
+function lowerFirst(value: string) {
+  return `${value.charAt(0).toLowerCase()}${value.slice(1)}`
 }
 
 function modifiedClick(event: MouseEvent<HTMLAnchorElement>) {
@@ -230,14 +243,6 @@ function choiceHref(
   if (kickoff) params.set('kickoff', kickoff)
   const query = params.toString()
   return `/p/${encodeURIComponent(token)}${query ? `?${query}` : ''}`
-}
-
-function money(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(amount)
 }
 
 function FlipTotal({value}: {value: string}) {
@@ -303,8 +308,8 @@ function FlipDigit({
     )
   }, [char, from, up, delay, rolls])
 
-  const top = rolls ? (up ? from || '\u00a0' : char) : char
-  const bottom = rolls ? (up ? char : from || '\u00a0') : null
+  const top = rolls ? (up ? from || ' ' : char) : char
+  const bottom = rolls ? (up ? char : from || ' ') : null
 
   return (
     <span className="inline-block h-[1.45em] overflow-hidden px-[0.04em] align-top leading-none">
@@ -318,9 +323,15 @@ function FlipDigit({
   )
 }
 
+/**
+ * Digits and marks of a price string. Decimal prices keep their cents as
+ * plain marks so a whole-dollar total and a cents total both animate.
+ */
 function priceSlots(value: string, from: string) {
-  const next = value.replace(/\D/g, '').split('')
-  const prev = from.replace(/\D/g, '').split('')
+  const [valueWhole, valueCents] = value.split('.')
+  const [fromWhole] = from.split('.')
+  const next = valueWhole.replace(/\D/g, '').split('')
+  const prev = fromWhole.replace(/\D/g, '').split('')
   const missing = Math.max(0, next.length - prev.length)
   const aligned = [...Array<string>(missing).fill(''), ...prev].slice(-next.length)
   const slots: Array<{
@@ -345,5 +356,8 @@ function priceSlots(value: string, from: string) {
       place,
     })
   })
+  if (valueCents) {
+    slots.push({id: 'cents', kind: 'mark', char: `.${valueCents}`, from: '', place: 0})
+  }
   return slots
 }

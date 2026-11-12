@@ -5686,13 +5686,6 @@
         },
         "optional": true
       },
-      "priceId": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
-        },
-        "optional": true
-      },
       "scope": {
         "type": "objectAttribute",
         "value": {
@@ -6854,13 +6847,6 @@
         "type": "objectAttribute",
         "value": {
           "type": "number"
-        },
-        "optional": true
-      },
-      "priceId": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "string"
         },
         "optional": true
       },

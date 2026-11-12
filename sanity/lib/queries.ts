@@ -892,9 +892,20 @@ export const clientPortalSlugsQuery = defineQuery(`
 `)
 
 /**
+ * The name on the sign-in page. Prices, scope, and legal details stay on
+ * `proposalByTokenQuery`, which runs only after the gate cookie is valid.
+ */
+export const proposalGateIdentityQuery = defineQuery(`
+  *[_type == "proposal" && token == $key][0]{
+    _id,
+    clientDisplayName
+  }
+`)
+
+/**
  * One proposal, loaded by its unguessable link key.
- * The card price is `amount` on each package and add-on.
- * `priceId` stays out of this query. Charging looks it up on the server.
+ * The card price is `amount` on each package and add-on. Charging reads
+ * the same field on the server through lib/proposal/quote.ts.
  */
 export const proposalByTokenQuery = defineQuery(`
   *[_type == "proposal" && token == $key][0]{

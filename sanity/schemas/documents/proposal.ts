@@ -306,7 +306,7 @@ export default defineType({
           title: 'Deadline',
           type: 'datetime',
           description:
-            'Optional. If empty, the bonus applies on the day the proposal is first opened, decided by the server.',
+            'The clock for the whole same-day offer: this bonus and the package discount on the Packages section. The discount shows and charges only while this is in the future. Leave it empty and no discount applies, even if the sticker is switched on.',
         }),
       ],
     }),

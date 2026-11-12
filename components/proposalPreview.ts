@@ -29,7 +29,7 @@ const SITUATION_CARDS = [
     title: 'They still call the office',
     quote: 'If the times are not on the site, someone phones and a person has to answer.',
   },
-]
+] as const
 
 /**
  * Real projects for the Harbor Parish preview, in order.
@@ -91,7 +91,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       enabled: true,
       bonusTitle: 'Homepage copy',
       bonusDetail: 'Sign and pay the deposit today, and the homepage copy is included.',
-      deadline: null,
+      deadline: '2026-11-24T23:59:00.000Z',
     },
     recommendedPackageId: 'pkg-complete',
     // Preview figures so the cards have prices to design against.

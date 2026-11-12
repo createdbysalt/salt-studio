@@ -1,16 +1,11 @@
-import {ProposalPage, resolveProposalSelection} from '@/components/ProposalPage'
-import {
-  previewProofPicks,
-  previewProposal,
-  withPreviewProofProjects,
-} from '@/components/proposalPreview'
+import {ProposalGate} from '@/components/ProposalGate'
+import {ProposalPage, type ProposalPaymentView} from '@/components/ProposalPage'
+import {previewProposal} from '@/components/proposalPreview'
+import {latestPaymentForProposal} from '@/lib/proposal/acceptances'
+import {isDevPreview, isProposalUnlocked, loadProposal} from '@/lib/proposal/load'
+import {resolveProposalSelection} from '@/lib/proposal/quote'
 import {sanityFetch} from '@/sanity/lib/live'
-import {
-  footerLegalPagesQuery,
-  previewProofProjectsQuery,
-  proposalByTokenQuery,
-  settingsQuery,
-} from '@/sanity/lib/queries'
+import {footerLegalPagesQuery, proposalGateIdentityQuery, settingsQuery} from '@/sanity/lib/queries'
 import type {Metadata} from 'next'
 import {notFound} from 'next/navigation'
 
@@ -24,6 +19,8 @@ type Props = {
   }>
 }
 
+type ProposalQuery = Props['searchParams'] extends Promise<infer Query> ? Query : never
+
 function previewCardCount(value: string | string[] | undefined) {
   const raw = Array.isArray(value) ? value[0] : value
   const count = Number(raw)
@@ -31,29 +28,56 @@ function previewCardCount(value: string | string[] | undefined) {
   return undefined
 }
 
-async function loadProposal(token: string, cardCount?: number) {
+function gateSearch(query: ProposalQuery) {
+  const params = new URLSearchParams()
+  const add = (key: string, value: string | string[] | undefined) => {
+    if (!value) return
+    if (Array.isArray(value)) {
+      for (const item of value) params.append(key, item)
+      return
+    }
+    params.set(key, value)
+  }
+  add('package', query.package)
+  add('addon', query.addon)
+  add('kickoff', query.kickoff)
+  add('cards', query.cards)
+  const search = params.toString()
+  return search ? `?${search}` : ''
+}
+
+async function loadClientName(token: string) {
+  if (isDevPreview(token)) return previewProposal().clientDisplayName?.trim() || null
   const {data} = await sanityFetch({
-    query: proposalByTokenQuery,
+    query: proposalGateIdentityQuery,
     params: {key: token},
     stega: false,
   })
-  if (data?._id) return data
-  if (process.env.NODE_ENV === 'development' && token === 'preview') {
-    const preview = previewProposal(cardCount)
-    const {data: projects} = await sanityFetch({
-      query: previewProofProjectsQuery,
-      params: {slugs: previewProofPicks.map((pick) => pick.slug)},
-      stega: false,
-    })
-    return withPreviewProofProjects(preview, projects ?? [])
+  const name = data?.clientDisplayName?.trim()
+  if (!data?._id || !name) return null
+  return name
+}
+
+/** The latest payment, or null when the store is not configured or empty. */
+async function loadPayment(proposalId: string): Promise<ProposalPaymentView | null> {
+  try {
+    const row = await latestPaymentForProposal(proposalId)
+    if (!row) return null
+    return {
+      status: row.status,
+      method: row.method,
+      amountCents: row.amount_cents,
+      signerEmail: row.proposal_acceptances?.signer_email ?? null,
+    }
+  } catch (error) {
+    console.error('[proposal] could not read the payment state', error)
+    return null
   }
-  return null
 }
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {token} = await params
-  const proposal = await loadProposal(token)
-  const name = proposal?.clientDisplayName?.trim()
+  const name = await loadClientName(token)
 
   return {
     title: name ? `Proposal for ${name}` : 'Proposal',
@@ -64,6 +88,22 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function ProposalRoute({params, searchParams}: Props) {
   const {token} = await params
   const query = await searchParams
+  if (!(await isProposalUnlocked(token))) {
+    const name = await loadClientName(token)
+    if (!name) notFound()
+    return (
+      <>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "document.getElementById('proposal-open-boot')?.remove();document.getElementById('proposal-open')?.remove();document.documentElement.style.overflow='';",
+          }}
+        />
+        <ProposalGate token={token} clientName={name} search={gateSearch(query)} />
+      </>
+    )
+  }
+
   const [proposal, {data: settings}, {data: legalPages}] = await Promise.all([
     loadProposal(token, previewCardCount(query.cards)),
     sanityFetch({query: settingsQuery, stega: false}),
@@ -71,11 +111,14 @@ export default async function ProposalRoute({params, searchParams}: Props) {
   ])
   if (!proposal?._id) notFound()
 
+  const payment = await loadPayment(proposal._id)
+
   return (
     <ProposalPage
       token={token}
       proposal={proposal}
       selection={resolveProposalSelection(proposal, query)}
+      payment={payment}
       settings={settings}
       legalPages={legalPages}
     />

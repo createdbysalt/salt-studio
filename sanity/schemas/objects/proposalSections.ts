@@ -432,7 +432,7 @@ export const proposalPackagesSection = defineType({
       title: 'Same-day discount',
       type: 'object',
       description:
-        'A percent off the package prices if they sign today. The sticker sits beside the heading. Add-ons stay at full price.',
+        'A percent off the package prices if they sign today. The sticker sits beside the heading. Add-ons stay at full price. It runs on the Same-day offer deadline on the proposal: no deadline, no discount.',
       fields: [
         defineField({
           name: 'enabled',

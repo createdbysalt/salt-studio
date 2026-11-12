@@ -16,10 +16,24 @@ const GRAY = '#f3f3f3'
  * ProposalLayout renders this. The boot cover in app/layout.tsx hides the
  * page until this overlay is mounted.
  */
+function clearProposalCover() {
+  document.getElementById(BOOT_ID)?.remove()
+  document.getElementById(OVERLAY_ID)?.remove()
+  document.documentElement.style.overflow = ''
+}
+
 export function ProposalOpen() {
   useEffect(() => {
     if (!window.location.pathname.startsWith('/p/')) return
-    if (document.getElementById(OVERLAY_ID)) return
+    // The sign-in page is white. The gray opening belongs to the proposal itself.
+    if (document.querySelector('[data-proposal-gate]')) {
+      clearProposalCover()
+      return
+    }
+    if (document.getElementById(OVERLAY_ID)) {
+      document.getElementById(BOOT_ID)?.remove()
+      return
+    }
 
     const boot = document.getElementById(BOOT_ID)
     if (prefersReducedMotion()) {

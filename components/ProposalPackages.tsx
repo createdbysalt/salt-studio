@@ -9,6 +9,8 @@ export type ProposalPackageOffer = {
   items: string[]
   scope: PortableTextBlock[]
   price: string
+  /** The reduced price, already formatted, when the same-day percent applies. */
+  sale: string | null
   amount: number | null
   recommended: boolean
 }
@@ -76,18 +78,6 @@ function ScopeLink({
       </div>
     </ProposalScopePanel>
   )
-}
-
-function money(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
-function reducedAmount(amount: number, percent: number) {
-  return Math.round((amount * (100 - percent)) / 100)
 }
 
 const stickerStar =
@@ -182,11 +172,10 @@ export function ProposalPackages({
                   {pkg.name}
                 </h3>
                 {pkg.price ? (
-                  discountPercent != null && pkg.amount != null ? (
+                  discountPercent != null && pkg.sale ? (
                     <p className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                       <span className="sr-only">
-                        {pkg.price} crossed out. {money(reducedAmount(pkg.amount, discountPercent))}{' '}
-                        if signed within 24 hours.
+                        {pkg.price} crossed out. {pkg.sale} if signed within 24 hours.
                       </span>
                       <s
                         aria-hidden="true"
@@ -202,7 +191,7 @@ export function ProposalPackages({
                             : 'text-[#f08a3a]'
                         }`}
                       >
-                        {money(reducedAmount(pkg.amount, discountPercent))}
+                        {pkg.sale}
                       </span>
                     </p>
                   ) : (

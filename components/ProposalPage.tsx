@@ -5,12 +5,24 @@ import {ProposalCoverFrame} from '@/components/ProposalCoverFrame'
 import {ProposalLockup} from '@/components/ProposalLockup'
 import {ProposalOutcomes, ProposalSwirlField} from '@/components/ProposalOutcomes'
 import {ProposalPackages} from '@/components/ProposalPackages'
-import {ProposalPayButton} from '@/components/ProposalPayButton'
 import {ProposalProof} from '@/components/ProposalProof'
 import {ProposalRail, type ProposalRailItem} from '@/components/ProposalRail'
 import {ProposalScopePanel} from '@/components/ProposalScopePanel'
+import {ProposalSignForm} from '@/components/ProposalSignForm'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import {SiteFooter} from '@/components/SiteFooter'
+import type {PaymentMethod, PaymentStatus} from '@/lib/proposal/acceptances'
+import {
+  discountedAmount,
+  formatAmount,
+  formatCents,
+  proposalIsAccepted,
+  proposalIsExpired,
+  quoteInputs,
+  quoteSelection,
+  sameDayPercent,
+  type ProposalSelection,
+} from '@/lib/proposal/quote'
 import type {
   FooterLegalPagesQueryResult,
   ProposalByTokenQueryResult,
@@ -25,16 +37,13 @@ export type ProposalDocument = NonNullable<ProposalByTokenQueryResult>
 type Section = NonNullable<ProposalDocument['sections']>[number]
 type PackageOption = NonNullable<ProposalDocument['packages']>[number]
 type AddOnOption = NonNullable<ProposalDocument['addOns']>[number]
-export type ProposalSelection = {
-  packageId: string | null
-  addonIds: string[]
-  kickoffDate: string | null
-}
 
-type ProposalQuery = {
-  package?: string | string[]
-  addon?: string | string[]
-  kickoff?: string | string[]
+/** The latest payment row, as the page needs it. Supabase is the authority. */
+export type ProposalPaymentView = {
+  status: PaymentStatus
+  method: PaymentMethod
+  amountCents: number
+  signerEmail: string | null
 }
 
 type View = {
@@ -45,42 +54,22 @@ type View = {
   selectedAddOns: AddOnOption[]
   expired: boolean
   accepted: boolean
-}
-
-export function resolveProposalSelection(
-  proposal: ProposalDocument,
-  query: ProposalQuery,
-): ProposalSelection {
-  const packages = proposal.packages ?? []
-  const requestedPackage = firstQueryValue(query.package)
-  const packageId =
-    packages.find((item) => item._id === requestedPackage)?._id ??
-    mostExpensivePackageId(packages) ??
-    packages.find((item) => item._id === proposal.recommendedPackageId)?._id ??
-    packages[0]?._id ??
-    null
-
-  const knownAddOns = new Set((proposal.addOns ?? []).map((item) => item._id))
-  const addonIds = queryValues(query.addon).filter((id) => knownAddOns.has(id))
-
-  const kickoffs = proposal.kickoffOptions ?? []
-  const requestedKickoff = firstQueryValue(query.kickoff)
-  const kickoffDate =
-    kickoffs.find((item) => item.date === requestedKickoff)?.date ?? kickoffs[0]?.date ?? null
-
-  return {packageId, addonIds, kickoffDate}
+  payment: ProposalPaymentView | null
+  now: number
 }
 
 export function ProposalPage({
   token,
   proposal,
   selection,
+  payment = null,
   settings = null,
   legalPages = null,
 }: {
   token: string
   proposal: ProposalDocument
   selection: ProposalSelection
+  payment?: ProposalPaymentView | null
   settings?: SettingsQueryResult | null
   legalPages?: FooterLegalPagesQueryResult | null
 }) {
@@ -89,14 +78,17 @@ export function ProposalPage({
   const selectedAddOns = (proposal.addOns ?? []).filter((item) =>
     selection.addonIds.includes(item._id),
   )
+  const now = Date.now()
   const view: View = {
     token,
     proposal,
     selection,
     selectedPackage,
     selectedAddOns,
-    expired: proposalIsExpired(proposal),
-    accepted: proposal.status === 'signed' || proposal.status === 'paid',
+    expired: proposalIsExpired(proposal, now),
+    accepted: proposalIsAccepted(proposal) || payment?.status === 'paid',
+    payment,
+    now,
   }
   const slides = (proposal.sections ?? []).flatMap((section) => {
     if (section.enabled === false || !sectionIsShown(section, view)) return []
@@ -505,28 +497,6 @@ function Proof({section}: {section: Extract<Section, {_type: 'proposalProofSecti
   )
 }
 
-function proposalPrice(amount: number | null | undefined) {
-  if (amount == null || !Number.isFinite(amount)) return ''
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
-function mostExpensivePackageId(packages: Array<{_id: string; amount?: number | null}>) {
-  let bestId: string | null = null
-  let best = -Infinity
-  for (const pkg of packages) {
-    if (!pkg._id || pkg.amount == null || !Number.isFinite(pkg.amount)) continue
-    if (pkg.amount > best) {
-      best = pkg.amount
-      bestId = pkg._id
-    }
-  }
-  return bestId
-}
-
 function Packages({
   section,
   view,
@@ -534,9 +504,11 @@ function Packages({
   section: Extract<Section, {_type: 'proposalPackagesSection'}>
   view: View
 }) {
+  const discountPercent = sameDayPercent(view.proposal, view.now)
   const packages = (view.proposal.packages ?? []).flatMap((pkg) => {
     const name = line(pkg.name)
     if (!pkg._id || !name) return []
+    const amount = typeof pkg.amount === 'number' ? pkg.amount : null
     return [
       {
         id: pkg._id,
@@ -544,8 +516,12 @@ function Packages({
         summary: line(pkg.summary),
         items: (pkg.includedItems ?? []).map((item) => line(item)).filter(Boolean),
         scope: (pkg.scope ?? []) as PortableTextBlock[],
-        price: proposalPrice(pkg.amount),
-        amount: typeof pkg.amount === 'number' ? pkg.amount : null,
+        price: formatAmount(amount),
+        sale:
+          discountPercent != null && amount != null
+            ? formatAmount(discountedAmount(amount, discountPercent))
+            : null,
+        amount,
         recommended: pkg._id === view.proposal.recommendedPackageId,
       },
     ]
@@ -568,22 +544,10 @@ function Packages({
               name,
               line: line(addOn.line),
               scope: (addOn.scope ?? []) as PortableTextBlock[],
-              price: proposalPrice(addOn.amount),
+              price: formatAmount(addOn.amount),
             },
           ]
         })
-
-  const discount = section.sameDayDiscount
-  const discountPercent =
-    !view.expired &&
-    !view.accepted &&
-    discount?.enabled === true &&
-    typeof discount.percent === 'number' &&
-    Number.isInteger(discount.percent) &&
-    discount.percent >= 1 &&
-    discount.percent <= 90
-      ? discount.percent
-      : null
 
   return (
     <ProposalPackages
@@ -656,30 +620,6 @@ function AddOns({
   )
 }
 
-function sameDayPercent(view: View) {
-  const packages = (view.proposal.sections ?? []).find(
-    (section): section is Extract<Section, {_type: 'proposalPackagesSection'}> =>
-      section._type === 'proposalPackagesSection',
-  )
-  const discount = packages?.sameDayDiscount
-  if (view.expired || view.accepted || discount?.enabled !== true) return null
-  if (
-    typeof discount.percent !== 'number' ||
-    !Number.isInteger(discount.percent) ||
-    discount.percent < 1 ||
-    discount.percent > 90
-  ) {
-    return null
-  }
-  return discount.percent
-}
-
-function reducedPrice(amount: number | null | undefined, percent: number | null) {
-  if (amount == null || !Number.isFinite(amount)) return null
-  if (percent == null) return amount
-  return Math.round((amount * (100 - percent)) / 100)
-}
-
 function Investment({
   section,
   view,
@@ -687,7 +627,9 @@ function Investment({
   section: Extract<Section, {_type: 'proposalInvestmentSection'}>
   view: View
 }) {
-  const percent = sameDayPercent(view)
+  const inputs = quoteInputs(view.proposal, view.now)
+  const quote = quoteSelection(inputs, view.selection)
+  const percent = inputs.percent
   const packages = (view.proposal.packages ?? []).flatMap((pkg) => {
     const name = line(pkg.name)
     if (!pkg._id || !name) return []
@@ -733,111 +675,115 @@ function Investment({
       <ProposalChoices
         token={view.token}
         kickoff={view.selection.kickoffDate}
-        percent={percent}
+        inputs={inputs}
         packageId={view.selection.packageId}
         addonIds={view.selection.addonIds}
         packages={packages.flatMap((pkg) => {
-          const due = reducedPrice(pkg.amount, percent)
-          if (due == null) return []
+          if (typeof pkg.amount !== 'number') return []
           return [
             {
               id: pkg._id,
               name: line(pkg.name),
-              price: proposalPrice(pkg.amount),
-              sale: percent != null ? proposalPrice(due) : null,
-              due,
+              price: formatAmount(pkg.amount),
+              sale: percent != null ? formatAmount(discountedAmount(pkg.amount, percent)) : null,
             },
           ]
         })}
         addOns={addOns.flatMap((addOn) => {
           if (typeof addOn.amount !== 'number') return []
-          return [
-            {
-              id: addOn._id,
-              name: line(addOn.name),
-              amount: addOn.amount,
-              price: proposalPrice(addOn.amount),
-            },
-          ]
+          return [{id: addOn._id, name: line(addOn.name), price: formatAmount(addOn.amount)}]
         })}
       />
 
       {accept && !view.accepted ? (
         <div id="sign" className="mx-auto mt-[4.5rem] w-full max-w-[36rem]">
           {view.expired ? (
-            <div className="rounded-[32px] border border-white/70 bg-[rgba(228,228,228,0.62)] px-[2rem] py-[2.25rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_30px_80px_rgba(40,30,10,0.12)] backdrop-blur-[42px]">
-              <p className="text-[1.15rem] font-medium leading-snug">
-                The price is no longer held. Write back and a new proposal can go out.
-              </p>
-            </div>
-          ) : (
-            <form className="relative overflow-hidden rounded-[32px] border border-white/70 bg-[rgba(228,228,228,0.62)] px-[2rem] py-[2.25rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_30px_80px_rgba(40,30,10,0.12)] backdrop-blur-[42px]">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-[linear-gradient(180deg,rgba(255,255,255,0.5),transparent)]"
-              />
-              <div className="relative grid gap-5">
-                <div className="text-center">
-                  <p className="text-[2.5rem] font-medium leading-[1.05] tracking-[-0.04em]">
-                    Sign here and we can start.
-                  </p>
-                </div>
-                <label className="block rounded-[20px] border border-white/80 bg-white/70 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] transition-colors focus-within:border-[#08090a]/25">
-                  <span className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-                    Full name
-                  </span>
-                  <input
-                    name="signerName"
-                    autoComplete="name"
-                    placeholder="Your name"
-                    className="mt-2 w-full bg-transparent text-[1.35rem] font-medium tracking-[-0.03em] text-[#08090a] outline-none placeholder:font-normal placeholder:text-[#a3a3a3]"
-                  />
-                </label>
-                <label className="flex items-start gap-3 text-[1.05rem] leading-relaxed">
-                  <input type="checkbox" className="mt-1.5 h-4 w-4 accent-ink" />
-                  <span>
-                    <AgreementLine
-                      label="I agree to the Master Services Agreement and this Statement of Work."
-                      statement={
-                        scope ? (
-                          <Statement
-                            packageName={line(view.selectedPackage?.name)}
-                            packageScope={
-                              (view.selectedPackage?.scope ?? []) as PortableTextBlock[]
-                            }
-                            packageItems={view.selectedPackage?.includedItems ?? []}
-                            addOns={view.selectedAddOns.map((addOn) => ({
-                              name: line(addOn.name),
-                              scope: (addOn.scope ?? []) as PortableTextBlock[],
-                              line: line(addOn.line),
-                            }))}
-                            standing={(scope.body ?? []) as PortableTextBlock[]}
-                          />
-                        ) : null
-                      }
-                      agreement={
-                        <Agreement
-                          body={(view.proposal.msa?.body ?? []) as PortableTextBlock[]}
-                          pdfUrl={view.proposal.msa?.pdfUrl ?? null}
-                        />
-                      }
+            <SignCardNote>
+              The price is no longer held. Write back and a new proposal can go out.
+            </SignCardNote>
+          ) : view.payment?.status === 'processing' ? (
+            <SignCardNote title="Your payment is on its way.">
+              Bank payments take a few business days to clear. We email{' '}
+              {view.payment.signerEmail || 'you'} the moment it does, with the signed scope and the
+              receipt.
+            </SignCardNote>
+          ) : view.payment?.status === 'pending_wire' ? (
+            <SignCardNote title="Wire instructions are on their way.">
+              We send them to {view.payment.signerEmail || 'you'} for{' '}
+              {formatCents(view.payment.amountCents)}. The scope is yours as soon as it lands.
+            </SignCardNote>
+          ) : quote ? (
+            <ProposalSignForm
+              token={view.token}
+              selection={view.selection}
+              payLabel={`Pay ${formatCents(quote.firstCents)}`}
+              restLine={restLine(quote.totalCents, quote.steps)}
+              wireAvailable={quote.firstCents >= 1_000_000}
+              note={
+                view.payment?.status === 'failed'
+                  ? 'That payment did not go through, and nothing was charged. Try again below.'
+                  : null
+              }
+            >
+              <AgreementLine
+                label="I agree to the Master Services Agreement and this Statement of Work."
+                statement={
+                  scope ? (
+                    <Statement
+                      packageName={line(view.selectedPackage?.name)}
+                      packageScope={(view.selectedPackage?.scope ?? []) as PortableTextBlock[]}
+                      packageItems={view.selectedPackage?.includedItems ?? []}
+                      addOns={view.selectedAddOns.map((addOn) => ({
+                        name: line(addOn.name),
+                        scope: (addOn.scope ?? []) as PortableTextBlock[],
+                        line: line(addOn.line),
+                      }))}
+                      standing={(scope.body ?? []) as PortableTextBlock[]}
                     />
-                    {version ? ` Version ${version}.` : ''}
-                  </span>
-                </label>
-                <div>
-                  <ProposalPayButton />
-                  <p className="mt-3 text-center text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
-                    The signed scope and receipt go to your email.
-                  </p>
-                </div>
-              </div>
-            </form>
+                  ) : null
+                }
+                agreement={
+                  <Agreement
+                    body={(view.proposal.msa?.body ?? []) as PortableTextBlock[]}
+                    pdfUrl={view.proposal.msa?.pdfUrl ?? null}
+                  />
+                }
+              />
+              {version ? ` Version ${version}.` : ''}
+            </ProposalSignForm>
+          ) : (
+            <SignCardNote>Choose a package above to sign.</SignCardNote>
           )}
         </div>
       ) : null}
     </section>
   )
+}
+
+function SignCardNote({title, children}: {title?: string; children: ReactNode}) {
+  return (
+    <div className="rounded-[32px] border border-white/70 bg-[rgba(228,228,228,0.62)] px-[2rem] py-[2.25rem] text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_30px_80px_rgba(40,30,10,0.12)] backdrop-blur-[42px]">
+      {title ? (
+        <p className="text-[2.5rem] font-medium leading-[1.05] tracking-[-0.04em]">{title}</p>
+      ) : null}
+      <p
+        className={`text-[1.15rem] font-medium leading-snug ${title ? 'mt-4 text-[#5c5c5c]' : ''}`}
+      >
+        {children}
+      </p>
+    </div>
+  )
+}
+
+/** "The remaining $2,475 is invoiced when the work is accepted." */
+function restLine(totalCents: number, steps: Array<{amountCents: number; trigger: string}>) {
+  if (steps.length < 2) return null
+  const rest = totalCents - (steps[0]?.amountCents ?? 0)
+  if (steps.length === 2) {
+    const trigger = steps[1]?.trigger ?? ''
+    return `The remaining ${formatCents(rest)} is invoiced ${trigger.charAt(0).toLowerCase()}${trigger.slice(1)}.`
+  }
+  return `The remaining ${formatCents(rest)} is invoiced in ${steps.length - 1} later payments.`
 }
 
 function paymentSentence(view: View) {
@@ -1057,13 +1003,6 @@ function proposalHref(
   return `/p/${encodeURIComponent(token)}${query ? `?${query}` : ''}`
 }
 
-function proposalIsExpired(proposal: ProposalDocument) {
-  if (proposal.status === 'expired') return true
-  if (!proposal.validUntil) return false
-  const end = new Date(proposal.validUntil)
-  return !Number.isNaN(end.getTime()) && end.getTime() < Date.now()
-}
-
 function validityLabel(validUntil: string | null, expired: boolean) {
   if (expired) return 'Expired'
   if (!validUntil) return null
@@ -1090,13 +1029,4 @@ function withEmphasis(headline: string, emphasis: string): ReactNode {
       {headline.slice(index + emphasis.length)}
     </>
   )
-}
-
-function firstQueryValue(value: string | string[] | undefined) {
-  return Array.isArray(value) ? value[0] : value
-}
-
-function queryValues(value: string | string[] | undefined) {
-  if (!value) return []
-  return Array.isArray(value) ? value : [value]
 }
