@@ -2,15 +2,20 @@ import 'server-only'
 import type {ProposalDocument} from '@/components/ProposalPage'
 import {
   agreedTextHash,
+  latestAcceptanceForProposal,
   latestPaymentForProposal,
+  type AcceptanceRow,
   type LatestPayment,
 } from '@/lib/proposal/acceptances'
 import {isDevPreview, isProposalUnlocked, loadProposal} from '@/lib/proposal/load'
 import {
+  honoredPercent,
   proposalIsAccepted,
   proposalIsExpired,
-  quoteProposal,
+  quoteInputs,
+  quoteSelection,
   resolveProposalSelection,
+  selectionKey,
   type ProposalQuote,
   type ProposalSelection,
 } from '@/lib/proposal/quote'
@@ -35,6 +40,8 @@ export type SigningContext = {
   clientName: string
   agreedHash: string
   latest: LatestPayment | null
+  /** The signature to reuse, when the terms have not moved. */
+  reuseAcceptance: AcceptanceRow | null
 }
 
 const MIN_NAME = 2
@@ -97,10 +104,15 @@ export async function prepareSigning(
 
   const proposal = await loadProposal(token)
   if (!proposal?._id) return {ok: false, error: 'This proposal is no longer available.'}
-  if (proposalIsExpired(proposal)) {
+  if (proposalIsAccepted(proposal)) return {ok: false, error: 'This proposal is already signed.'}
+
+  // A signature already on file keeps its terms. Someone who signed in time
+  // can still finish paying after the offer window, and at the price they
+  // agreed to, rather than being turned away or quietly charged more.
+  const signed = await latestAcceptanceForProposal(proposal._id)
+  if (proposalIsExpired(proposal) && !signed) {
     return {ok: false, error: 'This proposal has expired. Write back and a new one can go out.'}
   }
-  if (proposalIsAccepted(proposal)) return {ok: false, error: 'This proposal is already signed.'}
 
   const signerName = String(formData.get('signerName') ?? '').trim()
   if (signerName.length < MIN_NAME || signerName.length > 200) {
@@ -123,7 +135,10 @@ export async function prepareSigning(
     addon: formData.getAll('addon').map((value) => String(value)),
     kickoff: String(formData.get('kickoff') ?? ''),
   })
-  const quote = quoteProposal(proposal, selection)
+  const inputs = quoteInputs(proposal)
+  const honored = honoredPercent(inputs.percent, signed)
+  if (honored != null) inputs.percent = honored
+  const quote = quoteSelection(inputs, selection)
   if (!quote) return {ok: false, error: 'Choose a package first.'}
 
   const pkg = (proposal.packages ?? []).find((item) => item._id === quote.packageId)
@@ -138,6 +153,8 @@ export async function prepareSigning(
     return {ok: false, error: 'A payment is already on its way for this proposal.'}
   }
 
+  const agreedHash = agreedTextFor(proposal, pkg, addOns)
+
   return {
     ok: true,
     proposal,
@@ -147,7 +164,24 @@ export async function prepareSigning(
     signerEmail,
     packageName: clean(pkg.name),
     clientName: clean(proposal.clientDisplayName) || clean(proposal.clientLegalName),
-    agreedHash: agreedTextFor(proposal, pkg, addOns),
+    agreedHash,
     latest,
+    // One signature per set of terms. Clicking pay again after walking away
+    // reuses it; changing the selection or the price is a new signature.
+    reuseAcceptance: signed && sameTerms(signed, selection, quote, agreedHash) ? signed : null,
   }
+}
+
+function sameTerms(
+  signed: AcceptanceRow,
+  selection: ProposalSelection,
+  quote: ProposalQuote,
+  agreedHash: string,
+) {
+  return (
+    signed.selection_key === selectionKey(selection) &&
+    signed.total_cents === quote.totalCents &&
+    signed.first_cents === quote.firstCents &&
+    signed.agreed_text_sha256 === agreedHash
+  )
 }

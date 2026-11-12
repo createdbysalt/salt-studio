@@ -20,8 +20,10 @@ import {
   proposalIsExpired,
   quoteInputs,
   quoteSelection,
-  sameDayPercent,
+  selectionKey,
+  type ProposalQuote,
   type ProposalSelection,
+  type QuoteInputs,
 } from '@/lib/proposal/quote'
 import type {
   FooterLegalPagesQueryResult,
@@ -47,6 +49,11 @@ export type ProposalPaymentView = {
   signerEmail: string | null
   /** The kickoff date frozen on the acceptance, YYYY-MM-DD. */
   kickoffDate: string | null
+  /** The same-day percent frozen on the signature, if there was one. */
+  honoredPercent: number | null
+  selectionKey: string | null
+  /** A checkout page of theirs is still open and payable. */
+  resumable: boolean
 }
 
 type View = {
@@ -59,6 +66,10 @@ type View = {
   accepted: boolean
   payment: ProposalPaymentView | null
   now: number
+  /** The quote everything on the page is drawn from. */
+  inputs: QuoteInputs
+  /** True once a signature is on file, which keeps their terms alive. */
+  signed: boolean
 }
 
 export function ProposalPage({
@@ -82,6 +93,13 @@ export function ProposalPage({
     selection.addonIds.includes(item._id),
   )
   const now = Date.now()
+  // One set of inputs for the whole page. When the offer window closed but
+  // they already signed, their percent is kept, so what is shown here is
+  // what checkout will charge.
+  const inputs = quoteInputs(proposal, now)
+  if (inputs.percent == null && payment?.honoredPercent != null) {
+    inputs.percent = payment.honoredPercent
+  }
   const view: View = {
     token,
     proposal,
@@ -92,6 +110,8 @@ export function ProposalPage({
     accepted: proposalIsAccepted(proposal) || payment?.status === 'paid',
     payment,
     now,
+    inputs,
+    signed: payment != null,
   }
   const slides = (proposal.sections ?? []).flatMap((section) => {
     if (section.enabled === false || !sectionIsShown(section, view)) return []
@@ -507,7 +527,7 @@ function Packages({
   section: Extract<Section, {_type: 'proposalPackagesSection'}>
   view: View
 }) {
-  const discountPercent = sameDayPercent(view.proposal, view.now)
+  const discountPercent = view.inputs.percent
   const packages = (view.proposal.packages ?? []).flatMap((pkg) => {
     const name = line(pkg.name)
     if (!pkg._id || !name) return []
@@ -630,7 +650,7 @@ function Investment({
   section: Extract<Section, {_type: 'proposalInvestmentSection'}>
   view: View
 }) {
-  const inputs = quoteInputs(view.proposal, view.now)
+  const inputs = view.inputs
   const quote = quoteSelection(inputs, view.selection)
   const percent = inputs.percent
   const packages = (view.proposal.packages ?? []).flatMap((pkg) => {
@@ -700,7 +720,7 @@ function Investment({
 
       {accept && !view.accepted ? (
         <div id="sign" className="mx-auto mt-[4.5rem] w-full max-w-[36rem]">
-          {view.expired ? (
+          {view.expired && !view.signed ? (
             <SignCardNote>
               The price is no longer held. Write back and a new proposal can go out.
             </SignCardNote>
@@ -723,6 +743,7 @@ function Investment({
               payLabel={`Pay ${formatCents(quote.firstCents)}`}
               restLine={restLine(quote.totalCents, quote.steps)}
               wireAvailable={quote.firstCents >= 1_000_000}
+              resume={resumeFor(view, quote)}
               note={
                 view.payment?.status === 'failed'
                   ? 'That payment did not go through, and nothing was charged. Try again below.'
@@ -765,6 +786,19 @@ function Investment({
       ) : null}
     </section>
   )
+}
+
+/**
+ * They signed, went to pay, and came back without finishing. The card then
+ * offers to pick that payment up rather than asking them to sign again.
+ * Changing the selection moves them off it, because the terms have moved.
+ */
+function resumeFor(view: View, quote: ProposalQuote) {
+  const payment = view.payment
+  if (!payment?.resumable || !payment.signerName) return null
+  if (payment.selectionKey !== selectionKey(view.selection)) return null
+  if (payment.amountCents !== quote.firstCents) return null
+  return {signerName: payment.signerName}
 }
 
 function KickoffLink({token}: {token: string}) {
