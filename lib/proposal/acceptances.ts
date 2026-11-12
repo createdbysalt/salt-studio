@@ -160,10 +160,20 @@ export async function updatePayment(
     >
   >,
 ) {
-  await supabaseRequest<unknown>(`/rest/v1/proposal_payments?id=${eq(id)}`, {
+  // return=representation: the shared helper parses JSON, and a 204 has none.
+  const rows = await supabaseRequest<PaymentRow[]>(`/rest/v1/proposal_payments?id=${eq(id)}`, {
     method: 'PATCH',
-    headers: {Prefer: 'return=minimal'},
+    headers: {Prefer: 'return=representation'},
     body: JSON.stringify(patch),
+  })
+  if (rows.length === 0) throw new Error(`Payment ${id} was not updated.`)
+}
+
+/** Removes a recorded event so Stripe's retry is processed again. */
+export async function forgetPaymentEvent(eventId: string) {
+  await supabaseRequest<unknown[]>(`/rest/v1/proposal_payment_events?event_id=${eq(eventId)}`, {
+    method: 'DELETE',
+    headers: {Prefer: 'return=representation'},
   })
 }
 

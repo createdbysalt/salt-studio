@@ -1,6 +1,7 @@
 import {getStripe, stripeIsLive, stripeWebhookSecret} from '@/lib/payments/stripe'
 import {
   findPaymentBySessionId,
+  forgetPaymentEvent,
   paymentsStoreConfigured,
   recordPaymentEvent,
   updatePayment,
@@ -100,12 +101,19 @@ export async function POST(request: Request) {
   const customerId =
     typeof session.customer === 'string' ? session.customer : (session.customer?.id ?? null)
 
-  await updatePayment(payment.id, {
-    status: decision.status,
-    stripe_payment_intent_id: paymentIntentId ?? payment.stripe_payment_intent_id,
-    stripe_customer_id: customerId ?? payment.stripe_customer_id,
-    paid_at: decision.status === 'paid' ? new Date().toISOString() : payment.paid_at,
-  })
+  try {
+    await updatePayment(payment.id, {
+      status: decision.status,
+      stripe_payment_intent_id: paymentIntentId ?? payment.stripe_payment_intent_id,
+      stripe_customer_id: customerId ?? payment.stripe_customer_id,
+      paid_at: decision.status === 'paid' ? new Date().toISOString() : payment.paid_at,
+    })
+  } catch (error) {
+    // The event id was recorded first. Forget it and fail, so Stripe's retry is processed.
+    console.error(`[stripe webhook] could not update payment ${payment.id}`, error)
+    await forgetPaymentEvent(event.id).catch(() => undefined)
+    return json(500, {ok: false, error: 'update_failed'})
+  }
 
   if (decision.status === 'paid') {
     try {
