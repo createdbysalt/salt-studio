@@ -3,12 +3,29 @@
 import {isCorsOriginError} from 'next-sanity/live'
 import {toast} from 'sonner'
 
+function isUnauthorized(error: unknown) {
+  if (!(error instanceof Error)) return false
+  const status =
+    (error as {statusCode?: number; status?: number}).statusCode ??
+    (error as {status?: number}).status
+  if (status === 401 || status === 403) return true
+  return /unauthorized|forbidden|not authorized|permission/i.test(error.message)
+}
+
 export function handleError(error: unknown) {
   // Sanity's Live Content API recycles its SSE stream periodically (and after
   // idle), surfacing a `DisconnectError: forced by provider`. The client
   // reconnects on its own, so log it quietly instead of raising a fatal toast.
   if (error instanceof Error && error.name === 'DisconnectError') {
     console.warn('[SanityLive] stream disconnected, reconnecting…', error.message)
+    return
+  }
+
+  // The dataset is private. Outside draft mode the browser has no token, so
+  // the live event stream is refused. Server reads still carry the token and
+  // the page still refreshes on focus and reconnect, so this is not fatal.
+  if (isUnauthorized(error)) {
+    console.warn('[SanityLive] live events need a token on a private dataset; skipping')
     return
   }
 
