@@ -24,6 +24,11 @@ type ArrayOf<T> = Array<
 >
 
 // Source: schema.json
+export type SameDayDiscount = {
+  enabled?: boolean
+  percent?: number
+}
+
 export type SanityImageAssetReference = {
   _ref: string
   _type: 'reference'
@@ -783,6 +788,460 @@ export type ContactForm = {
   style?: 'stacked' | 'columns' | 'compact'
 }
 
+export type ProposalSignedSection = {
+  _type: 'proposalSignedSection'
+  enabled?: boolean
+  heading?: string
+  nextSteps?: Array<string>
+  kickoffUrl?: string
+  kickoffLabel?: string
+}
+
+export type ProposalAcceptSection = {
+  _type: 'proposalAcceptSection'
+  enabled?: boolean
+  prompt?: string
+  checkboxLabel?: string
+}
+
+export type ProposalTermsSection = {
+  _type: 'proposalTermsSection'
+  enabled?: boolean
+  validityNote?: string
+  changeOrderRule?: string
+}
+
+export type ProposalScheduleSection = {
+  _type: 'proposalScheduleSection'
+  enabled?: boolean
+  heading?: string
+  excludedNote?: string
+}
+
+export type ProposalSowSection = {
+  _type: 'proposalSowSection'
+  enabled?: boolean
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal' | 'h3'
+    listItem?: 'bullet' | 'number'
+    markDefs?: null
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
+}
+
+export type ProposalInvestmentSection = {
+  _type: 'proposalInvestmentSection'
+  enabled?: boolean
+  heading?: string
+  title?: string
+  intro?: string
+}
+
+export type ProposalOfferSection = {
+  _type: 'proposalOfferSection'
+  enabled?: boolean
+  heading?: string
+}
+
+export type ProposalAddOnsSection = {
+  _type: 'proposalAddOnsSection'
+  enabled?: boolean
+  heading?: string
+  intro?: string
+}
+
+export type ProposalPackagesSection = {
+  _type: 'proposalPackagesSection'
+  enabled?: boolean
+  heading?: string
+  intro?: string
+  sameDayDiscount?: SameDayDiscount
+}
+
+export type TestimonialReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'testimonial'
+}
+
+export type ProposalProofSection = {
+  _type: 'proposalProofSection'
+  enabled?: boolean
+  eyebrow?: string
+  heading?: string
+  projects?: Array<{
+    project?: ProjectReference
+    note?: string
+    _type: 'proposalProofProject'
+    _key: string
+  }>
+  testimonials?: Array<
+    {
+      _key: string
+    } & TestimonialReference
+  >
+}
+
+export type ProposalPhasesSection = {
+  _type: 'proposalPhasesSection'
+  enabled?: boolean
+  heading?: string
+  intro?: string
+  phases?: Array<
+    {
+      _key: string
+    } & ProposalPhaseItem
+  >
+  questionsHeading?: string
+  questions?: Array<{
+    question?: string
+    answer?: string
+    _type: 'proposalApproachQuestion'
+    _key: string
+  }>
+}
+
+export type ProposalOutcomesSection = {
+  _type: 'proposalOutcomesSection'
+  enabled?: boolean
+  heading?: string
+  cards?: Array<{
+    title?: string
+    body?: string
+    _type: 'proposalOutcomeCard'
+    _key: string
+  }>
+}
+
+export type ProposalSituationSection = {
+  _type: 'proposalSituationSection'
+  enabled?: boolean
+  problemLine?: string
+  cards?: Array<{
+    icon?:
+      | 'scattered'
+      | 'waiting'
+      | 'arrival'
+      | 'missing'
+      | 'calling'
+      | 'document'
+      | 'people'
+      | 'friction'
+    title?: string
+    quote?: string
+    _type: 'proposalSituationCard'
+    _key: string
+  }>
+}
+
+export type ProposalCoverSection = {
+  _type: 'proposalCoverSection'
+  enabled?: boolean
+  outcomeHeadline?: string
+  headlineEmphasis?: string
+  effectPhrase?: string
+  coverImage?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  preparedBy?: string
+}
+
+export type ProposalPaymentStep = {
+  _type: 'proposalPaymentStep'
+  percent?: number
+  trigger?: string
+}
+
+export type ProposalPhaseItem = {
+  _type: 'proposalPhaseItem'
+  name?: string
+  summary?: string
+  weeks?: string
+}
+
+export type ProposalScopeItem = {
+  _type: 'proposalScopeItem'
+  text?: string
+}
+
+export type ProposalDeliverable = {
+  _type: 'proposalDeliverable'
+  name?: string
+  description?: string
+  phase?: string
+  acceptanceCriteria?: string
+}
+
+export type ProposalAddOn = {
+  _id: string
+  _type: 'proposalAddOn'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  line?: string
+  amount?: number
+  scope?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal' | 'h3'
+    listItem?: 'bullet' | 'number'
+    markDefs?: null
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
+  deliverables?: Array<
+    {
+      _key: string
+    } & ProposalDeliverable
+  >
+  outOfScope?: Array<
+    {
+      _key: string
+    } & ProposalScopeItem
+  >
+}
+
+export type ProposalPackageReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'proposalPackage'
+}
+
+export type ProposalAddOnReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'proposalAddOn'
+}
+
+export type PaymentScheduleReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'paymentSchedule'
+}
+
+export type ProposalMsaReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'proposalMsa'
+}
+
+export type Proposal = {
+  _id: string
+  _type: 'proposal'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title?: string
+  status?: 'draft' | 'sent' | 'viewed' | 'signed' | 'paid' | 'expired'
+  token?: string
+  clientDisplayName?: string
+  clientLogo?: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  }
+  clientLegalName?: string
+  signerName?: string
+  signerEmail?: string
+  sections?: Array<
+    | ({
+        _key: string
+      } & ProposalCoverSection)
+    | ({
+        _key: string
+      } & ProposalSituationSection)
+    | ({
+        _key: string
+      } & ProposalOutcomesSection)
+    | ({
+        _key: string
+      } & ProposalPhasesSection)
+    | ({
+        _key: string
+      } & ProposalProofSection)
+    | ({
+        _key: string
+      } & ProposalPackagesSection)
+    | ({
+        _key: string
+      } & ProposalAddOnsSection)
+    | ({
+        _key: string
+      } & ProposalOfferSection)
+    | ({
+        _key: string
+      } & ProposalInvestmentSection)
+    | ({
+        _key: string
+      } & ProposalSowSection)
+    | ({
+        _key: string
+      } & ProposalScheduleSection)
+    | ({
+        _key: string
+      } & ProposalTermsSection)
+    | ({
+        _key: string
+      } & ProposalAcceptSection)
+    | ({
+        _key: string
+      } & ProposalSignedSection)
+  >
+  packages?: Array<
+    {
+      _key: string
+    } & ProposalPackageReference
+  >
+  recommendedPackage?: ProposalPackageReference
+  addOns?: Array<
+    {
+      _key: string
+    } & ProposalAddOnReference
+  >
+  paymentSchedule?: PaymentScheduleReference
+  msa?: ProposalMsaReference
+  kickoffOptions?: Array<{
+    label?: string
+    date?: string
+    _type: 'proposalKickoffOption'
+    _key: string
+  }>
+  validUntil?: string
+  sameDayOffer?: {
+    enabled?: boolean
+    bonusTitle?: string
+    bonusDetail?: string
+    deadline?: string
+  }
+}
+
+export type ProposalMsa = {
+  _id: string
+  _type: 'proposalMsa'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  version?: string
+  effectiveDate?: string
+  pdf?: {
+    asset?: SanityFileAssetReference
+    media?: unknown
+    _type: 'file'
+  }
+  body?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal' | 'h3'
+    listItem?: 'bullet' | 'number'
+    markDefs?: null
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
+}
+
+export type PaymentSchedule = {
+  _id: string
+  _type: 'paymentSchedule'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  steps?: Array<
+    {
+      _key: string
+    } & ProposalPaymentStep
+  >
+}
+
+export type ProposalPackage = {
+  _id: string
+  _type: 'proposalPackage'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  name?: string
+  summary?: string
+  amount?: number
+  includedItems?: Array<string>
+  scope?: Array<{
+    children?: Array<{
+      marks?: Array<string>
+      text?: string
+      _type: 'span'
+      _key: string
+    }>
+    style?: 'normal' | 'h3'
+    listItem?: 'bullet' | 'number'
+    markDefs?: null
+    level?: number
+    _type: 'block'
+    _key: string
+  }>
+  deliverables?: Array<
+    {
+      _key: string
+    } & ProposalDeliverable
+  >
+  outOfScope?: Array<
+    {
+      _key: string
+    } & ProposalScopeItem
+  >
+  phases?: Array<
+    {
+      _key: string
+    } & ProposalPhaseItem
+  >
+}
+
+export type SanityImageCrop = {
+  _type: 'sanity.imageCrop'
+  top?: number
+  bottom?: number
+  left?: number
+  right?: number
+}
+
+export type SanityImageHotspot = {
+  _type: 'sanity.imageHotspot'
+  x?: number
+  y?: number
+  height?: number
+  width?: number
+}
+
 export type Testimonial = {
   _id: string
   _type: 'testimonial'
@@ -933,22 +1392,6 @@ export type Capability = {
   sortOrder?: number
 }
 
-export type SanityImageCrop = {
-  _type: 'sanity.imageCrop'
-  top?: number
-  bottom?: number
-  left?: number
-  right?: number
-}
-
-export type SanityImageHotspot = {
-  _type: 'sanity.imageHotspot'
-  x?: number
-  y?: number
-  height?: number
-  width?: number
-}
-
 export type WorkCategory = {
   _id: string
   _type: 'workCategory'
@@ -1060,13 +1503,6 @@ export type CapabilityReference = {
   _type: 'reference'
   _weak?: boolean
   [internalGroqTypeReferenceTo]?: 'capability'
-}
-
-export type TestimonialReference = {
-  _ref: string
-  _type: 'reference'
-  _weak?: boolean
-  [internalGroqTypeReferenceTo]?: 'testimonial'
 }
 
 export type Service = {
@@ -1998,6 +2434,7 @@ export type Geopoint = {
 }
 
 export type AllSanitySchemaTypes =
+  | SameDayDiscount
   | SanityImageAssetReference
   | LogoImage
   | Avatar
@@ -2066,6 +2503,36 @@ export type AllSanitySchemaTypes =
   | PortalChecklistCategory
   | PortalChecklistItem
   | ContactForm
+  | ProposalSignedSection
+  | ProposalAcceptSection
+  | ProposalTermsSection
+  | ProposalScheduleSection
+  | ProposalSowSection
+  | ProposalInvestmentSection
+  | ProposalOfferSection
+  | ProposalAddOnsSection
+  | ProposalPackagesSection
+  | TestimonialReference
+  | ProposalProofSection
+  | ProposalPhasesSection
+  | ProposalOutcomesSection
+  | ProposalSituationSection
+  | ProposalCoverSection
+  | ProposalPaymentStep
+  | ProposalPhaseItem
+  | ProposalScopeItem
+  | ProposalDeliverable
+  | ProposalAddOn
+  | ProposalPackageReference
+  | ProposalAddOnReference
+  | PaymentScheduleReference
+  | ProposalMsaReference
+  | Proposal
+  | ProposalMsa
+  | PaymentSchedule
+  | ProposalPackage
+  | SanityImageCrop
+  | SanityImageHotspot
   | Testimonial
   | ProjectPhasesReference
   | PortalChecklistReference
@@ -2076,14 +2543,11 @@ export type AllSanitySchemaTypes =
   | ProjectPhases
   | Slug
   | Capability
-  | SanityImageCrop
-  | SanityImageHotspot
   | WorkCategory
   | QuizReference
   | QuizSubmission
   | Quiz
   | CapabilityReference
-  | TestimonialReference
   | Service
   | Person
   | Project
@@ -2568,6 +3032,16 @@ export type HomePageQueryResult =
     }
   | {
       _id: 'home'
+      _type: 'paymentSchedule'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
+    }
+  | {
+      _id: 'home'
       _type: 'person'
       seoTitle: string | null
       seoDescription: string | null
@@ -2660,6 +3134,131 @@ export type HomePageQueryResult =
   | {
       _id: 'home'
       _type: 'projectPhases'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
+    }
+  | {
+      _id: 'home'
+      _type: 'proposal'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'proposalAcceptSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalAddOnsSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalCoverSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalInvestmentSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalOfferSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalOutcomesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalPackagesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalPhasesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalProofSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalScheduleSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSignedSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSituationSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSowSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalTermsSection'
+            enabled: boolean | null
+            internalName: null
+          }
+      > | null
+    }
+  | {
+      _id: 'home'
+      _type: 'proposalAddOn'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
+    }
+  | {
+      _id: 'home'
+      _type: 'proposalMsa'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      hiddenH1: null
+      sections: null
+    }
+  | {
+      _id: 'home'
+      _type: 'proposalPackage'
       seoTitle: null
       seoDescription: null
       ogImage: null
@@ -3100,6 +3699,16 @@ export type ServicesPageQueryResult =
     }
   | {
       _id: 'servicesPage'
+      _type: 'paymentSchedule'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
       _type: 'person'
       capabilitiesHeadline: null
       seoTitle: string | null
@@ -3192,6 +3801,131 @@ export type ServicesPageQueryResult =
   | {
       _id: 'servicesPage'
       _type: 'projectPhases'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'proposal'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'proposalAcceptSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalAddOnsSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalCoverSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalInvestmentSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalOfferSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalOutcomesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalPackagesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalPhasesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalProofSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalScheduleSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSignedSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSituationSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSowSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalTermsSection'
+            enabled: boolean | null
+            internalName: null
+          }
+      > | null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'proposalAddOn'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'proposalMsa'
+      capabilitiesHeadline: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'servicesPage'
+      _type: 'proposalPackage'
       capabilitiesHeadline: null
       seoTitle: null
       seoDescription: null
@@ -3677,6 +4411,15 @@ export type AboutPageQueryResult =
     }
   | {
       _id: 'aboutPage'
+      _type: 'paymentSchedule'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
       _type: 'person'
       seoTitle: string | null
       seoDescription: string | null
@@ -3765,6 +4508,127 @@ export type AboutPageQueryResult =
   | {
       _id: 'aboutPage'
       _type: 'projectPhases'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'proposal'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'proposalAcceptSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalAddOnsSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalCoverSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalInvestmentSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalOfferSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalOutcomesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalPackagesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalPhasesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalProofSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalScheduleSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSignedSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSituationSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSowSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalTermsSection'
+            enabled: boolean | null
+            internalName: null
+          }
+      > | null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'proposalAddOn'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'proposalMsa'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'aboutPage'
+      _type: 'proposalPackage'
       seoTitle: null
       seoDescription: null
       ogImage: null
@@ -5199,6 +6063,22 @@ export type WorkPageQueryResult =
     }
   | {
       _id: 'workPage'
+      _type: 'paymentSchedule'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+    }
+  | {
+      _id: 'workPage'
       _type: 'person'
       headline: string | null
       subhead: null
@@ -5278,6 +6158,70 @@ export type WorkPageQueryResult =
   | {
       _id: 'workPage'
       _type: 'projectPhases'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+    }
+  | {
+      _id: 'workPage'
+      _type: 'proposal'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+    }
+  | {
+      _id: 'workPage'
+      _type: 'proposalAddOn'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+    }
+  | {
+      _id: 'workPage'
+      _type: 'proposalMsa'
+      headline: null
+      subhead: null
+      projectSource: null
+      curatedProjects: null
+      pillSource: null
+      categoryPills: null
+      videoPlayback: null
+      emptyState: null
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+    }
+  | {
+      _id: 'workPage'
+      _type: 'proposalPackage'
       headline: null
       subhead: null
       projectSource: null
@@ -5797,6 +6741,15 @@ export type ContactPageQueryResult =
     }
   | {
       _id: 'contactPage'
+      _type: 'paymentSchedule'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
       _type: 'person'
       seoTitle: string | null
       seoDescription: string | null
@@ -5885,6 +6838,127 @@ export type ContactPageQueryResult =
   | {
       _id: 'contactPage'
       _type: 'projectPhases'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
+      _type: 'proposal'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: Array<
+        | {
+            _key: string
+            _type: 'proposalAcceptSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalAddOnsSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalCoverSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalInvestmentSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalOfferSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalOutcomesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalPackagesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalPhasesSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalProofSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalScheduleSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSignedSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSituationSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalSowSection'
+            enabled: boolean | null
+            internalName: null
+          }
+        | {
+            _key: string
+            _type: 'proposalTermsSection'
+            enabled: boolean | null
+            internalName: null
+          }
+      > | null
+    }
+  | {
+      _id: 'contactPage'
+      _type: 'proposalAddOn'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
+      _type: 'proposalMsa'
+      seoTitle: null
+      seoDescription: null
+      ogImage: null
+      speakableSummary: null
+      sections: null
+    }
+  | {
+      _id: 'contactPage'
+      _type: 'proposalPackage'
       seoTitle: null
       seoDescription: null
       ogImage: null
@@ -6350,10 +7424,403 @@ export type ClientPortalAuthQueryResult = {
 } | null
 
 // Source: sanity/lib/queries.ts
+// Variable: clientPortalAuthShellQuery
+// Query: *[_type == "clientPortal" && slug.current == $slug][0]{    _id,    enabled  }
+export type ClientPortalAuthShellQueryResult = {
+  _id: string
+  enabled: boolean | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: clientPortalShellBySlugQuery
+// Query: *[_type == "clientPortal" && slug.current == $slug][0]{    _id,    name,    enabled  }
+export type ClientPortalShellBySlugQueryResult = {
+  _id: string
+  name: string | null
+  enabled: boolean | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: clientPortalAutomationByIdQuery
+// Query: *[_type == "clientPortal" && _id == $projectId][0]{    _id,    name,    enabled,    "slug": slug.current,    "clientRef": client._ref,    "checklistSource": checklistTemplate->{      categories[]{        items[]{          _key,          title,          link        }      }    },    "formsSource": formsTemplate->{      items[]{        _key,        title,        link      }    }  }
+export type ClientPortalAutomationByIdQueryResult = {
+  _id: string
+  name: string | null
+  enabled: boolean | null
+  slug: string | null
+  clientRef: string | null
+  checklistSource: {
+    categories: Array<{
+      items: Array<{
+        _key: string
+        title: string | null
+        link: string | null
+      }> | null
+    }> | null
+  } | null
+  formsSource: {
+    items: Array<{
+      _key: string
+      title: string | null
+      link: string | null
+    }> | null
+  } | null
+} | null
+
+// Source: sanity/lib/queries.ts
 // Variable: clientPortalSlugsQuery
 // Query: *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}
 export type ClientPortalSlugsQueryResult = Array<{
   slug: string | null
+}>
+
+// Source: sanity/lib/queries.ts
+// Variable: proposalGateIdentityQuery
+// Query: *[_type == "proposal" && token == $key][0]{    _id,    clientDisplayName  }
+export type ProposalGateIdentityQueryResult = {
+  _id: string
+  clientDisplayName: string | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: proposalByTokenQuery
+// Query: *[_type == "proposal" && token == $key][0]{    _id,    status,    clientDisplayName,    clientLegalName,    signerName,    signerEmail,    clientLogo{ asset, alt, hotspot, crop },    validUntil,    kickoffOptions[]{ _key, label, date },    sameDayOffer{ enabled, bonusTitle, bonusDetail, deadline },    packages[]->{      _id,      name,      summary,      amount,      includedItems,      scope,      deliverables[]{ _key, name, description, phase, acceptanceCriteria },      outOfScope[]{ _key, text },      phases[]{ _key, name, summary, weeks }    },    "recommendedPackageId": recommendedPackage._ref,    addOns[]->{      _id,      name,      line,      amount,      scope,      deliverables[]{ _key, name, description, phase, acceptanceCriteria },      outOfScope[]{ _key, text }    },    paymentSchedule->{      _id,      name,      steps[]{ _key, percent, trigger }    },    msa->{      _id,      version,      effectiveDate,      "pdfUrl": pdf.asset->url,      body    },    sections[]{      _key,      _type,      enabled,      _type == "proposalCoverSection" => {        outcomeHeadline,        headlineEmphasis,        effectPhrase,        preparedBy,        coverImage{ asset, alt, hotspot, crop }      },      _type == "proposalSituationSection" => {        problemLine,        cards[]{ _key, icon, title, quote }      },      _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },      _type == "proposalPhasesSection" => {        heading,        intro,        phases[]{ _key, name, summary, weeks },        questionsHeading,        questions[]{ _key, question, answer }      },      _type == "proposalProofSection" => {        eyebrow,        heading,        projects[]{          _key,          note,          project->{            _id,            title,            "slug": slug.current,            year,            coverImage,            videoUrl,            "clientName": client->name,            "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{              _key,              value,              label            }          }        },        testimonials[]->{ _id, quote, author, role }      },      _type == "proposalPackagesSection" => {        heading,        intro,        sameDayDiscount{ enabled, percent }      },      _type == "proposalAddOnsSection" => { heading, intro },      _type == "proposalOfferSection" => { heading },      _type == "proposalInvestmentSection" => { heading, title, intro },      _type == "proposalSowSection" => { body },      _type == "proposalScheduleSection" => { heading, excludedNote },      _type == "proposalTermsSection" => { validityNote, changeOrderRule },      _type == "proposalAcceptSection" => { prompt, checkboxLabel },      _type == "proposalSignedSection" => { heading, nextSteps, kickoffUrl, kickoffLabel }    }  }
+export type ProposalByTokenQueryResult = {
+  _id: string
+  status: 'draft' | 'expired' | 'paid' | 'sent' | 'signed' | 'viewed' | null
+  clientDisplayName: string | null
+  clientLegalName: string | null
+  signerName: string | null
+  signerEmail: string | null
+  clientLogo: {
+    asset: SanityImageAssetReference | null
+    alt: string | null
+    hotspot: SanityImageHotspot | null
+    crop: SanityImageCrop | null
+  } | null
+  validUntil: string | null
+  kickoffOptions: Array<{
+    _key: string
+    label: string | null
+    date: string | null
+  }> | null
+  sameDayOffer: {
+    enabled: boolean | null
+    bonusTitle: string | null
+    bonusDetail: string | null
+    deadline: string | null
+  } | null
+  packages: Array<{
+    _id: string
+    name: string | null
+    summary: string | null
+    amount: number | null
+    includedItems: Array<string> | null
+    scope: Array<{
+      children?: Array<{
+        marks?: Array<string>
+        text?: string
+        _type: 'span'
+        _key: string
+      }>
+      style?: 'h3' | 'normal'
+      listItem?: 'bullet' | 'number'
+      markDefs?: null
+      level?: number
+      _type: 'block'
+      _key: string
+    }> | null
+    deliverables: Array<{
+      _key: string
+      name: string | null
+      description: string | null
+      phase: string | null
+      acceptanceCriteria: string | null
+    }> | null
+    outOfScope: Array<{
+      _key: string
+      text: string | null
+    }> | null
+    phases: Array<{
+      _key: string
+      name: string | null
+      summary: string | null
+      weeks: string | null
+    }> | null
+  }> | null
+  recommendedPackageId: string | null
+  addOns: Array<{
+    _id: string
+    name: string | null
+    line: string | null
+    amount: number | null
+    scope: Array<{
+      children?: Array<{
+        marks?: Array<string>
+        text?: string
+        _type: 'span'
+        _key: string
+      }>
+      style?: 'h3' | 'normal'
+      listItem?: 'bullet' | 'number'
+      markDefs?: null
+      level?: number
+      _type: 'block'
+      _key: string
+    }> | null
+    deliverables: Array<{
+      _key: string
+      name: string | null
+      description: string | null
+      phase: string | null
+      acceptanceCriteria: string | null
+    }> | null
+    outOfScope: Array<{
+      _key: string
+      text: string | null
+    }> | null
+  }> | null
+  paymentSchedule: {
+    _id: string
+    name: string | null
+    steps: Array<{
+      _key: string
+      percent: number | null
+      trigger: string | null
+    }> | null
+  } | null
+  msa: {
+    _id: string
+    version: string | null
+    effectiveDate: string | null
+    pdfUrl: string | null
+    body: Array<{
+      children?: Array<{
+        marks?: Array<string>
+        text?: string
+        _type: 'span'
+        _key: string
+      }>
+      style?: 'h3' | 'normal'
+      listItem?: 'bullet' | 'number'
+      markDefs?: null
+      level?: number
+      _type: 'block'
+      _key: string
+    }> | null
+  } | null
+  sections: Array<
+    | {
+        _key: string
+        _type: 'proposalAcceptSection'
+        enabled: boolean | null
+        prompt: string | null
+        checkboxLabel: string | null
+      }
+    | {
+        _key: string
+        _type: 'proposalAddOnsSection'
+        enabled: boolean | null
+        heading: string | null
+        intro: string | null
+      }
+    | {
+        _key: string
+        _type: 'proposalCoverSection'
+        enabled: boolean | null
+        outcomeHeadline: string | null
+        headlineEmphasis: string | null
+        effectPhrase: string | null
+        preparedBy: string | null
+        coverImage: {
+          asset: SanityImageAssetReference | null
+          alt: string | null
+          hotspot: SanityImageHotspot | null
+          crop: SanityImageCrop | null
+        } | null
+      }
+    | {
+        _key: string
+        _type: 'proposalInvestmentSection'
+        enabled: boolean | null
+        heading: string | null
+        title: string | null
+        intro: string | null
+      }
+    | {
+        _key: string
+        _type: 'proposalOfferSection'
+        enabled: boolean | null
+        heading: string | null
+      }
+    | {
+        _key: string
+        _type: 'proposalOutcomesSection'
+        enabled: boolean | null
+        heading: string | null
+        cards: Array<{
+          _key: string
+          title: string | null
+          body: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'proposalPackagesSection'
+        enabled: boolean | null
+        heading: string | null
+        intro: string | null
+        sameDayDiscount: {
+          enabled: boolean | null
+          percent: number | null
+        } | null
+      }
+    | {
+        _key: string
+        _type: 'proposalPhasesSection'
+        enabled: boolean | null
+        heading: string | null
+        intro: string | null
+        phases: Array<{
+          _key: string
+          name: string | null
+          summary: string | null
+          weeks: string | null
+        }> | null
+        questionsHeading: string | null
+        questions: Array<{
+          _key: string
+          question: string | null
+          answer: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'proposalProofSection'
+        enabled: boolean | null
+        eyebrow: string | null
+        heading: string | null
+        projects: Array<{
+          _key: string
+          note: string | null
+          project: {
+            _id: string
+            title: string | null
+            slug: string | null
+            year: string | null
+            coverImage: {
+              asset?: SanityImageAssetReference
+              media?: unknown
+              hotspot?: SanityImageHotspot
+              crop?: SanityImageCrop
+              alt?: string
+              _type: 'image'
+            } | null
+            videoUrl: string | null
+            clientName: string | null
+            stats: Array<{
+              _key: string
+              value: string | null
+              label: string | null
+            }> | null
+          } | null
+        }> | null
+        testimonials: Array<{
+          _id: string
+          quote: string | null
+          author: string | null
+          role: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'proposalScheduleSection'
+        enabled: boolean | null
+        heading: string | null
+        excludedNote: string | null
+      }
+    | {
+        _key: string
+        _type: 'proposalSignedSection'
+        enabled: boolean | null
+        heading: string | null
+        nextSteps: Array<string> | null
+        kickoffUrl: string | null
+        kickoffLabel: string | null
+      }
+    | {
+        _key: string
+        _type: 'proposalSituationSection'
+        enabled: boolean | null
+        problemLine: string | null
+        cards: Array<{
+          _key: string
+          icon:
+            | 'arrival'
+            | 'calling'
+            | 'document'
+            | 'friction'
+            | 'missing'
+            | 'people'
+            | 'scattered'
+            | 'waiting'
+            | null
+          title: string | null
+          quote: string | null
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'proposalSowSection'
+        enabled: boolean | null
+        body: Array<{
+          children?: Array<{
+            marks?: Array<string>
+            text?: string
+            _type: 'span'
+            _key: string
+          }>
+          style?: 'h3' | 'normal'
+          listItem?: 'bullet' | 'number'
+          markDefs?: null
+          level?: number
+          _type: 'block'
+          _key: string
+        }> | null
+      }
+    | {
+        _key: string
+        _type: 'proposalTermsSection'
+        enabled: boolean | null
+        validityNote: string | null
+        changeOrderRule: string | null
+      }
+  > | null
+} | null
+
+// Source: sanity/lib/queries.ts
+// Variable: previewProofProjectsQuery
+// Query: *[_type == "project" && slug.current in $slugs && hidden != true]{    _id,    title,    "slug": slug.current,    year,    coverImage,    videoUrl,    "clientName": client->name,    "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{      _key,      value,      label    }  }
+export type PreviewProofProjectsQueryResult = Array<{
+  _id: string
+  title: string | null
+  slug: string | null
+  year: string | null
+  coverImage: {
+    asset?: SanityImageAssetReference
+    media?: unknown
+    hotspot?: SanityImageHotspot
+    crop?: SanityImageCrop
+    alt?: string
+    _type: 'image'
+  } | null
+  videoUrl: string | null
+  clientName: string | null
+  stats: Array<{
+    _key: string
+    value: string | null
+    label: string | null
+  }> | null
 }>
 
 declare module '@sanity/client' {
@@ -6389,6 +7856,12 @@ declare module '@sanity/client' {
     '\n  *[_type == "person" && defined(slug.current)]{"slug": slug.current}\n': PersonSlugsQueryResult
     '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    _type,\n    name,\n    "slug": slug.current,\n    serviceType,\n    clientType,\n    "hasOverview": defined(projectPhases),\n    "hasChecklist": defined(checklistTemplate),\n    "hasForms": defined(formsTemplate),\n    "checklistSource": checklistTemplate->{\n      categories[]{\n        _key,\n        title,\n        description,\n        items[]{\n          _key,\n          title,\n          description,\n          required,\n          link,\n          linkLabel\n        }\n      }\n    },\n    "formsSource": formsTemplate->{\n      heading,\n      description,\n      items[]{\n        _key,\n        title,\n        description,\n        required,\n        link,\n        linkLabel\n      }\n    },\n    "projectPhases": projectPhases->{\n      heading,\n      phases[]{ _key, name, note }\n    },\n    activePhase,\n    sharedFolderUrl,\n    brandingFolderUrl,\n    mediaFolderUrl,\n    previewUrl,\n    productionUrl,\n    whatsappGroupUrl,\n    "contentDue": coalesce(contentDue, checklistDue, formsDue),\n    launchEstimate,\n    enabled,\n    checklist[]{\n      _key,\n      title,\n      description,\n      items[]{\n        _key,\n        title,\n        description,\n        required,\n        link,\n        linkLabel,\n        done\n      }\n    }\n  }\n': ClientPortalBySlugQueryResult
     '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    enabled,\n    password\n  }\n': ClientPortalAuthQueryResult
+    '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    enabled\n  }\n': ClientPortalAuthShellQueryResult
+    '\n  *[_type == "clientPortal" && slug.current == $slug][0]{\n    _id,\n    name,\n    enabled\n  }\n': ClientPortalShellBySlugQueryResult
+    '\n  *[_type == "clientPortal" && _id == $projectId][0]{\n    _id,\n    name,\n    enabled,\n    "slug": slug.current,\n    "clientRef": client._ref,\n    "checklistSource": checklistTemplate->{\n      categories[]{\n        items[]{\n          _key,\n          title,\n          link\n        }\n      }\n    },\n    "formsSource": formsTemplate->{\n      items[]{\n        _key,\n        title,\n        link\n      }\n    }\n  }\n': ClientPortalAutomationByIdQueryResult
     '\n  *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}\n': ClientPortalSlugsQueryResult
+    '\n  *[_type == "proposal" && token == $key][0]{\n    _id,\n    clientDisplayName\n  }\n': ProposalGateIdentityQueryResult
+    '\n  *[_type == "proposal" && token == $key][0]{\n    _id,\n    status,\n    clientDisplayName,\n    clientLegalName,\n    signerName,\n    signerEmail,\n    clientLogo{ asset, alt, hotspot, crop },\n    validUntil,\n    kickoffOptions[]{ _key, label, date },\n    sameDayOffer{ enabled, bonusTitle, bonusDetail, deadline },\n    packages[]->{\n      _id,\n      name,\n      summary,\n      amount,\n      includedItems,\n      scope,\n      deliverables[]{ _key, name, description, phase, acceptanceCriteria },\n      outOfScope[]{ _key, text },\n      phases[]{ _key, name, summary, weeks }\n    },\n    "recommendedPackageId": recommendedPackage._ref,\n    addOns[]->{\n      _id,\n      name,\n      line,\n      amount,\n      scope,\n      deliverables[]{ _key, name, description, phase, acceptanceCriteria },\n      outOfScope[]{ _key, text }\n    },\n    paymentSchedule->{\n      _id,\n      name,\n      steps[]{ _key, percent, trigger }\n    },\n    msa->{\n      _id,\n      version,\n      effectiveDate,\n      "pdfUrl": pdf.asset->url,\n      body\n    },\n    sections[]{\n      _key,\n      _type,\n      enabled,\n      _type == "proposalCoverSection" => {\n        outcomeHeadline,\n        headlineEmphasis,\n        effectPhrase,\n        preparedBy,\n        coverImage{ asset, alt, hotspot, crop }\n      },\n      _type == "proposalSituationSection" => {\n        problemLine,\n        cards[]{ _key, icon, title, quote }\n      },\n      _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },\n      _type == "proposalPhasesSection" => {\n        heading,\n        intro,\n        phases[]{ _key, name, summary, weeks },\n        questionsHeading,\n        questions[]{ _key, question, answer }\n      },\n      _type == "proposalProofSection" => {\n        eyebrow,\n        heading,\n        projects[]{\n          _key,\n          note,\n          project->{\n            _id,\n            title,\n            "slug": slug.current,\n            year,\n            coverImage,\n            videoUrl,\n            "clientName": client->name,\n            "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{\n              _key,\n              value,\n              label\n            }\n          }\n        },\n        testimonials[]->{ _id, quote, author, role }\n      },\n      _type == "proposalPackagesSection" => {\n        heading,\n        intro,\n        sameDayDiscount{ enabled, percent }\n      },\n      _type == "proposalAddOnsSection" => { heading, intro },\n      _type == "proposalOfferSection" => { heading },\n      _type == "proposalInvestmentSection" => { heading, title, intro },\n      _type == "proposalSowSection" => { body },\n      _type == "proposalScheduleSection" => { heading, excludedNote },\n      _type == "proposalTermsSection" => { validityNote, changeOrderRule },\n      _type == "proposalAcceptSection" => { prompt, checkboxLabel },\n      _type == "proposalSignedSection" => { heading, nextSteps, kickoffUrl, kickoffLabel }\n    }\n  }\n': ProposalByTokenQueryResult
+    '\n  *[_type == "project" && slug.current in $slugs && hidden != true]{\n    _id,\n    title,\n    "slug": slug.current,\n    year,\n    coverImage,\n    videoUrl,\n    "clientName": client->name,\n    "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{\n      _key,\n      value,\n      label\n    }\n  }\n': PreviewProofProjectsQueryResult
   }
 }

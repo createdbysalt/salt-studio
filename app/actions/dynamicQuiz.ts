@@ -3,6 +3,7 @@
 import {answerLabel, questionAnswerKey, scoreDynamicQuiz} from '@/lib/quiz/dynamic'
 import {apiVersion, dataset, projectId} from '@/sanity/lib/api'
 import {quizBySlugQuery} from '@/sanity/lib/queries'
+import {token} from '@/sanity/lib/token'
 import {createClient} from 'next-sanity'
 import {Resend} from 'resend'
 
@@ -42,7 +43,8 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 
 // Plain published-content client — no stega, no draft mode. Server actions
 // don't participate in live revalidation, so sanityFetch isn't the tool here.
-const readClient = createClient({projectId, dataset, apiVersion, useCdn: true})
+// The read token is required now that the dataset is private.
+const readClient = createClient({projectId, dataset, apiVersion, token, useCdn: false})
 
 const writeClient = process.env.SANITY_API_WRITE_TOKEN
   ? createClient({

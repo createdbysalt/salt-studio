@@ -8,6 +8,7 @@ import {
   ComposeIcon,
   DesktopIcon,
   DocumentsIcon,
+  DocumentTextIcon,
   FolderIcon,
   HelpCircleIcon,
   HomeIcon,
@@ -197,6 +198,25 @@ export const saltDeskStructure: StructureResolver = (S) => {
         ]),
     )
 
+  const proposals = S.listItem()
+    .id('proposals')
+    .title('Proposals')
+    .icon(DocumentsIcon)
+    .child(
+      S.list()
+        .title('Proposals')
+        .items([
+          S.documentTypeListItem('proposal').title('Proposals').icon(DocumentsIcon),
+          S.divider().title('Catalog'),
+          S.documentTypeListItem('proposalPackage').title('Packages').icon(TagIcon),
+          S.documentTypeListItem('proposalAddOn').title('Add-ons').icon(AddIcon),
+          S.documentTypeListItem('paymentSchedule').title('Payment schedules').icon(ClockIcon),
+          S.documentTypeListItem('proposalMsa')
+            .title('Master services agreements')
+            .icon(DocumentTextIcon),
+        ]),
+    )
+
   const settings = S.listItem()
     .title('Settings')
     .icon(CogIcon)
@@ -234,7 +254,9 @@ export const saltDeskStructure: StructureResolver = (S) => {
         ]),
     )
 
-  return S.list().title('Content').items([corePages, dynamicContent, leads, table, settings])
+  return S.list()
+    .title('Content')
+    .items([corePages, dynamicContent, leads, proposals, table, settings])
 }
 
 export const saltSingletonTypes = [

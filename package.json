@@ -21,6 +21,7 @@
     "seed:team:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "start": "next start -p 4000",
     "test:onboarding": "tsx --test tests/onboarding-automation.test.ts tests/privacy-migration-plan.test.ts",
+    "test:proposal": "tsx --conditions=react-server --test tests/proposal-gate.test.ts tests/proposal-quote.test.ts tests/proposal-fulfillment.test.ts tests/proposal-kickoff.test.ts tests/proposal-document-pdf.test.ts",
     "type-check": "next typegen && tsc --noEmit",
     "typegen": "sanity schema extract && sanity typegen generate",
     "verify:onboarding:sandbox": "tsx scripts/onboarding/verify-sandbox.ts"
@@ -35,6 +36,7 @@
     ]
   },
   "dependencies": {
+    "@calcom/embed-react": "^1.5.3",
     "@gsap/react": "^2.1.2",
     "@next/env": "16.2.2",
     "@sanity/client": "7.20.0",
@@ -45,6 +47,8 @@
     "@sanity/ui": "3.1.14",
     "@sanity/util": "5.19.0",
     "@sanity/vision": "5.19.0",
+    "@stripe/react-stripe-js": "^7.0.1",
+    "@stripe/stripe-js": "^10.2.1",
     "@tailwindcss/postcss": "^4.2.2",
     "@tailwindcss/typography": "^0.5.19",
     "@vercel/speed-insights": "2.0.0",
@@ -67,8 +71,10 @@
     "sanity-plugin-dashboard-widget-document-list": "^2.1.3",
     "sanity-plugin-media": "^4.1.1",
     "server-only": "0.0.1",
+    "shaders": "^2.1.1",
     "simple-icons": "^16.27.1",
     "sonner": "2.0.7",
+    "stripe": "^23.1.0",
     "styled-components": "6.3.12"
   },
   "devDependencies": {

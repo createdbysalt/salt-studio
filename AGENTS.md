@@ -59,3 +59,16 @@ npm run lint
 | `qfix`     | Debug from error message                                 |
 | `qrestart` | Kill port 4000, `npm run dev`                            |
 | `qtypes`   | `npm run typegen`                                        |
+
+## Learned User Preferences
+
+- On proposals, the recommended package is the higher-priced option and should be the larger card.
+- Proposal scope of work should stay easy to paste as paragraphs and bullets for legal coverage. Each package and each add-on has its own scope, and the signed statement is assembled from the selection.
+- One shared password can unlock every proposal. Each client still gets their own link, and that link is what keeps one client from opening another proposal.
+
+## Learned Workspace Facts
+
+- Client proposals are served at `/p/[token]` from `app/(proposal)/`, outside the public `(personal)` site. `token` is the unguessable private link key on the Sanity `proposal` document.
+- The shared gate password and cookie signing secret are `PROPOSAL_GATE_PASSWORD` and `PROPOSAL_GATE_SECRET` on the 1Password item `salt-studio-sanity`. Unlock sets an httpOnly `proposal_gate` cookie scoped to that proposal path. The sign-in page may show the client name; prices, scope, and legal text load only after the cookie is valid.
+- Proposal content uses Sanity types `proposal`, `proposalPackage`, `proposalAddOn`, and `proposalMsa`. A proposal has at most two packages. The page sends selected ids and the server recomputes the total.
+- The production Sanity dataset is still public. Do not store a real client's legal details on a proposal until proposals move to a private dataset.

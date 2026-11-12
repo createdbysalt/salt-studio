@@ -890,3 +890,145 @@ export const clientPortalAutomationByIdQuery = defineQuery(`
 export const clientPortalSlugsQuery = defineQuery(`
   *[_type == "clientPortal" && defined(slug.current) && enabled != false]{"slug": slug.current}
 `)
+
+/**
+ * The name on the sign-in page. Prices, scope, and legal details stay on
+ * `proposalByTokenQuery`, which runs only after the gate cookie is valid.
+ */
+export const proposalGateIdentityQuery = defineQuery(`
+  *[_type == "proposal" && token == $key][0]{
+    _id,
+    clientDisplayName
+  }
+`)
+
+/**
+ * One proposal, loaded by its unguessable link key.
+ * The card price is `amount` on each package and add-on. Charging reads
+ * the same field on the server through lib/proposal/quote.ts.
+ */
+export const proposalByTokenQuery = defineQuery(`
+  *[_type == "proposal" && token == $key][0]{
+    _id,
+    status,
+    clientDisplayName,
+    clientLegalName,
+    signerName,
+    signerEmail,
+    clientLogo{ asset, alt, hotspot, crop },
+    validUntil,
+    kickoffOptions[]{ _key, label, date },
+    sameDayOffer{ enabled, bonusTitle, bonusDetail, deadline },
+    packages[]->{
+      _id,
+      name,
+      summary,
+      amount,
+      includedItems,
+      scope,
+      deliverables[]{ _key, name, description, phase, acceptanceCriteria },
+      outOfScope[]{ _key, text },
+      phases[]{ _key, name, summary, weeks }
+    },
+    "recommendedPackageId": recommendedPackage._ref,
+    addOns[]->{
+      _id,
+      name,
+      line,
+      amount,
+      scope,
+      deliverables[]{ _key, name, description, phase, acceptanceCriteria },
+      outOfScope[]{ _key, text }
+    },
+    paymentSchedule->{
+      _id,
+      name,
+      steps[]{ _key, percent, trigger }
+    },
+    msa->{
+      _id,
+      version,
+      effectiveDate,
+      "pdfUrl": pdf.asset->url,
+      body
+    },
+    sections[]{
+      _key,
+      _type,
+      enabled,
+      _type == "proposalCoverSection" => {
+        outcomeHeadline,
+        headlineEmphasis,
+        effectPhrase,
+        preparedBy,
+        coverImage{ asset, alt, hotspot, crop }
+      },
+      _type == "proposalSituationSection" => {
+        problemLine,
+        cards[]{ _key, icon, title, quote }
+      },
+      _type == "proposalOutcomesSection" => { heading, cards[]{ _key, title, body } },
+      _type == "proposalPhasesSection" => {
+        heading,
+        intro,
+        phases[]{ _key, name, summary, weeks },
+        questionsHeading,
+        questions[]{ _key, question, answer }
+      },
+      _type == "proposalProofSection" => {
+        eyebrow,
+        heading,
+        projects[]{
+          _key,
+          note,
+          project->{
+            _id,
+            title,
+            "slug": slug.current,
+            year,
+            coverImage,
+            videoUrl,
+            "clientName": client->name,
+            "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{
+              _key,
+              value,
+              label
+            }
+          }
+        },
+        testimonials[]->{ _id, quote, author, role }
+      },
+      _type == "proposalPackagesSection" => {
+        heading,
+        intro,
+        sameDayDiscount{ enabled, percent }
+      },
+      _type == "proposalAddOnsSection" => { heading, intro },
+      _type == "proposalOfferSection" => { heading },
+      _type == "proposalInvestmentSection" => { heading, title, intro },
+      _type == "proposalSowSection" => { body },
+      _type == "proposalScheduleSection" => { heading, excludedNote },
+      _type == "proposalTermsSection" => { validityNote, changeOrderRule },
+      _type == "proposalAcceptSection" => { prompt, checkboxLabel },
+      _type == "proposalSignedSection" => { heading, nextSteps, kickoffUrl, kickoffLabel }
+    }
+  }
+`)
+
+/** Projects for the local proposal preview. The notes are written in the preview, not here. */
+export const previewProofProjectsQuery = defineQuery(`
+  *[_type == "project" && slug.current in $slugs && hidden != true]{
+    _id,
+    title,
+    "slug": slug.current,
+    year,
+    coverImage,
+    videoUrl,
+    "clientName": client->name,
+    "stats": sections[_type == "projectStatsSection" && enabled != false][0].items[]{
+      _key,
+      value,
+      label
+    }
+  }
+`)
