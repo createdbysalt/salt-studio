@@ -16,6 +16,7 @@ import {
   discountedAmount,
   formatAmount,
   formatCents,
+  honoredPercent,
   proposalIsAccepted,
   proposalIsExpired,
   quoteInputs,
@@ -97,9 +98,14 @@ export function ProposalPage({
   // they already signed, their percent is kept, so what is shown here is
   // what checkout will charge.
   const inputs = quoteInputs(proposal, now)
-  if (inputs.percent == null && payment?.honoredPercent != null) {
-    inputs.percent = payment.honoredPercent
-  }
+  // Their signature only covers the selection they signed, so a different
+  // package or add-on is priced at today's rules, same as the server does.
+  const onSignedDeal =
+    payment?.selectionKey != null && payment.selectionKey === selectionKey(selection)
+  inputs.percent = honoredPercent(
+    inputs.percent,
+    onSignedDeal && payment ? {same_day_percent: payment.honoredPercent} : null,
+  )
   const view: View = {
     token,
     proposal,
@@ -111,7 +117,7 @@ export function ProposalPage({
     payment,
     now,
     inputs,
-    signed: payment != null,
+    signed: payment != null && onSignedDeal,
   }
   const slides = (proposal.sections ?? []).flatMap((section) => {
     if (section.enabled === false || !sectionIsShown(section, view)) return []

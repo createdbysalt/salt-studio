@@ -106,13 +106,10 @@ export async function prepareSigning(
   if (!proposal?._id) return {ok: false, error: 'This proposal is no longer available.'}
   if (proposalIsAccepted(proposal)) return {ok: false, error: 'This proposal is already signed.'}
 
-  // A signature already on file keeps its terms. Someone who signed in time
-  // can still finish paying after the offer window, and at the price they
-  // agreed to, rather than being turned away or quietly charged more.
+  // A signature on file keeps its own terms alive, but only for the exact
+  // thing it signed. Checked further down, once there is a selection to
+  // compare against: anything else is a new deal at today's prices.
   const signed = await latestAcceptanceForProposal(proposal._id)
-  if (proposalIsExpired(proposal) && !signed) {
-    return {ok: false, error: 'This proposal has expired. Write back and a new one can go out.'}
-  }
 
   const signerName = String(formData.get('signerName') ?? '').trim()
   if (signerName.length < MIN_NAME || signerName.length > 200) {
@@ -136,24 +133,43 @@ export async function prepareSigning(
     kickoff: String(formData.get('kickoff') ?? ''),
   })
   const inputs = quoteInputs(proposal)
-  const honored = honoredPercent(inputs.percent, signed)
-  if (honored != null) inputs.percent = honored
-  const quote = quoteSelection(inputs, selection)
-  if (!quote) return {ok: false, error: 'Choose a package first.'}
+  const live = quoteSelection(inputs, selection)
+  if (!live) return {ok: false, error: 'Choose a package first.'}
 
-  const pkg = (proposal.packages ?? []).find((item) => item._id === quote.packageId)
+  const pkg = (proposal.packages ?? []).find((item) => item._id === live.packageId)
   if (!pkg) return {ok: false, error: 'Choose a package first.'}
   const addOns = (proposal.addOns ?? []).filter((item) =>
-    quote.addOns.some((chosen) => chosen.id === item._id),
+    live.addOns.some((chosen) => chosen.id === item._id),
   )
+  const agreedHash = agreedTextFor(proposal, pkg, addOns)
+
+  // Re-price at the percent on the signature and keep it only when that
+  // reproduces, to the cent, the deal they actually signed. A different
+  // package or add-on cannot inherit an expired discount this way.
+  const sameDeal =
+    signed != null &&
+    signed.selection_key === selectionKey(selection) &&
+    signed.agreed_text_sha256 === agreedHash
+  const frozen = sameDeal
+    ? quoteSelection({...inputs, percent: honoredPercent(inputs.percent, signed)}, selection)
+    : null
+  const honorsSignature =
+    frozen != null &&
+    signed != null &&
+    frozen.totalCents === signed.total_cents &&
+    frozen.firstCents === signed.first_cents
+  const quote = honorsSignature && frozen ? frozen : live
+
+  // Only the signed deal outlives the proposal. Anything else is too late.
+  if (proposalIsExpired(proposal) && !honorsSignature) {
+    return {ok: false, error: 'This proposal has expired. Write back and a new one can go out.'}
+  }
 
   const latest = await latestPaymentForProposal(proposal._id)
   if (latest?.status === 'paid') return {ok: false, error: 'This proposal is already paid.'}
   if (latest?.status === 'processing' || latest?.status === 'pending_wire') {
     return {ok: false, error: 'A payment is already on its way for this proposal.'}
   }
-
-  const agreedHash = agreedTextFor(proposal, pkg, addOns)
 
   return {
     ok: true,
@@ -166,22 +182,8 @@ export async function prepareSigning(
     clientName: clean(proposal.clientDisplayName) || clean(proposal.clientLegalName),
     agreedHash,
     latest,
-    // One signature per set of terms. Clicking pay again after walking away
-    // reuses it; changing the selection or the price is a new signature.
-    reuseAcceptance: signed && sameTerms(signed, selection, quote, agreedHash) ? signed : null,
+    // One signature per deal. Clicking pay again after walking away reuses
+    // it; changing the selection or the price is a new signature.
+    reuseAcceptance: honorsSignature ? signed : null,
   }
-}
-
-function sameTerms(
-  signed: AcceptanceRow,
-  selection: ProposalSelection,
-  quote: ProposalQuote,
-  agreedHash: string,
-) {
-  return (
-    signed.selection_key === selectionKey(selection) &&
-    signed.total_cents === quote.totalCents &&
-    signed.first_cents === quote.firstCents &&
-    signed.agreed_text_sha256 === agreedHash
-  )
 }
