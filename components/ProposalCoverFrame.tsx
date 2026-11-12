@@ -133,7 +133,13 @@ export function ProposalCoverFrame({
   return (
     <div
       ref={frame}
-      className={`relative z-0 mx-auto h-[56vh] max-h-[56vh] w-full max-w-6xl origin-center overflow-hidden rounded-[16px] border-0 shadow-none will-change-transform md:h-[64vh] md:max-h-[64vh] lg:aspect-[1.75/1] lg:h-auto lg:max-h-[80vh] ${src ? 'bg-paper' : ''}`}
+      // On a large screen the panel fills the section's gutters rather than
+      // stopping at the 1152px column, and its height is set directly instead
+      // of by an aspect ratio. A ratio made a wider panel a taller one too,
+      // which ran it off the bottom of the screen and pushed the headline up
+      // against the top. The hero is bottom anchored, so a shorter panel
+      // brings the headline back down.
+      className={`relative z-0 mx-auto h-[56vh] max-h-[56vh] w-full max-w-6xl origin-center overflow-hidden rounded-[16px] border-0 shadow-none will-change-transform md:h-[64vh] md:max-h-[64vh] lg:h-[52vh] lg:max-h-[52vh] lg:max-w-[100rem] ${src ? 'bg-paper' : ''}`}
     >
       {src ? (
         // The cover is the largest thing above the fold, so it is the LCP.
