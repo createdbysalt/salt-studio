@@ -252,7 +252,8 @@ export const proposalPhasesSection = defineType({
       title: 'Heading',
       type: 'string',
       initialValue: 'How we get there',
-      description: 'The large title above the timeline.',
+      hidden: true,
+      description: 'The page always shows How we get there. This value is not used.',
     }),
     defineField({
       name: 'intro',
@@ -337,16 +338,16 @@ export const proposalProofSection = defineType({
       title: 'Eyebrow',
       type: 'string',
       initialValue: 'What we make',
-      description: 'Kept on the document. The page always shows What we make above the line.',
+      hidden: true,
+      description: 'The page always shows What we make. This value is not used.',
     }),
     defineField({
       name: 'heading',
       title: 'Line',
       type: 'string',
       initialValue: "A few projects we're proud of.",
-      description:
-        "Kept on the document. The page always shows A few projects we're proud of. The eyebrow above it always says What we make.",
-      validation: (rule) => rule.max(120).warning('One sentence holds the screen'),
+      hidden: true,
+      description: "The page always shows A few projects we're proud of. This value is not used.",
     }),
     defineField({
       name: 'projects',
@@ -413,16 +414,59 @@ export const proposalPackagesSection = defineType({
       name: 'heading',
       title: 'Heading',
       type: 'string',
-      initialValue: 'The engagement',
-      description:
-        'Heading above the package cards. The packages themselves are chosen on the proposal.',
+      initialValue: 'The investment.',
+      hidden: true,
+      description: 'The page always shows The investment. This value is not used.',
     }),
     defineField({
       name: 'intro',
       title: 'Intro',
       type: 'text',
       rows: 2,
-      description: 'One or two sentences on how to choose. Optional.',
+      hidden: true,
+      description:
+        "The page always shows We're excited to partner with you. This is the work we'd take on together. This value is not used.",
+    }),
+    defineField({
+      name: 'sameDayDiscount',
+      title: 'Same-day discount',
+      type: 'object',
+      description:
+        'A percent off the package prices if they sign today. The sticker sits beside the heading. Add-ons stay at full price.',
+      fields: [
+        defineField({
+          name: 'enabled',
+          title: 'Show this offer',
+          type: 'boolean',
+          initialValue: false,
+          description:
+            'Turn on to show the sticker and the reduced package prices. Turn off to show the full prices only.',
+        }),
+        defineField({
+          name: 'percent',
+          title: 'Percent off',
+          type: 'number',
+          initialValue: 10,
+          description:
+            'A whole number, such as 10 or 15. The sticker reads “10% off” and “sign within 24 hours.” Each package price is reduced by this percent.',
+          validation: (rule) =>
+            rule.min(1).max(90).integer().error('Use a whole percent from 1 to 90'),
+        }),
+      ],
+      validation: (rule) =>
+        rule.custom((value) => {
+          const offer = value as {enabled?: boolean; percent?: number} | undefined
+          if (!offer?.enabled) return true
+          if (
+            typeof offer.percent !== 'number' ||
+            !Number.isInteger(offer.percent) ||
+            offer.percent < 1 ||
+            offer.percent > 90
+          ) {
+            return 'Set a whole percent from 1 to 90 before showing the offer'
+          }
+          return true
+        }),
     }),
   ],
   preview: {
@@ -444,14 +488,16 @@ export const proposalAddOnsSection = defineType({
       title: 'Heading',
       type: 'string',
       initialValue: 'Add-ons',
-      description: 'Heading above the add-on toggles.',
+      hidden: true,
+      description: 'The page always shows Add-ons. This value is not used.',
     }),
     defineField({
       name: 'intro',
       title: 'Intro',
       type: 'text',
       rows: 2,
-      description: 'One line on what an add-on changes. Optional.',
+      hidden: true,
+      description: 'The page does not show an intro above the add-ons. This value is not used.',
     }),
   ],
   preview: {
@@ -492,11 +538,28 @@ export const proposalInvestmentSection = defineType({
     shownField(),
     defineField({
       name: 'heading',
+      title: 'Label',
+      type: 'string',
+      initialValue: 'Accept & Sign',
+      hidden: true,
+      description: 'The page always shows Accept & Sign. This value is not used.',
+    }),
+    defineField({
+      name: 'title',
       title: 'Heading',
       type: 'string',
-      initialValue: 'Investment',
+      initialValue: "We can't wait to work together.",
+      hidden: true,
+      description: "The page always shows We can't wait to work together. This value is not used.",
+    }),
+    defineField({
+      name: 'intro',
+      title: 'Intro',
+      type: 'text',
+      rows: 2,
+      hidden: true,
       description:
-        'Heading for the live total. Amounts are calculated on the server, not typed here.',
+        'The page always explains how to choose, then builds the payment line from the schedule. This value is not used.',
     }),
   ],
   preview: {
@@ -514,50 +577,32 @@ export const proposalSowSection = defineType({
   fields: [
     shownField(),
     defineField({
-      name: 'overview',
-      title: 'Overview',
-      type: 'text',
-      rows: 4,
-      description: 'One paragraph: what is being built, and why.',
-      validation: (rule) => rule.required().error('The signed scope needs an overview'),
-    }),
-    defineField({
-      name: 'clientResponsibilities',
-      title: 'Client responsibilities',
+      name: 'body',
+      title: 'Standing terms',
       type: 'array',
       description:
-        'What you need from them: content, access, feedback time, and one decision-maker.',
-      of: [defineArrayMember({type: 'string'})],
-    }),
-    defineField({
-      name: 'assumptions',
-      title: 'Assumptions and dependencies',
-      type: 'array',
-      description: 'What has to be true for this scope and schedule to hold.',
-      of: [defineArrayMember({type: 'string'})],
-    }),
-    defineField({
-      name: 'acceptanceProcess',
-      title: 'Acceptance process',
-      type: 'text',
-      rows: 3,
-      description: 'How “done” is confirmed: the review window and the rounds of revision.',
-    }),
-    defineField({
-      name: 'ownership',
-      title: 'Ownership',
-      type: 'text',
-      rows: 3,
-      description:
-        'Who owns the project-specific work, and what Salt keeps. Default: they own the deliverables on full payment, and Salt keeps its background tools.',
-    }),
-    defineField({
-      name: 'postLaunch',
-      title: 'After launch',
-      type: 'text',
-      rows: 2,
-      description:
-        'The care plan if they add it. Otherwise say a separate agreement covers ongoing work.',
+        'Terms that always close the statement: who the parties are, what you need from the client, acceptance, and ownership. The page builds the document from the selected package’s scope, then each checked add-on’s scope, then this text.',
+      of: [
+        defineArrayMember({
+          type: 'block',
+          styles: [
+            {title: 'Paragraph', value: 'normal'},
+            {title: 'Heading', value: 'h3'},
+          ],
+          lists: [
+            {title: 'Bullet', value: 'bullet'},
+            {title: 'Numbered', value: 'number'},
+          ],
+          marks: {
+            decorators: [
+              {title: 'Bold', value: 'strong'},
+              {title: 'Italic', value: 'em'},
+            ],
+            annotations: [],
+          },
+        }),
+      ],
+      validation: (rule) => rule.required().error('Paste the standing terms'),
     }),
   ],
   preview: {
@@ -640,8 +685,9 @@ export const proposalAcceptSection = defineType({
       name: 'prompt',
       title: 'Prompt',
       type: 'string',
-      initialValue: 'Sign here and we start on the date you choose.',
-      description: 'The line above the signature. Mention the real kickoff.',
+      initialValue: 'Sign here and we can start.',
+      hidden: true,
+      description: 'The page always shows Sign here and we can start. This value is not used.',
     }),
     defineField({
       name: 'checkboxLabel',
@@ -649,7 +695,9 @@ export const proposalAcceptSection = defineType({
       type: 'text',
       rows: 2,
       initialValue: 'I agree to the Master Services Agreement and this Statement of Work.',
-      description: 'The exact sentence they check. The agreement version is added on the page.',
+      hidden: true,
+      description:
+        'The page always uses this sentence. The agreement version comes from the Master Services Agreement. This value is not used.',
     }),
   ],
   preview: {

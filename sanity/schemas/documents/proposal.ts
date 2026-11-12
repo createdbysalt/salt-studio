@@ -127,7 +127,7 @@ export default defineType({
       type: 'array',
       group: 'page',
       description:
-        'The page, from top to bottom. Reorder sections here, or hide one without deleting it.',
+        'The page, from top to bottom. Hide a section without deleting it. Labels such as What we heard, The timeline, The investment, and Accept & Sign are the same on every proposal. Edit the story, the phases, the projects, and the scopes.',
       of: proposalSectionMembers,
       initialValue: [
         {
@@ -143,10 +143,16 @@ export default defineType({
         {_type: 'proposalOutcomesSection', enabled: true},
         {_type: 'proposalPhasesSection', enabled: true, heading: 'How we get there'},
         {_type: 'proposalProofSection', enabled: true},
-        {_type: 'proposalPackagesSection', enabled: true, heading: 'The engagement'},
+        {_type: 'proposalPackagesSection', enabled: true, heading: 'The investment.'},
         {_type: 'proposalAddOnsSection', enabled: true, heading: 'Add-ons'},
-        {_type: 'proposalOfferSection', enabled: true, heading: 'If you sign today'},
-        {_type: 'proposalInvestmentSection', enabled: true, heading: 'Investment'},
+        {
+          _type: 'proposalInvestmentSection',
+          enabled: true,
+          heading: 'Accept & Sign',
+          title: "We can't wait to work together.",
+          intro:
+            'Select a package, then any add-ons. The total and the scope of work update as you go.',
+        },
         {_type: 'proposalSowSection', enabled: true},
         {_type: 'proposalScheduleSection', enabled: true, heading: 'Payment schedule'},
         {
@@ -170,14 +176,15 @@ export default defineType({
       type: 'array',
       group: 'commercial',
       description:
-        'Two or three packages the client can choose from. One of them is marked recommended.',
+        'One or two packages. Each package has its own scope of work. The card opens that scope. The statement further down joins the selected package with any checked add-ons.',
       of: [defineArrayMember({type: 'reference', to: [{type: 'proposalPackage'}]})],
       validation: (rule) =>
-        rule
-          .max(3)
-          .error('Show two or three packages')
-          .min(2)
-          .warning('Two or three packages reads as a clear choice'),
+        rule.custom((value) => {
+          const count = Array.isArray(value) ? value.length : 0
+          if (count < 1) return 'Add at least one package'
+          if (count > 2) return 'Two packages is the maximum'
+          return true
+        }),
     }),
     defineField({
       name: 'recommendedPackage',
@@ -185,7 +192,8 @@ export default defineType({
       type: 'reference',
       group: 'commercial',
       to: [{type: 'proposalPackage'}],
-      description: 'The package marked recommended. It must be one of the packages above.',
+      description:
+        'Mark the higher-priced package when there are two. The page gives that one the larger card. With one package, the card fills the row. It must be one of the packages above.',
       validation: (rule) =>
         rule.custom((value, context) => {
           const selected = (context.document?.packages as {_ref?: string}[] | undefined) ?? []
@@ -202,7 +210,8 @@ export default defineType({
       title: 'Add-ons',
       type: 'array',
       group: 'commercial',
-      description: 'Optional toggles. Each one updates the total and the signed scope.',
+      description:
+        'As many as you need. The page shows them two per row. Each add-on has its own scope of work. Checking one adds that scope to the statement and its price to the total.',
       of: [defineArrayMember({type: 'reference', to: [{type: 'proposalAddOn'}]})],
     }),
     defineField({

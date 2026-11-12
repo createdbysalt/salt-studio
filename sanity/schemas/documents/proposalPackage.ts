@@ -2,8 +2,8 @@ import {TagIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
 /**
- * A reusable proposal package. The dollar amount lives in the payments
- * table, keyed by priceId. Never type a price here.
+ * A reusable proposal package. The card shows `amount`.
+ * `priceId` is the payments-table key. Charging reads that table on the server.
  */
 export default defineType({
   name: 'proposalPackage',
@@ -33,12 +33,22 @@ export default defineType({
       validation: (rule) => rule.required().error('Add a short summary'),
     }),
     defineField({
+      name: 'amount',
+      title: 'Price',
+      type: 'number',
+      group: 'card',
+      description:
+        'The price on the proposal card, in US dollars. Whole dollars, no cents. This is the figure the client reads.',
+      validation: (rule) =>
+        rule.required().integer().positive().error('Enter the price in whole US dollars'),
+    }),
+    defineField({
       name: 'priceId',
       title: 'Price id',
       type: 'string',
       group: 'card',
       description:
-        'The id of this package in the payments table, for example “website-essential”. The page looks up the amount on the server. Do not type a dollar amount here.',
+        'The id of this package in the payments table, for example “website-essential”. Charging uses this id on the server. It is not shown on the card.',
       validation: (rule) =>
         rule
           .required()
@@ -51,9 +61,38 @@ export default defineType({
       type: 'array',
       group: 'card',
       description:
-        'The short checklist on the package card. The signed list is the deliverables below.',
+        'The short checklist on the package card. The full scope is the Scope of work field.',
       of: [defineArrayMember({type: 'string'})],
       validation: (rule) => rule.min(1).error('Add at least one included item'),
+    }),
+    defineField({
+      name: 'scope',
+      title: 'Scope of work',
+      type: 'array',
+      group: 'scope',
+      description:
+        'This package’s own scope of work. Paragraphs and bullets. The card button opens only this text. The statement further down includes it when this package is selected.',
+      validation: (rule) => rule.required().min(1).error('Paste this package’s scope of work'),
+      of: [
+        defineArrayMember({
+          type: 'block',
+          styles: [
+            {title: 'Paragraph', value: 'normal'},
+            {title: 'Heading', value: 'h3'},
+          ],
+          lists: [
+            {title: 'Bullet', value: 'bullet'},
+            {title: 'Numbered', value: 'number'},
+          ],
+          marks: {
+            decorators: [
+              {title: 'Bold', value: 'strong'},
+              {title: 'Italic', value: 'em'},
+            ],
+            annotations: [],
+          },
+        }),
+      ],
     }),
     defineField({
       name: 'deliverables',
@@ -61,16 +100,16 @@ export default defineType({
       type: 'array',
       group: 'scope',
       description:
-        'Numbered scope items. Each one needs acceptance criteria so the Statement of Work can assemble itself.',
+        'Optional notes for you. The page does not print these. The client reads the Scope of work field.',
       of: [defineArrayMember({type: 'proposalDeliverable'})],
-      validation: (rule) => rule.min(1).error('A package needs at least one deliverable'),
     }),
     defineField({
       name: 'outOfScope',
       title: 'Out of scope',
       type: 'array',
       group: 'scope',
-      description: 'What this package explicitly does not include.',
+      description:
+        'What this package explicitly does not include. Optional notes for you. The page does not print this.',
       of: [defineArrayMember({type: 'proposalScopeItem'})],
     }),
     defineField({
@@ -78,7 +117,8 @@ export default defineType({
       title: 'Phases',
       type: 'array',
       group: 'scope',
-      description: 'The phases that go into the signed scope for this package.',
+      description:
+        'Optional phase notes for you. The signed statement uses the Scope of work field, not this list.',
       of: [defineArrayMember({type: 'proposalPhaseItem'})],
     }),
   ],

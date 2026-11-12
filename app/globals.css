@@ -249,6 +249,22 @@
   background-size: 12px 12px;
 }
 
+@keyframes proposal-recommend-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.7);
+  }
+}
+
+.animate-proposal-recommend {
+  animation: proposal-recommend-pulse 2.6s ease-in-out infinite;
+}
+
 /* Empty proposal cover. Called only from ProposalCoverFrame when src is absent.
    No other class paints a drifting field. Reads no data.
    A still of the outcome shader: sky on the left, gold on the right.
@@ -745,7 +761,8 @@
     .animate-salt-scan-fill,
     .animate-salt-blink,
     .animate-salt-mark-in,
-    .animate-salt-rise {
+    .animate-salt-rise,
+    .animate-proposal-recommend {
       animation: none !important;
     }
 

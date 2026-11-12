@@ -31,7 +31,7 @@ export function ProposalProof({
   projects: ProposalProofProject[]
 }) {
   return (
-    <section className="flex min-h-dvh w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:py-32">
+    <section className="flex min-h-[85dvh] w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-10 md:min-h-[88dvh] md:px-[max(4.5rem,var(--spacing-gutter))] md:py-16 lg:min-h-dvh lg:py-32">
       <header>
         <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
           {eyebrow}
@@ -256,7 +256,7 @@ function ProofMedia({
   }, [mp4Src, playing])
 
   return (
-    <div className="relative aspect-video shrink-0 overflow-hidden rounded-[20px] bg-[#d5d5d5]">
+    <div className="relative aspect-video shrink-0 overflow-hidden rounded-[20px] bg-[#d5d5d5] shadow-[0_1px_2px_rgba(8,9,10,0.08),0_8px_20px_rgba(8,9,10,0.1)]">
       {imageUrl ? (
         <Image
           src={imageUrl}

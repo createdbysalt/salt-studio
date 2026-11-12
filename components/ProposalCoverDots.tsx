@@ -4,7 +4,7 @@
  * The marketing homepage dot field, behind the proposal cover.
  * Dots breathe, ease away from the pointer, and ripple on click.
  * A static grid stands in when WebGL2 float buffers are unavailable.
- * ProposalPage renders this inside the cover.
+ * ProposalPage renders this behind the cover and the engagement section.
  */
 import {useEffect, useRef, useState} from 'react'
 

@@ -430,7 +430,7 @@ function PhaseList({
     } else {
       ctx = gsap.context(() => {
         gsap.set(ink, {scaleY: 0, transformOrigin: 'top center'})
-        gsap.set(pen, {top: 0, xPercent: -50, yPercent: -50})
+        gsap.set(pen, {top: 0})
         gsap
           .timeline({
             defaults: {ease: 'none'},
@@ -475,10 +475,9 @@ function PhaseList({
         >
           <div className="absolute inset-0 bg-black/15" />
           <div ref={inkRef} className="absolute inset-0 origin-top scale-y-0 bg-[#08090a]" />
-          <div
-            ref={penRef}
-            className="absolute left-1/2 top-0 size-3 -translate-y-1/2 rounded-full bg-[#08090a] ring-4 ring-white/80"
-          />
+          <div ref={penRef} className="absolute left-1/2 top-0">
+            <div className="size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#08090a] ring-4 ring-white/80" />
+          </div>
         </div>
         <ol ref={listRef}>
           {phases.map((phase, index) => (

@@ -52,7 +52,37 @@ const chromaColors = {
   opacity: 0.97,
 } as const
 
-export function ProposalSwirlField({pace = 'section'}: {pace?: 'section' | 'slow'}) {
+/** Orange-led swirl for the recommended package, with a little sky at the edge. */
+const emberSwirl = {
+  ...swirlColors,
+  colorA: '#f08a3a',
+  colorB: '#dce8f6',
+  blend: 22,
+} as const
+
+const emberStill: CSSProperties = {
+  backgroundColor: '#f3b56e',
+  backgroundImage:
+    'linear-gradient(125deg, rgba(240, 150, 70, 0.82) 0%, rgba(248, 196, 130, 0.64) 68%, rgba(197, 223, 248, 0.42) 100%)',
+}
+
+const emberChroma = {
+  ...chromaColors,
+  baseColor: '#ffe0bc',
+  upColor: '#ff9a48',
+  downColor: '#f8d4a4',
+  leftColor: '#f07a32',
+  rightColor: '#cfe4f8',
+  opacity: 0.46,
+} as const
+
+export function ProposalSwirlField({
+  pace = 'section',
+  tone = 'sunrise',
+}: {
+  pace?: 'section' | 'slow'
+  tone?: 'sunrise' | 'ember'
+}) {
   const rootRef = useRef<HTMLDivElement>(null)
   const [kit, setKit] = useState<ShaderKit | null>(null)
   const [ready, setReady] = useState(false)
@@ -137,14 +167,24 @@ export function ProposalSwirlField({pace = 'section'}: {pace?: 'section' | 'slow
       aria-hidden
       className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
     >
-      <div className="proposal-outcome-field absolute inset-0" style={shaderStill} />
+      <div
+        className="proposal-outcome-field absolute inset-0"
+        style={tone === 'ember' ? emberStill : shaderStill}
+      />
       {showShader && Shader && Swirl && ChromaFlow ? (
         <div className={`absolute inset-0 ${ready ? 'opacity-100' : 'opacity-0'}`}>
           <Shader className="h-full w-full">
-            <Swirl {...swirlColors} speed={pace === 'slow' ? 0.16 : swirlColors.speed} />
-            <ChromaFlow {...chromaColors} momentum={pace === 'slow' ? 6 : chromaColors.momentum} />
+            <Swirl
+              {...(tone === 'ember' ? emberSwirl : swirlColors)}
+              speed={pace === 'slow' ? 0.16 : swirlColors.speed}
+            />
+            <ChromaFlow
+              {...(tone === 'ember' ? emberChroma : chromaColors)}
+              momentum={pace === 'slow' ? 6 : chromaColors.momentum}
+            />
           </Shader>
-          <div className="absolute inset-0 bg-white/20" />
+          {tone === 'sunrise' ? <div className="absolute inset-0 bg-white/20" /> : null}
+          {tone === 'ember' ? <div className="absolute inset-0 bg-white/15" /> : null}
         </div>
       ) : null}
       <div className="proposal-outcome-grain absolute inset-0" />

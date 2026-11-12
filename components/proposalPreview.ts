@@ -93,17 +93,29 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       bonusDetail: 'Sign and pay the deposit today, and the homepage copy is included.',
       deadline: null,
     },
-    recommendedPackageId: 'pkg-foundation',
+    recommendedPackageId: 'pkg-complete',
+    // Preview figures so the cards have prices to design against.
     packages: [
       {
         _id: 'pkg-foundation',
         name: 'Foundation',
         summary: 'A clear site the office can update, built around how people actually arrive.',
+        amount: 5500,
         includedItems: [
           'Discovery workshop',
           'Site structure and design',
           'Build and launch',
           'A short training session',
+        ],
+        scope: [
+          sowBlock(
+            'f-scope-1',
+            'A clear site the office can update, built around how people actually arrive.',
+          ),
+          sowBullet('f-scope-2', 'Discovery workshop.'),
+          sowBullet('f-scope-3', 'Site structure and design.'),
+          sowBullet('f-scope-4', 'Build and launch.'),
+          sowBullet('f-scope-5', 'A short training session so the office can publish a page.'),
         ],
         deliverables: [
           {
@@ -159,10 +171,20 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         _id: 'pkg-complete',
         name: 'Complete',
         summary: 'Foundation, plus the words on the main pages and a month of care after launch.',
+        amount: 8500,
         includedItems: [
           'Everything in Foundation',
           'Copy for the main pages',
           'One month of care after launch',
+        ],
+        scope: [
+          sowBlock(
+            'c-scope-1',
+            'Foundation, plus the words on the main pages and a month of care after launch.',
+          ),
+          sowBullet('c-scope-2', 'Everything in Foundation.'),
+          sowBullet('c-scope-3', 'Copy for the homepage, visit, and about pages.'),
+          sowBullet('c-scope-4', 'One month of small fixes after launch.'),
         ],
         deliverables: [
           {
@@ -227,6 +249,13 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         _id: 'addon-copy',
         name: 'Copywriting',
         line: 'Words for the homepage, visit, and about pages.',
+        amount: 1800,
+        scope: [
+          sowBlock(
+            'copy-scope',
+            'Words for the homepage, visit, and about pages, from interviews with your team.',
+          ),
+        ],
         deliverables: [
           {
             _key: 'ad1',
@@ -242,6 +271,10 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         _id: 'addon-care',
         name: 'Care plan',
         line: 'A month of small fixes after launch.',
+        amount: 600,
+        scope: [
+          sowBlock('care-scope', 'A month of small fixes and questions for 30 days after launch.'),
+        ],
         deliverables: [
           {
             _key: 'ad2',
@@ -259,7 +292,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       name: '50/50',
       steps: [
         {_key: 's1', percent: 50, trigger: 'On signing'},
-        {_key: 's2', percent: 50, trigger: 'When the site is accepted'},
+        {_key: 's2', percent: 50, trigger: 'When the work is accepted'},
       ],
     },
     msa: {
@@ -267,6 +300,20 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       version: '1.0',
       effectiveDate: '2026-11-01',
       pdfUrl: null,
+      body: [
+        sowBlock(
+          'msa-1',
+          'This Master Services Agreement is between Salt Studio and Harbor Parish. It covers how the work is done, how it is paid for, and who owns it once it is paid for.',
+        ),
+        sowBlock(
+          'msa-2',
+          'The statement of work names the specific project. If the two differ, the statement of work governs the scope. This agreement governs everything else.',
+        ),
+        sowBlock(
+          'msa-3',
+          'On full payment, Harbor Parish owns the site built for this project. Salt Studio keeps its own tools and methods.',
+        ),
+      ],
     },
     sections: [
       {
@@ -370,49 +417,44 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         _key: 'sec-packages',
         _type: 'proposalPackagesSection',
         enabled: true,
-        heading: 'The engagement',
-        intro:
-          'Two ways to do this. Foundation is the site. Complete adds the words and a month of care.',
+        heading: 'The investment.',
+        intro: "We're excited to partner with you. This is the work we'd take on together.",
+        sameDayDiscount: {enabled: true, percent: 10},
       },
       {
         _key: 'sec-addons',
         _type: 'proposalAddOnsSection',
         enabled: true,
         heading: 'Add-ons',
-        intro: 'Each one changes the total and the signed scope.',
-      },
-      {
-        _key: 'sec-offer',
-        _type: 'proposalOfferSection',
-        enabled: true,
-        heading: 'If you sign today',
+        intro: '',
       },
       {
         _key: 'sec-investment',
         _type: 'proposalInvestmentSection',
         enabled: true,
-        heading: 'Investment',
+        heading: 'Accept & Sign',
+        title: "We can't wait to work together.",
+        intro:
+          'Select a package, then any add-ons. The total and the scope of work update as you go.',
       },
       {
         _key: 'sec-sow',
         _type: 'proposalSowSection',
         enabled: true,
-        overview:
-          'Salt Studio will design and build a website for Harbor Parish so the office can publish service times, events, and a clear welcome for first-time visitors.',
-        clientResponsibilities: [
-          'One person who can approve the work',
-          'Access to the domain and current site',
-          'Feedback within five business days of each review',
+        body: [
+          sowBlock(
+            'sow-1',
+            'This statement of work is between Salt Studio and Harbor Parish. The Master Services Agreement governs. This scope names the specific work.',
+          ),
+          sowBlock('sow-2', 'What we need from you', 'h3'),
+          sowBullet('sow-3', 'One person who can approve the work.'),
+          sowBullet('sow-4', 'Access to the domain and the current site.'),
+          sowBullet('sow-5', 'Feedback within five business days of each review.'),
+          sowBlock(
+            'sow-6',
+            'Each deliverable has a review window of five business days and one round of revision. Silence after the window counts as acceptance. On full payment, Harbor Parish owns the site built for this project. Salt Studio keeps its own tools and methods.',
+          ),
         ],
-        assumptions: [
-          'The page list confirmed in Foundation is the scope',
-          'Copy and photos, unless added, come from the parish',
-        ],
-        acceptanceProcess:
-          'Each deliverable has a review window of five business days and one round of revision. Silence after the window counts as acceptance.',
-        ownership:
-          'On full payment, Harbor Parish owns the site built for this project. Salt Studio keeps its own tools and methods.',
-        postLaunch: 'Ongoing care after the included window is a separate agreement.',
       },
       {
         _key: 'sec-schedule',
@@ -433,7 +475,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         _key: 'sec-accept',
         _type: 'proposalAcceptSection',
         enabled: true,
-        prompt: 'Sign here and we start on the date you choose.',
+        prompt: 'Sign here and we can start.',
         checkboxLabel: 'I agree to the Master Services Agreement and this Statement of Work.',
       },
       {
@@ -448,5 +490,23 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         ],
       },
     ],
+  }
+}
+
+function sowBlock(key: string, text: string, style: 'normal' | 'h3' = 'normal') {
+  return {
+    _key: key,
+    _type: 'block' as const,
+    style,
+    markDefs: null,
+    children: [{_key: `${key}-span`, _type: 'span' as const, text, marks: [] as string[]}],
+  }
+}
+
+function sowBullet(key: string, text: string) {
+  return {
+    ...sowBlock(key, text),
+    listItem: 'bullet' as const,
+    level: 1,
   }
 }

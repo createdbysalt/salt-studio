@@ -1,14 +1,23 @@
 import {ProposalApproach} from '@/components/ProposalApproach'
+import {ProposalChoices} from '@/components/ProposalChoices'
 import {ProposalCoverDots} from '@/components/ProposalCoverDots'
 import {ProposalCoverFrame} from '@/components/ProposalCoverFrame'
 import {ProposalLockup} from '@/components/ProposalLockup'
 import {ProposalOutcomes, ProposalSwirlField} from '@/components/ProposalOutcomes'
+import {ProposalPackages} from '@/components/ProposalPackages'
+import {ProposalPayButton} from '@/components/ProposalPayButton'
 import {ProposalProof} from '@/components/ProposalProof'
 import {ProposalRail, type ProposalRailItem} from '@/components/ProposalRail'
+import {ProposalScopePanel} from '@/components/ProposalScopePanel'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
-import type {ProposalByTokenQueryResult} from '@/sanity.types'
+import {SiteFooter} from '@/components/SiteFooter'
+import type {
+  FooterLegalPagesQueryResult,
+  ProposalByTokenQueryResult,
+  SettingsQueryResult,
+} from '@/sanity.types'
 import {urlForImage} from '@/sanity/lib/utils'
-import {stegaClean} from 'next-sanity'
+import {PortableText, stegaClean, type PortableTextBlock} from 'next-sanity'
 import Link from 'next/link'
 import type {ReactNode} from 'react'
 
@@ -16,8 +25,6 @@ export type ProposalDocument = NonNullable<ProposalByTokenQueryResult>
 type Section = NonNullable<ProposalDocument['sections']>[number]
 type PackageOption = NonNullable<ProposalDocument['packages']>[number]
 type AddOnOption = NonNullable<ProposalDocument['addOns']>[number]
-type Phase = NonNullable<PackageOption['phases']>[number]
-
 export type ProposalSelection = {
   packageId: string | null
   addonIds: string[]
@@ -48,6 +55,7 @@ export function resolveProposalSelection(
   const requestedPackage = firstQueryValue(query.package)
   const packageId =
     packages.find((item) => item._id === requestedPackage)?._id ??
+    mostExpensivePackageId(packages) ??
     packages.find((item) => item._id === proposal.recommendedPackageId)?._id ??
     packages[0]?._id ??
     null
@@ -67,10 +75,14 @@ export function ProposalPage({
   token,
   proposal,
   selection,
+  settings = null,
+  legalPages = null,
 }: {
   token: string
   proposal: ProposalDocument
   selection: ProposalSelection
+  settings?: SettingsQueryResult | null
+  legalPages?: FooterLegalPagesQueryResult | null
 }) {
   const packages = proposal.packages ?? []
   const selectedPackage = packages.find((item) => item._id === selection.packageId) ?? null
@@ -88,6 +100,7 @@ export function ProposalPage({
   }
   const slides = (proposal.sections ?? []).flatMap((section) => {
     if (section.enabled === false || !sectionIsShown(section, view)) return []
+    if (section._type === 'proposalAddOnsSection' && packagesAreShown(view)) return []
     const content = renderSection(section, view)
     if (!content) return []
     const anchor = railAnchor(section._type)
@@ -101,24 +114,20 @@ export function ProposalPage({
     : undefined
 
   return (
-    <article className="bg-background text-foreground">
-      <ProposalLockup
-        client={clientName}
-        logoUrl={clientLogoUrl}
-        logoAlt={line(clientLogo?.alt) || clientName}
-        acceptHref={view.accepted ? '#signed' : '#accept'}
-      />
-      <ProposalRail items={slides.map((slide) => slide.anchor)} />
+    <>
+      <article className="relative z-10 bg-background text-foreground">
+        <ProposalLockup
+          client={clientName}
+          logoUrl={clientLogoUrl}
+          logoAlt={line(clientLogo?.alt) || clientName}
+          acceptHref={view.accepted ? '#signed' : '#investment'}
+        />
+        <ProposalRail items={slides.map((slide) => slide.anchor)} />
 
-      {renderProposalSlides(slides)}
-
-      <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-[max(4.5rem,var(--spacing-gutter))] py-8 font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-          <p>Private proposal</p>
-          <p>Salt Studio</p>
-        </div>
-      </footer>
-    </article>
+        {renderProposalSlides(slides)}
+      </article>
+      <SiteFooter settings={settings} legalPages={legalPages} showPageNav={false} compact />
+    </>
   )
 }
 
@@ -157,13 +166,29 @@ function renderProposalSlides(slides: ProposalSlide[]) {
       index += band.length
       continue
     }
+    if (slide?.anchor.id === 'packages') {
+      const withInvestment = next?.anchor.id === 'investment'
+      const band = withInvestment && next ? [slide, next] : [slide]
+      nodes.push(
+        <div key={`${slide.key}-field`} className="relative bg-background">
+          <ProposalCoverDots />
+          <div className="relative z-[1]">
+            {band.map((item) => proposalSlide(item, {shareDots: true}))}
+          </div>
+        </div>,
+      )
+      index += band.length
+      continue
+    }
     if (slide) nodes.push(proposalSlide(slide))
     index += 1
   }
   return nodes
 }
 
-function proposalSlide(slide: ProposalSlide) {
+function proposalSlide(slide: ProposalSlide, options?: {shareDots?: boolean}) {
+  const dots =
+    !options?.shareDots && (slide.anchor.id === 'cover' || slide.anchor.id === 'packages')
   const shell =
     slide.anchor.id === 'situation'
       ? 'relative z-10 -mt-10 -mb-10 overflow-hidden rounded-[40px]'
@@ -175,22 +200,26 @@ function proposalSlide(slide: ProposalSlide) {
             ? 'relative z-10'
             : slide.anchor.id === 'proof'
               ? 'relative z-10 -mt-10 -mb-10 overflow-hidden rounded-[40px]'
-              : 'flex min-h-dvh flex-col justify-center'
+              : slide.anchor.id === 'packages'
+                ? 'relative flex min-h-dvh flex-col justify-center'
+                : slide.anchor.id === 'investment'
+                  ? 'relative scroll-mt-28'
+                  : 'flex min-h-dvh flex-col justify-center'
 
   return (
     <div
       key={slide.key}
       id={slide.anchor.id}
       data-theme={slide.field.dark ? 'dark' : undefined}
-      style={
-        slide.anchor.id === 'cover'
-          ? {backgroundColor: '#ffffff', backgroundImage: 'none'}
-          : undefined
-      }
-      className={`${shell} ${slide.field.className}`}
+      style={dots ? {backgroundColor: '#ffffff', backgroundImage: 'none'} : undefined}
+      className={`${shell} ${options?.shareDots ? 'bg-transparent' : slide.field.className}`}
     >
-      {slide.anchor.id === 'cover' ? <ProposalCoverDots /> : null}
-      {slide.content}
+      {dots ? <ProposalCoverDots /> : null}
+      {slide.anchor.id === 'packages' ? (
+        <div className="relative z-[1]">{slide.content}</div>
+      ) : (
+        slide.content
+      )}
       {slide.anchor.id === 'cover' ? (
         <div aria-hidden className="h-[calc(var(--spacing-6)+2.5rem)] shrink-0" />
       ) : null}
@@ -200,10 +229,11 @@ function proposalSlide(slide: ProposalSlide) {
 
 function sectionIsShown(section: Section, view: View) {
   if (section._type === 'proposalSignedSection') return view.accepted
-  if (section._type === 'proposalAcceptSection') return !view.accepted
-  if (section._type === 'proposalOfferSection') {
-    return offerIsOpen(view.proposal.sameDayOffer) && !view.expired && !view.accepted
-  }
+  if (section._type === 'proposalOfferSection') return false
+  if (section._type === 'proposalSowSection') return false
+  if (section._type === 'proposalTermsSection') return false
+  if (section._type === 'proposalScheduleSection') return false
+  if (section._type === 'proposalAcceptSection') return false
   return true
 }
 
@@ -256,17 +286,17 @@ function renderSection(section: Section, view: View): ReactNode {
     case 'proposalAddOnsSection':
       return <AddOns section={section} view={view} />
     case 'proposalOfferSection':
-      return <Offer section={section} view={view} />
+      return null
     case 'proposalInvestmentSection':
       return <Investment section={section} view={view} />
     case 'proposalSowSection':
-      return <Statement section={section} view={view} />
+      return null
     case 'proposalScheduleSection':
-      return <Schedule section={section} view={view} />
+      return null
     case 'proposalTermsSection':
-      return <Terms section={section} view={view} />
+      return null
     case 'proposalAcceptSection':
-      return <Accept section={section} view={view} />
+      return null
     case 'proposalSignedSection':
       return <Signed section={section} view={view} />
     default: {
@@ -435,7 +465,7 @@ function Phases({section}: {section: Extract<Section, {_type: 'proposalPhasesSec
 
   return (
     <ProposalApproach
-      heading={line(section.heading) || 'How we get there'}
+      heading="How we get there"
       intro={line(section.intro)}
       phases={phases}
       questionsHeading={line(section.questionsHeading) || 'How this gets built.'}
@@ -475,6 +505,28 @@ function Proof({section}: {section: Extract<Section, {_type: 'proposalProofSecti
   )
 }
 
+function proposalPrice(amount: number | null | undefined) {
+  if (amount == null || !Number.isFinite(amount)) return ''
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
+
+function mostExpensivePackageId(packages: Array<{_id: string; amount?: number | null}>) {
+  let bestId: string | null = null
+  let best = -Infinity
+  for (const pkg of packages) {
+    if (!pkg._id || pkg.amount == null || !Number.isFinite(pkg.amount)) continue
+    if (pkg.amount > best) {
+      best = pkg.amount
+      bestId = pkg._id
+    }
+  }
+  return bestId
+}
+
 function Packages({
   section,
   view,
@@ -482,58 +534,74 @@ function Packages({
   section: Extract<Section, {_type: 'proposalPackagesSection'}>
   view: View
 }) {
-  const packages = view.proposal.packages ?? []
+  const packages = (view.proposal.packages ?? []).flatMap((pkg) => {
+    const name = line(pkg.name)
+    if (!pkg._id || !name) return []
+    return [
+      {
+        id: pkg._id,
+        name,
+        summary: line(pkg.summary),
+        items: (pkg.includedItems ?? []).map((item) => line(item)).filter(Boolean),
+        scope: (pkg.scope ?? []) as PortableTextBlock[],
+        price: proposalPrice(pkg.amount),
+        amount: typeof pkg.amount === 'number' ? pkg.amount : null,
+        recommended: pkg._id === view.proposal.recommendedPackageId,
+      },
+    ]
+  })
   if (packages.length === 0) return null
 
-  return (
-    <SectionBlock heading={line(section.heading) || 'The engagement'} intro={line(section.intro)}>
-      <div className={`grid gap-4 ${packages.length > 1 ? 'lg:grid-cols-2' : ''}`}>
-        {packages.map((pkg) => {
-          const selected = pkg._id === view.selection.packageId
-          const recommended = pkg._id === view.proposal.recommendedPackageId
-          return (
-            <Link
-              key={pkg._id}
-              href={proposalHref(
-                view.token,
-                pkg._id,
-                view.selection.addonIds,
-                view.selection.kickoffDate,
-              )}
-              scroll={false}
-              aria-current={selected ? 'true' : undefined}
-              className={`flex flex-col border p-6 md:p-8 ${
-                selected ? 'border-foreground bg-surface' : 'border-border'
-              }`}
-            >
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="text-[length:var(--text-h3)] leading-[var(--text-h3--line-height)] tracking-[var(--tracking-heading)]">
-                  {line(pkg.name)}
-                </h3>
-                {recommended ? (
-                  <span className="inline-flex items-center gap-2 font-mono text-[12px] uppercase tracking-[0.08em]">
-                    <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-                    Recommended
-                  </span>
-                ) : null}
-              </div>
-              <p className="mt-4 text-lg leading-relaxed text-foreground/80">{line(pkg.summary)}</p>
-              <ul className="mt-6 grid gap-2 text-base">
-                {(pkg.includedItems ?? []).map((item) => (
-                  <li key={item} className="border-t border-border-subtle py-2">
-                    {line(item)}
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-8 font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-                Amount shown at signing
-              </p>
-            </Link>
-          )
-        })}
-      </div>
-    </SectionBlock>
+  const addOnSection = (view.proposal.sections ?? []).find(
+    (item): item is Extract<Section, {_type: 'proposalAddOnsSection'}> =>
+      item._type === 'proposalAddOnsSection',
   )
+  const addOns =
+    addOnSection?.enabled === false
+      ? []
+      : (view.proposal.addOns ?? []).flatMap((addOn) => {
+          const name = line(addOn.name)
+          if (!addOn._id || !name) return []
+          return [
+            {
+              id: addOn._id,
+              name,
+              line: line(addOn.line),
+              scope: (addOn.scope ?? []) as PortableTextBlock[],
+              price: proposalPrice(addOn.amount),
+            },
+          ]
+        })
+
+  const discount = section.sameDayDiscount
+  const discountPercent =
+    !view.expired &&
+    !view.accepted &&
+    discount?.enabled === true &&
+    typeof discount.percent === 'number' &&
+    Number.isInteger(discount.percent) &&
+    discount.percent >= 1 &&
+    discount.percent <= 90
+      ? discount.percent
+      : null
+
+  return (
+    <ProposalPackages
+      heading="The investment."
+      intro="We're excited to partner with you. This is the work we'd take on together."
+      packages={packages}
+      addOnHeading="Add-ons"
+      addOns={addOns}
+      discountPercent={discountPercent}
+    />
+  )
+}
+
+function packagesAreShown(view: View) {
+  const shown = (view.proposal.sections ?? []).some(
+    (section) => section._type === 'proposalPackagesSection' && section.enabled !== false,
+  )
+  return shown && (view.proposal.packages ?? []).some((pkg) => pkg._id && line(pkg.name))
 }
 
 function AddOns({
@@ -544,10 +612,10 @@ function AddOns({
   view: View
 }) {
   const addOns = view.proposal.addOns ?? []
-  if (addOns.length === 0) return null
+  if (addOns.length === 0 || packagesAreShown(view)) return null
 
   return (
-    <SectionBlock heading={line(section.heading) || 'Add-ons'} intro={line(section.intro)}>
+    <SectionBlock heading="Add-ons">
       <ul className="border-t border-border">
         {addOns.map((addOn) => {
           const selected = view.selection.addonIds.includes(addOn._id)
@@ -588,33 +656,28 @@ function AddOns({
   )
 }
 
-function Offer({
-  section,
-  view,
-}: {
-  section: Extract<Section, {_type: 'proposalOfferSection'}>
-  view: View
-}) {
-  const offer = view.proposal.sameDayOffer
-  if (!offerIsOpen(offer) || view.expired || view.accepted) return null
-
-  return (
-    <section className="bg-ink text-paper">
-      <div className="mx-auto w-full max-w-6xl px-[max(4.5rem,var(--spacing-gutter))] py-16 md:py-24">
-        <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-paper/60">
-          {line(section.heading) || 'If you sign today'}
-        </p>
-        <h2 className="mt-4 max-w-3xl text-[length:var(--text-h2)] leading-[var(--text-h2--line-height)] tracking-[var(--tracking-heading)]">
-          {line(offer?.bonusTitle)}
-        </h2>
-        {line(offer?.bonusDetail) ? (
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-paper/80">
-            {line(offer?.bonusDetail)}
-          </p>
-        ) : null}
-      </div>
-    </section>
+function sameDayPercent(view: View) {
+  const packages = (view.proposal.sections ?? []).find(
+    (section): section is Extract<Section, {_type: 'proposalPackagesSection'}> =>
+      section._type === 'proposalPackagesSection',
   )
+  const discount = packages?.sameDayDiscount
+  if (view.expired || view.accepted || discount?.enabled !== true) return null
+  if (
+    typeof discount.percent !== 'number' ||
+    !Number.isInteger(discount.percent) ||
+    discount.percent < 1 ||
+    discount.percent > 90
+  ) {
+    return null
+  }
+  return discount.percent
+}
+
+function reducedPrice(amount: number | null | undefined, percent: number | null) {
+  if (amount == null || !Number.isFinite(amount)) return null
+  if (percent == null) return amount
+  return Math.round((amount * (100 - percent)) / 100)
 }
 
 function Investment({
@@ -624,318 +687,299 @@ function Investment({
   section: Extract<Section, {_type: 'proposalInvestmentSection'}>
   view: View
 }) {
-  const steps = view.proposal.paymentSchedule?.steps ?? []
-
+  const percent = sameDayPercent(view)
+  const packages = (view.proposal.packages ?? []).flatMap((pkg) => {
+    const name = line(pkg.name)
+    if (!pkg._id || !name) return []
+    return [pkg]
+  })
+  const addOns = (view.proposal.addOns ?? []).flatMap((addOn) => {
+    const name = line(addOn.name)
+    if (!addOn._id || !name) return []
+    return [addOn]
+  })
+  const sections = view.proposal.sections ?? []
+  const scope = sections.find(
+    (item): item is Extract<Section, {_type: 'proposalSowSection'}> =>
+      item._type === 'proposalSowSection' && item.enabled !== false,
+  )
+  const accept = sections.find(
+    (item): item is Extract<Section, {_type: 'proposalAcceptSection'}> =>
+      item._type === 'proposalAcceptSection' && item.enabled !== false,
+  )
+  const lead = [
+    'Select a package, then any add-ons. The total and the scope of work update as you go.',
+    paymentSentence(view),
+  ]
+    .filter(Boolean)
+    .join(' ')
+  const version = line(view.proposal.msa?.version)
   return (
-    <SectionBlock heading={line(section.heading) || 'Investment'}>
-      <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-end">
-        <div>
-          <p className="text-[length:var(--text-h2)] leading-[var(--text-h2--line-height)] tracking-[var(--tracking-heading)]">
-            Amount shown at signing
+    <section className="w-full px-[max(3.5rem,var(--spacing-gutter))] pt-16 pb-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:pt-24 lg:pb-32">
+      <header className="mx-auto max-w-[40rem] text-center">
+        <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+          Accept & Sign
+        </p>
+        <h2 className="mx-auto mt-3 max-w-[9em] text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
+          We can't wait to work together.
+        </h2>
+        {lead ? (
+          <p className="mx-auto mt-4 max-w-[36rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
+            {lead}
           </p>
-          <p className="mt-4 max-w-md text-lg leading-relaxed text-foreground/80">
-            The total is calculated on the server from the package and add-ons you choose. This page
-            does not keep a price of its own.
-          </p>
-        </div>
-        <dl className="border-t border-border">
-          <div className="flex items-baseline justify-between gap-4 border-b border-border py-3">
-            <dt>Package</dt>
-            <dd>{line(view.selectedPackage?.name) || 'Choose one'}</dd>
-          </div>
-          <div className="flex items-baseline justify-between gap-4 border-b border-border py-3">
-            <dt>Add-ons</dt>
-            <dd className="text-right">
-              {view.selectedAddOns.length > 0
-                ? view.selectedAddOns.map((item) => line(item.name)).join(', ')
-                : 'None'}
-            </dd>
-          </div>
-          {steps.map((step) => (
-            <div
-              key={step._key}
-              className="flex items-baseline justify-between gap-4 border-b border-border py-3"
-            >
-              <dt>{line(step.trigger)}</dt>
-              <dd>{step.percent ? `${step.percent}%` : ''}</dd>
+        ) : null}
+      </header>
+
+      <ProposalChoices
+        token={view.token}
+        kickoff={view.selection.kickoffDate}
+        percent={percent}
+        packageId={view.selection.packageId}
+        addonIds={view.selection.addonIds}
+        packages={packages.flatMap((pkg) => {
+          const due = reducedPrice(pkg.amount, percent)
+          if (due == null) return []
+          return [
+            {
+              id: pkg._id,
+              name: line(pkg.name),
+              price: proposalPrice(pkg.amount),
+              sale: percent != null ? proposalPrice(due) : null,
+              due,
+            },
+          ]
+        })}
+        addOns={addOns.flatMap((addOn) => {
+          if (typeof addOn.amount !== 'number') return []
+          return [
+            {
+              id: addOn._id,
+              name: line(addOn.name),
+              amount: addOn.amount,
+              price: proposalPrice(addOn.amount),
+            },
+          ]
+        })}
+      />
+
+      {accept && !view.accepted ? (
+        <div id="sign" className="mx-auto mt-[4.5rem] w-full max-w-[36rem]">
+          {view.expired ? (
+            <div className="rounded-[32px] border border-white/70 bg-[rgba(228,228,228,0.62)] px-[2rem] py-[2.25rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_30px_80px_rgba(40,30,10,0.12)] backdrop-blur-[42px]">
+              <p className="text-[1.15rem] font-medium leading-snug">
+                The price is no longer held. Write back and a new proposal can go out.
+              </p>
             </div>
-          ))}
-        </dl>
-      </div>
-    </SectionBlock>
+          ) : (
+            <form className="relative overflow-hidden rounded-[32px] border border-white/70 bg-[rgba(228,228,228,0.62)] px-[2rem] py-[2.25rem] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_30px_80px_rgba(40,30,10,0.12)] backdrop-blur-[42px]">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-[linear-gradient(180deg,rgba(255,255,255,0.5),transparent)]"
+              />
+              <div className="relative grid gap-5">
+                <div className="text-center">
+                  <p className="text-[2.5rem] font-medium leading-[1.05] tracking-[-0.04em]">
+                    Sign here and we can start.
+                  </p>
+                </div>
+                <label className="block rounded-[20px] border border-white/80 bg-white/70 px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] transition-colors focus-within:border-[#08090a]/25">
+                  <span className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+                    Full name
+                  </span>
+                  <input
+                    name="signerName"
+                    autoComplete="name"
+                    placeholder="Your name"
+                    className="mt-2 w-full bg-transparent text-[1.35rem] font-medium tracking-[-0.03em] text-[#08090a] outline-none placeholder:font-normal placeholder:text-[#a3a3a3]"
+                  />
+                </label>
+                <label className="flex items-start gap-3 text-[1.05rem] leading-relaxed">
+                  <input type="checkbox" className="mt-1.5 h-4 w-4 accent-ink" />
+                  <span>
+                    <AgreementLine
+                      label="I agree to the Master Services Agreement and this Statement of Work."
+                      statement={
+                        scope ? (
+                          <Statement
+                            packageName={line(view.selectedPackage?.name)}
+                            packageScope={
+                              (view.selectedPackage?.scope ?? []) as PortableTextBlock[]
+                            }
+                            packageItems={view.selectedPackage?.includedItems ?? []}
+                            addOns={view.selectedAddOns.map((addOn) => ({
+                              name: line(addOn.name),
+                              scope: (addOn.scope ?? []) as PortableTextBlock[],
+                              line: line(addOn.line),
+                            }))}
+                            standing={(scope.body ?? []) as PortableTextBlock[]}
+                          />
+                        ) : null
+                      }
+                      agreement={
+                        <Agreement
+                          body={(view.proposal.msa?.body ?? []) as PortableTextBlock[]}
+                          pdfUrl={view.proposal.msa?.pdfUrl ?? null}
+                        />
+                      }
+                    />
+                    {version ? ` Version ${version}.` : ''}
+                  </span>
+                </label>
+                <div>
+                  <ProposalPayButton />
+                  <p className="mt-3 text-center text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
+                    The signed scope and receipt go to your email.
+                  </p>
+                </div>
+              </div>
+            </form>
+          )}
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
+function paymentSentence(view: View) {
+  const steps = (view.proposal.paymentSchedule?.steps ?? []).flatMap((step) => {
+    const trigger = line(step.trigger)
+    if (!trigger) return []
+    const when = `${trigger.charAt(0).toLowerCase()}${trigger.slice(1)}`
+    return [step.percent ? `${step.percent}% ${when}` : when]
+  })
+  const split =
+    steps.length === 0
+      ? ''
+      : steps.length === 1
+        ? `You pay ${steps[0]}.`
+        : `You pay ${steps.slice(0, -1).join(', ')} and ${steps[steps.length - 1]}.`
+  return [split, 'The first payment is collected here, and later payments are invoiced.']
+    .filter(Boolean)
+    .join(' ')
+}
+
+function AgreementLine({
+  label,
+  statement,
+  agreement,
+}: {
+  label: string
+  statement: ReactNode
+  agreement: ReactNode
+}) {
+  return (
+    <>
+      {splitAgreement(label).map((part, index) => {
+        if (part.kind === 'text') return <span key={index}>{part.text}</span>
+        if (part.kind === 'sow' && !statement) return <span key={index}>{part.text}</span>
+        return (
+          <ProposalScopePanel
+            key={index}
+            appearance="inline"
+            label={part.text}
+            title={part.kind === 'msa' ? 'Master Services Agreement' : 'Statement of Work'}
+            dismissLabel={
+              part.kind === 'msa'
+                ? 'Dismiss the Master Services Agreement'
+                : 'Dismiss scope of work'
+            }
+            closeLabel={
+              part.kind === 'msa' ? 'Close the Master Services Agreement' : 'Close scope of work'
+            }
+          >
+            {part.kind === 'msa' ? agreement : statement}
+          </ProposalScopePanel>
+        )
+      })}
+    </>
+  )
+}
+
+function splitAgreement(label: string) {
+  const phrases = [
+    {kind: 'msa' as const, text: 'Master Services Agreement'},
+    {kind: 'sow' as const, text: 'Statement of Work'},
+  ]
+  const marks = phrases.flatMap((phrase) => {
+    const start = label.indexOf(phrase.text)
+    if (start < 0) return []
+    return [{kind: phrase.kind, start, end: start + phrase.text.length}]
+  })
+  marks.sort((a, b) => a.start - b.start)
+  const parts: Array<{kind: 'text' | 'msa' | 'sow'; text: string}> = []
+  let cursor = 0
+  for (const mark of marks) {
+    if (mark.start < cursor) continue
+    if (mark.start > cursor) parts.push({kind: 'text', text: label.slice(cursor, mark.start)})
+    parts.push({kind: mark.kind, text: label.slice(mark.start, mark.end)})
+    cursor = mark.end
+  }
+  if (cursor < label.length) parts.push({kind: 'text', text: label.slice(cursor)})
+  return parts
+}
+
+function Agreement({body, pdfUrl}: {body: PortableTextBlock[]; pdfUrl: string | null}) {
+  return (
+    <div className="max-w-[40rem] text-[1.0625rem] leading-relaxed [&_h3]:mt-[1.25rem] [&_h3:first-child]:mt-0 [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]">
+      {body.length > 0 ? <PortableText value={body} /> : null}
+      {pdfUrl ? (
+        <p className={body.length > 0 ? 'mt-4' : ''}>
+          <a
+            href={pdfUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-[3px]"
+          >
+            Open the agreement PDF.
+          </a>
+        </p>
+      ) : null}
+    </div>
   )
 }
 
 function Statement({
-  section,
-  view,
+  packageName,
+  packageScope,
+  packageItems,
+  addOns,
+  standing,
 }: {
-  section: Extract<Section, {_type: 'proposalSowSection'}>
-  view: View
+  packageName: string
+  packageScope: PortableTextBlock[]
+  packageItems: Array<string | null>
+  addOns: Array<{name: string; scope: PortableTextBlock[]; line: string}>
+  standing: PortableTextBlock[]
 }) {
-  const deliverables = [
-    ...(view.selectedPackage?.deliverables ?? []),
-    ...view.selectedAddOns.flatMap((addOn) => addOn.deliverables ?? []),
-  ]
-  const exclusions = uniqueLines([
-    ...(view.selectedPackage?.outOfScope ?? []).map((item) => item.text),
-    ...view.selectedAddOns.flatMap((addOn) => (addOn.outOfScope ?? []).map((item) => item.text)),
-  ])
-  const packagePhases = (view.selectedPackage?.phases ?? []).filter((phase) => line(phase.name))
-  const phases = packagePhases.length > 0 ? packagePhases : phasesFromApproach(view.proposal)
-  const msaVersion = line(view.proposal.msa?.version)
-
   return (
-    <SectionBlock heading="Statement of Work">
-      <div className="grid gap-12">
-        {line(section.overview) ? (
-          <p className="max-w-3xl text-lg leading-relaxed">{line(section.overview)}</p>
-        ) : null}
-        <dl className="grid gap-6 md:grid-cols-2">
-          <div>
-            <dt className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-              Parties
-            </dt>
-            <dd className="mt-2 text-lg">
-              Salt Studio and{' '}
-              {line(view.proposal.clientLegalName) || line(view.proposal.clientDisplayName)}
-            </dd>
-          </div>
-          <div>
-            <dt className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-              Order of precedence
-            </dt>
-            <dd className="mt-2 text-lg">
-              The Master Services Agreement{msaVersion ? ` ${msaVersion}` : ''} governs. This scope
-              names the specific work.
-            </dd>
-          </div>
-        </dl>
-        {deliverables.length > 0 ? (
-          <div>
-            <h3 className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-              Deliverables
-            </h3>
-            <ol className="mt-4 border-t border-border">
-              {deliverables.map((item, index) => (
-                <li
-                  key={item._key}
-                  className="grid gap-2 border-b border-border py-5 md:grid-cols-[4rem_minmax(0,1fr)]"
-                >
-                  <span className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <div>
-                    <p className="text-lg">{line(item.name)}</p>
-                    <p className="mt-2 text-foreground/80">{line(item.description)}</p>
-                    {line(item.acceptanceCriteria) ? (
-                      <p className="mt-2 text-foreground/70">
-                        Done when: {line(item.acceptanceCriteria)}
-                      </p>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </div>
-        ) : null}
-        {exclusions.length > 0 ? <BulletBlock title="Out of scope" items={exclusions} /> : null}
-        {phases.length > 0 ? (
-          <div>
-            <h3 className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-              Timeline
-            </h3>
-            <div className="mt-4">
-              <PhaseList phases={phases} />
-            </div>
-          </div>
-        ) : null}
-        <BulletBlock title="What we need from you" items={section.clientResponsibilities ?? []} />
-        <BulletBlock title="Assumptions" items={section.assumptions ?? []} />
-        {line(section.acceptanceProcess) ? (
-          <CopyBlock title="Acceptance" body={line(section.acceptanceProcess)} />
-        ) : null}
-        {line(section.ownership) ? (
-          <CopyBlock title="Ownership" body={line(section.ownership)} />
-        ) : null}
-        {line(section.postLaunch) ? (
-          <CopyBlock title="After launch" body={line(section.postLaunch)} />
-        ) : null}
-      </div>
-    </SectionBlock>
-  )
-}
-
-function Schedule({
-  section,
-  view,
-}: {
-  section: Extract<Section, {_type: 'proposalScheduleSection'}>
-  view: View
-}) {
-  const steps = view.proposal.paymentSchedule?.steps ?? []
-  if (steps.length === 0 && !line(section.excludedNote)) return null
-
-  return (
-    <SectionBlock heading={line(section.heading) || 'Payment schedule'}>
-      <ol className="grid gap-px bg-border md:grid-cols-2">
-        {steps.map((step, index) => (
-          <li key={step._key} className="bg-background p-6 md:p-8">
-            <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-              {String(index + 1).padStart(2, '0')}
-            </p>
-            <p className="mt-3 text-[length:var(--text-h3)] leading-[var(--text-h3--line-height)] tracking-[var(--tracking-heading)]">
-              {step.percent ? `${step.percent}%` : 'Payment'}
-            </p>
-            <p className="mt-2 text-lg text-foreground/80">{line(step.trigger)}</p>
-          </li>
-        ))}
-      </ol>
-      {line(section.excludedNote) ? (
-        <p className="mt-6 max-w-2xl text-foreground/70">{line(section.excludedNote)}</p>
+    <div className="max-w-[40rem] text-[1.0625rem] leading-relaxed [&_h3]:mt-[1.25rem] [&_h3:first-child]:mt-0 [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]">
+      {packageName ? <h3 className="mt-0">{packageName}</h3> : null}
+      <ScopeCopy blocks={packageScope} items={packageItems} />
+      {addOns.map((addOn) => (
+        <div key={addOn.name}>
+          {addOn.name ? <h3>{addOn.name}</h3> : null}
+          <ScopeCopy blocks={addOn.scope} items={addOn.line ? [addOn.line] : []} />
+        </div>
+      ))}
+      {standing.length > 0 ? (
+        <div className="mt-[1.25rem]">
+          <PortableText value={standing} />
+        </div>
       ) : null}
-      <p className="mt-4 max-w-2xl text-foreground/70">
-        The first payment is collected here. Later payments are invoiced. They are not charged
-        automatically.
-      </p>
-    </SectionBlock>
+    </div>
   )
 }
 
-function Terms({
-  section,
-  view,
-}: {
-  section: Extract<Section, {_type: 'proposalTermsSection'}>
-  view: View
-}) {
-  const msa = view.proposal.msa
-  const version = line(msa?.version)
-  const pdfUrl = msa?.pdfUrl
-
+function ScopeCopy({blocks, items}: {blocks: PortableTextBlock[]; items: Array<string | null>}) {
+  if (blocks.length > 0) return <PortableText value={blocks} />
+  const lines = items.map((item) => line(item)).filter(Boolean)
+  if (lines.length === 0) return null
   return (
-    <SectionBlock heading="Terms">
-      <div className="grid gap-8 md:grid-cols-2">
-        <CopyBlock
-          title="How long this holds"
-          body={
-            line(section.validityNote) ||
-            (view.proposal.validUntil
-              ? `Held through ${formatTimestamp(view.proposal.validUntil)}.`
-              : '')
-          }
-        />
-        <CopyBlock title="Change orders" body={line(section.changeOrderRule)} />
-        <div>
-          <h3 className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-            Agreement
-          </h3>
-          {pdfUrl ? (
-            <a
-              href={pdfUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-block text-lg underline"
-            >
-              Master Services Agreement{version ? ` ${version}` : ''}
-            </a>
-          ) : (
-            <p className="mt-2 text-lg">
-              Master Services Agreement{version ? ` ${version}` : ''}
-              {line(msa?.effectiveDate) ? `, effective ${formatDay(line(msa?.effectiveDate))}` : ''}
-            </p>
-          )}
-        </div>
-      </div>
-    </SectionBlock>
-  )
-}
-
-function Accept({
-  section,
-  view,
-}: {
-  section: Extract<Section, {_type: 'proposalAcceptSection'}>
-  view: View
-}) {
-  if (view.accepted) return null
-  if (view.expired) {
-    return (
-      <SectionBlock heading="This proposal has expired">
-        <p className="max-w-2xl text-lg leading-relaxed">
-          The price and the kickoff dates are no longer held. Write back and a new proposal can go
-          out.
-        </p>
-      </SectionBlock>
-    )
-  }
-
-  const kickoffs = view.proposal.kickoffOptions ?? []
-  const version = line(view.proposal.msa?.version)
-  const email = line(view.proposal.signerEmail)
-
-  return (
-    <SectionBlock heading={line(section.prompt) || 'Accept and pay'}>
-      <form className="grid max-w-xl gap-8">
-        {kickoffs.length > 0 ? (
-          <fieldset>
-            <legend className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-              Kickoff
-            </legend>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {kickoffs.map((option) => {
-                const selected = option.date === view.selection.kickoffDate
-                return (
-                  <Link
-                    key={option._key}
-                    href={proposalHref(
-                      view.token,
-                      view.selection.packageId,
-                      view.selection.addonIds,
-                      option.date,
-                    )}
-                    scroll={false}
-                    aria-current={selected ? 'true' : undefined}
-                    className={`border px-4 py-3 font-mono text-[12px] uppercase tracking-[0.08em] ${
-                      selected ? 'border-foreground bg-foreground text-background' : 'border-border'
-                    }`}
-                  >
-                    {line(option.label) || formatDay(option.date ?? '')}
-                  </Link>
-                )
-              })}
-            </div>
-          </fieldset>
-        ) : null}
-        <label className="block">
-          <span className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-            Full name
-          </span>
-          <input
-            name="signerName"
-            autoComplete="name"
-            className="mt-2 w-full border-b border-border bg-transparent py-3 text-lg outline-none focus:border-foreground"
-          />
-        </label>
-        <label className="flex items-start gap-3 text-lg leading-relaxed">
-          <input type="checkbox" className="mt-1.5 h-4 w-4 accent-ink" />
-          <span>
-            {line(section.checkboxLabel) ||
-              'I agree to the Master Services Agreement and this Statement of Work.'}
-            {version ? ` Version ${version}.` : ''}
-          </span>
-        </label>
-        {email ? (
-          <p className="text-foreground/70">The signed scope and receipt go to {email}.</p>
-        ) : null}
-        <div>
-          <button type="button" disabled className="btn-solid cursor-not-allowed opacity-40">
-            Pay the first payment
-          </button>
-          <p className="mt-3 text-foreground/70">You sign before you pay. Payment connects next.</p>
-        </div>
-      </form>
-    </SectionBlock>
+    <ul>
+      {lines.map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </ul>
   )
 }
 
@@ -999,67 +1043,6 @@ function SectionBlock({
   )
 }
 
-function PhaseList({phases}: {phases: Array<Phase | null>}) {
-  const items = phases.filter((phase): phase is Phase => Boolean(phase && line(phase.name)))
-  return (
-    <ol className="grid gap-px bg-border md:grid-cols-3">
-      {items.map((phase) => (
-        <li key={phase._key} className="bg-background p-6">
-          <p className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-            {line(phase.weeks)}
-          </p>
-          <h3 className="mt-3 text-lg">{line(phase.name)}</h3>
-          <p className="mt-2 text-foreground/80">{line(phase.summary)}</p>
-        </li>
-      ))}
-    </ol>
-  )
-}
-
-function BulletBlock({title, items}: {title: string; items: Array<string | null>}) {
-  const lines = uniqueLines(items)
-  if (lines.length === 0) return null
-  return (
-    <div>
-      <h3 className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-        {title}
-      </h3>
-      <ul className="mt-3 grid gap-2">
-        {lines.map((item) => (
-          <li key={item} className="text-lg">
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
-
-function CopyBlock({title, body}: {title: string; body: string}) {
-  if (!body) return null
-  return (
-    <div>
-      <h3 className="font-mono text-[12px] uppercase tracking-[0.08em] text-muted-foreground">
-        {title}
-      </h3>
-      <p className="mt-2 text-lg leading-relaxed">{body}</p>
-    </div>
-  )
-}
-
-function phasesFromApproach(proposal: ProposalDocument): Phase[] {
-  const approach = (proposal.sections ?? []).find(
-    (section): section is Extract<Section, {_type: 'proposalPhasesSection'}> =>
-      section._type === 'proposalPhasesSection',
-  )
-  return (approach?.phases ?? []).map((phase) => ({
-    _key: phase._key,
-    name: phase.name,
-    summary: phase.summary,
-    weeks: phase.weeks,
-  }))
-}
-
 function proposalHref(
   token: string,
   packageId: string | null,
@@ -1081,13 +1064,6 @@ function proposalIsExpired(proposal: ProposalDocument) {
   return !Number.isNaN(end.getTime()) && end.getTime() < Date.now()
 }
 
-function offerIsOpen(offer: ProposalDocument['sameDayOffer']) {
-  if (!offer?.enabled || !line(offer.bonusTitle)) return false
-  if (!offer.deadline) return true
-  const end = new Date(offer.deadline)
-  return !Number.isNaN(end.getTime()) && end.getTime() >= Date.now()
-}
-
 function validityLabel(validUntil: string | null, expired: boolean) {
   if (expired) return 'Expired'
   if (!validUntil) return null
@@ -1095,28 +1071,6 @@ function validityLabel(validUntil: string | null, expired: boolean) {
   if (Number.isNaN(end.getTime())) return null
   const days = Math.max(1, Math.ceil((end.getTime() - Date.now()) / 86_400_000))
   return days === 1 ? 'Valid for 1 day' : `Valid for ${days} days`
-}
-
-function formatTimestamp(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'America/Los_Angeles',
-  }).format(date)
-}
-
-function formatDay(value: string) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value)
-  if (!match) return value
-  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date)
 }
 
 function line(value: string | null | undefined) {
@@ -1136,18 +1090,6 @@ function withEmphasis(headline: string, emphasis: string): ReactNode {
       {headline.slice(index + emphasis.length)}
     </>
   )
-}
-
-function uniqueLines(values: Array<string | null | undefined>) {
-  const seen = new Set<string>()
-  const result: string[] = []
-  for (const value of values) {
-    const text = line(value)
-    if (!text || seen.has(text)) continue
-    seen.add(text)
-    result.push(text)
-  }
-  return result
 }
 
 function firstQueryValue(value: string | string[] | undefined) {

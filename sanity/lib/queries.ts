@@ -893,8 +893,8 @@ export const clientPortalSlugsQuery = defineQuery(`
 
 /**
  * One proposal, loaded by its unguessable link key.
- * Dollar amounts stay out of this query. The page sends selected ids
- * and the server recomputes the total.
+ * The card price is `amount` on each package and add-on.
+ * `priceId` stays out of this query. Charging looks it up on the server.
  */
 export const proposalByTokenQuery = defineQuery(`
   *[_type == "proposal" && token == $key][0]{
@@ -912,7 +912,9 @@ export const proposalByTokenQuery = defineQuery(`
       _id,
       name,
       summary,
+      amount,
       includedItems,
+      scope,
       deliverables[]{ _key, name, description, phase, acceptanceCriteria },
       outOfScope[]{ _key, text },
       phases[]{ _key, name, summary, weeks }
@@ -922,6 +924,8 @@ export const proposalByTokenQuery = defineQuery(`
       _id,
       name,
       line,
+      amount,
+      scope,
       deliverables[]{ _key, name, description, phase, acceptanceCriteria },
       outOfScope[]{ _key, text }
     },
@@ -934,7 +938,8 @@ export const proposalByTokenQuery = defineQuery(`
       _id,
       version,
       effectiveDate,
-      "pdfUrl": pdf.asset->url
+      "pdfUrl": pdf.asset->url,
+      body
     },
     sections[]{
       _key,
@@ -982,18 +987,15 @@ export const proposalByTokenQuery = defineQuery(`
         },
         testimonials[]->{ _id, quote, author, role }
       },
-      _type == "proposalPackagesSection" => { heading, intro },
+      _type == "proposalPackagesSection" => {
+        heading,
+        intro,
+        sameDayDiscount{ enabled, percent }
+      },
       _type == "proposalAddOnsSection" => { heading, intro },
       _type == "proposalOfferSection" => { heading },
-      _type == "proposalInvestmentSection" => { heading },
-      _type == "proposalSowSection" => {
-        overview,
-        clientResponsibilities,
-        assumptions,
-        acceptanceProcess,
-        ownership,
-        postLaunch
-      },
+      _type == "proposalInvestmentSection" => { heading, title, intro },
+      _type == "proposalSowSection" => { body },
       _type == "proposalScheduleSection" => { heading, excludedNote },
       _type == "proposalTermsSection" => { validityNote, changeOrderRule },
       _type == "proposalAcceptSection" => { prompt, checkboxLabel },

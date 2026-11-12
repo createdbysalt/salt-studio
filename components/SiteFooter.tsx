@@ -1,6 +1,6 @@
 'use client'
 
-import {useContactMenu} from '@/components/ContactMenu'
+import {useOptionalContactMenu} from '@/components/ContactMenu'
 import {DEFAULT_NAV} from '@/components/homeHero'
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
 import {SaltWordmark} from '@/components/SaltWordmark'
@@ -96,6 +96,10 @@ function isExternalHref(href: string): boolean {
 type SiteFooterProps = {
   settings: SettingsQueryResult | null
   legalPages?: FooterLegalPagesQueryResult | null
+  /** Page links across the top. Proposals keep the mark, social, and legal row. */
+  showPageNav?: boolean
+  /** Half-height reveal. The public site keeps the full footer. */
+  compact?: boolean
 }
 
 const LEGAL_TYPE_LABELS: Record<string, string> = {
@@ -117,10 +121,15 @@ const LEGAL_FALLBACKS = [
  * social + legal. Inverse of the page: dark on light routes, paper on
  * dark project pages.
  */
-export function SiteFooter({settings, legalPages}: SiteFooterProps) {
+export function SiteFooter({
+  settings,
+  legalPages,
+  showPageNav = true,
+  compact = false,
+}: SiteFooterProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const {openContact} = useContactMenu()
+  const contact = useOptionalContactMenu()
   const inverseLight = pageIsDark(pathname)
   const siteName = stegaClean(settings?.siteName ?? '') || 'Salt Studio'
   const year = new Date().getFullYear()
@@ -136,7 +145,7 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
     }
     if (isContactHref(href)) {
       event.preventDefault()
-      openContact()
+      contact?.openContact()
     }
   }
 
@@ -244,26 +253,34 @@ export function SiteFooter({settings, legalPages}: SiteFooterProps) {
     <footer
       ref={footerRef}
       data-theme={inverseLight ? undefined : 'dark'}
-      className="sticky bottom-0 z-0 flex min-h-[58svh] w-full flex-col overflow-hidden bg-background text-foreground"
+      className={`sticky bottom-0 z-0 flex w-full flex-col overflow-hidden bg-background text-foreground ${
+        compact ? 'min-h-[29svh]' : 'min-h-[58svh]'
+      }`}
     >
-      <nav
-        ref={navRef}
-        aria-label="Footer"
-        className="flex w-full items-center px-3 pt-3 md:px-10 md:pt-3.5"
-      >
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={(event) => handleNavClick(event, item.href)}
-            className="min-w-0 flex-1 text-center font-sans text-[11px] font-semibold tracking-[-0.02em] text-foreground/45 transition-opacity hover:opacity-70 md:text-[13px]"
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+      {showPageNav ? (
+        <nav
+          ref={navRef}
+          aria-label="Footer"
+          className="flex w-full items-center px-3 pt-3 md:px-10 md:pt-3.5"
+        >
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={(event) => handleNavClick(event, item.href)}
+              className="min-w-0 flex-1 text-center font-sans text-[11px] font-semibold tracking-[-0.02em] text-foreground/45 transition-opacity hover:opacity-70 md:text-[13px]"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 pb-16 pt-24">
+      <div
+        className={`flex flex-1 flex-col items-center justify-center px-6 ${
+          compact ? 'gap-4 pb-[2rem] pt-12' : 'gap-6 pb-16 pt-24'
+        }`}
+      >
         <div ref={markRef} className="flex items-center justify-center">
           <SaltWordmark
             title={siteName}

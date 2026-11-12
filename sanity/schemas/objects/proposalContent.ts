@@ -120,7 +120,7 @@ export const proposalPaymentStep = defineType({
       title: 'When it is due',
       type: 'string',
       description:
-        'What has to happen before this payment, for example “On signing” or “When the build is accepted”.',
+        'What has to happen before this payment, for example “On signing” or “When the work is accepted”.',
       validation: (rule) => rule.required().error('Say what triggers this payment'),
     }),
   ],

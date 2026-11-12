@@ -5,7 +5,12 @@ import {
   withPreviewProofProjects,
 } from '@/components/proposalPreview'
 import {sanityFetch} from '@/sanity/lib/live'
-import {previewProofProjectsQuery, proposalByTokenQuery} from '@/sanity/lib/queries'
+import {
+  footerLegalPagesQuery,
+  previewProofProjectsQuery,
+  proposalByTokenQuery,
+  settingsQuery,
+} from '@/sanity/lib/queries'
 import type {Metadata} from 'next'
 import {notFound} from 'next/navigation'
 
@@ -59,14 +64,20 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 export default async function ProposalRoute({params, searchParams}: Props) {
   const {token} = await params
   const query = await searchParams
-  const proposal = await loadProposal(token, previewCardCount(query.cards))
+  const [proposal, {data: settings}, {data: legalPages}] = await Promise.all([
+    loadProposal(token, previewCardCount(query.cards)),
+    sanityFetch({query: settingsQuery, stega: false}),
+    sanityFetch({query: footerLegalPagesQuery, stega: false}),
+  ])
   if (!proposal?._id) notFound()
 
   return (
     <ProposalPage
       token={token}
       proposal={proposal}
-      selection={resolveProposalSelection(proposal, await searchParams)}
+      selection={resolveProposalSelection(proposal, query)}
+      settings={settings}
+      legalPages={legalPages}
     />
   )
 }
