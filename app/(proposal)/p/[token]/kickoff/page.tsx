@@ -1,4 +1,5 @@
 import {ProposalKickoff} from '@/components/ProposalKickoff'
+import {getStripe} from '@/lib/payments/stripe'
 import {latestPaymentForProposal, type LatestPayment} from '@/lib/proposal/acceptances'
 import {kickoffLink} from '@/lib/proposal/kickoff'
 import {isDevPreview, isProposalUnlocked, loadProposal} from '@/lib/proposal/load'
@@ -7,7 +8,29 @@ import type {Metadata} from 'next'
 import {stegaClean} from 'next-sanity'
 import {notFound, redirect} from 'next/navigation'
 
-type Props = {params: Promise<{token: string}>}
+type Props = {
+  params: Promise<{token: string}>
+  searchParams: Promise<{session_id?: string | string[]}>
+}
+
+/**
+ * Stripe sends them straight back here, which can beat the webhook. This
+ * asks Stripe directly so the page opens, while the webhook stays the one
+ * thing that writes `paid`.
+ */
+async function checkoutState(sessionId: string | undefined, proposalId: string) {
+  if (!sessionId) return null
+  const stripe = getStripe()
+  if (!stripe) return null
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    if (session.metadata?.proposal_id !== proposalId) return null
+    if (session.status !== 'complete') return null
+    return session.payment_status === 'paid' ? ('paid' as const) : ('processing' as const)
+  } catch {
+    return null
+  }
+}
 
 function clean(value: string | null | undefined) {
   return stegaClean(value ?? '').trim()
@@ -22,8 +45,10 @@ export const metadata: Metadata = {
  * The kickoff booking page. Same gate as the proposal, and only once the
  * first payment is confirmed. Before that it sends them back to sign.
  */
-export default async function ProposalKickoffRoute({params}: Props) {
+export default async function ProposalKickoffRoute({params, searchParams}: Props) {
   const {token} = await params
+  const {session_id: sessionParam} = await searchParams
+  const sessionId = Array.isArray(sessionParam) ? sessionParam[0] : sessionParam
   const proposalPath = `/p/${encodeURIComponent(token)}`
   if (!(await isProposalUnlocked(token))) redirect(proposalPath)
 
@@ -39,19 +64,18 @@ export default async function ProposalKickoffRoute({params}: Props) {
   // The development preview is for looking at the page. A real client still
   // has to pay before this calendar opens. A bank debit that is processing
   // counts: the signature is recorded and the call should not wait days.
-  const paymentState: 'paid' | 'processing' | 'wire' =
-    payment?.status === 'processing'
-      ? 'processing'
-      : payment?.status === 'pending_wire'
-        ? 'wire'
-        : 'paid'
-  const open =
-    isDevPreview(token) ||
-    proposalIsAccepted(proposal) ||
-    payment?.status === 'paid' ||
-    payment?.status === 'processing' ||
-    payment?.status === 'pending_wire'
+  const fromRow =
+    payment?.status === 'paid'
+      ? ('paid' as const)
+      : payment?.status === 'processing'
+        ? ('processing' as const)
+        : payment?.status === 'pending_wire'
+          ? ('wire' as const)
+          : null
+  const state = fromRow ?? (await checkoutState(sessionId, proposal._id))
+  const open = isDevPreview(token) || proposalIsAccepted(proposal) || state != null
   if (!open) redirect(`${proposalPath}#investment`)
+  const paymentState = state ?? 'paid'
 
   const signed = (proposal.sections ?? []).find(
     (section) => section._type === 'proposalSignedSection' && section.enabled !== false,
