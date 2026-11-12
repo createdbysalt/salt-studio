@@ -83,9 +83,19 @@ function ScopeLink({
 const stickerStar =
   'M100 12C120 54 148 80 188 100C148 120 120 146 100 188C80 146 52 120 12 100C52 80 80 54 100 12Z'
 
+/** The star is too big for a phone, so there it becomes a small badge. */
+function SameDayBadge({percent}: {percent: number}) {
+  return (
+    <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#f08a3a] px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] leading-none text-white md:hidden">
+      <span aria-hidden="true" className="size-1.5 rounded-full bg-white/90" />
+      {percent}% off, sign within 24 hours
+    </p>
+  )
+}
+
 function SameDaySticker({percent}: {percent: number}) {
   return (
-    <div className="pointer-events-none relative z-20 mt-1 -mb-28 shrink-0 self-end md:mt-2 md:mb-0 md:self-start">
+    <div className="pointer-events-none relative z-20 mt-1 -mb-28 hidden shrink-0 self-end md:mt-2 md:mb-0 md:block md:self-start">
       <div className="relative h-[15rem] w-[15rem] rotate-[-8deg] drop-shadow-[0_0_14px_rgba(240,138,58,0.9)] drop-shadow-[0_0_32px_rgba(240,138,58,0.55)] lg:h-[14rem] lg:w-[14rem]">
         <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full" aria-hidden="true">
           <path d={stickerStar} fill="#f08a3a" />
@@ -124,7 +134,7 @@ export function ProposalPackages({
 
   return (
     <section className="w-full px-[max(3.5rem,var(--spacing-gutter))] pt-40 pb-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:pt-48 lg:pb-32">
-      <header className="flex flex-nowrap items-start justify-between gap-x-4">
+      <header className="flex flex-nowrap items-start justify-between gap-x-4 md:gap-x-6">
         <div className="min-w-0">
           <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
             The work
@@ -137,6 +147,7 @@ export function ProposalPackages({
               {intro}
             </p>
           ) : null}
+          {discountPercent != null ? <SameDayBadge percent={discountPercent} /> : null}
         </div>
         {discountPercent != null ? <SameDaySticker percent={discountPercent} /> : null}
       </header>
@@ -228,7 +239,7 @@ export function ProposalPackages({
             <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
               {addOnHeading}
             </p>
-            <div className="mt-4 grid grid-cols-2 items-stretch gap-3">
+            <div className="mt-4 grid grid-cols-1 items-stretch gap-3 md:grid-cols-2">
               {addOns.map((addOn) => (
                 <article
                   key={addOn.id}
@@ -238,7 +249,7 @@ export function ProposalPackages({
                     aria-hidden
                     className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.4),transparent_42%)]"
                   />
-                  <div className="relative flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="relative flex flex-row items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-[1.15rem] font-medium leading-snug tracking-[-0.03em] md:text-[1.5rem]">
                         {addOn.name}

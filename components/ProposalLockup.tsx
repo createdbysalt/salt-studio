@@ -3,7 +3,7 @@
 import {SaltWordmark} from '@/components/SaltWordmark'
 import {CONTACT_WHATSAPP_HREF} from '@/lib/contactMenu'
 import Image from 'next/image'
-import {useCallback, useEffect, useRef, useState} from 'react'
+import {useCallback, useEffect, useRef, useState, type MouseEvent} from 'react'
 
 /**
  * Salt × client, fixed at the top left of a proposal, with Accept & Sign
@@ -33,7 +33,18 @@ export function ProposalLockup({
   const syncPlates = useCallback(() => {
     const chipNode = chip.current
     const acceptNode = accept.current
-    if (!chipNode || !acceptNode) return
+    if (!chipNode) return
+    // Below md the two plates are not side by side, so they must not be
+    // locked to a shared size. Clear the inline sizes and let them be.
+    if (window.innerWidth < 768 || !acceptNode) {
+      chipNode.style.width = ''
+      chipNode.style.height = ''
+      if (acceptNode) {
+        acceptNode.style.width = ''
+        acceptNode.style.height = ''
+      }
+      return
+    }
     chipNode.style.width = 'max-content'
     chipNode.style.height = ''
     acceptNode.style.width = 'max-content'
@@ -89,6 +100,19 @@ export function ProposalLockup({
   const action =
     'pointer-events-auto rounded-sm px-3 py-2 font-mono text-[12px] font-medium uppercase tracking-[0.08em] transition-colors duration-300 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-current'
 
+  const scrollToAccept = useCallback(
+    (event: MouseEvent<HTMLAnchorElement>) => {
+      const id = acceptHref.replace('#', '')
+      const node = document.getElementById(id)
+      if (!node) return
+      event.preventDefault()
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      node.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'start'})
+      history.pushState(null, '', `#${id}`)
+    },
+    [acceptHref],
+  )
+
   const contactPlate = contactOverDark
     ? 'bg-[rgba(234,234,234,0.92)] text-ink'
     : 'bg-[rgba(0,0,0,0.12)] text-ink'
@@ -128,16 +152,8 @@ export function ProposalLockup({
             ref={setAccept}
             href={acceptHref}
             data-proposal-enter="chrome"
-            className={`${action} ${chipPlate} inline-flex h-full items-center justify-center gap-2`}
-            onClick={(event) => {
-              const id = acceptHref.replace('#', '')
-              const node = document.getElementById(id)
-              if (!node) return
-              event.preventDefault()
-              const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-              node.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'start'})
-              history.pushState(null, '', `#${id}`)
-            }}
+            className={`${action} ${chipPlate} hidden h-full items-center justify-center gap-2 md:inline-flex`}
+            onClick={scrollToAccept}
           >
             <span
               aria-hidden
@@ -147,6 +163,18 @@ export function ProposalLockup({
           </a>
         </div>
       </div>
+
+      {/* On a phone the two plates would collide, so this one sits small at
+          the bottom, opposite the contact button. */}
+      <a
+        href={acceptHref}
+        data-proposal-enter="chrome"
+        className={`pointer-events-auto fixed bottom-2 left-2 z-30 inline-flex items-center gap-2 rounded-full px-3.5 py-2.5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_10px_30px_rgba(40,30,10,0.12)] backdrop-blur-[42px] transition-colors duration-300 focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-current md:hidden ${contactPlate}`}
+        onClick={scrollToAccept}
+      >
+        <span aria-hidden className="inline-block size-[6px] shrink-0 rounded-full bg-accent" />
+        Accept &amp; Sign
+      </a>
       <a
         ref={contact}
         href={CONTACT_WHATSAPP_HREF}

@@ -310,8 +310,15 @@ function ApproachNotes({title, notes}: {title: string; notes: ProposalApproachQu
             return (
               <li
                 key={note.key}
-                className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_30px_80px_rgba(40,30,10,0.14)] backdrop-blur-[42px]"
+                className="relative isolate overflow-hidden rounded-[32px] border border-white/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_30px_80px_rgba(40,30,10,0.14)]"
               >
+                {/* Safari paints a backdrop blur as a square when the blurred
+                    element is also the rounded one, so the blur is its own
+                    rounded layer inside this clipper. */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 -z-10 rounded-[32px] bg-white/30 backdrop-blur-[42px]"
+                />
                 <div
                   aria-hidden
                   className="pointer-events-none absolute -right-6 -top-10 h-28 w-28 rounded-full bg-white/80 blur-2xl"

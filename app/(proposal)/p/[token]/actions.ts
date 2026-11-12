@@ -100,12 +100,31 @@ export async function proposalPaymentStatus(
 }
 
 export type SignActionState =
-  | {ok: true; clientSecret: string; amountCents: number}
+  | {ok: true; url: string; amountCents: number}
   | {ok: true; wire: true}
   | {ok: false; error: string}
   | null
 
 const NOT_READY = 'Payments are not switched on yet. Write back and we will take it from here.'
+
+/**
+ * Where Stripe sends them back to. A Host header is something the caller
+ * controls, so outside development this is the configured site URL and
+ * nothing else. Otherwise a crafted header could point the return at
+ * another domain, carrying the proposal key with it.
+ */
+async function requestOrigin() {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '')
+  if (process.env.NODE_ENV === 'production') {
+    return configured || 'https://www.createdbysalt.com'
+  }
+  const list = await headers()
+  const host = list.get('host')
+  if (!host || !/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host)) {
+    return configured || 'https://www.createdbysalt.com'
+  }
+  return `http://${host}`
+}
 
 async function requestFacts() {
   const list = await headers()
@@ -202,11 +221,15 @@ async function beginCheckout(token: string, context: SigningContext): Promise<Si
     latest.expires_at &&
     new Date(latest.expires_at).getTime() > Date.now()
   ) {
-    const session = await stripe.checkout.sessions.retrieve(latest.stripe_checkout_session_id)
-    if (session.status === 'open' && session.client_secret) {
-      return {ok: true, clientSecret: session.client_secret, amountCents: quote.firstCents}
+    // The id can be gone, or belong to the other mode after a key change.
+    // Either way the answer is the same: open a fresh session.
+    const session = await stripe.checkout.sessions
+      .retrieve(latest.stripe_checkout_session_id)
+      .catch(() => null)
+    if (session?.status === 'open' && session.url) {
+      return {ok: true, url: session.url, amountCents: quote.firstCents}
     }
-    await updatePayment(latest.id, {status: 'expired'})
+    await updatePayment(latest.id, {status: 'expired'}).catch(() => undefined)
   }
 
   const acceptance = await writeAcceptance(token, context)
@@ -222,10 +245,15 @@ async function beginCheckout(token: string, context: SigningContext): Promise<Si
 
   const expiresAt = Math.floor(Date.now() / 1000) + SESSION_MINUTES * 60
   const label = `First payment, ${context.clientName || context.signerName}, ${context.packageName}`
+  const origin = await requestOrigin()
+  const path = `/p/${encodeURIComponent(token)}`
   const session = await stripe.checkout.sessions.create({
     mode: 'payment',
-    ui_mode: 'embedded_page',
-    redirect_on_completion: 'never',
+    // Stripe's own page: a full screen built for a phone, and it carries the
+    // branding set in the Stripe Dashboard. They come back to the kickoff.
+    ui_mode: 'hosted_page',
+    success_url: `${origin}${path}/kickoff?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}${path}#investment`,
     customer: customer.id,
     line_items: [
       {
@@ -251,8 +279,8 @@ async function beginCheckout(token: string, context: SigningContext): Promise<Si
     expires_at: expiresAt,
   })
 
-  if (!session.client_secret) {
-    return {ok: false, error: 'Stripe did not open a payment form. Try again in a moment.'}
+  if (!session.url) {
+    return {ok: false, error: 'Stripe did not open a payment page. Try again in a moment.'}
   }
 
   await insertPayment({
@@ -268,5 +296,5 @@ async function beginCheckout(token: string, context: SigningContext): Promise<Si
     expires_at: new Date(expiresAt * 1000).toISOString(),
   })
 
-  return {ok: true, clientSecret: session.client_secret, amountCents: acceptance.first_cents}
+  return {ok: true, url: session.url, amountCents: acceptance.first_cents}
 }
