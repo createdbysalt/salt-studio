@@ -64,11 +64,11 @@ export function ProposalKickoff({
       </div>
 
       <section className="mx-auto w-full max-w-[72rem] px-[1.5rem] pb-[3rem] pt-[2.5rem] md:pt-[3.5rem]">
-        <header className="max-w-[44rem]">
+        <header className="max-w-[52rem]">
           <h1 className="max-w-[12em] text-balance text-[clamp(2.25rem,4.5vw,3.5rem)] font-medium leading-[1.0] tracking-[-0.04em]">
             {clientName}, thank you so much.
           </h1>
-          <p className="mt-3 max-w-[36rem] text-[0.95rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
+          <p className="mt-3 max-w-[48rem] text-[0.95rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
             {THANKS[paymentState]} Your next step is booking the kickoff call. {intro}
           </p>
         </header>
