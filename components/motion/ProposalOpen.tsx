@@ -25,8 +25,12 @@ function clearProposalCover() {
 export function ProposalOpen() {
   useEffect(() => {
     if (!window.location.pathname.startsWith('/p/')) return
-    // The sign-in page is white. The gray opening belongs to the proposal itself.
-    if (document.querySelector('[data-proposal-gate]')) {
+    // The sign-in page is white, and the kickoff page should be visible at once.
+    // The gray opening belongs to the proposal itself.
+    if (
+      document.querySelector('[data-proposal-gate]') ||
+      window.location.pathname.endsWith('/kickoff')
+    ) {
       clearProposalCover()
       return
     }
