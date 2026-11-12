@@ -328,10 +328,27 @@ export function ProposalCoverDots() {
     }
 
     function resize() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
       const r = containerEl.getBoundingClientRect()
       W = r.width
       H = r.height
+
+      // This field is absolute inset-0, so the band behind the packages and
+      // investment sections makes it several viewports tall. Multiplied by a
+      // Retina pixel ratio the backing store can pass what Safari will
+      // allocate for a canvas, and Safari then renders it blank with no
+      // error. Stepping the ratio down keeps the dots slightly softer on a
+      // very tall band instead of losing them altogether.
+      const MAX_DIM = 8192
+      const MAX_AREA = 16_000_000
+      let ratio = Math.min(window.devicePixelRatio || 1, 2)
+      while (
+        ratio > 0.5 &&
+        (W * ratio > MAX_DIM || H * ratio > MAX_DIM || W * ratio * H * ratio > MAX_AREA)
+      ) {
+        ratio -= 0.25
+      }
+      dpr = ratio
+
       canvasEl.width = Math.max(1, Math.floor(W * dpr))
       canvasEl.height = Math.max(1, Math.floor(H * dpr))
       ox = 6
@@ -452,6 +469,21 @@ export function ProposalCoverDots() {
     document.addEventListener('pointerdown', onDown)
     document.addEventListener('visibilitychange', onVis)
 
+    // The container's position only moves when the page scrolls or resizes.
+    // syncRect used to run inside the frame loop, which forced a layout flush
+    // sixty times a second per instance, interleaved with the handlers that
+    // write styles on scroll. That read-after-write pattern is what made the
+    // page feel heavy rather than any single animation.
+    let rectQueued = 0
+    const onScrollRect = () => {
+      if (rectQueued) return
+      rectQueued = requestAnimationFrame(() => {
+        rectQueued = 0
+        syncRect()
+      })
+    }
+    window.addEventListener('scroll', onScrollRect, {passive: true})
+
     // Static render for reduced motion
     function renderStatic() {
       if (!fbos) return
@@ -480,7 +512,6 @@ export function ProposalCoverDots() {
       const dt = Math.min((ts - t0) / 1000, 0.05)
       t0 = ts
       time += dt
-      syncRect()
 
       // Lerp smooth mouse
       if (mouseDown) {
@@ -558,6 +589,7 @@ export function ProposalCoverDots() {
         requestAnimationFrame(() => {
           roPending = false
           resize()
+          syncRect()
           if (reduce) renderStatic()
         })
       }
@@ -568,6 +600,8 @@ export function ProposalCoverDots() {
       if (rafId) cancelAnimationFrame(rafId)
       ro.disconnect()
       io.disconnect()
+      if (rectQueued) cancelAnimationFrame(rectQueued)
+      window.removeEventListener('scroll', onScrollRect)
       document.removeEventListener('pointermove', onMove)
       document.removeEventListener('pointerleave', onLeave)
       document.removeEventListener('pointerdown', onDown)
@@ -600,12 +634,10 @@ export function ProposalCoverDots() {
   }
 
   return (
+    // No will-change on the canvas. It is never transformed, so the hint only
+    // kept a compositor layer resident per instance for nothing.
     <div ref={containerRef} className="pointer-events-none absolute inset-0 z-0">
-      <canvas
-        ref={canvasRef}
-        className="block h-full w-full"
-        style={{touchAction: 'none', willChange: 'transform'}}
-      />
+      <canvas ref={canvasRef} className="block h-full w-full" style={{touchAction: 'none'}} />
     </div>
   )
 }

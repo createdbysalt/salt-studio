@@ -3,6 +3,7 @@
 import {usePathname} from 'next/navigation'
 import {useEffect} from 'react'
 import {trackError} from './events'
+import {isPrivateProposalPath} from './private-routes'
 
 /**
  * Error Tracker
@@ -21,7 +22,7 @@ export function ErrorTracker() {
   const pathname = usePathname()
 
   useEffect(() => {
-    if (pathname.startsWith('/p/')) return
+    if (isPrivateProposalPath(pathname)) return
 
     function handleError(event: ErrorEvent) {
       trackError({

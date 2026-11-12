@@ -4,6 +4,7 @@ import {pageIsDark} from '@/lib/pageTheme'
 import {usePathname} from 'next/navigation'
 import {createContext, ReactNode, useCallback, useContext, useEffect, useState} from 'react'
 import {updateGoogleConsent} from './gtm'
+import {isPrivateProposalPath} from './private-routes'
 import type {ConsentLevel, ConsentState} from './types'
 import {ucAcceptAll, ucDenyAll, ucReadConsentLevels} from './usercentrics'
 
@@ -80,6 +81,7 @@ interface ConsentProviderProps {
  * Renders a consent banner if user hasn't made a choice.
  */
 export function ConsentProvider({children}: ConsentProviderProps) {
+  const bannerPathname = usePathname()
   const [consent, setConsent] = useState<ConsentState>(defaultConsent)
   const [hasConsented, setHasConsented] = useState(false)
   const [showBanner, setShowBanner] = useState(false)
@@ -199,7 +201,12 @@ export function ConsentProvider({children}: ConsentProviderProps) {
       }}
     >
       {children}
-      {showBanner && <ConsentBanner />}
+      {/*
+        Not on a proposal. No tag loads there, so there is nothing to consent
+        to, and the banner sat at z-50 over the Accept & Sign pill and the
+        WhatsApp button in the bottom corners.
+      */}
+      {showBanner && !isPrivateProposalPath(bannerPathname) && <ConsentBanner />}
     </ConsentContext.Provider>
   )
 }

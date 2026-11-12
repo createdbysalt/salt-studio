@@ -2,6 +2,12 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  /* Opening a scope drawer sets overflow hidden on the body to lock the page.
+     Where the scrollbar takes real width, removing it let the whole page jump
+     sideways and back on every "View full scope of work" click. Reserving the
+     gutter holds the layout still. Browsers with overlay scrollbars, which is
+     every phone, are unaffected. */
+  scrollbar-gutter: stable;
 }
 
 p:not(:last-child) {

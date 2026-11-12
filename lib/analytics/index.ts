@@ -35,6 +35,8 @@ export {PageViewTracker} from './page-view-tracker'
 export {ScrollTracker} from './scroll-tracker'
 export {ErrorTracker} from './error-tracker'
 export {AnalyticsDebugOverlay} from './debug-overlay'
+export {SiteOnly} from './site-only'
+export {isPrivateProposalPath} from './private-routes'
 
 // Typed event helpers
 export {

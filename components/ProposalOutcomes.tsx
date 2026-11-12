@@ -172,7 +172,13 @@ export function ProposalSwirlField({
         style={tone === 'ember' ? emberStill : shaderStill}
       />
       {showShader && Shader && Swirl && ChromaFlow ? (
-        <div className={`absolute inset-0 ${ready ? 'opacity-100' : 'opacity-0'}`}>
+        // Fade the shader in over the still gradient underneath it. Without a
+        // transition the handoff was a hard pop on first paint.
+        <div
+          className={`absolute inset-0 transition-opacity duration-500 ease-out motion-reduce:transition-none ${
+            ready ? 'opacity-100' : 'opacity-0'
+          }`}
+        >
           <Shader className="h-full w-full">
             <Swirl
               {...(tone === 'ember' ? emberSwirl : swirlColors)}
