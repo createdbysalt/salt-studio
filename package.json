@@ -4,7 +4,7 @@
   "scripts": {
     "analyze": "next experimental-analyze --serve",
     "prebuild": "node scripts/generate-error-content.mjs",
-    "build": "next build --turbopack && sanity manifest extract --path public/studio/static",
+    "build": "next build --turbopack && sanity manifest extract --path public/studio/static && node scripts/deploy-schema.mjs",
     "predev": "node scripts/ensure-typegen.mjs",
     "dev": "next --turbopack -p 4000",
     "dev:fast": "next --turbopack -p 4000",
