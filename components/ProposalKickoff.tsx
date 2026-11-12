@@ -65,23 +65,23 @@ export function ProposalKickoff({
         </Link>
       </div>
 
-      <section className="mx-auto w-full max-w-[72rem] px-[1.5rem] pb-[4rem] pt-[1.5rem] md:pt-[2rem]">
+      <section className="mx-auto w-full max-w-[72rem] px-[1.5rem] pb-[3rem] pt-[1rem] md:pt-[1.25rem]">
         <header className="max-w-[40rem]">
-          <h1 className="max-w-[12em] text-balance text-[clamp(2.5rem,6vw,4.5rem)] font-medium leading-[1.0] tracking-[-0.04em]">
+          <h1 className="max-w-[14em] text-balance text-[clamp(1.6rem,3vw,2.25rem)] font-medium leading-[1.05] tracking-[-0.035em]">
             {clientName}, thank you so much.
           </h1>
-          <p className="mt-4 max-w-[32rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
+          <p className="mt-2 max-w-[32rem] text-[0.95rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
             {THANKS[paymentState]}
           </p>
-          <p className="mt-10 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+          <p className="mt-5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
             {heading}
           </p>
-          <p className="mt-2 max-w-[30rem] text-[1rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
+          <p className="mt-1.5 max-w-[32rem] text-[0.95rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
             {intro}
           </p>
         </header>
 
-        <div className="mt-10 overflow-hidden rounded-[32px] border border-[#08090a]/10 bg-white shadow-[0_30px_80px_rgba(40,30,10,0.08)]">
+        <div className="mt-5 overflow-hidden rounded-[32px] border border-[#08090a]/10 bg-white shadow-[0_30px_80px_rgba(40,30,10,0.08)]">
           <Cal
             namespace={NAMESPACE}
             calLink={calLink}
@@ -95,7 +95,7 @@ export function ProposalKickoff({
           />
         </div>
 
-        <p className="mt-4 text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
+        <p className="mt-3 text-[0.85rem] font-medium leading-snug text-[#5c5c5c]">
           If the calendar does not load,{' '}
           <a
             href={fallbackHref}
