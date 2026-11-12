@@ -23,7 +23,9 @@ export function ProposalGate({
 
   return (
     <main data-proposal-gate="" className="relative min-h-svh bg-white text-[#08090a]">
-      <ProposalCoverDots />
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
+        <ProposalCoverDots />
+      </div>
       <div className="relative z-[1] flex min-h-svh items-center justify-center px-[1.5rem] py-[4rem]">
         <form
           action={formAction}
@@ -42,7 +44,7 @@ export function ProposalGate({
             <div>
               <h1 className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
                 <Link href="/" aria-label="Salt Studio" className="inline-flex text-[#08090a]">
-                  <SaltWordmark className="h-[52px] w-auto" />
+                  <SaltWordmark className="h-[46px] w-auto" />
                 </Link>
                 <span
                   aria-hidden="true"

@@ -93,17 +93,7 @@ export default async function ProposalRoute({params, searchParams}: Props) {
   if (!(await isProposalUnlocked(token))) {
     const name = await loadClientName(token)
     if (!name) notFound()
-    return (
-      <>
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "document.getElementById('proposal-open-boot')?.remove();document.getElementById('proposal-open')?.remove();document.documentElement.style.overflow='';",
-          }}
-        />
-        <ProposalGate token={token} clientName={name} search={gateSearch(query)} />
-      </>
-    )
+    return <ProposalGate token={token} clientName={name} search={gateSearch(query)} />
   }
 
   const [proposal, {data: settings}, {data: legalPages}] = await Promise.all([
