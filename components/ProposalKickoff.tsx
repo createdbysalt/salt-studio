@@ -64,7 +64,7 @@ export function ProposalKickoff({
 
   return (
     <main className="min-h-svh bg-white text-[#08090a]">
-      <div className="px-[max(1.5rem,var(--spacing-gutter))] pt-[1.5rem]">
+      <div className="flex justify-center px-[max(1.5rem,var(--spacing-gutter))] pt-[1.5rem]">
         <div className="flex items-center gap-3 text-[#08090a]">
           <Link href="/" aria-label="Salt Studio" className="inline-flex">
             <SaltWordmark className="h-[22px] w-auto" />
@@ -89,25 +89,22 @@ export function ProposalKickoff({
       </div>
 
       <section className="mx-auto w-full max-w-[72rem] px-[1.5rem] pb-[4rem] pt-[3rem] md:pt-[4.5rem]">
-        <header className="max-w-[40rem]">
-          <h1 className="text-balance text-[clamp(2.5rem,6vw,4.5rem)] font-medium leading-[1.0] tracking-[-0.04em]">
-            Thank you so much.
-          </h1>
-          <p className="mt-4 max-w-[32rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
+        <header className="mx-auto max-w-[40rem] text-center">
+          <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+            Thank you so much
+          </p>
+          <p className="mx-auto mt-3 max-w-[30rem] text-[1rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
             {THANKS[paymentState]}
+          </p>
+          <h1 className="mx-auto mt-8 max-w-[11em] text-balance text-[clamp(2.5rem,6vw,4.5rem)] font-medium leading-[1.0] tracking-[-0.04em]">
+            {heading}
+          </h1>
+          <p className="mx-auto mt-4 max-w-[32rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
+            {intro}
           </p>
         </header>
 
-        <div className="mt-12 max-w-[40rem] md:mt-16">
-          <h2 className="text-balance text-[clamp(1.75rem,3.6vw,2.5rem)] font-medium leading-[1.05] tracking-[-0.035em]">
-            {heading}
-          </h2>
-          <p className="mt-3 max-w-[32rem] text-[1.05rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
-            {intro}
-          </p>
-        </div>
-
-        <div className="mt-6 overflow-hidden rounded-[32px] border border-[#08090a]/10 bg-white shadow-[0_30px_80px_rgba(40,30,10,0.08)]">
+        <div className="mt-10 overflow-hidden rounded-[32px] border border-[#08090a]/10 bg-white shadow-[0_30px_80px_rgba(40,30,10,0.08)]">
           <Cal
             namespace={NAMESPACE}
             calLink={calLink}
