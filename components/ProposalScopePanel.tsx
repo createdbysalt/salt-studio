@@ -37,6 +37,7 @@ export function ProposalScopePanel({
   const titleId = useId()
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [readMode, setReadMode] = useState(false)
   const [present, setPresent] = useState(false)
   const [interactive, setInteractive] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -48,19 +49,24 @@ export function ProposalScopePanel({
 
   const download = useCallback(() => {
     if (!downloadName) return
-    if (pdfUrl && saveHostedPdf(pdfUrl, downloadName)) return
+    // A phone has nowhere useful to put a file, and iOS often ignores a
+    // programmatic download, so there the document opens in a new tab to read.
+    const read = viewInsteadOfDownload()
+    if (pdfUrl && openHostedPdf(pdfUrl, downloadName, read)) return
     const panel = panelRef.current
     if (!panel) return
     const bytes = buildProposalPdf(blocksFromPanel(panel, title, downloadNote))
     // Copy into a plain ArrayBuffer-backed view so Blob's typing accepts it.
     const blob = new Blob([new Uint8Array(bytes)], {type: 'application/pdf'})
     const url = URL.createObjectURL(blob)
-    saveFile(url, downloadName)
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+    if (read) window.open(url, '_blank', 'noopener')
+    else saveFile(url, downloadName)
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
   }, [downloadName, downloadNote, pdfUrl, title])
 
   useEffect(() => {
     setMounted(true)
+    setReadMode(viewInsteadOfDownload())
   }, [])
 
   useEffect(() => {
@@ -183,7 +189,9 @@ export function ProposalScopePanel({
                 className="absolute inset-y-0 right-0 flex w-full max-w-[min(100vw,52rem)] flex-col bg-[#f3f3f3] text-[#08090a] shadow-[-24px_0_80px_rgba(0,0,0,0.35)] will-change-transform"
               >
                 <SidePanelClose open={open && present} onClose={close} ariaLabel={closeLabel} />
-                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-7 pt-12 pb-16 md:px-10">
+                {/* The spacing scale is wide here: px-7 is 84px, which eats a
+                    phone. Keep the roomy inset from md up only. */}
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-12 pb-16 md:px-10">
                   <h2
                     id={titleId}
                     data-scope-reveal
@@ -198,10 +206,12 @@ export function ProposalScopePanel({
                           <button
                             type="button"
                             onClick={download}
-                            aria-label={`Download ${title} as a PDF`}
+                            aria-label={
+                              readMode ? `Open ${title} as a PDF` : `Download ${title} as a PDF`
+                            }
                             className="inline-flex shrink-0 items-center rounded-sm bg-[#08090a] px-3.5 py-1.5 font-mono text-[11px] font-medium uppercase leading-none tracking-label text-white"
                           >
-                            Download PDF
+                            {readMode ? 'Open PDF' : 'Download PDF'}
                           </button>
                         </span>
                       </>
@@ -228,9 +238,19 @@ function titleLines(title: string) {
   return {lead: words.length > 1 ? words.slice(0, -1).join(' ') : '', last}
 }
 
-function saveHostedPdf(pdfUrl: string, filename: string) {
+/** True on phones and tablets, where reading beats saving a file. */
+function viewInsteadOfDownload() {
+  if (typeof window === 'undefined') return false
+  return window.matchMedia('(max-width: 767px), (pointer: coarse)').matches
+}
+
+function openHostedPdf(pdfUrl: string, filename: string, read: boolean) {
   try {
     const url = new URL(pdfUrl)
+    if (read) {
+      window.open(url.toString(), '_blank', 'noopener')
+      return true
+    }
     url.searchParams.set('dl', filename)
     saveFile(url.toString(), filename)
     return true

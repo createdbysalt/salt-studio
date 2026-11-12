@@ -207,14 +207,16 @@ export function ProposalChoices({
             <span className="pb-[1.1em] font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
               Total
             </span>
-            <span className="text-[clamp(3rem,6vw,5rem)] font-medium leading-none tracking-[-0.06em]">
+            <span className="text-[clamp(3.75rem,6vw,5rem)] font-medium leading-none tracking-[-0.06em]">
               <FlipTotal value={formatCents(totalCents)} />
             </span>
           </p>
           {firstStep ? (
             <p className="mt-2 text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
-              {formatCents(firstStep.amountCents)} {lowerFirst(firstStep.trigger)}. The rest is
-              invoiced later.
+              <span className="block">
+                {formatCents(firstStep.amountCents)} {lowerFirst(firstStep.trigger)}.
+              </span>
+              <span className="block">The rest is invoiced later.</span>
             </p>
           ) : null}
         </div>
