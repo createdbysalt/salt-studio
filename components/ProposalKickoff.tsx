@@ -8,7 +8,7 @@ import {useEffect} from 'react'
 const NAMESPACE = 'kickoff'
 
 const THANKS: Record<'paid' | 'processing' | 'wire', string> = {
-  paid: 'Your payment went through. The signed scope and your receipt are on their way to your email.',
+  paid: 'Your payment went through, and the signed scope and your receipt are on their way to your email.',
   processing:
     'Your bank payment is on its way. It takes a few business days to clear, and the signed scope and receipt go to your email once it does.',
   wire: 'Wire instructions are on their way to your email. The signed scope follows as soon as the payment lands.',
@@ -24,7 +24,6 @@ export function ProposalKickoff({
   calLink,
   fallbackHref,
   paymentState,
-  heading,
   intro,
   name,
   email,
@@ -33,7 +32,6 @@ export function ProposalKickoff({
   calLink: string
   fallbackHref: string
   paymentState: 'paid' | 'processing' | 'wire'
-  heading: string
   intro: string
   name: string | null
   email: string | null
@@ -70,14 +68,8 @@ export function ProposalKickoff({
           <h1 className="max-w-[14em] text-balance text-[clamp(1.6rem,3vw,2.25rem)] font-medium leading-[1.05] tracking-[-0.035em]">
             {clientName}, thank you so much.
           </h1>
-          <p className="mt-2 max-w-[32rem] text-[0.95rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
-            {THANKS[paymentState]}
-          </p>
-          <p className="mt-5 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-            {heading}
-          </p>
-          <p className="mt-1.5 max-w-[32rem] text-[0.95rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
-            {intro}
+          <p className="mt-3 max-w-[36rem] text-[0.95rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
+            {THANKS[paymentState]} Your next step is booking the kickoff call. {intro}
           </p>
         </header>
 

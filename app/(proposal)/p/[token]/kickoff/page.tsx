@@ -75,7 +75,6 @@ export default async function ProposalKickoffRoute({params}: Props) {
       calLink={link.calLink}
       fallbackHref={link.href}
       paymentState={paymentState}
-      heading="Let's book the kickoff call"
       intro="Grab the earliest time that works for you, ideally in the next day or two. The sooner we talk, the sooner the work starts."
       name={acceptance?.signer_name || clean(proposal.signerName) || null}
       email={acceptance?.signer_email || clean(proposal.signerEmail) || null}
