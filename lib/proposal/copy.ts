@@ -10,6 +10,10 @@
  * bundle as well as the site.
  */
 
+/** The sentence under "The investment.", above the package cards. */
+export const PACKAGES_INTRO =
+  "We're excited to partner with you. This is the work we'd take on together."
+
 /** The sentence under "We can't wait to work together." */
 export const INVESTMENT_INTRO =
   'Select a package, then any add-ons. The total and the scope of work update as you go.'

@@ -12,7 +12,7 @@ import {ProposalSignForm} from '@/components/ProposalSignForm'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import {SiteFooter} from '@/components/SiteFooter'
 import type {PaymentMethod, PaymentStatus} from '@/lib/proposal/acceptances'
-import {INVESTMENT_INTRO} from '@/lib/proposal/copy'
+import {INVESTMENT_INTRO, PACKAGES_INTRO} from '@/lib/proposal/copy'
 import {
   discountedAmount,
   formatAmount,
@@ -582,7 +582,8 @@ function Packages({
   return (
     <ProposalPackages
       heading="The investment."
-      intro="We're excited to partner with you. This is the work we'd take on together."
+      // Editable per proposal, with the shared default when it is left empty.
+      intro={line(section.intro) || PACKAGES_INTRO}
       packages={packages}
       addOnHeading="Add-ons"
       addOns={addOns}
