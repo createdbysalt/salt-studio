@@ -66,17 +66,17 @@ export function ProposalKickoff({
       </div>
 
       <section className="mx-auto w-full max-w-[72rem] px-[1.5rem] pb-[4rem] pt-[1.5rem] md:pt-[2rem]">
-        <header className="mx-auto max-w-[40rem] text-center">
-          <h1 className="mx-auto max-w-[12em] text-balance text-[clamp(2.5rem,6vw,4.5rem)] font-medium leading-[1.0] tracking-[-0.04em]">
+        <header className="max-w-[40rem]">
+          <h1 className="max-w-[12em] text-balance text-[clamp(2.5rem,6vw,4.5rem)] font-medium leading-[1.0] tracking-[-0.04em]">
             {clientName}, thank you so much.
           </h1>
-          <p className="mx-auto mt-4 max-w-[32rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
+          <p className="mt-4 max-w-[32rem] text-[1.125rem] font-medium leading-snug tracking-[-0.02em] text-[#5c5c5c]">
             {THANKS[paymentState]}
           </p>
           <p className="mt-10 font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
             {heading}
           </p>
-          <p className="mx-auto mt-2 max-w-[30rem] text-[1rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
+          <p className="mt-2 max-w-[30rem] text-[1rem] font-medium leading-snug tracking-[-0.01em] text-[#5c5c5c]">
             {intro}
           </p>
         </header>
