@@ -928,7 +928,12 @@ export const proposalByTokenQuery = defineQuery(`
       scope,
       deliverables[]{ _key, name, description, phase, acceptanceCriteria },
       outOfScope[]{ _key, text },
-      phases[]{ _key, name, summary, weeks }
+      phases[]{ _key, name, summary, weeks },
+      paymentSchedule->{
+        _id,
+        name,
+        steps[]{ _key, percent, trigger }
+      }
     },
     "recommendedPackageId": recommendedPackage._ref,
     addOns[]->{
