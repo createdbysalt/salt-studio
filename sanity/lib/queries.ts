@@ -1015,6 +1015,40 @@ export const proposalByTokenQuery = defineQuery(`
   }
 `)
 
+/** Current proposal text for pre-v3 acceptance compatibility checks only. */
+export const proposalByIdForLegacyAcceptanceQuery = defineQuery(`
+  *[_type == "proposal" && _id == $id][0]{
+    _id,
+    clientDisplayName,
+    clientLegalName,
+    packages[]->{
+      _id,
+      name,
+      scope,
+      includedItems
+    },
+    addOns[]->{
+      _id,
+      name,
+      line,
+      scope
+    },
+    msa->{
+      _id,
+      version,
+      effectiveDate,
+      "pdfUrl": pdf.asset->url,
+      body
+    },
+    sections[]{
+      _key,
+      _type,
+      enabled,
+      _type == "proposalSowSection" => { body }
+    }
+  }
+`)
+
 /** Projects for the local proposal preview. The notes are written in the preview, not here. */
 export const previewProofProjectsQuery = defineQuery(`
   *[_type == "project" && slug.current in $slugs && hidden != true]{

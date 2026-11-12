@@ -1,13 +1,22 @@
 import 'server-only'
 import type {ProposalDocument} from '@/components/ProposalPage'
 import {
-  agreedTextHash,
   latestAcceptanceForProposal,
   latestPaymentForProposal,
   type AcceptanceRow,
   type LatestPayment,
 } from '@/lib/proposal/acceptances'
+import {agreedTextFor, plainText} from '@/lib/proposal/agreementText'
+import type {PdfBlock} from '@/lib/proposal/documentPdf'
+import {
+  acceptanceDocumentHash,
+  buildFrozenAgreementDocument,
+  type FrozenAddress,
+  type FrozenAgreementDocument,
+  type FrozenMsaPdf,
+} from '@/lib/proposal/frozenDocument'
 import {isDevPreview, isProposalUnlocked, loadProposal} from '@/lib/proposal/load'
+import {freezeMsaPdf} from '@/lib/proposal/msaPdf'
 import {
   honoredPercent,
   proposalIsAccepted,
@@ -19,6 +28,7 @@ import {
   type ProposalQuote,
   type ProposalSelection,
 } from '@/lib/proposal/quote'
+import {validateSigningFields} from '@/lib/proposal/signingFields'
 import {stegaClean} from 'next-sanity'
 
 /**
@@ -36,15 +46,17 @@ export type SigningContext = {
   quote: ProposalQuote
   signerName: string
   signerEmail: string
+  signerLegalName: string
+  signerAddress: FrozenAddress
   packageName: string
   clientName: string
   agreedHash: string
+  agreedDocument: FrozenAgreementDocument | null
+  msaPdf: FrozenMsaPdf | null
   latest: LatestPayment | null
   /** The signature to reuse, when the terms have not moved. */
   reuseAcceptance: AcceptanceRow | null
 }
-
-const MIN_NAME = 2
 
 function clean(value: string | null | undefined) {
   return stegaClean(value ?? '').trim()
@@ -57,38 +69,129 @@ type Block = {
   listItem?: string
 }
 
-/** Plain text of portable text, enough to hash what was shown. */
-export function plainText(blocks: unknown): string {
-  if (!Array.isArray(blocks)) return ''
-  return (blocks as Block[])
-    .map((block) => {
-      const prefix = block.listItem
-        ? '- '
-        : block.style && block.style !== 'normal'
-          ? `${block.style}: `
-          : ''
-      const text = (block.children ?? []).map((child) => child.text ?? '').join('')
-      return `${prefix}${text}`
-    })
-    .join('\n')
+function dateLabel(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('en-US', {dateStyle: 'long', timeZone: 'UTC'}).format(date)
 }
 
-export function agreedTextFor(
-  proposal: ProposalDocument,
-  pkg: NonNullable<ProposalDocument['packages']>[number],
-  addOns: NonNullable<ProposalDocument['addOns']>,
-) {
-  const sow = (proposal.sections ?? []).find((section) => section._type === 'proposalSowSection')
+function formatAddress(address: FrozenAddress) {
+  return address.lines.join(', ')
+}
+
+function portableBlocksToPdf(blocks: unknown): PdfBlock[] {
+  if (!Array.isArray(blocks)) return []
+  return (blocks as Block[]).flatMap((block): PdfBlock[] => {
+    const text = (block.children ?? [])
+      .map((child) => child.text ?? '')
+      .join('')
+      .trim()
+    if (!text) return []
+    if (block.listItem) return [{kind: 'bullet' as const, text, marker: '•'}]
+    if (block.style && block.style !== 'normal') return [{kind: 'heading' as const, text}]
+    return [{kind: 'paragraph' as const, text}]
+  })
+}
+
+function signedSowBlocks(input: {
+  proposal: ProposalDocument
+  pkg: NonNullable<ProposalDocument['packages']>[number]
+  addOns: NonNullable<ProposalDocument['addOns']>
+  selection: ProposalSelection
+  signerName: string
+  signerLegalName: string
+  signerAddress: FrozenAddress
+  signerEmail: string
+  acceptedAt: string
+  quote: ProposalQuote
+  msaVersion: string | null
+  agreedHash: string | null
+  ip: string | null
+}) {
+  const sow = (input.proposal.sections ?? []).find(
+    (section) => section._type === 'proposalSowSection',
+  )
   const standing = sow && 'body' in sow ? sow.body : null
-  return agreedTextHash([
-    clean(pkg.name),
-    plainText(pkg.scope),
-    (pkg.includedItems ?? []).map((item) => clean(item)).join('\n'),
-    ...addOns.flatMap((addOn) => [clean(addOn.name), clean(addOn.line), plainText(addOn.scope)]),
-    plainText(standing),
-    clean(proposal.msa?.version),
-    plainText(proposal.msa?.body),
-  ])
+  const blocks: PdfBlock[] = [
+    {kind: 'kicker', text: 'Salt Studio'},
+    {kind: 'title', text: 'Signed Statement of Work'},
+    {kind: 'note', text: `Client legal name: ${input.signerLegalName}`},
+    {kind: 'note', text: `Mailing address: ${formatAddress(input.signerAddress)}`},
+    {kind: 'note', text: `Signed date: ${dateLabel(input.acceptedAt)}`},
+    {kind: 'heading', text: 'Parties'},
+    {
+      kind: 'paragraph',
+      text: `This Statement of Work is between Salt Studio and ${input.signerLegalName}.`,
+    },
+    {kind: 'heading', text: input.pkg.name ? clean(input.pkg.name) : 'Selected package'},
+    ...portableBlocksToPdf(input.pkg.scope),
+    ...(input.pkg.includedItems ?? [])
+      .map((item) => clean(item))
+      .filter(Boolean)
+      .map((text): PdfBlock => ({kind: 'bullet', text, marker: '•'})),
+  ]
+
+  for (const addOn of input.addOns) {
+    const name = clean(addOn.name)
+    if (name) blocks.push({kind: 'heading', text: name})
+    blocks.push(...portableBlocksToPdf(addOn.scope))
+    const line = clean(addOn.line)
+    if (line) blocks.push({kind: 'bullet', text: line, marker: '•'})
+  }
+
+  blocks.push(
+    {kind: 'heading', text: 'Standing terms'},
+    ...portableBlocksToPdf(standing),
+    {kind: 'heading', text: 'Fees and payment steps'},
+    {kind: 'paragraph', text: `Total fee: ${money(input.quote.totalCents)}.`},
+    {kind: 'paragraph', text: `Payment made now: ${money(input.quote.firstCents)}.`},
+    ...input.quote.steps.map(
+      (step): PdfBlock => ({
+        kind: 'bullet',
+        marker: '•',
+        text: `${step.percent}% (${money(step.amountCents)}) — ${step.trigger}`,
+      }),
+    ),
+  )
+
+  blocks.push(
+    {kind: 'heading', text: 'Kickoff date'},
+    {
+      kind: 'paragraph',
+      text: `Selected kickoff date: ${input.selection.kickoffDate ?? 'Not selected'}.`,
+    },
+    {kind: 'heading', text: 'Acceptance block'},
+    {kind: 'paragraph', text: `Accepted by: ${input.signerName}`},
+    {kind: 'paragraph', text: `Email: ${input.signerEmail}`},
+    {kind: 'paragraph', text: `Accepted at: ${input.acceptedAt}`},
+    {kind: 'paragraph', text: `IP address: ${input.ip ?? 'Not recorded'}`},
+    {kind: 'paragraph', text: `MSA version: ${input.msaVersion ?? 'Not recorded'}`},
+  )
+  if (input.agreedHash) blocks.push({kind: 'paragraph', text: `Record hash: ${input.agreedHash}`})
+
+  return blocks
+}
+
+function money(cents: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
+    maximumFractionDigits: cents % 100 === 0 ? 0 : 2,
+  }).format(cents / 100)
+}
+
+function quoteFromAcceptance(row: AcceptanceRow): ProposalQuote {
+  return {
+    packageId: row.package_id,
+    packageAmountCents: row.total_cents,
+    packageDueCents: row.total_cents,
+    percent: row.same_day_percent,
+    addOns: row.addon_ids.map((id) => ({id, amountCents: 0})),
+    totalCents: row.total_cents,
+    steps: row.steps,
+    firstCents: row.first_cents,
+  }
 }
 
 export async function prepareSigning(
@@ -111,20 +214,8 @@ export async function prepareSigning(
   // compare against: anything else is a new deal at today's prices.
   const signed = await latestAcceptanceForProposal(proposal._id)
 
-  const signerName = String(formData.get('signerName') ?? '').trim()
-  if (signerName.length < MIN_NAME || signerName.length > 200) {
-    return {ok: false, error: 'Type your full name to sign.'}
-  }
   if (formData.get('agree') !== 'yes') {
     return {ok: false, error: 'Tick the box to agree to the scope and the agreement.'}
-  }
-
-  const signerEmail = clean(proposal.signerEmail)
-  if (!signerEmail || !signerEmail.includes('@')) {
-    return {
-      ok: false,
-      error: 'This proposal has no signer email yet. Write back and we will fix it.',
-    }
   }
 
   const selection = resolveProposalSelection(proposal, {
@@ -141,27 +232,15 @@ export async function prepareSigning(
   const addOns = (proposal.addOns ?? []).filter((item) =>
     live.addOns.some((chosen) => chosen.id === item._id),
   )
-  const agreedHash = agreedTextFor(proposal, pkg, addOns)
-
-  // Re-price at the percent on the signature and keep it only when that
-  // reproduces, to the cent, the deal they actually signed. A different
-  // package or add-on cannot inherit an expired discount this way.
-  const sameDeal =
-    signed != null &&
-    signed.selection_key === selectionKey(selection) &&
-    signed.agreed_text_sha256 === agreedHash
-  const frozen = sameDeal
-    ? quoteSelection({...inputs, percent: honoredPercent(inputs.percent, signed)}, selection)
-    : null
-  const honorsSignature =
-    frozen != null &&
-    signed != null &&
-    frozen.totalCents === signed.total_cents &&
-    frozen.firstCents === signed.first_cents
-  const quote = honorsSignature && frozen ? frozen : live
+  const legacyHashStillMatches =
+    signed?.agreed_document != null ||
+    signed?.agreed_text_sha256 === agreedTextFor(proposal, pkg, addOns)
+  const signedSelection =
+    signed != null && signed.selection_key === selectionKey(selection) && legacyHashStillMatches
+  const quote = signedSelection && signed ? quoteFromAcceptance(signed) : live
 
   // Only the signed deal outlives the proposal. Anything else is too late.
-  if (proposalIsExpired(proposal) && !honorsSignature) {
+  if (proposalIsExpired(proposal) && !signedSelection) {
     return {ok: false, error: 'This proposal has expired. Write back and a new one can go out.'}
   }
 
@@ -171,19 +250,115 @@ export async function prepareSigning(
     return {ok: false, error: 'A payment is already on its way for this proposal.'}
   }
 
+  if (signedSelection && signed) {
+    const address = signed.signer_address ?? {formatted: '', lines: []}
+    return {
+      ok: true,
+      proposal,
+      selection,
+      quote,
+      signerName: signed.signer_name,
+      signerEmail: signed.signer_email,
+      signerLegalName: signed.signer_legal_name ?? '',
+      signerAddress: address,
+      packageName: signed.package_name ?? clean(pkg.name),
+      clientName: signed.client_name ?? clean(proposal.clientDisplayName),
+      agreedHash: signed.agreed_text_sha256,
+      agreedDocument: signed.agreed_document,
+      msaPdf:
+        signed.msa_pdf_sha256 && signed.msa_pdf_bytes_base64
+          ? {
+              status: 'frozen',
+              sha256: signed.msa_pdf_sha256,
+              bytesBase64: signed.msa_pdf_bytes_base64,
+              filename: signed.msa_pdf_filename ?? 'Master-Services-Agreement.pdf',
+              contentType: signed.msa_pdf_content_type ?? 'application/pdf',
+            }
+          : signed.msa_pdf_missing_reason
+            ? {status: 'missing', reason: signed.msa_pdf_missing_reason}
+            : null,
+      latest,
+      reuseAcceptance: signed,
+    }
+  }
+
+  const fields = validateSigningFields(formData)
+  if (!fields.ok) return fields
+
+  const acceptedAt = new Date().toISOString()
+  const msaPdf = await freezeMsaPdf(proposal.msa?.pdfUrl)
+  const sowBlocks = signedSowBlocks({
+    proposal,
+    pkg,
+    addOns,
+    selection,
+    signerName: fields.signerName,
+    signerLegalName: fields.legalName,
+    signerAddress: fields.address,
+    signerEmail: fields.email,
+    acceptedAt,
+    quote,
+    msaVersion: clean(proposal.msa?.version) || null,
+    agreedHash: null,
+    ip: null,
+  })
+  const agreedDocument = buildFrozenAgreementDocument({
+    signerFullName: fields.signerName,
+    signerLegalName: fields.legalName,
+    signerAddress: fields.address,
+    signerEmail: fields.email,
+    acceptedAt,
+    proposalId: proposal._id,
+    clientName: clean(proposal.clientDisplayName) || null,
+    packageId: quote.packageId,
+    packageName: clean(pkg.name) || null,
+    addonIds: quote.addOns.map((item) => item.id),
+    addonNames: addOns.map((addOn) => clean(addOn.name)).filter(Boolean),
+    selectionKey: selectionKey(selection),
+    selection,
+    quote,
+    scheduleName: proposal.paymentSchedule?.name ?? null,
+    msaId: proposal.msa?._id ?? null,
+    msaVersion: clean(proposal.msa?.version) || null,
+    msaEffectiveDate: proposal.msa?.effectiveDate ?? null,
+    msaBodyText: plainText(proposal.msa?.body),
+    msaPdf,
+    sowBlocks,
+  })
+  const agreedHash = acceptanceDocumentHash(agreedDocument)
+  agreedDocument.sow.blocks = signedSowBlocks({
+    proposal,
+    pkg,
+    addOns,
+    selection,
+    signerName: fields.signerName,
+    signerLegalName: fields.legalName,
+    signerAddress: fields.address,
+    signerEmail: fields.email,
+    acceptedAt,
+    quote,
+    msaVersion: clean(proposal.msa?.version) || null,
+    agreedHash,
+    ip: null,
+  })
+
   return {
     ok: true,
     proposal,
     selection,
     quote,
-    signerName,
-    signerEmail,
+    signerName: fields.signerName,
+    signerEmail: fields.email,
+    signerLegalName: fields.legalName,
+    signerAddress: fields.address,
     packageName: clean(pkg.name),
     clientName: clean(proposal.clientDisplayName) || clean(proposal.clientLegalName),
     agreedHash,
+    agreedDocument,
+    msaPdf,
     latest,
     // One signature per deal. Clicking pay again after walking away reuses
     // it; changing the selection or the price is a new signature.
-    reuseAcceptance: honorsSignature ? signed : null,
+    reuseAcceptance: null,
   }
 }

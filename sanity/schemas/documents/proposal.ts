@@ -21,6 +21,10 @@ function fourteenDaysFromNow() {
   return new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
 }
 
+function statusRequiresSignerEmail(status: unknown) {
+  return status === 'sent' || status === 'viewed' || status === 'signed' || status === 'paid'
+}
+
 /**
  * A private proposal for one lead.
  *
@@ -102,8 +106,7 @@ export default defineType({
       type: 'string',
       group: 'client',
       description:
-        'The legal party named in the Statement of Work. Use the exact name that signs the contract, for example “Harbor Parish Church, Inc.”',
-      validation: (rule) => rule.required().error('The signed scope needs the client’s legal name'),
+        'Optional prefill for the legal party named in the Statement of Work. The signer can edit the final legal name on the proposal page before signing.',
     }),
     defineField({
       name: 'signerName',
@@ -118,7 +121,14 @@ export default defineType({
       type: 'string',
       group: 'client',
       description: 'Where the signed scope and receipt are sent.',
-      validation: (rule) => rule.email().error('Use a valid email address'),
+      validation: (rule) =>
+        rule
+          .email()
+          .error('Use a valid email address')
+          .custom((value, context) => {
+            if (!statusRequiresSignerEmail(context.document?.status)) return true
+            return value ? true : 'Add signer email before setting this proposal to sent'
+          }),
     }),
     defineField({
       name: 'sections',

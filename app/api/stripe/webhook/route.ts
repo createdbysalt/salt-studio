@@ -8,6 +8,8 @@ import {
   updatePayment,
 } from '@/lib/proposal/acceptances'
 import {decideFulfillment, type CheckoutEventKind} from '@/lib/proposal/fulfillment'
+import {sendPaidProposalEmailsForPayment} from '@/lib/proposal/paidEmails'
+import {receiptUrlForPayment, receiptUrlForPaymentIntent} from '@/lib/proposal/stripeReceipt'
 import {apiVersion, dataset, projectId} from '@/sanity/lib/api'
 import {createClient} from 'next-sanity'
 import {NextResponse} from 'next/server'
@@ -91,7 +93,26 @@ export async function POST(request: Request) {
   }
 
   const fresh = await recordPaymentEvent(event.id, payment.id, event.type)
-  if (!fresh) return json(200, {ok: true, ignored: 'duplicate_event'})
+  if (!fresh) {
+    if (payment.status === 'paid') {
+      const refreshedReceipt = await receiptUrlForPayment(stripe, payment)
+      if (refreshedReceipt && !payment.stripe_receipt_url) {
+        await updatePayment(payment.id, {stripe_receipt_url: refreshedReceipt}).catch(
+          () => undefined,
+        )
+      }
+      await sendPaidProposalEmailsForPayment({
+        paymentId: payment.id,
+        receiptUrl: refreshedReceipt,
+        liveMode: stripeIsLive(),
+        forceSendFailure:
+          !stripeIsLive() && request.headers.get('x-proposal-email-test-failure') === '1',
+      }).catch((error) => {
+        console.error('[stripe webhook] could not retry pending proposal emails', error)
+      })
+    }
+    return json(200, {ok: true, ignored: 'duplicate_event'})
+  }
 
   const decision = decideFulfillment(
     event.type as CheckoutEventKind,
@@ -124,12 +145,15 @@ export async function POST(request: Request) {
       : (session.payment_intent?.id ?? null)
   const customerId =
     typeof session.customer === 'string' ? session.customer : (session.customer?.id ?? null)
+  const receiptUrl =
+    decision.status === 'paid' ? await receiptUrlForPaymentIntent(stripe, paymentIntentId) : null
 
   try {
     await updatePayment(payment.id, {
       status: decision.status,
       stripe_payment_intent_id: paymentIntentId ?? payment.stripe_payment_intent_id,
       stripe_customer_id: customerId ?? payment.stripe_customer_id,
+      stripe_receipt_url: receiptUrl ?? payment.stripe_receipt_url,
       paid_at: decision.status === 'paid' ? new Date().toISOString() : payment.paid_at,
     })
   } catch (error) {
@@ -153,6 +177,15 @@ export async function POST(request: Request) {
       // The Supabase row is already paid. Studio catching up is best effort.
       console.error('[stripe webhook] could not mark the proposal paid in Sanity', error)
     }
+    await sendPaidProposalEmailsForPayment({
+      paymentId: payment.id,
+      receiptUrl,
+      liveMode: stripeIsLive(),
+      forceSendFailure:
+        !stripeIsLive() && request.headers.get('x-proposal-email-test-failure') === '1',
+    }).catch((error) => {
+      console.error('[stripe webhook] could not send proposal paid emails', error)
+    })
   }
 
   if (decision.status === 'expired') {
