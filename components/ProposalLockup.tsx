@@ -120,7 +120,9 @@ export function ProposalLockup({
   return (
     <>
       <div className="pointer-events-none fixed top-5 right-[max(3.5rem,var(--spacing-gutter))] left-[max(3.5rem,var(--spacing-gutter))] z-30 md:right-[max(4.5rem,var(--spacing-gutter))] md:left-[max(4.5rem,var(--spacing-gutter))]">
-        <div className="flex items-stretch justify-between">
+        {/* Below md the Accept and Sign plate sits at the bottom instead,
+            so the client lockup is alone up here and reads better centered. */}
+        <div className="flex items-stretch justify-center md:justify-between">
           <div data-proposal-enter="lockup" className="pointer-events-none flex">
             <div
               ref={setChip}
