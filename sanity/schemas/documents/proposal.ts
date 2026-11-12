@@ -25,8 +25,7 @@ function fourteenDaysFromNow() {
  * A private proposal for one lead.
  *
  * Client names and the signed scope live here. Read this only on the server.
- * The production dataset is still public until proposals move to a private dataset,
- * so do not put a real client's legal details in until that move is done.
+ * The production dataset is private, so a real client's legal details are safe here.
  * Dollar amounts are never stored here. The page sends selected ids and the server
  * recomputes the total.
  */
@@ -103,7 +102,7 @@ export default defineType({
       type: 'string',
       group: 'client',
       description:
-        'The legal party named in the Statement of Work. The production dataset is still world-readable, so wait to enter a real client until proposals live in a private dataset.',
+        'The legal party named in the Statement of Work. Use the exact name that signs the contract, for example “Harbor Parish Church, Inc.”',
       validation: (rule) => rule.required().error('The signed scope needs the client’s legal name'),
     }),
     defineField({
