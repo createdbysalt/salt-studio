@@ -1,53 +1,60 @@
 /**
  * Shared Tally kit for church website clients.
  *
- * ENJOY_LIFE_TALLY_FORMS are the live Enjoy Life examples. Do not send new
- * clients there. Do not PATCH, rename, or delete PROTECTED_TALLY_FORM_IDS.
+ * Form IDs and URLs are client data and stay out of the repo. They live in the
+ * NEXT_PUBLIC_TALLY_CHURCH_FORMS env var as JSON — real values in `.env.local`
+ * and Vercel, shape documented in `.env.example`.
  *
- * CHURCH_TALLY_FORMS is the Salt Church kit. Create or refresh those URLs with
- * `node scripts/tally/church-kit.mjs`.
+ * `protected` IDs are live client forms (Enjoy Life + Before We Meet + MFI).
+ * Do not PATCH, rename, or delete them. `enjoyLife` are live examples — do not
+ * send new clients there. `church` is the Salt Church kit; create or refresh
+ * those URLs with `node scripts/tally/church-kit.mjs`.
  */
 
-export const PROTECTED_TALLY_FORM_IDS = [
-  '1AOReW',
-  'oblYeV',
-  'MePV4X',
-  'J9GoPd',
-  'gDgzld',
-  'yPg1Q4',
-  'Xx9Qa4',
-  '812rBx',
-  'ZjjkEe',
-  'eqYXjq',
+export const CHURCH_TALLY_FORM_KEYS = [
+  'gettingStarted',
+  'staff',
+  'ministry',
+  'dreamTeam',
+  'smallGroup',
+  'event',
+  'course',
+  'testimony',
+  'faq',
 ] as const
 
-export type ProtectedTallyFormId = (typeof PROTECTED_TALLY_FORM_IDS)[number]
+export type ChurchTallyFormKey = (typeof CHURCH_TALLY_FORM_KEYS)[number]
 
-export const ENJOY_LIFE_TALLY_FORMS = {
-  staff: 'https://tally.so/r/1AOReW',
-  ministry: 'https://tally.so/r/oblYeV',
-  dreamTeam: 'https://tally.so/r/MePV4X',
-  smallGroup: 'https://tally.so/r/J9GoPd',
-  event: 'https://tally.so/r/gDgzld',
-  course: 'https://tally.so/r/yPg1Q4',
-  testimony: 'https://tally.so/r/Xx9Qa4',
-  faq: 'https://tally.so/r/812rBx',
-} as const
+type TallyCatalog = {
+  protected?: string[]
+  enjoyLife?: Record<string, string>
+  church?: Partial<Record<ChurchTallyFormKey, string>>
+  overrides?: Record<string, {title: string; link: string; description?: string}>
+}
 
-/** New Salt Church kit. Filled after `scripts/tally/church-kit.mjs` creates the forms. */
-export const CHURCH_TALLY_FORMS = {
-  gettingStarted: 'https://tally.so/r/XxPl4P',
-  staff: 'https://tally.so/r/814oZl',
-  ministry: 'https://tally.so/r/0QRre9',
-  dreamTeam: 'https://tally.so/r/zx5X7k',
-  smallGroup: 'https://tally.so/r/5BPKZN',
-  event: 'https://tally.so/r/Y5lD4N',
-  course: 'https://tally.so/r/lbkD6o',
-  testimony: 'https://tally.so/r/RGyKPK',
-  faq: 'https://tally.so/r/obL6Gb',
-} as const
+function parseCatalog(): TallyCatalog {
+  const raw = process.env.NEXT_PUBLIC_TALLY_CHURCH_FORMS
+  if (!raw) return {}
+  try {
+    return JSON.parse(raw) as TallyCatalog
+  } catch {
+    console.warn('NEXT_PUBLIC_TALLY_CHURCH_FORMS is not valid JSON — Tally links are disabled')
+    return {}
+  }
+}
 
-export type ChurchTallyFormKey = keyof typeof CHURCH_TALLY_FORMS
+const catalog = parseCatalog()
+
+/** Live client form IDs. Never PATCH, rename, or delete. */
+export const PROTECTED_TALLY_FORM_IDS: readonly string[] = catalog.protected ?? []
+
+/** Live Enjoy Life example URLs. Do not send new clients there. */
+export const ENJOY_LIFE_TALLY_FORMS: Record<string, string> = catalog.enjoyLife ?? {}
+
+/** The Salt Church kit. Falls back to '#' when the env var is missing. */
+export const CHURCH_TALLY_FORMS = Object.fromEntries(
+  CHURCH_TALLY_FORM_KEYS.map((key) => [key, catalog.church?.[key] ?? '#']),
+) as Record<ChurchTallyFormKey, string>
 
 export const CHURCH_TALLY_FORM_META: Record<
   ChurchTallyFormKey,
@@ -57,7 +64,7 @@ export const CHURCH_TALLY_FORM_META: Record<
     title: 'Salt Church — Getting Started',
     sendTo: 'Church admin or project lead',
     expect:
-      'Kickoff, then church info or “pull from current site.” Voice samples, Planning Center, and domain still required.',
+      'Kickoff, then church info or “pull from current site.” Design direction, voice samples, Planning Center, and domain still required.',
   },
   staff: {
     title: 'Salt Church — Staff Bio',
@@ -105,10 +112,4 @@ export const CHURCH_TALLY_FORM_META: Record<
 export const CLIENT_GETTING_STARTED_OVERRIDES: Record<
   string,
   {title: string; link: string; description?: string}
-> = {
-  clc: {
-    title: 'Church Info Form',
-    link: 'https://tally.so/r/yP5oEB',
-    description: 'Mission, vision, values, Sunday expect, location, and church history.',
-  },
-}
+> = catalog.overrides ?? {}
