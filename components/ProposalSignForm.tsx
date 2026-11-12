@@ -24,6 +24,7 @@ export function ProposalSignForm({
   payLabel,
   restLine,
   wireAvailable,
+  resume,
   note,
   children,
 }: {
@@ -32,6 +33,8 @@ export function ProposalSignForm({
   payLabel: string
   restLine: string | null
   wireAvailable: boolean
+  /** Set when they already signed and a payment of theirs is still open. */
+  resume: {signerName: string} | null
   note: string | null
   children: ReactNode
 }) {
@@ -58,7 +61,7 @@ export function ProposalSignForm({
     window.location.assign(checkoutUrl)
   }, [checkoutUrl])
 
-  const ready = name.trim().length >= 2 && agreed
+  const ready = resume != null || (name.trim().length >= 2 && agreed)
   const leaving = checkoutUrl != null
 
   return (
@@ -83,7 +86,11 @@ export function ProposalSignForm({
       <div className="relative grid gap-5">
         <div className="text-center">
           <p className="text-[2.5rem] font-medium leading-[1.05] tracking-[-0.04em]">
-            {leaving ? 'Taking you to payment.' : 'Sign here and we can start.'}
+            {leaving
+              ? 'Taking you to payment.'
+              : resume
+                ? 'Pick up where you left off.'
+                : 'Sign here and we can start.'}
           </p>
         </div>
 
@@ -98,38 +105,51 @@ export function ProposalSignForm({
                 {note}
               </p>
             ) : null}
-            <label className={fieldClass}>
-              <span className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-                Full name
-              </span>
-              <input
-                name="signerName"
-                autoComplete="name"
-                placeholder="Your name"
-                required
-                minLength={2}
-                value={name}
-                disabled={leaving}
-                onChange={(event) => setName(event.target.value)}
-                className="mt-2 w-full bg-transparent text-[1.35rem] font-medium tracking-[-0.03em] text-[#08090a] outline-none placeholder:font-normal placeholder:text-[#a3a3a3] disabled:opacity-70"
-              />
-            </label>
-            <label className="flex items-start gap-3 text-[1.05rem] leading-relaxed">
-              <input
-                type="checkbox"
-                name="agree"
-                value="yes"
-                checked={agreed}
-                disabled={leaving}
-                onChange={(event) => setAgreed(event.target.checked)}
-                className="mt-1.5 h-4 w-4 accent-ink"
-              />
-              <span>{children}</span>
-            </label>
+            {resume ? (
+              <>
+                <input type="hidden" name="signerName" value={resume.signerName} />
+                <input type="hidden" name="agree" value="yes" />
+                <p className="text-center text-[1.05rem] font-medium leading-snug text-[#5c5c5c]">
+                  Signed as {resume.signerName}. The payment was not finished, so it is still
+                  waiting for you.
+                </p>
+              </>
+            ) : (
+              <>
+                <label className={fieldClass}>
+                  <span className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+                    Full name
+                  </span>
+                  <input
+                    name="signerName"
+                    autoComplete="name"
+                    placeholder="Your name"
+                    required
+                    minLength={2}
+                    value={name}
+                    disabled={leaving}
+                    onChange={(event) => setName(event.target.value)}
+                    className="mt-2 w-full bg-transparent text-[1.35rem] font-medium tracking-[-0.03em] text-[#08090a] outline-none placeholder:font-normal placeholder:text-[#a3a3a3] disabled:opacity-70"
+                  />
+                </label>
+                <label className="flex items-start gap-3 text-[1.05rem] leading-relaxed">
+                  <input
+                    type="checkbox"
+                    name="agree"
+                    value="yes"
+                    checked={agreed}
+                    disabled={leaving}
+                    onChange={(event) => setAgreed(event.target.checked)}
+                    className="mt-1.5 h-4 w-4 accent-ink"
+                  />
+                  <span>{children}</span>
+                </label>
+              </>
+            )}
 
             <div>
               <ProposalPayButton
-                label={payLabel}
+                label={resume ? `Continue payment, ${payLabel.replace(/^Pay /, '')}` : payLabel}
                 disabled={!ready || leaving}
                 pending={pending || leaving}
               />

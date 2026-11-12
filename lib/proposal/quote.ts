@@ -162,6 +162,19 @@ export function sameDayPercent(proposal: QuoteProposal, now = Date.now()): numbe
   return percent
 }
 
+/**
+ * The same-day percent to use. The live clock decides for someone who has
+ * not signed. A signature keeps the percent frozen on it, so the price
+ * cannot climb while they were away from a payment they already agreed to.
+ */
+export function honoredPercent(
+  live: number | null,
+  signed: {same_day_percent: number | null} | null,
+) {
+  if (live != null) return live
+  return signed?.same_day_percent ?? null
+}
+
 /** Whole dollars after the percent, rounded half up. Matches the card. */
 export function discountedAmount(amount: number, percent: number | null) {
   if (percent == null) return amount

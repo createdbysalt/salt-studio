@@ -2,15 +2,20 @@ import 'server-only'
 import type {ProposalDocument} from '@/components/ProposalPage'
 import {
   agreedTextHash,
+  latestAcceptanceForProposal,
   latestPaymentForProposal,
+  type AcceptanceRow,
   type LatestPayment,
 } from '@/lib/proposal/acceptances'
 import {isDevPreview, isProposalUnlocked, loadProposal} from '@/lib/proposal/load'
 import {
+  honoredPercent,
   proposalIsAccepted,
   proposalIsExpired,
-  quoteProposal,
+  quoteInputs,
+  quoteSelection,
   resolveProposalSelection,
+  selectionKey,
   type ProposalQuote,
   type ProposalSelection,
 } from '@/lib/proposal/quote'
@@ -35,6 +40,8 @@ export type SigningContext = {
   clientName: string
   agreedHash: string
   latest: LatestPayment | null
+  /** The signature to reuse, when the terms have not moved. */
+  reuseAcceptance: AcceptanceRow | null
 }
 
 const MIN_NAME = 2
@@ -97,10 +104,12 @@ export async function prepareSigning(
 
   const proposal = await loadProposal(token)
   if (!proposal?._id) return {ok: false, error: 'This proposal is no longer available.'}
-  if (proposalIsExpired(proposal)) {
-    return {ok: false, error: 'This proposal has expired. Write back and a new one can go out.'}
-  }
   if (proposalIsAccepted(proposal)) return {ok: false, error: 'This proposal is already signed.'}
+
+  // A signature on file keeps its own terms alive, but only for the exact
+  // thing it signed. Checked further down, once there is a selection to
+  // compare against: anything else is a new deal at today's prices.
+  const signed = await latestAcceptanceForProposal(proposal._id)
 
   const signerName = String(formData.get('signerName') ?? '').trim()
   if (signerName.length < MIN_NAME || signerName.length > 200) {
@@ -123,14 +132,38 @@ export async function prepareSigning(
     addon: formData.getAll('addon').map((value) => String(value)),
     kickoff: String(formData.get('kickoff') ?? ''),
   })
-  const quote = quoteProposal(proposal, selection)
-  if (!quote) return {ok: false, error: 'Choose a package first.'}
+  const inputs = quoteInputs(proposal)
+  const live = quoteSelection(inputs, selection)
+  if (!live) return {ok: false, error: 'Choose a package first.'}
 
-  const pkg = (proposal.packages ?? []).find((item) => item._id === quote.packageId)
+  const pkg = (proposal.packages ?? []).find((item) => item._id === live.packageId)
   if (!pkg) return {ok: false, error: 'Choose a package first.'}
   const addOns = (proposal.addOns ?? []).filter((item) =>
-    quote.addOns.some((chosen) => chosen.id === item._id),
+    live.addOns.some((chosen) => chosen.id === item._id),
   )
+  const agreedHash = agreedTextFor(proposal, pkg, addOns)
+
+  // Re-price at the percent on the signature and keep it only when that
+  // reproduces, to the cent, the deal they actually signed. A different
+  // package or add-on cannot inherit an expired discount this way.
+  const sameDeal =
+    signed != null &&
+    signed.selection_key === selectionKey(selection) &&
+    signed.agreed_text_sha256 === agreedHash
+  const frozen = sameDeal
+    ? quoteSelection({...inputs, percent: honoredPercent(inputs.percent, signed)}, selection)
+    : null
+  const honorsSignature =
+    frozen != null &&
+    signed != null &&
+    frozen.totalCents === signed.total_cents &&
+    frozen.firstCents === signed.first_cents
+  const quote = honorsSignature && frozen ? frozen : live
+
+  // Only the signed deal outlives the proposal. Anything else is too late.
+  if (proposalIsExpired(proposal) && !honorsSignature) {
+    return {ok: false, error: 'This proposal has expired. Write back and a new one can go out.'}
+  }
 
   const latest = await latestPaymentForProposal(proposal._id)
   if (latest?.status === 'paid') return {ok: false, error: 'This proposal is already paid.'}
@@ -147,7 +180,10 @@ export async function prepareSigning(
     signerEmail,
     packageName: clean(pkg.name),
     clientName: clean(proposal.clientDisplayName) || clean(proposal.clientLegalName),
-    agreedHash: agreedTextFor(proposal, pkg, addOns),
+    agreedHash,
     latest,
+    // One signature per deal. Clicking pay again after walking away reuses
+    // it; changing the selection or the price is a new signature.
+    reuseAcceptance: honorsSignature ? signed : null,
   }
 }

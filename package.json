@@ -21,7 +21,7 @@
     "seed:team:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "start": "next start -p 4000",
     "test:onboarding": "tsx --test tests/onboarding-automation.test.ts tests/privacy-migration-plan.test.ts",
-    "test:proposal": "tsx --conditions=react-server --test tests/proposal-gate.test.ts tests/proposal-quote.test.ts tests/proposal-fulfillment.test.ts tests/proposal-kickoff.test.ts tests/proposal-document-pdf.test.ts",
+    "test:proposal": "tsx --conditions=react-server --test tests/proposal-gate.test.ts tests/proposal-quote.test.ts tests/proposal-fulfillment.test.ts tests/proposal-kickoff.test.ts tests/proposal-document-pdf.test.ts tests/proposal-honored-percent.test.ts",
     "type-check": "next typegen && tsc --noEmit",
     "typegen": "sanity schema extract && sanity typegen generate",
     "verify:onboarding:sandbox": "tsx scripts/onboarding/verify-sandbox.ts"

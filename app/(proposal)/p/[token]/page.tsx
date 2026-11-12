@@ -63,6 +63,7 @@ async function loadPayment(proposalId: string): Promise<ProposalPaymentView | nu
   try {
     const row = await latestPaymentForProposal(proposalId)
     if (!row) return null
+    const unexpired = row.expires_at != null && new Date(row.expires_at).getTime() > Date.now()
     return {
       status: row.status,
       method: row.method,
@@ -70,6 +71,10 @@ async function loadPayment(proposalId: string): Promise<ProposalPaymentView | nu
       signerName: row.proposal_acceptances?.signer_name ?? null,
       signerEmail: row.proposal_acceptances?.signer_email ?? null,
       kickoffDate: row.proposal_acceptances?.kickoff_date ?? null,
+      // The percent they signed at, so the page shows what checkout charges.
+      honoredPercent: row.proposal_acceptances?.same_day_percent ?? null,
+      selectionKey: row.proposal_acceptances?.selection_key ?? null,
+      resumable: row.status === 'open' && row.method === 'checkout' && unexpired,
     }
   } catch (error) {
     console.error('[proposal] could not read the payment state', error)

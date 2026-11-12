@@ -135,6 +135,14 @@ async function requestFacts() {
   }
 }
 
+/**
+ * The signature for this attempt. It is written once per set of terms, so
+ * walking away and coming back does not record signing twice.
+ */
+async function acceptanceFor(token: string, context: SigningContext) {
+  return context.reuseAcceptance ?? (await writeAcceptance(token, context))
+}
+
 async function writeAcceptance(token: string, context: SigningContext) {
   const {ip, userAgent} = await requestFacts()
   const {proposal, selection, quote} = context
@@ -189,7 +197,7 @@ async function requestWire(token: string, context: SigningContext): Promise<Sign
   if (context.quote.firstCents < WIRE_FROM_CENTS) {
     return {ok: false, error: `Wire is available from ${formatCents(WIRE_FROM_CENTS)}.`}
   }
-  const acceptance = await writeAcceptance(token, context)
+  const acceptance = await acceptanceFor(token, context)
   await insertPayment({
     acceptance_id: acceptance.id,
     proposal_id: acceptance.proposal_id,
@@ -232,7 +240,7 @@ async function beginCheckout(token: string, context: SigningContext): Promise<Si
     await updatePayment(latest.id, {status: 'expired'}).catch(() => undefined)
   }
 
-  const acceptance = await writeAcceptance(token, context)
+  const acceptance = await acceptanceFor(token, context)
 
   const existing = await stripe.customers.list({email: context.signerEmail, limit: 1})
   const customer =

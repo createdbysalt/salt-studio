@@ -61,6 +61,7 @@ export type LatestPayment = PaymentRow & {
     signer_email: string
     first_cents: number
     kickoff_date: string | null
+    same_day_percent: number | null
   } | null
 }
 
@@ -95,9 +96,29 @@ function eq(value: string) {
 export async function latestPaymentForProposal(proposalId: string): Promise<LatestPayment | null> {
   if (!paymentsStoreConfigured()) return null
   const rows = await supabaseRequest<LatestPayment[]>(
-    `/rest/v1/proposal_payments?proposal_id=${eq(proposalId)}&select=${PAYMENT_COLUMNS},proposal_acceptances(selection_key,signer_name,signer_email,first_cents,kickoff_date)&order=created_at.desc&limit=1`,
+    `/rest/v1/proposal_payments?proposal_id=${eq(proposalId)}&select=${PAYMENT_COLUMNS},proposal_acceptances(selection_key,signer_name,signer_email,first_cents,kickoff_date,same_day_percent)&order=created_at.desc&limit=1`,
   )
   return rows[0] ?? null
+}
+
+const ACCEPTANCE_COLUMNS =
+  'id,proposal_id,signer_name,signer_email,package_id,addon_ids,selection_key,kickoff_date,same_day_percent,total_cents,first_cents,agreed_text_sha256,created_at'
+
+/** The signature already on file for this proposal, if there is one. */
+export async function latestAcceptanceForProposal(proposalId: string) {
+  if (!paymentsStoreConfigured()) return null
+  const rows = await supabaseRequest<AcceptanceRow[]>(
+    `/rest/v1/proposal_acceptances?proposal_id=${eq(proposalId)}&select=${ACCEPTANCE_COLUMNS}&order=created_at.desc&limit=1`,
+  )
+  return rows[0] ?? null
+}
+
+/** Open checkout rows for a proposal, so a finished payment can close the rest. */
+export async function openCheckoutPayments(proposalId: string, exceptId: string) {
+  const rows = await supabaseRequest<PaymentRow[]>(
+    `/rest/v1/proposal_payments?proposal_id=${eq(proposalId)}&status=eq.open&method=eq.checkout&id=neq.${encodeURIComponent(exceptId)}&select=${PAYMENT_COLUMNS}`,
+  )
+  return rows
 }
 
 export async function findPaymentBySessionId(sessionId: string): Promise<PaymentRow | null> {
