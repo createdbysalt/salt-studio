@@ -8,6 +8,7 @@ import {
   GoogleTagManagerScript,
   PageViewTracker,
   ScrollTracker,
+  SiteOnly,
   UsercentricsScripts,
   WebVitalsReporter,
 } from '@/lib/analytics'
@@ -73,10 +74,18 @@ export default async function RootLayout({children}: {children: React.ReactNode}
         <Script id="salt-intro-boot" strategy="beforeInteractive">
           {`(function(){try{var path=location.pathname;if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;if(path.indexOf("/p/")===0)return;if(path!=="/")return;try{sessionStorage.removeItem("salt-intro")}catch(e){}window.__SALT_INTRO__=true;var s=document.createElement("style");s.id="salt-intro-boot-style";s.textContent="html,body{background:#08090a!important}[data-intro-hide]{opacity:0!important;pointer-events:none!important}[data-home-hero] [data-phrase-a],[data-home-hero] [data-phrase-b]{opacity:0!important}";(document.head||document.documentElement).appendChild(s);var d=document.createElement("div");d.id="salt-intro-boot";d.setAttribute("aria-hidden","true");d.style.cssText="position:fixed;inset:0;z-index:199;background:#08090a;pointer-events:none";(document.body||document.documentElement).appendChild(d);}catch(e){}})();`}
         </Script>
-        <UsercentricsScripts />
-        <GoogleTagManagerScript />
-        <ClientGoogleAnalyticsScript measurementId={devSettings?.clientGoogleAnalyticsId} />
-        <GoogleTagManagerNoScript />
+        {/*
+          Site only. A proposal at /p/ is one private document for one client,
+          so no consent bundle, tag manager or ad pixel loads there. The
+          trackers inside ConsentProvider already refused to report from those
+          routes; this stops the scripts being fetched at all.
+        */}
+        <SiteOnly>
+          <UsercentricsScripts />
+          <GoogleTagManagerScript />
+          <ClientGoogleAnalyticsScript measurementId={devSettings?.clientGoogleAnalyticsId} />
+          <GoogleTagManagerNoScript />
+        </SiteOnly>
         <ConsentProvider>
           <Suspense fallback={null}>
             <ClientIdentifier />

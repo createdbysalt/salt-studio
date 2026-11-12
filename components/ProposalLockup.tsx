@@ -75,20 +75,35 @@ export function ProposalLockup({
   )
 
   useEffect(() => {
-    const update = () => {
+    const read = () => {
       const node = chip.current
       setOnColor(node ? lockupOnColor(node) : false)
       const button = contact.current
       setContactOverDark(button ? surfaceIsDark(button) : false)
     }
 
-    update()
+    // Both reads hit-test a point and then resolve styles for every element
+    // under it. Running that straight out of the scroll handler meant a
+    // layout flush in the middle of a scroll, interleaved with the other
+    // handlers writing styles. Deferring to a frame keeps the reads batched
+    // after layout has settled, and caps them at one pass per frame.
+    let queued = 0
+    const update = () => {
+      if (queued) return
+      queued = requestAnimationFrame(() => {
+        queued = 0
+        read()
+      })
+    }
+
+    read()
     syncPlates()
     window.addEventListener('scroll', update, {passive: true})
     window.addEventListener('resize', update)
     window.addEventListener('resize', syncPlates)
     document.fonts.ready.then(syncPlates).catch(() => {})
     return () => {
+      if (queued) cancelAnimationFrame(queued)
       window.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
       window.removeEventListener('resize', syncPlates)

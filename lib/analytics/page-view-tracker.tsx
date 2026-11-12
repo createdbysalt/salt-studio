@@ -3,6 +3,7 @@
 import {usePathname, useSearchParams} from 'next/navigation'
 import {useEffect, useRef} from 'react'
 import {trackPageView} from './events'
+import {isPrivateProposalPath} from './private-routes'
 
 /**
  * Page View Tracker
@@ -26,7 +27,7 @@ export function PageViewTracker() {
 
   useEffect(() => {
     // Proposal links carry an unguessable key. Keep that path out of analytics.
-    if (pathname.startsWith('/p/')) return
+    if (isPrivateProposalPath(pathname)) return
 
     // Build full URL
     const url = searchParams.toString() ? `${pathname}?${searchParams.toString()}` : pathname

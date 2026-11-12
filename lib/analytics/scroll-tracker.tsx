@@ -3,6 +3,7 @@
 import {usePathname} from 'next/navigation'
 import {useEffect, useRef} from 'react'
 import {trackScrollDepth} from './events'
+import {isPrivateProposalPath} from './private-routes'
 
 type ScrollMilestone = 25 | 50 | 75 | 90 | 100
 
@@ -20,7 +21,7 @@ export function ScrollTracker() {
   const firedMilestones = useRef<Set<ScrollMilestone>>(new Set())
 
   useEffect(() => {
-    if (pathname.startsWith('/p/')) return
+    if (isPrivateProposalPath(pathname)) return
 
     // Reset milestones on route change
     firedMilestones.current.clear()

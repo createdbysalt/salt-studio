@@ -292,6 +292,15 @@ function PhaseScrub({
 function ApproachNotes({title, notes}: {title: string; notes: ProposalApproachQuestion[]}) {
   const [openKey, setOpenKey] = useState<string | null>(notes[0]?.key ?? null)
 
+  // Opening a question changes the height of the document, which moves every
+  // start and end offset below it. The timeline scrub kept the offsets it had
+  // measured, so after a question was opened it fired at the wrong scroll
+  // position. Re-measure once the 300ms row transition has finished.
+  useEffect(() => {
+    const timer = setTimeout(() => ScrollTrigger.refresh(), 320)
+    return () => clearTimeout(timer)
+  }, [openKey])
+
   return (
     <section
       data-approach-notes
@@ -408,6 +417,14 @@ function PhaseList({
     if (!list || !track || !ink || !pen) return
 
     const place = () => {
+      // This list is hidden from md up, where PhaseScrub takes over. A hidden
+      // element measures as all zeroes, so placing the track from those rects
+      // wrote nonsense and left a scroll trigger pinned at the top of the
+      // page. The ResizeObserver re-runs this as soon as it is shown again.
+      if (list.getClientRects().length === 0) {
+        track.style.opacity = '0'
+        return
+      }
       const dots = list.querySelectorAll<HTMLElement>('[data-phase-dot]')
       const first = dots[0]
       const last = dots[dots.length - 1]
