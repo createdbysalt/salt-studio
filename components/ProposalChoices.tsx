@@ -213,8 +213,12 @@ export function ProposalChoices({
           </p>
           {firstStep ? (
             <p className="mt-2 text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
+              {/* The share is read off the selected package's own split, so a
+                  50/50 package and a 30/40/30 one each state their own figure
+                  without a sentence anywhere that has to be kept in step. */}
               <span className="block">
-                {formatCents(firstStep.amountCents)} {lowerFirst(firstStep.trigger)}.
+                {formatCents(firstStep.amountCents)}, {formatPercent(firstStep.percent)} of the
+                total, {lowerFirst(firstStep.trigger)}.
               </span>
               <span className="block">The rest is invoiced later.</span>
             </p>
@@ -227,6 +231,11 @@ export function ProposalChoices({
 
 function lowerFirst(value: string) {
   return `${value.charAt(0).toLowerCase()}${value.slice(1)}`
+}
+
+/** "50%" for a whole percent, "33.3%" when a split needs the decimal. */
+function formatPercent(percent: number) {
+  return `${Number.isInteger(percent) ? percent : Math.round(percent * 10) / 10}%`
 }
 
 function modifiedClick(event: MouseEvent<HTMLAnchorElement>) {

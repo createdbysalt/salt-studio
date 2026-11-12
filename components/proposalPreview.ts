@@ -99,6 +99,9 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       {
         _id: 'pkg-foundation',
         name: 'Foundation',
+        // No schedule of its own, so it follows the proposal's 50/50. This is
+        // the usual case and the one that must keep working unchanged.
+        paymentSchedule: null,
         summary: 'A clear site the office can update, built around how people actually arrive.',
         amount: 5500,
         includedItems: [
@@ -170,6 +173,17 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       {
         _id: 'pkg-complete',
         name: 'Complete',
+        // Its own split, so the preview shows the two packages charging
+        // different amounts today from the same proposal.
+        paymentSchedule: {
+          _id: 'schedule-30-40-30',
+          name: '30/40/30',
+          steps: [
+            {_key: 'c1', percent: 30, trigger: 'On signing'},
+            {_key: 'c2', percent: 40, trigger: 'When the build starts'},
+            {_key: 'c3', percent: 30, trigger: 'When the work is accepted'},
+          ],
+        },
         summary: 'Foundation, plus the words on the main pages and a month of care after launch.',
         amount: 8500,
         includedItems: [

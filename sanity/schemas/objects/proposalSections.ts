@@ -1,3 +1,4 @@
+import {INVESTMENT_INTRO, PACKAGES_INTRO} from '@/lib/proposal/copy'
 import {defineArrayMember, defineField, defineType} from 'sanity'
 
 function shownField() {
@@ -420,12 +421,16 @@ export const proposalPackagesSection = defineType({
     }),
     defineField({
       name: 'intro',
-      title: 'Intro',
+      title: 'Line under the heading',
       type: 'text',
       rows: 2,
-      hidden: true,
+      initialValue: PACKAGES_INTRO,
       description:
-        "The page always shows We're excited to partner with you. This is the work we'd take on together. This value is not used.",
+        'The sentence under “The investment.”, above the package cards. This is the one to warm up for a particular client. Leave it empty and the page uses the default: “' +
+        PACKAGES_INTRO +
+        '” Do not put prices or the payment split here. Both are worked out from the package they pick and shown on the cards and under the total.',
+      validation: (rule) =>
+        rule.max(200).warning('Keep it to a sentence or two, or it pushes the packages down'),
     }),
     defineField({
       name: 'sameDayDiscount',
@@ -554,12 +559,16 @@ export const proposalInvestmentSection = defineType({
     }),
     defineField({
       name: 'intro',
-      title: 'Intro',
+      title: 'Line under the heading',
       type: 'text',
       rows: 2,
-      hidden: true,
+      initialValue: INVESTMENT_INTRO,
       description:
-        'The page always explains how to choose, then builds the payment line from the schedule. This value is not used.',
+        'The sentence under “We can’t wait to work together.” Leave it empty and the page uses the default: “' +
+        INVESTMENT_INTRO +
+        '” Do not restate the payment split here. The share taken today is printed under the total, worked out from the package they pick, so a sentence saying it would go stale the moment a package changes.',
+      validation: (rule) =>
+        rule.max(200).warning('Keep it to a sentence or two, or it crowds the packages below'),
     }),
   ],
   preview: {

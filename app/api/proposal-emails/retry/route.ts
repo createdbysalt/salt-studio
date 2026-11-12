@@ -1,3 +1,4 @@
+import {timingSafeEqual} from 'node:crypto'
 import {getStripe, stripeIsLive} from '@/lib/payments/stripe'
 import {retryPendingProposalEmails} from '@/lib/proposal/paidEmails'
 import {receiptUrlForPayment} from '@/lib/proposal/stripeReceipt'
@@ -5,8 +6,17 @@ import {NextResponse} from 'next/server'
 
 export const runtime = 'nodejs'
 
+/**
+ * Compared in constant time, the same way the proposal gate compares its
+ * password. A plain === returns as soon as two bytes differ, which leaks the
+ * length of the matching prefix to anyone who can measure the response. The
+ * length check first is fine: the length of a secret is not the secret.
+ */
 function authorized(request: Request, secret: string) {
-  return request.headers.get('authorization') === `Bearer ${secret}`
+  const expected = Buffer.from(`Bearer ${secret}`)
+  const given = Buffer.from(request.headers.get('authorization') ?? '')
+  if (given.length !== expected.length) return false
+  return timingSafeEqual(given, expected)
 }
 
 export async function POST(request: Request) {

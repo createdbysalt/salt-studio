@@ -19,11 +19,13 @@ import {isDevPreview, isProposalUnlocked, loadProposal} from '@/lib/proposal/loa
 import {freezeMsaPdf} from '@/lib/proposal/msaPdf'
 import {
   honoredPercent,
+  matchesSignedFigures,
   proposalIsAccepted,
   proposalIsExpired,
   quoteInputs,
   quoteSelection,
   resolveProposalSelection,
+  sameSignedDeal,
   selectionKey,
   type ProposalQuote,
   type ProposalSelection,
@@ -181,19 +183,6 @@ function money(cents: number) {
   }).format(cents / 100)
 }
 
-function quoteFromAcceptance(row: AcceptanceRow): ProposalQuote {
-  return {
-    packageId: row.package_id,
-    packageAmountCents: row.total_cents,
-    packageDueCents: row.total_cents,
-    percent: row.same_day_percent,
-    addOns: row.addon_ids.map((id) => ({id, amountCents: 0})),
-    totalCents: row.total_cents,
-    steps: row.steps,
-    firstCents: row.first_cents,
-  }
-}
-
 export async function prepareSigning(
   token: string,
   formData: FormData,
@@ -232,15 +221,35 @@ export async function prepareSigning(
   const addOns = (proposal.addOns ?? []).filter((item) =>
     live.addOns.some((chosen) => chosen.id === item._id),
   )
-  const legacyHashStillMatches =
-    signed?.agreed_document != null ||
-    signed?.agreed_text_sha256 === agreedTextFor(proposal, pkg, addOns)
-  const signedSelection =
-    signed != null && signed.selection_key === selectionKey(selection) && legacyHashStillMatches
-  const quote = signedSelection && signed ? quoteFromAcceptance(signed) : live
+  /**
+   * A signature carries over only when the deal is genuinely the same one.
+   *
+   * Three things have to hold, and all three matter:
+   *   1. the same package and add-ons, by selection key
+   *   2. the proposal content has not been edited since they signed
+   *   3. re-pricing it today lands on the same figures, to the cent
+   *
+   * The third is the one that protects the charge. Without it the amount
+   * comes from the stored row and is never checked against the live
+   * proposal, so a price corrected in Sanity after someone signed and walked
+   * away would be charged at the old number with no signal that anything had
+   * changed. Both the screen and the charge would agree and both be wrong.
+   *
+   * For a frozen v3 document the content hash lives inside the document.
+   * Older rows kept it in `agreed_text_sha256`. A v3 document from before
+   * that field existed has neither, so it fails to match and the client
+   * simply signs again at today's price.
+   */
+  const contentHash = agreedTextFor(proposal, pkg, addOns)
+  const sameDeal = sameSignedDeal(signed, selectionKey(selection), contentHash)
+  const frozen = sameDeal
+    ? quoteSelection({...inputs, percent: honoredPercent(inputs.percent, signed)}, selection)
+    : null
+  const honorsSignature = matchesSignedFigures(frozen, signed)
+  const quote = honorsSignature && frozen ? frozen : live
 
   // Only the signed deal outlives the proposal. Anything else is too late.
-  if (proposalIsExpired(proposal) && !signedSelection) {
+  if (proposalIsExpired(proposal) && !honorsSignature) {
     return {ok: false, error: 'This proposal has expired. Write back and a new one can go out.'}
   }
 
@@ -250,7 +259,7 @@ export async function prepareSigning(
     return {ok: false, error: 'A payment is already on its way for this proposal.'}
   }
 
-  if (signedSelection && signed) {
+  if (honorsSignature && signed) {
     const address = signed.signer_address ?? {formatted: '', lines: []}
     return {
       ok: true,
@@ -317,7 +326,8 @@ export async function prepareSigning(
     selectionKey: selectionKey(selection),
     selection,
     quote,
-    scheduleName: proposal.paymentSchedule?.name ?? null,
+    contentSha256: contentHash,
+    scheduleName: quote.scheduleName ?? proposal.paymentSchedule?.name ?? null,
     msaId: proposal.msa?._id ?? null,
     msaVersion: clean(proposal.msa?.version) || null,
     msaEffectiveDate: proposal.msa?.effectiveDate ?? null,

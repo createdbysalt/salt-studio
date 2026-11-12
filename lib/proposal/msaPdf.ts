@@ -2,6 +2,9 @@ import 'server-only'
 import {base64FromBytes, sha256Bytes, type FrozenMsaPdf} from '@/lib/proposal/frozenDocument'
 import {token} from '@/sanity/lib/token'
 
+/** Resend caps attachments around 40MB; stay well under it. */
+const MAX_MSA_PDF_BYTES = 8_000_000
+
 export async function freezeMsaPdf(pdfUrl: string | null | undefined): Promise<FrozenMsaPdf> {
   if (!pdfUrl) return {status: 'missing', reason: 'missing_pdf_asset'}
   let url: URL
@@ -9,6 +12,13 @@ export async function freezeMsaPdf(pdfUrl: string | null | undefined): Promise<F
     url = new URL(pdfUrl)
   } catch {
     return {status: 'missing', reason: 'invalid_pdf_url'}
+  }
+
+  // The read token goes in this request, so it only ever goes to Sanity. The
+  // URL comes from a Sanity asset today, but nothing downstream enforces
+  // that, and a credential handed to an arbitrary host is not recoverable.
+  if (url.protocol !== 'https:' || url.hostname !== 'cdn.sanity.io') {
+    return {status: 'missing', reason: 'untrusted_pdf_host'}
   }
 
   const response = await fetch(url, {
@@ -19,6 +29,10 @@ export async function freezeMsaPdf(pdfUrl: string | null | undefined): Promise<F
 
   const bytes = new Uint8Array(await response.arrayBuffer())
   if (bytes.length === 0) return {status: 'missing', reason: 'empty_pdf_asset'}
+  // Base64 of these bytes is stored on the acceptance row and attached to an
+  // email. Both have limits, and an oversized agreement should be reported
+  // rather than silently bloat every row and bounce every send.
+  if (bytes.length > MAX_MSA_PDF_BYTES) return {status: 'missing', reason: 'pdf_too_large'}
 
   const pathName = url.pathname.split('/').filter(Boolean).pop() ?? 'master-services-agreement.pdf'
   const filename = pathName.toLowerCase().endsWith('.pdf') ? pathName : `${pathName}.pdf`

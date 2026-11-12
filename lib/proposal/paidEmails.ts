@@ -6,7 +6,6 @@ import {
   findPaymentById,
   markProposalEmailFailed,
   markProposalEmailSent,
-  paidPaymentsMissingStudioEmail,
   pendingProposalEmails,
   updatePayment,
   type AcceptanceRow,
@@ -15,7 +14,7 @@ import {
 } from '@/lib/proposal/acceptances'
 import {agreedTextFor} from '@/lib/proposal/agreementText'
 import {buildProposalPdf, type PdfBlock} from '@/lib/proposal/documentPdf'
-import {bytesFromBase64, type FrozenMsaPdf} from '@/lib/proposal/frozenDocument'
+import {bytesFromBase64, sha256Bytes, type FrozenMsaPdf} from '@/lib/proposal/frozenDocument'
 import {freezeMsaPdf} from '@/lib/proposal/msaPdf'
 import {formatCents} from '@/lib/proposal/quote'
 import {client} from '@/sanity/lib/client'
@@ -411,14 +410,33 @@ async function sendClaimedEmail(
   }
   const claim = await claimProposalEmail(row.id)
   if (!claim) return {kind: row.kind, status: 'already_sent' as const}
+  /**
+   * The send and the record of it are separate failures.
+   *
+   * Recording was inside this try, so a database blip after the mail had gone
+   * put the row back to pending. A later retry then sent the client a second
+   * copy of their contract. Resend's idempotency key only covers a 24 hour
+   * window, and nothing here runs on a schedule, so a retry days later would
+   * have been a fresh send.
+   *
+   * Now only the send itself can mark the row for retry. If the mail went but
+   * the write failed, the row stays claimed: it will not be sent again, and
+   * the stale-claim sweep plus the log is how a human picks it up.
+   */
+  let sent: {id: string | null}
   try {
-    const sent = await sender(message)
-    await markProposalEmailSent(claim.id, sent.id)
-    return {kind: claim.kind, status: 'sent' as const}
+    sent = await sender(message)
   } catch (error) {
     await markProposalEmailFailed(claim.id, error instanceof Error ? error.message : 'send_failed')
     return {kind: claim.kind, status: 'pending' as const, reason: 'send_failed'}
   }
+  await markProposalEmailSent(claim.id, sent.id).catch((error) => {
+    console.error(
+      `[proposal emails] ${claim.kind} for payment ${rowInput.paymentId} was sent but not recorded`,
+      error,
+    )
+  })
+  return {kind: claim.kind, status: 'sent' as const}
 }
 
 export async function sendPaidProposalEmails(input: {
@@ -454,14 +472,34 @@ export async function sendPaidProposalEmails(input: {
   let studioNote: string | null = null
 
   if (hasFrozenMsa(input.acceptance)) {
-    msaPdf = {
+    const candidate: Extract<FrozenMsaPdf, {status: 'frozen'}> = {
       status: 'frozen',
       sha256: input.acceptance.msa_pdf_sha256 as string,
       bytesBase64: input.acceptance.msa_pdf_bytes_base64 as string,
       filename: input.acceptance.msa_pdf_filename ?? 'Master-Services-Agreement.pdf',
       contentType: input.acceptance.msa_pdf_content_type ?? 'application/pdf',
     }
-    bytesFromBase64(msaPdf.bytesBase64)
+    /**
+     * Check the bytes against the hash that was stored with them.
+     *
+     * Freezing the bytes and the hash together is only worth anything if the
+     * pair is verified before use. The previous code decoded the base64 and
+     * threw the result away, which proves nothing: Buffer.from drops invalid
+     * base64 characters silently rather than failing, so a truncated or
+     * corrupted column would decode to something shorter and be attached to
+     * the client's contract with nobody the wiser.
+     *
+     * On a mismatch the signer packet is held back and the studio is told,
+     * rather than sending a document that cannot be shown to match what was
+     * signed. The payment is already settled either way.
+     */
+    if (sha256Bytes(bytesFromBase64(candidate.bytesBase64)) === candidate.sha256) {
+      msaPdf = candidate
+    } else {
+      signerSkipReason = 'msa_pdf_hash_mismatch'
+      studioNote =
+        'The stored agreement PDF does not match the hash recorded when it was signed, so the signer packet was not sent. The payment went through.'
+    }
   } else if (input.acceptance.agreed_document) {
     signerSkipReason = input.acceptance.msa_pdf_missing_reason ?? 'missing_msa_pdf'
     studioNote = `MSA PDF missing at signing (${signerSkipReason}); signer packet was not sent.`
@@ -607,11 +645,20 @@ export async function retryPendingProposalEmails(input: {
   limit?: number
   receiptUrlResolver?: (payment: PaymentRow) => Promise<string | null>
 }) {
+  /**
+   * Only rows that are already queued, never a sweep over paid payments.
+   *
+   * This used to also pull "paid payments with no studio_notice row", which
+   * every payment taken before this feature shipped satisfies. The first
+   * authenticated call would then have mailed signed documents to a batch of
+   * past clients, months after the fact, for a payment they completed long
+   * ago. A backfill is only safe deliberately and with a cutoff, so it is not
+   * something the routine retry should do on its own.
+   *
+   * To re-send for one payment, pass its id to sendPaidProposalEmailsForPayment.
+   */
   const rows = await pendingProposalEmails(input.limit)
-  const missingRows = await paidPaymentsMissingStudioEmail(input.limit)
-  const paymentIds = Array.from(
-    new Set([...rows.map((row) => row.payment_id), ...missingRows.map((payment) => payment.id)]),
-  )
+  const paymentIds = Array.from(new Set(rows.map((row) => row.payment_id)))
   const results: Array<{paymentId: string; results: PaidEmailResult[]}> = []
   for (const paymentId of paymentIds) {
     results.push({

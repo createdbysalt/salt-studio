@@ -22,6 +22,17 @@ export type FrozenMsaPdf =
 
 export type FrozenAgreementDocument = {
   version: 3
+  /**
+   * sha256 of the proposal content this was signed against, from
+   * `agreedTextFor`. It is what tells a later visit whether the proposal has
+   * been edited since the signature. It is deliberately not the hash of this
+   * document: that one also covers the signer's name and the moment they
+   * signed, so it changes on every visit and cannot detect drift.
+   *
+   * Absent on documents frozen before this field existed. Treat that as drift
+   * and re-sign, which is the safe direction.
+   */
+  contentSha256?: string
   signer: {
     fullName: string
     legalName: string
@@ -131,6 +142,7 @@ export function buildFrozenAgreementDocument(input: {
   selectionKey: string
   selection: ProposalSelection
   quote: ProposalQuote
+  contentSha256: string
   scheduleName: string | null
   msaId: string | null
   msaVersion: string | null
@@ -141,6 +153,7 @@ export function buildFrozenAgreementDocument(input: {
 }): FrozenAgreementDocument {
   return {
     version: 3,
+    contentSha256: input.contentSha256,
     signer: {
       fullName: input.signerFullName,
       legalName: input.signerLegalName,
