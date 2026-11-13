@@ -1,4 +1,5 @@
 import 'server-only'
+import {fetchPublic, readTextCapped} from '@/lib/audit/safeFetch'
 
 /**
  * Live website audit for the Websites quiz (/quiz/[slug] with a URL question).
@@ -74,14 +75,14 @@ async function runPageSpeed(url: string) {
 }
 
 async function runBasicChecks(url: string) {
-  const response = await fetch(url, {
+  // Follows redirects by hand and refuses any hop that lands on a private address.
+  const response = await fetchPublic(url, {
     signal: AbortSignal.timeout(PAGE_TIMEOUT_MS),
     headers: {'user-agent': 'Mozilla/5.0 (compatible; SaltAudit/1.0; +https://createdbysalt.com)'},
-    redirect: 'follow',
   })
   if (!response.ok) throw new Error(`Site responded ${response.status}`)
   // Only the <head> matters; cap the read so huge pages can't hurt us.
-  const html = (await response.text()).slice(0, 200_000)
+  const html = await readTextCapped(response, 200_000)
 
   const hasTag = (pattern: RegExp) => pattern.test(html)
   return {
