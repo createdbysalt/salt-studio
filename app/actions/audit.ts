@@ -1,5 +1,6 @@
 'use server'
 
+import {normalizePublicUrl} from '@/lib/audit/url'
 import {auditWebsite, type WebsiteAudit} from '@/lib/audit/website'
 
 /**
@@ -8,25 +9,8 @@ import {auditWebsite, type WebsiteAudit} from '@/lib/audit/website'
  * happens (public hostnames only — no localhost, IPs, or internal names).
  */
 
-const BLOCKED_HOSTNAME = /^(localhost|.*\.local|.*\.internal|\d{1,3}(\.\d{1,3}){3}|\[.*\])$/i
-
-function normalizeUrl(raw: string): string | null {
-  const trimmed = (raw || '').trim().slice(0, 500)
-  if (!trimmed) return null
-  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
-  let parsed: URL
-  try {
-    parsed = new URL(withProtocol)
-  } catch {
-    return null
-  }
-  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null
-  if (!parsed.hostname.includes('.') || BLOCKED_HOSTNAME.test(parsed.hostname)) return null
-  return parsed.toString()
-}
-
 export async function runWebsiteAudit(rawUrl: string): Promise<WebsiteAudit | null> {
-  const url = normalizeUrl(rawUrl)
+  const url = normalizePublicUrl(rawUrl)
   if (!url) return null
   try {
     return await auditWebsite(url)

@@ -20,6 +20,7 @@
     "seed:copy:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "seed:team:archived": "echo 'Archived Photon seed — see scripts/archive/photon/' && exit 1",
     "start": "next start -p 4000",
+    "test:growth": "tsx --conditions=react-server --test tests/growth-scoring.test.ts tests/growth-report.test.ts",
     "test:onboarding": "tsx --test tests/onboarding-automation.test.ts tests/privacy-migration-plan.test.ts",
     "test:proposal": "NEXT_PUBLIC_SANITY_PROJECT_ID=jkqf2ng5 NEXT_PUBLIC_SANITY_DATASET=production SANITY_API_READ_TOKEN=test-token tsx --conditions=react-server --test tests/proposal-gate.test.ts tests/proposal-quote.test.ts tests/proposal-fulfillment.test.ts tests/proposal-kickoff.test.ts tests/proposal-document-pdf.test.ts tests/proposal-honored-percent.test.ts tests/proposal-signature-guard.test.ts tests/proposal-v3-emails.test.ts",
     "type-check": "next typegen && tsc --noEmit",
@@ -36,6 +37,7 @@
     ]
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
     "@calcom/embed-react": "^1.5.3",
     "@gsap/react": "^2.1.2",
     "@next/env": "16.2.2",
@@ -75,7 +77,8 @@
     "simple-icons": "^16.27.1",
     "sonner": "2.0.7",
     "stripe": "^23.1.0",
-    "styled-components": "6.3.12"
+    "styled-components": "6.3.12",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
