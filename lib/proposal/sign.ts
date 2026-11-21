@@ -8,6 +8,7 @@ import {
 } from '@/lib/proposal/acceptances'
 import {agreedTextFor, plainText} from '@/lib/proposal/agreementText'
 import type {PdfBlock} from '@/lib/proposal/documentPdf'
+import {feeSectionBlocks} from '@/lib/proposal/feeBlocks'
 import {
   acceptanceDocumentHash,
   buildFrozenAgreementDocument,
@@ -20,6 +21,7 @@ import {freezeMsaPdf} from '@/lib/proposal/msaPdf'
 import {
   honoredPercent,
   matchesSignedFigures,
+  postedChooseOneError,
   proposalIsAccepted,
   proposalIsExpired,
   quoteInputs,
@@ -146,16 +148,7 @@ function signedSowBlocks(input: {
   blocks.push(
     {kind: 'part', text: 'Standing terms'},
     ...portableBlocksToPdf(standing),
-    {kind: 'part', text: 'Fees and payment steps'},
-    {kind: 'paragraph', text: `Total fee: ${money(input.quote.totalCents)}.`},
-    {kind: 'paragraph', text: `Payment made now: ${money(input.quote.firstCents)}.`},
-    ...input.quote.steps.map(
-      (step): PdfBlock => ({
-        kind: 'bullet',
-        marker: '•',
-        text: `${step.percent}% (${money(step.amountCents)}) — ${step.trigger}`,
-      }),
-    ),
+    ...feeSectionBlocks(input.quote),
   )
 
   blocks.push(
@@ -231,15 +224,6 @@ async function signerIpAddress() {
   }
 }
 
-function money(cents: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
-    maximumFractionDigits: cents % 100 === 0 ? 0 : 2,
-  }).format(cents / 100)
-}
-
 export async function prepareSigning(
   token: string,
   formData: FormData,
@@ -254,6 +238,14 @@ export async function prepareSigning(
   const proposal = await loadProposal(token)
   if (!proposal?._id) return {ok: false, error: 'This proposal is no longer available.'}
   if (proposalIsAccepted(proposal)) return {ok: false, error: 'This proposal is already signed.'}
+
+  // Before any acceptance read or row. A page URL is narrowed to one add-on
+  // per group. A posted form that still names two is refused, so nothing is written.
+  const groupError = postedChooseOneError(
+    proposal,
+    formData.getAll('addon').map((value) => String(value)),
+  )
+  if (groupError) return {ok: false, error: groupError}
 
   // A signature on file keeps its own terms alive, but only for the exact
   // thing it signed. Checked further down, once there is a selection to
@@ -275,9 +267,7 @@ export async function prepareSigning(
 
   const pkg = (proposal.packages ?? []).find((item) => item._id === live.packageId)
   if (!pkg) return {ok: false, error: 'Choose a package first.'}
-  const addOns = (proposal.addOns ?? []).filter((item) =>
-    live.addOns.some((chosen) => chosen.id === item._id),
-  )
+  const addOns = (proposal.addOns ?? []).filter((item) => selection.addonIds.includes(item._id))
   /**
    * A signature carries over only when the deal is genuinely the same one.
    *
@@ -387,7 +377,7 @@ export async function prepareSigning(
     clientName: clean(proposal.clientDisplayName) || null,
     packageId: quote.packageId,
     packageName: clean(pkg.name) || null,
-    addonIds: quote.addOns.map((item) => item.id),
+    addonIds: addOns.flatMap((addOn) => (addOn._id ? [addOn._id] : [])),
     addonNames: addOns.map((addOn) => clean(addOn.name)).filter(Boolean),
     selectionKey: selectionKey(selection),
     selection,

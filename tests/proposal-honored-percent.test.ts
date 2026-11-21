@@ -25,7 +25,9 @@ const inputs: QuoteInputs = {
     {id: 'small', amount: 1000},
     {id: 'big', amount: 8000},
   ],
-  addOns: [{id: 'extra', amount: 200}],
+  addOns: [
+    {id: 'extra', amount: 200, name: 'Extra', billingType: 'one-time', chooseOneGroup: null},
+  ],
   percent: null,
   steps: [
     {key: 'a', percent: 50, trigger: 'On signing'},

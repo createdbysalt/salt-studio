@@ -90,3 +90,37 @@ test('nothing to compare against never honours a signature', () => {
   assert.equal(matchesSignedFigures(null, signature()), false)
   assert.equal(matchesSignedFigures({totalCents: 1, firstCents: 1}, null), false)
 })
+
+test('a signed one-time acceptance with no monthly list still matches', () => {
+  // A row written on main has no monthly key. An empty list today is the same deal.
+  const frozen = {totalCents: 850_000, firstCents: 255_000, monthly: []}
+  assert.equal(matchesSignedFigures(frozen, signature()), true)
+  assert.equal(
+    matchesSignedFigures(
+      {totalCents: 850_000, firstCents: 255_000},
+      signature({agreed_document: {quote: {monthly: []}}}),
+    ),
+    true,
+  )
+})
+
+test('a changed monthly price refuses the signature', () => {
+  const signed = signature({
+    agreed_document: {
+      quote: {monthly: [{id: 'addon-notes', name: 'Monthly notes', amountCents: 50_000}]},
+    },
+  })
+  const same = {
+    totalCents: 850_000,
+    firstCents: 255_000,
+    monthly: [{id: 'addon-notes', name: 'Monthly notes', amountCents: 50_000}],
+  }
+  assert.equal(matchesSignedFigures(same, signed), true)
+  assert.equal(
+    matchesSignedFigures(
+      {...same, monthly: [{id: 'addon-notes', name: 'Monthly notes', amountCents: 60_000}]},
+      signed,
+    ),
+    false,
+  )
+})

@@ -181,7 +181,7 @@ async function writeAcceptance(token: string, context: SigningContext) {
     client_name: context.clientName || null,
     package_id: quote.packageId,
     package_name: context.packageName || null,
-    addon_ids: quote.addOns.map((item) => item.id),
+    addon_ids: selection.addonIds,
     selection_key: selectionKey(selection),
     kickoff_date: selection.kickoffDate,
     same_day_percent: quote.percent,

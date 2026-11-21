@@ -5700,6 +5700,30 @@
         },
         "optional": true
       },
+      "billingType": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "one-time"
+            },
+            {
+              "type": "string",
+              "value": "monthly"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "chooseOneGroup": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "scope": {
         "type": "objectAttribute",
         "value": {

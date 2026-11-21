@@ -220,7 +220,7 @@ export default defineType({
       type: 'array',
       group: 'commercial',
       description:
-        'As many as you need. The page shows them two per row. Each add-on has its own scope of work. Checking one adds that scope to the statement and its price to the total.',
+        'As many as you need. The page shows them two per row. Each add-on has its own scope of work. Checking a one-time add-on adds that scope to the statement and its price to the total. A monthly add-on is listed as billed monthly and is not part of the total or today’s payment. Add-ons that share a choose-one group are a single choice, and the client can also pick none.',
       of: [defineArrayMember({type: 'reference', to: [{type: 'proposalAddOn'}]})],
     }),
     defineField({

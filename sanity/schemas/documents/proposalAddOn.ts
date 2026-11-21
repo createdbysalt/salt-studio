@@ -37,9 +37,43 @@ export default defineType({
       type: 'number',
       group: 'card',
       description:
-        'The price on the proposal card, in US dollars. Whole dollars, no cents. This is the figure the client reads.',
+        'The price on the proposal card, in US dollars. Whole dollars, no cents. This is the figure the client reads. For a monthly add-on, this is the monthly price.',
       validation: (rule) =>
         rule.required().integer().positive().error('Enter the price in whole US dollars'),
+    }),
+    defineField({
+      name: 'billingType',
+      title: 'Billing',
+      type: 'string',
+      group: 'card',
+      initialValue: 'one-time',
+      options: {
+        layout: 'radio',
+        list: [
+          {title: 'One-time', value: 'one-time'},
+          {title: 'Monthly', value: 'monthly'},
+        ],
+      },
+      description:
+        'One-time adds this price to the total and the deposit. Monthly is billed monthly and is not part of the total or today’s payment. An empty value is treated as one-time.',
+    }),
+    defineField({
+      name: 'chooseOneGroup',
+      title: 'Choose-one group',
+      type: 'string',
+      group: 'card',
+      description:
+        'Optional. Add-ons on the same proposal that share this key are one choice, and the client can pick at most one, or none. Use a short lowercase key, for example linkedin. Leave it empty for an add-on that can be checked on its own. A key used by only one add-on on a proposal stays a normal checkbox.',
+      validation: (rule) =>
+        rule.custom((value) => {
+          if (value == null || value === '') return true
+          if (typeof value !== 'string') return 'Use a short lowercase key, like linkedin'
+          if (value.length > 40) return 'Keep the key short, like linkedin'
+          if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
+            return 'Use lowercase letters, numbers, and hyphens, like linkedin'
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'scope',
@@ -90,6 +124,14 @@ export default defineType({
     }),
   ],
   preview: {
-    select: {title: 'name', subtitle: 'line'},
+    select: {title: 'name', line: 'line', amount: 'amount', billingType: 'billingType'},
+    prepare({title, line, amount, billingType}) {
+      const price = typeof amount === 'number' ? `$${amount.toLocaleString('en-US')}` : ''
+      const billed = billingType === 'monthly' && price ? `${price} a month` : price
+      return {
+        title: title || 'Add-on',
+        subtitle: [billed, line].filter(Boolean).join(' · '),
+      }
+    },
   },
 })

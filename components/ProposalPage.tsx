@@ -14,7 +14,9 @@ import {SiteFooter} from '@/components/SiteFooter'
 import type {PaymentMethod, PaymentStatus} from '@/lib/proposal/acceptances'
 import {INVESTMENT_INTRO, PACKAGES_INTRO} from '@/lib/proposal/copy'
 import {
+  chooseOneGroupKey,
   discountedAmount,
+  formatAddOnPrice,
   formatAmount,
   formatCents,
   honoredPercent,
@@ -574,7 +576,7 @@ function Packages({
               name,
               line: line(addOn.line),
               scope: (addOn.scope ?? []) as PortableTextBlock[],
-              price: formatAmount(addOn.amount),
+              price: formatAddOnPrice(addOn.amount, addOn.billingType),
             },
           ]
         })
@@ -608,43 +610,94 @@ function AddOns({
 }) {
   const addOns = view.proposal.addOns ?? []
   if (addOns.length === 0 || packagesAreShown(view)) return null
+  const groupCounts = new Map<string, number>()
+  for (const addOn of addOns) {
+    const group = chooseOneGroupKey(addOn.chooseOneGroup)
+    if (!group) continue
+    groupCounts.set(group, (groupCounts.get(group) ?? 0) + 1)
+  }
+  const seenGroups = new Set<string>()
 
   return (
     <SectionBlock heading="Add-ons">
       <ul className="border-t border-border">
-        {addOns.map((addOn) => {
-          const selected = view.selection.addonIds.includes(addOn._id)
-          const nextIds = selected
-            ? view.selection.addonIds.filter((id) => id !== addOn._id)
-            : [...view.selection.addonIds, addOn._id]
-          return (
-            <li key={addOn._id} className="border-b border-border">
-              <Link
-                href={proposalHref(
-                  view.token,
-                  view.selection.packageId,
-                  nextIds,
-                  view.selection.kickoffDate,
-                )}
-                scroll={false}
-                aria-pressed={selected}
-                className="flex items-start gap-4 py-5"
-              >
-                <span
-                  className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center border ${
-                    selected ? 'border-foreground bg-foreground' : 'border-foreground/40'
-                  }`}
-                  aria-hidden="true"
+        {addOns.flatMap((addOn) => {
+          const group = chooseOneGroupKey(addOn.chooseOneGroup)
+          const grouped = group != null && (groupCounts.get(group) ?? 0) >= 2
+          if (grouped && group && seenGroups.has(group)) return []
+          if (grouped && group) seenGroups.add(group)
+          const members = grouped
+            ? addOns.flatMap((item) => {
+                if (chooseOneGroupKey(item.chooseOneGroup) !== group || !item._id) return []
+                return [
+                  {
+                    id: item._id,
+                    name: line(item.name),
+                    line: line(item.line),
+                    amount: item.amount,
+                    billingType: item.billingType,
+                  },
+                ]
+              })
+            : addOn._id
+              ? [
+                  {
+                    id: addOn._id,
+                    name: line(addOn.name),
+                    line: line(addOn.line),
+                    amount: addOn.amount,
+                    billingType: addOn.billingType,
+                  },
+                ]
+              : []
+          const rows = grouped
+            ? [{id: '', name: 'None', line: '', amount: null, billingType: null}, ...members]
+            : members
+          return rows.map((row) => {
+            const memberIds = new Set(members.map((item) => item.id))
+            const selected = row.id
+              ? view.selection.addonIds.includes(row.id)
+              : !members.some((item) => view.selection.addonIds.includes(item.id))
+            const without = view.selection.addonIds.filter((id) => !memberIds.has(id))
+            const nextIds = !grouped && selected ? without : row.id ? [...without, row.id] : without
+            return (
+              <li key={row.id || `none-${group}`} className="border-b border-border">
+                <Link
+                  href={proposalHref(
+                    view.token,
+                    view.selection.packageId,
+                    nextIds,
+                    view.selection.kickoffDate,
+                  )}
+                  scroll={false}
+                  aria-pressed={selected}
+                  className="flex items-start justify-between gap-4 py-5"
                 >
-                  {selected ? <span className="h-1.5 w-1.5 bg-background" /> : null}
-                </span>
-                <span>
-                  <span className="block text-lg">{line(addOn.name)}</span>
-                  <span className="mt-1 block text-foreground/70">{line(addOn.line)}</span>
-                </span>
-              </Link>
-            </li>
-          )
+                  <span className="flex items-start gap-4">
+                    <span
+                      className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center border ${
+                        grouped ? 'rounded-full' : ''
+                      } ${selected ? 'border-foreground bg-foreground' : 'border-foreground/40'}`}
+                      aria-hidden="true"
+                    >
+                      {selected ? <span className="h-1.5 w-1.5 bg-background" /> : null}
+                    </span>
+                    <span>
+                      <span className="block text-lg">{row.name || 'None'}</span>
+                      {row.line ? (
+                        <span className="mt-1 block text-foreground/70">{row.line}</span>
+                      ) : null}
+                    </span>
+                  </span>
+                  {typeof row.amount === 'number' ? (
+                    <span className="shrink-0">
+                      {formatAddOnPrice(row.amount, row.billingType)}
+                    </span>
+                  ) : null}
+                </Link>
+              </li>
+            )
+          })
         })}
       </ul>
     </SectionBlock>
@@ -721,7 +774,14 @@ function Investment({
         })}
         addOns={addOns.flatMap((addOn) => {
           if (typeof addOn.amount !== 'number') return []
-          return [{id: addOn._id, name: line(addOn.name), price: formatAmount(addOn.amount)}]
+          return [
+            {
+              id: addOn._id,
+              name: line(addOn.name),
+              price: formatAddOnPrice(addOn.amount, addOn.billingType),
+              group: chooseOneGroupKey(addOn.chooseOneGroup),
+            },
+          ]
         })}
       />
 
