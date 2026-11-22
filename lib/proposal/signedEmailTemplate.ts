@@ -85,7 +85,7 @@ export function signerEmailHtml(input: {
     input.signerIp ? row('From IP', input.signerIp) : '',
     input.msaVersion ? row('Agreement version', input.msaVersion) : '',
     input.msaFilename && input.msaSha256
-      ? row('Agreement checksum (SHA-256)', `${input.msaFilename} — ${input.msaSha256}`)
+      ? row('Agreement checksum (SHA-256)', `${input.msaFilename}, ${input.msaSha256}`)
       : null,
     input.recordHash ? row('Record hash (SHA-256)', input.recordHash) : '',
   ].join('')
@@ -180,7 +180,7 @@ export function signerEmailText(input: Parameters<typeof signerEmailHtml>[0]) {
     input.signerIp ? `  From IP: ${input.signerIp}` : null,
     input.msaVersion ? `  Agreement version: ${input.msaVersion}` : null,
     input.msaFilename && input.msaSha256
-      ? `  Agreement checksum (SHA-256): ${input.msaFilename} — ${input.msaSha256}`
+      ? `  Agreement checksum (SHA-256): ${input.msaFilename}, ${input.msaSha256}`
       : null,
     input.recordHash ? `  Record hash (SHA-256): ${input.recordHash}` : null,
     '',
