@@ -1,7 +1,12 @@
 'use client'
 
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
-import {formatCents, quoteSelection, type QuoteInputs} from '@/lib/proposal/quote'
+import {
+  formatCents,
+  monthlyBillingSentence,
+  quoteSelection,
+  type QuoteInputs,
+} from '@/lib/proposal/quote'
 import {useGSAP} from '@gsap/react'
 import {useRouter} from 'next/navigation'
 import {useEffect, useRef, useState, type MouseEvent} from 'react'
@@ -17,6 +22,8 @@ type AddOnChoice = {
   id: string
   name: string
   price: string
+  /** Set only when this proposal has two or more add-ons with the same key. */
+  group: string | null
 }
 
 const rowClass =
@@ -71,6 +78,14 @@ export function ProposalChoices({
   const quote = quoteSelection(inputs, {packageId: currentPackage, addonIds: currentAddOns})
   const totalCents = quote?.totalCents ?? 0
   const firstStep = quote && quote.steps.length > 1 ? quote.steps[0] : null
+  const monthlyLine = monthlyBillingSentence(quote?.monthly ?? [])
+  const addOnBlocks = groupAddOnChoices(addOns)
+
+  function chooseGroup(group: string, nextId: string | null) {
+    const members = new Set(addOns.filter((item) => item.group === group).map((item) => item.id))
+    const without = selection.current.addonIds.filter((id) => !members.has(id))
+    visit(selection.current.packageId, nextId ? [...without, nextId] : without)
+  }
 
   return (
     <div className="mt-6 grid gap-5">
@@ -140,65 +155,76 @@ export function ProposalChoices({
           </fieldset>
         ) : null}
 
-        {addOns.length > 0 ? (
-          <fieldset>
-            <legend className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-              Select any add-ons
-            </legend>
-            <div className="mt-3 grid gap-3">
-              {addOns.map((addOn) => {
-                const selected = currentAddOns.includes(addOn.id)
-                return (
-                  <a
-                    key={addOn.id}
-                    href={choiceHref(
-                      token,
-                      currentPackage,
-                      selected
-                        ? currentAddOns.filter((id) => id !== addOn.id)
-                        : [...currentAddOns, addOn.id],
-                      kickoff,
-                    )}
-                    aria-current={selected ? 'true' : undefined}
-                    onClick={(event) => {
-                      if (modifiedClick(event)) return
-                      event.preventDefault()
-                      const current = selection.current.addonIds
-                      const next = current.includes(addOn.id)
-                        ? current.filter((id) => id !== addOn.id)
-                        : [...current, addOn.id]
-                      visit(selection.current.packageId, next)
-                    }}
-                    className={rowClass}
-                  >
-                    <span className="flex min-w-0 items-center gap-3">
-                      <span
-                        aria-hidden="true"
-                        className={`flex size-5 shrink-0 items-center justify-center rounded-[5px] border text-[11px] leading-none text-white transition-colors duration-300 ease-out ${
-                          selected
-                            ? 'border-[#08090a] bg-[#08090a]'
-                            : 'border-[#08090a]/30 bg-transparent'
-                        }`}
-                      >
-                        <span
-                          className={`transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                            selected ? 'scale-100' : 'scale-0'
-                          }`}
-                        >
-                          ✓
-                        </span>
-                      </span>
-                      <span className="text-[1.15rem] font-medium tracking-[-0.02em]">
-                        {addOn.name}
-                      </span>
-                    </span>
-                    <span className="shrink-0 font-medium tracking-[-0.03em]">{addOn.price}</span>
-                  </a>
-                )
-              })}
-            </div>
-          </fieldset>
-        ) : null}
+        {addOnBlocks.map((block) =>
+          block.kind === 'checks' ? (
+            <fieldset key={`checks-${block.items[0]?.id ?? 'addons'}`}>
+              <legend className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+                Select any add-ons
+              </legend>
+              <div className="mt-3 grid gap-3">
+                {block.items.map((addOn) => {
+                  const selected = currentAddOns.includes(addOn.id)
+                  const next = selected
+                    ? currentAddOns.filter((id) => id !== addOn.id)
+                    : [...currentAddOns, addOn.id]
+                  return (
+                    <ChoiceRow
+                      key={addOn.id}
+                      href={choiceHref(token, currentPackage, next, kickoff)}
+                      selected={selected}
+                      shape="check"
+                      name={addOn.name}
+                      price={addOn.price}
+                      onSelect={() => {
+                        const current = selection.current.addonIds
+                        const toggled = current.includes(addOn.id)
+                          ? current.filter((id) => id !== addOn.id)
+                          : [...current, addOn.id]
+                        visit(selection.current.packageId, toggled)
+                      }}
+                    />
+                  )
+                })}
+              </div>
+            </fieldset>
+          ) : (
+            <fieldset key={block.group} role="radiogroup">
+              <legend className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
+                Choose one
+              </legend>
+              <div className="mt-3 grid gap-3">
+                <ChoiceRow
+                  href={choiceHref(
+                    token,
+                    currentPackage,
+                    currentAddOns.filter((id) => !block.ids.has(id)),
+                    kickoff,
+                  )}
+                  selected={!block.items.some((item) => currentAddOns.includes(item.id))}
+                  shape="radio"
+                  name="None"
+                  price=""
+                  onSelect={() => chooseGroup(block.group, null)}
+                />
+                {block.items.map((addOn) => {
+                  const selected = currentAddOns.includes(addOn.id)
+                  const without = currentAddOns.filter((id) => !block.ids.has(id))
+                  return (
+                    <ChoiceRow
+                      key={addOn.id}
+                      href={choiceHref(token, currentPackage, [...without, addOn.id], kickoff)}
+                      selected={selected}
+                      shape="radio"
+                      name={addOn.name}
+                      price={addOn.price}
+                      onSelect={() => chooseGroup(block.group, addOn.id)}
+                    />
+                  )
+                })}
+              </div>
+            </fieldset>
+          ),
+        )}
       </div>
 
       <div className="flex justify-end pr-5">
@@ -207,7 +233,7 @@ export function ProposalChoices({
             <span className="pb-[1.1em] font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
               Total
             </span>
-            <span className="text-[clamp(3.75rem,6vw,5rem)] font-medium leading-none tracking-[-0.06em]">
+            <span className="whitespace-nowrap text-[clamp(3.75rem,6vw,5rem)] font-medium leading-none tracking-[-0.06em]">
               <FlipTotal value={formatCents(totalCents)} />
             </span>
           </p>
@@ -223,9 +249,104 @@ export function ProposalChoices({
               <span className="block">The rest is invoiced later.</span>
             </p>
           ) : null}
+          {monthlyLine ? (
+            <p className="mt-2 max-w-[22rem] text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
+              {monthlyLine}
+            </p>
+          ) : null}
         </div>
       </div>
     </div>
+  )
+}
+
+type AddOnBlock =
+  | {kind: 'checks'; items: AddOnChoice[]}
+  | {kind: 'radios'; group: string; ids: Set<string>; items: AddOnChoice[]}
+
+/** A group key used by only one add-on stays a checkbox. */
+function groupAddOnChoices(addOns: AddOnChoice[]): AddOnBlock[] {
+  const counts = new Map<string, number>()
+  for (const addOn of addOns) {
+    if (!addOn.group) continue
+    counts.set(addOn.group, (counts.get(addOn.group) ?? 0) + 1)
+  }
+  const seen = new Set<string>()
+  const blocks: AddOnBlock[] = []
+  const checks: AddOnChoice[] = []
+  const flush = () => {
+    if (checks.length === 0) return
+    blocks.push({kind: 'checks', items: [...checks]})
+    checks.length = 0
+  }
+  for (const addOn of addOns) {
+    const count = addOn.group ? (counts.get(addOn.group) ?? 0) : 0
+    if (!addOn.group || count < 2) {
+      checks.push(addOn)
+      continue
+    }
+    flush()
+    if (seen.has(addOn.group)) continue
+    seen.add(addOn.group)
+    const items = addOns.filter((item) => item.group === addOn.group)
+    blocks.push({
+      kind: 'radios',
+      group: addOn.group,
+      ids: new Set(items.map((item) => item.id)),
+      items,
+    })
+  }
+  flush()
+  return blocks
+}
+
+function ChoiceRow({
+  href,
+  selected,
+  shape,
+  name,
+  price,
+  onSelect,
+}: {
+  href: string
+  selected: boolean
+  shape: 'check' | 'radio'
+  name: string
+  price: string
+  onSelect: () => void
+}) {
+  return (
+    <a
+      href={href}
+      role={shape === 'radio' ? 'radio' : undefined}
+      aria-checked={shape === 'radio' ? selected : undefined}
+      aria-current={shape === 'check' && selected ? 'true' : undefined}
+      onClick={(event) => {
+        if (modifiedClick(event)) return
+        event.preventDefault()
+        onSelect()
+      }}
+      className={rowClass}
+    >
+      <span className="flex min-w-0 items-center gap-3">
+        <span
+          aria-hidden="true"
+          className={`flex size-5 shrink-0 items-center justify-center border text-[11px] leading-none text-white transition-colors duration-300 ease-out ${
+            shape === 'radio' ? 'rounded-full' : 'rounded-[5px]'
+          } ${selected ? 'border-[#08090a] bg-[#08090a]' : 'border-[#08090a]/30 bg-transparent'}`}
+        >
+          <span
+            className={`transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+              selected ? 'scale-100' : 'scale-0'
+            } ${shape === 'radio' ? 'size-2 rounded-full bg-white' : ''}`}
+          >
+            {shape === 'check' ? '✓' : null}
+          </span>
+        </span>
+        <span className="text-[1.15rem] font-medium tracking-[-0.02em]">{name}</span>
+      </span>
+      {price ? <span className="shrink-0 font-medium tracking-[-0.03em]">{price}</span> : null}
+    </a>
   )
 }
 

@@ -263,7 +263,7 @@ export function ProposalPackages({
                       ) : null}
                     </div>
                     {addOn.price ? (
-                      <p className="shrink-0 text-[1.15rem] font-medium leading-none tracking-[-0.04em] md:pt-1 md:text-[1.35rem]">
+                      <p className="shrink-0 text-right text-[1.15rem] font-medium leading-tight tracking-[-0.04em] md:pt-1 md:text-[1.35rem]">
                         {addOn.price}
                       </p>
                     ) : null}

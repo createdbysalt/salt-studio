@@ -32,7 +32,7 @@ const SITUATION_CARDS = [
 ] as const
 
 /**
- * Real projects for the Harbor Parish preview, in order.
+ * Real projects for the Preview preview, in order.
  * The note is written for this client. The picture and the numbers come from the project.
  */
 export const previewProofPicks = [
@@ -77,10 +77,10 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
   return {
     _id: 'preview',
     status: 'draft',
-    clientDisplayName: 'Harbor Parish',
-    clientLegalName: 'Harbor Parish',
-    signerName: 'Ruth Alvarez',
-    signerEmail: 'ruth@harborparish.example',
+    clientDisplayName: 'Preview',
+    clientLegalName: 'Preview',
+    signerName: 'Preview',
+    signerEmail: 'preview@example.test',
     clientLogo: null,
     validUntil: '2026-11-24T23:59:00.000Z',
     kickoffOptions: [
@@ -88,217 +88,102 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       {_key: 'kickoff-2', label: 'Monday, December 1', date: '2026-12-01'},
     ],
     sameDayOffer: {
-      enabled: true,
-      bonusTitle: 'Homepage copy',
-      bonusDetail: 'Sign and pay the deposit today, and the homepage copy is included.',
-      deadline: '2026-11-24T23:59:00.000Z',
+      enabled: false,
+      bonusTitle: '',
+      bonusDetail: '',
+      deadline: null,
     },
-    recommendedPackageId: 'pkg-complete',
-    // Preview figures so the cards have prices to design against.
+    recommendedPackageId: 'pkg-landing',
+    // One package on 50/50, one one-time add-on, one monthly add-on, and one choose-one group.
     packages: [
       {
-        _id: 'pkg-foundation',
-        name: 'Foundation',
-        // No schedule of its own, so it follows the proposal's 50/50. This is
-        // the usual case and the one that must keep working unchanged.
+        _id: 'pkg-landing',
+        name: 'Landing page',
         paymentSchedule: null,
-        summary: 'A clear site the office can update, built around how people actually arrive.',
-        amount: 5500,
-        includedItems: [
-          'Discovery workshop',
-          'Site structure and design',
-          'Build and launch',
-          'A short training session',
-        ],
+        summary: 'One landing page, designed and built.',
+        amount: 4800,
+        includedItems: ['Page structure', 'Design', 'Build and launch'],
         scope: [
-          sowBlock(
-            'f-scope-1',
-            'A clear site the office can update, built around how people actually arrive.',
-          ),
-          sowBullet('f-scope-2', 'Discovery workshop.'),
-          sowBullet('f-scope-3', 'Site structure and design.'),
-          sowBullet('f-scope-4', 'Build and launch.'),
-          sowBullet('f-scope-5', 'A short training session so the office can publish a page.'),
+          sowBlock('landing-scope', 'One landing page, designed and built.'),
+          sowBullet('landing-2', 'Page structure.'),
+          sowBullet('landing-3', 'Design.'),
+          sowBullet('landing-4', 'Build and launch.'),
         ],
         deliverables: [
           {
             _key: 'd1',
-            name: 'Site map and page list',
-            description: 'The pages, and what each one is for.',
-            phase: 'Foundation',
-            acceptanceCriteria: 'You confirm the page list before design starts.',
-          },
-          {
-            _key: 'd2',
-            name: 'Designed and built site',
-            description: 'The public site, set up so the office can edit the pages we agreed.',
+            name: 'Landing page',
+            description: 'The page, designed and built.',
             phase: 'Build',
-            acceptanceCriteria: 'You review it in a browser and confirm the agreed pages.',
-          },
-          {
-            _key: 'd3',
-            name: 'Launch and handoff',
-            description: 'The site goes live, with a short session on how to update it.',
-            phase: 'Launch',
-            acceptanceCriteria:
-              'The site is on your domain and one person on your team has published a change.',
+            acceptanceCriteria: 'You review it in a browser and confirm the page.',
           },
         ],
-        outOfScope: [
-          {_key: 'o1', text: 'Copywriting'},
-          {_key: 'o2', text: 'Photography'},
-          {_key: 'o3', text: 'Advertising'},
-        ],
+        outOfScope: [{_key: 'o1', text: 'Extra pages'}],
         phases: [
           {
             _key: 'p1',
-            name: 'Foundation',
-            summary: 'We learn how the parish works and lock the page list.',
-            weeks: 'Week 1',
-          },
-          {
-            _key: 'p2',
             name: 'Build',
-            summary: 'Design and build the site, with one review round.',
-            weeks: 'Weeks 2–4',
-          },
-          {
-            _key: 'p3',
-            name: 'Launch',
-            summary: 'We put it on your domain and walk the office through updates.',
-            weeks: 'Week 5',
-          },
-        ],
-      },
-      {
-        _id: 'pkg-complete',
-        name: 'Complete',
-        // Its own split, so the preview shows the two packages charging
-        // different amounts today from the same proposal.
-        paymentSchedule: {
-          _id: 'schedule-30-40-30',
-          name: '30/40/30',
-          steps: [
-            {_key: 'c1', percent: 30, trigger: 'On signing'},
-            {_key: 'c2', percent: 40, trigger: 'When the build starts'},
-            {_key: 'c3', percent: 30, trigger: 'When the work is accepted'},
-          ],
-        },
-        summary: 'Foundation, plus the words on the main pages and a month of care after launch.',
-        amount: 8500,
-        includedItems: [
-          'Everything in Foundation',
-          'Copy for the main pages',
-          'One month of care after launch',
-        ],
-        scope: [
-          sowBlock(
-            'c-scope-1',
-            'Foundation, plus the words on the main pages and a month of care after launch.',
-          ),
-          sowBullet('c-scope-2', 'Everything in Foundation.'),
-          sowBullet('c-scope-3', 'Copy for the homepage, visit, and about pages.'),
-          sowBullet('c-scope-4', 'One month of small fixes after launch.'),
-        ],
-        deliverables: [
-          {
-            _key: 'c1',
-            name: 'Site map and page list',
-            description: 'The pages, and what each one is for.',
-            phase: 'Foundation',
-            acceptanceCriteria: 'You confirm the page list before design starts.',
-          },
-          {
-            _key: 'c2',
-            name: 'Page copy',
-            description:
-              'Words for the homepage, visit, and about pages, from interviews with your team.',
-            phase: 'Foundation',
-            acceptanceCriteria: 'You approve the copy before it goes into the design.',
-          },
-          {
-            _key: 'c3',
-            name: 'Designed and built site',
-            description: 'The public site, with the approved copy in place.',
-            phase: 'Build',
-            acceptanceCriteria: 'You review it in a browser and confirm the agreed pages.',
-          },
-          {
-            _key: 'c4',
-            name: 'Launch, handoff, and one month of care',
-            description:
-              'Launch, a training session, and a month of small fixes after the site is live.',
-            phase: 'Launch',
-            acceptanceCriteria: 'The site is live, and the care month has a written end date.',
-          },
-        ],
-        outOfScope: [
-          {_key: 'co1', text: 'Photography'},
-          {_key: 'co2', text: 'Advertising'},
-        ],
-        phases: [
-          {
-            _key: 'cp1',
-            name: 'Foundation',
-            summary: 'Page list and interviews for the main pages.',
-            weeks: 'Weeks 1–2',
-          },
-          {
-            _key: 'cp2',
-            name: 'Build',
-            summary: 'Design and build, with the approved copy.',
-            weeks: 'Weeks 3–5',
-          },
-          {
-            _key: 'cp3',
-            name: 'Launch',
-            summary: 'Launch, training, and one month of care.',
-            weeks: 'Week 6',
+            summary: 'Design and build the page.',
+            weeks: 'Weeks 1–3',
           },
         ],
       },
     ],
     addOns: [
       {
-        _id: 'addon-copy',
-        name: 'Copywriting',
-        line: 'Words for the homepage, visit, and about pages.',
-        amount: 1800,
-        scope: [
-          sowBlock(
-            'copy-scope',
-            'Words for the homepage, visit, and about pages, from interviews with your team.',
-          ),
-        ],
-        deliverables: [
-          {
-            _key: 'ad1',
-            name: 'Page copy',
-            description: 'Words for the homepage, visit, and about pages.',
-            phase: 'Foundation',
-            acceptanceCriteria: 'You approve the copy before it goes into the design.',
-          },
-        ],
+        _id: 'addon-video',
+        name: 'Video edits',
+        line: 'A set of short edits for the launch film.',
+        amount: 900,
+        billingType: 'one-time',
+        chooseOneGroup: null,
+        scope: [sowBlock('video-scope', 'A set of short edits for the launch film.')],
+        deliverables: [],
         outOfScope: [],
       },
       {
-        _id: 'addon-care',
-        name: 'Care plan',
-        line: 'A month of small fixes after launch.',
-        amount: 600,
-        scope: [
-          sowBlock('care-scope', 'A month of small fixes and questions for 30 days after launch.'),
-        ],
-        deliverables: [
-          {
-            _key: 'ad2',
-            name: 'One month of care',
-            description: 'Small fixes and questions for 30 days after launch.',
-            phase: 'Launch',
-            acceptanceCriteria: 'The care month has a written start and end date.',
-          },
-        ],
-        outOfScope: [{_key: 'ado1', text: 'New pages beyond the agreed list'}],
+        _id: 'addon-notes',
+        name: 'Monthly notes',
+        line: 'Notes after launch.',
+        amount: 500,
+        billingType: 'monthly',
+        chooseOneGroup: null,
+        scope: [sowBlock('notes-scope', 'Notes after launch.')],
+        deliverables: [],
+        outOfScope: [],
+      },
+      {
+        _id: 'addon-plan-one',
+        name: 'Plan one',
+        line: 'The smaller monthly plan.',
+        amount: 1500,
+        billingType: 'monthly',
+        chooseOneGroup: 'plans',
+        scope: [sowBlock('plan-one-scope', 'The smaller monthly plan.')],
+        deliverables: [],
+        outOfScope: [],
+      },
+      {
+        _id: 'addon-plan-two',
+        name: 'Plan two',
+        line: 'The middle monthly plan.',
+        amount: 2000,
+        billingType: 'monthly',
+        chooseOneGroup: 'plans',
+        scope: [sowBlock('plan-two-scope', 'The middle monthly plan.')],
+        deliverables: [],
+        outOfScope: [],
+      },
+      {
+        _id: 'addon-plan-three',
+        name: 'Plan three',
+        line: 'The larger monthly plan.',
+        amount: 2500,
+        billingType: 'monthly',
+        chooseOneGroup: 'plans',
+        scope: [sowBlock('plan-three-scope', 'The larger monthly plan.')],
+        deliverables: [],
+        outOfScope: [],
       },
     ],
     paymentSchedule: {
@@ -318,7 +203,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       body: [
         sowBlock(
           'msa-1',
-          'This Master Services Agreement is between Salt Studio and Harbor Parish. It covers how the work is done, how it is paid for, and who owns it once it is paid for.',
+          'This Master Services Agreement is between Salt Studio and Preview. It covers how the work is done, how it is paid for, and who owns it once it is paid for.',
         ),
         sowBlock(
           'msa-2',
@@ -326,7 +211,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         ),
         sowBlock(
           'msa-3',
-          'On full payment, Harbor Parish owns the site built for this project. Salt Studio keeps its own tools and methods.',
+          'On full payment, Preview owns the site built for this project. Salt Studio keeps its own tools and methods.',
         ),
       ],
     },
@@ -434,7 +319,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         enabled: true,
         heading: 'The investment.',
         intro: "We're excited to partner with you. This is the work we'd take on together.",
-        sameDayDiscount: {enabled: true, percent: 10},
+        sameDayDiscount: {enabled: false, percent: 10},
       },
       {
         _key: 'sec-addons',
@@ -459,7 +344,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         body: [
           sowBlock(
             'sow-1',
-            'This statement of work is between Salt Studio and Harbor Parish. The Master Services Agreement governs. This scope names the specific work.',
+            'This statement of work is between Salt Studio and Preview. The Master Services Agreement governs. This scope names the specific work.',
           ),
           sowBlock('sow-2', 'What we need from you', 'h3'),
           sowBullet('sow-3', 'One person who can approve the work.'),
@@ -467,7 +352,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
           sowBullet('sow-5', 'Feedback within five business days of each review.'),
           sowBlock(
             'sow-6',
-            'Each deliverable has a review window of five business days and one round of revision. Silence after the window counts as acceptance. On full payment, Harbor Parish owns the site built for this project. Salt Studio keeps its own tools and methods.',
+            'Each deliverable has a review window of five business days and one round of revision. Silence after the window counts as acceptance. On full payment, Preview owns the site built for this project. Salt Studio keeps its own tools and methods.',
           ),
         ],
       },

@@ -67,6 +67,11 @@ export type FrozenAgreementDocument = {
     sameDayPercent: number | null
     scheduleName: string | null
     steps: QuoteStep[]
+    /**
+     * Selected monthly add-ons. Present only when at least one is selected,
+     * so a one-time document keeps the same shape and the same hash.
+     */
+    monthly?: Array<{id: string; name: string; amountCents: number}>
   }
   msa: {
     id: string | null
@@ -209,6 +214,7 @@ export function buildFrozenAgreementDocument(input: {
       sameDayPercent: input.quote.percent,
       scheduleName: input.scheduleName,
       steps: input.quote.steps,
+      ...(input.quote.monthly.length > 0 ? {monthly: input.quote.monthly} : {}),
     },
     msa: {
       id: input.msaId,

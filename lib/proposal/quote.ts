@@ -19,7 +19,32 @@ export type ProposalQuery = {
   kickoff?: string | string[]
 }
 
-type Priced = {_id: string; amount?: number | null}
+type Priced = {
+  _id: string
+  amount?: number | null
+  name?: string | null
+  billingType?: string | null
+  chooseOneGroup?: string | null
+}
+
+export type AddOnBillingType = 'one-time' | 'monthly'
+
+export type MonthlyCharge = {
+  id: string
+  name: string
+  amountCents: number
+}
+
+/** A missing or unknown value is one-time, so existing add-ons need no migration. */
+export function billingTypeOf(value: string | null | undefined): AddOnBillingType {
+  return (value ?? '').trim().toLowerCase() === 'monthly' ? 'monthly' : 'one-time'
+}
+
+/** Empty means the add-on is not in a choose-one group. */
+export function chooseOneGroupKey(value: string | null | undefined) {
+  const key = (value ?? '').trim().toLowerCase()
+  return key || null
+}
 
 type ScheduleStep = {_key?: string | null; percent?: number | null; trigger?: string | null}
 
@@ -60,8 +85,13 @@ export type ProposalQuote = {
   packageDueCents: number
   /** The same-day percent that applied, or null. */
   percent: number | null
+  /** Selected one-time add-ons. These are the only add-ons in the total. */
   addOns: Array<{id: string; amountCents: number}>
-  /** Discounted package plus add-ons. */
+  /** Selected monthly add-ons. They are not part of totalCents, steps, or firstCents. */
+  monthly: MonthlyCharge[]
+  /** Sum of the monthly list, in cents. Not part of the total. */
+  monthlyCents: number
+  /** Discounted package plus one-time add-ons. */
   totalCents: number
   steps: QuoteStep[]
   /** The name of the split applied, the package's own or the proposal's. */
@@ -117,7 +147,24 @@ export function resolveProposalSelection(
     null
 
   const knownAddOns = new Set((proposal.addOns ?? []).map((item) => item._id))
-  const addonIds = Array.from(new Set(queryValues(query.addon).filter((id) => knownAddOns.has(id))))
+  const requested = Array.from(
+    new Set(queryValues(query.addon).filter((id) => knownAddOns.has(id))),
+  )
+  // A crafted URL can name two add-ons from one group. Keep the first in
+  // proposal order so the page cannot show both. Posted forms are refused
+  // instead, in prepareSigning, before any acceptance row.
+  const groupWinner = new Map<string, string>()
+  for (const addOn of proposal.addOns ?? []) {
+    const group = chooseOneGroupKey(addOn.chooseOneGroup)
+    if (!group || !addOn._id || !requested.includes(addOn._id)) continue
+    if (!groupWinner.has(group)) groupWinner.set(group, addOn._id)
+  }
+  const addonIds = requested.filter((id) => {
+    const addOn = (proposal.addOns ?? []).find((item) => item._id === id)
+    const group = chooseOneGroupKey(addOn?.chooseOneGroup)
+    if (!group) return true
+    return groupWinner.get(group) === id
+  })
 
   const kickoffs = proposal.kickoffOptions ?? []
   const requestedKickoff = firstQueryValue(query.kickoff)
@@ -180,7 +227,35 @@ export type SignedRecord = {
   total_cents: number
   first_cents: number
   agreed_text_sha256: string | null
-  agreed_document?: {contentSha256?: string} | null
+  agreed_document?: {
+    contentSha256?: string
+    quote?: {
+      monthly?: Array<{id: string; name?: string; amountCents: number}> | null
+    } | null
+  } | null
+}
+
+const CHOOSE_ONE_ERROR = 'Choose only one add-on from each group.'
+
+/**
+ * Refuses a posted form that names two add-ons from the same group.
+ *
+ * Page URLs are narrowed in resolveProposalSelection. A form post is not,
+ * because that is the request that would write an acceptance. Duplicate
+ * copies of one id are one add-on. Unknown ids are ignored.
+ */
+export function postedChooseOneError(proposal: QuoteProposal, postedIds: string[]) {
+  const byId = new Map(
+    (proposal.addOns ?? []).filter((item) => item._id).map((item) => [item._id, item]),
+  )
+  const seen = new Map<string, string>()
+  for (const id of new Set(postedIds.filter((item) => byId.has(item)))) {
+    const group = chooseOneGroupKey(byId.get(id)?.chooseOneGroup)
+    if (!group) continue
+    if (seen.has(group)) return CHOOSE_ONE_ERROR
+    seen.set(group, id)
+  }
+  return null
 }
 
 /**
@@ -225,12 +300,30 @@ export function sameSignedDeal(
  * after someone signed and walked away, this is false, and they are re-priced
  * rather than charged the old number.
  */
+function monthlySignature(
+  list: Array<{id: string; name?: string | null; amountCents: number}> | null | undefined,
+) {
+  return [...(list ?? [])]
+    .map((item) => `${item.id}|${item.amountCents}|${(item.name ?? '').trim()}`)
+    .sort()
+    .join('\n')
+}
+
 export function matchesSignedFigures(
-  frozen: {totalCents: number; firstCents: number} | null | undefined,
+  frozen:
+    | {totalCents: number; firstCents: number; monthly?: MonthlyCharge[] | null}
+    | null
+    | undefined,
   signed: SignedRecord | null | undefined,
 ) {
   if (!frozen || !signed) return false
-  return frozen.totalCents === signed.total_cents && frozen.firstCents === signed.first_cents
+  if (frozen.totalCents !== signed.total_cents || frozen.firstCents !== signed.first_cents)
+    return false
+  // No monthly list on either side is the same deal. A changed monthly price
+  // is not, so the client signs again at the new figure.
+  return (
+    monthlySignature(frozen.monthly) === monthlySignature(signed.agreed_document?.quote?.monthly)
+  )
 }
 
 export function honoredPercent(
@@ -317,7 +410,13 @@ export type QuoteInputs = {
     steps?: Array<{key: string; percent: number; trigger: string}> | null
     scheduleName?: string | null
   }>
-  addOns: Array<{id: string; amount: number}>
+  addOns: Array<{
+    id: string
+    amount: number
+    name: string
+    billingType: AddOnBillingType
+    chooseOneGroup: string | null
+  }>
   percent: number | null
   steps: Array<{key: string; percent: number; trigger: string}>
   scheduleName?: string | null
@@ -338,7 +437,17 @@ export function quoteInputs(proposal: QuoteProposal, now = Date.now()): QuoteInp
       ]
     }),
     addOns: (proposal.addOns ?? []).flatMap((addOn) =>
-      addOn._id && isAmount(addOn.amount) ? [{id: addOn._id, amount: addOn.amount}] : [],
+      addOn._id && isAmount(addOn.amount)
+        ? [
+            {
+              id: addOn._id,
+              amount: addOn.amount,
+              name: (addOn.name ?? '').trim(),
+              billingType: billingTypeOf(addOn.billingType),
+              chooseOneGroup: chooseOneGroupKey(addOn.chooseOneGroup),
+            },
+          ]
+        : [],
     ),
     percent: sameDayPercent(proposal, now),
     steps: scheduleSteps(proposal).map(({key, percent, trigger}) => ({key, percent, trigger})),
@@ -362,10 +471,19 @@ export function quoteSelection(
   const packageDueCents = toCents(discountedAmount(pkg.amount, percent))
 
   const known = new Map(inputs.addOns.map((item) => [item.id, item]))
-  const addOns = Array.from(new Set(selection.addonIds)).flatMap((id) => {
+  const selected = Array.from(new Set(selection.addonIds)).flatMap((id) => {
     const addOn = known.get(id)
-    return addOn ? [{id, amountCents: toCents(addOn.amount)}] : []
+    return addOn ? [addOn] : []
   })
+  const addOns = selected.flatMap((addOn) =>
+    addOn.billingType === 'one-time' ? [{id: addOn.id, amountCents: toCents(addOn.amount)}] : [],
+  )
+  const monthly = selected.flatMap((addOn) =>
+    addOn.billingType === 'monthly'
+      ? [{id: addOn.id, name: addOn.name, amountCents: toCents(addOn.amount)}]
+      : [],
+  )
+  const monthlyCents = monthly.reduce((sum, item) => sum + item.amountCents, 0)
 
   const totalCents = packageDueCents + addOns.reduce((sum, item) => sum + item.amountCents, 0)
 
@@ -392,6 +510,8 @@ export function quoteSelection(
     packageDueCents,
     percent,
     addOns,
+    monthly,
+    monthlyCents,
     totalCents,
     steps,
     scheduleName,
@@ -422,4 +542,30 @@ export function formatCents(cents: number) {
 export function formatAmount(amount: number | null | undefined) {
   if (!isAmount(amount)) return ''
   return formatCents(toCents(amount))
+}
+
+/** "$900" or "$500 a month". A missing billing type reads as one-time. */
+export function formatAddOnPrice(
+  amount: number | null | undefined,
+  billingType: string | null | undefined,
+) {
+  const price = formatAmount(amount)
+  if (!price) return ''
+  return billingTypeOf(billingType) === 'monthly' ? `${price} a month` : price
+}
+
+/**
+ * The only sentence the page, the statement, and the emails use for monthly
+ * add-ons. It says the item is billed monthly and is not part of the total
+ * or today's payment. It does not name a start date, a term, or how to cancel.
+ */
+export function monthlyBillingSentence(items: Array<{name: string; amountCents: number}>) {
+  if (items.length === 0) return null
+  const list = items
+    .map((item) => {
+      const name = item.name.trim() || 'Add-on'
+      return `${name}, ${formatCents(item.amountCents)} a month`
+    })
+    .join('. ')
+  return `Billed monthly: ${list}. Not part of the total or today's payment.`
 }

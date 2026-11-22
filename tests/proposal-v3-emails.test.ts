@@ -532,3 +532,68 @@ test('AC-9 fixtures: pre-ship rows send only on hash match with a current PDF', 
   )
   assert.match(sent[0]?.text ?? '', /no MSA PDF/)
 })
+
+const MONTHLY_LINE =
+  "Billed monthly: Monthly notes, $500 a month. Plan two, $2,000 a month. Not part of the total or today's payment."
+
+test('monthly add-ons are listed apart from the total in the signer email and the studio notice', async () => {
+  installStore()
+  const sent: ProposalEmailSend[] = []
+  const base = acceptance()
+  assert.ok(base.agreed_document)
+  const row = acceptance({
+    total_cents: 570_000,
+    first_cents: 285_000,
+    steps: [
+      {key: 's1', percent: 50, trigger: 'On signing', amountCents: 285_000},
+      {key: 's2', percent: 50, trigger: 'When the work is accepted', amountCents: 285_000},
+    ],
+    agreed_document: {
+      ...base.agreed_document,
+      proposal: {
+        ...base.agreed_document.proposal,
+        addonNames: ['Video edits', 'Monthly notes', 'Plan two'],
+      },
+      quote: {
+        ...base.agreed_document.quote,
+        totalCents: 570_000,
+        firstCents: 285_000,
+        steps: [
+          {key: 's1', percent: 50, trigger: 'On signing', amountCents: 285_000},
+          {key: 's2', percent: 50, trigger: 'When the work is accepted', amountCents: 285_000},
+        ],
+        monthly: [
+          {id: 'addon-notes', name: 'Monthly notes', amountCents: 50_000},
+          {id: 'addon-plan-two', name: 'Plan two', amountCents: 200_000},
+        ],
+      },
+    },
+  })
+
+  await sendPaidProposalEmails({
+    payment: payment({id: 'pay_monthly', amount_cents: 285_000}),
+    acceptance: row,
+    liveMode: false,
+    sender: async (message) => {
+      sent.push(message)
+      return {id: `resend-${sent.length}`}
+    },
+  })
+
+  const signer = sent.find((message) => message.idempotencyKey.startsWith('signed-docs/'))
+  const studio = sent.find((message) => message.idempotencyKey.startsWith('signed-paid-notice/'))
+  assert.ok(signer && studio)
+  assert.match(signer.html, /Total \$5,700/)
+  assert.match(signer.html, /\$2,850/)
+  assert.match(signer.text, /TOTAL \$5,700/)
+  assert.ok(signer.html.includes(MONTHLY_LINE))
+  assert.ok(signer.text.includes(MONTHLY_LINE))
+  assert.equal(signer.html.includes('$8,200'), false)
+  assert.equal(/monthly was charged|charged monthly/i.test(signer.html), false)
+  assert.equal(/monthly was charged|charged monthly/i.test(signer.text), false)
+  assert.equal(/monthly was charged|charged monthly/i.test(studio.text), false)
+  assert.equal(MONTHLY_LINE.includes('charged'), false)
+  assert.ok(studio.text.includes('Amount: $2,850'))
+  assert.ok(studio.text.includes(MONTHLY_LINE))
+  assert.ok(studio.html.includes(MONTHLY_LINE))
+})

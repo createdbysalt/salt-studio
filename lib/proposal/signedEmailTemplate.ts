@@ -47,6 +47,8 @@ export function signerEmailHtml(input: {
   addressLines: string[]
   sameDayPercent: number | null
   savedLabel: string | null
+  /** Null when no monthly add-on was selected, so a one-time email is unchanged. */
+  monthlyLabel: string | null
 }) {
   const scope = [input.packageName, ...input.addOnNames].filter(Boolean)
   const scopeList = scope
@@ -118,6 +120,11 @@ export function signerEmailHtml(input: {
       ? `<tr><td style="padding:4px 0 0 0;font-family:${SANS};font-size:13px;line-height:19px;color:${INK};">Same-day discount applied: ${input.sameDayPercent}% off the package${input.savedLabel ? `, saving ${escapeHtml(input.savedLabel)}` : ''}. The total above is after it.</td></tr>`
       : ''
   }
+  ${
+    input.monthlyLabel
+      ? `<tr><td style="padding:8px 0 0 0;font-family:${SANS};font-size:13px;line-height:19px;color:${INK};">${escapeHtml(input.monthlyLabel)}</td></tr>`
+      : ''
+  }
   <tr><td style="padding:4px 0 0 0;font-family:${SANS};font-size:13px;line-height:19px;color:${MUTED};">The first payment was taken today. The rest are invoiced, never charged automatically.</td></tr>
 
   <tr><td style="padding:34px 0 0 0;"><div style="height:1px;background:${RULE};line-height:1px;font-size:0;">&nbsp;</div></td></tr>
@@ -163,6 +170,7 @@ export function signerEmailText(input: Parameters<typeof signerEmailHtml>[0]) {
     input.sameDayPercent
       ? `Same-day discount applied: ${input.sameDayPercent}% off the package${input.savedLabel ? `, saving ${input.savedLabel}` : ''}. The total above is after it.`
       : null,
+    input.monthlyLabel,
     'The first payment was taken today. The rest are invoiced, never charged automatically.',
     '',
     'THE RECORD',

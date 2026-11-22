@@ -1,8 +1,16 @@
 import assert from 'node:assert/strict'
+import {readFileSync} from 'node:fs'
 import test from 'node:test'
+import {agreedTextFor} from '@/lib/proposal/agreementText'
+import {feeSectionBlocks} from '@/lib/proposal/feeBlocks'
+import {acceptanceDocumentHash, buildFrozenAgreementDocument} from '@/lib/proposal/frozenDocument'
 import {
+  billingTypeOf,
   discountedAmount,
+  formatAddOnPrice,
   formatCents,
+  monthlyBillingSentence,
+  postedChooseOneError,
   quoteProposal,
   resolveProposalSelection,
   sameDayPercent,
@@ -104,7 +112,7 @@ test('the last step absorbs the rounding remainder', () => {
   )
 })
 
-test('add-ons are never discounted, and they count toward the split', () => {
+test('one-time add-ons are never discounted, and they count toward the split', () => {
   const quote = quoteProposal(
     proposal(),
     {
@@ -334,4 +342,252 @@ test('a per-package split still sums to the total exactly', () => {
     quote.steps.reduce((sum, step) => sum + step.amountCents, 0),
     quote.totalCents,
   )
+})
+
+// --- monthly add-ons and choose-one groups --------------------------------
+//
+// Monthly prices stay off the total, the deposit, and every step. A missing
+// billing type is one-time, so the tests above need no migration.
+
+const FIFTY_FIFTY = {
+  name: '50/50',
+  steps: [
+    {_key: 's1', percent: 50, trigger: 'On signing'},
+    {_key: 's2', percent: 50, trigger: 'When the work is accepted'},
+  ],
+}
+
+/** $4,800 package, $900 one-time, $500 and $1,500 monthly. Discount off. */
+function mixedBilling(schedule: QuoteProposal['paymentSchedule'] = FIFTY_FIFTY) {
+  return proposal({
+    sameDayOffer: {deadline: null},
+    sections: [
+      {_type: 'proposalPackagesSection', enabled: true, sameDayDiscount: {enabled: false}},
+    ],
+    packages: [{_id: 'pkg-landing', amount: 4800, name: 'Landing page'}],
+    addOns: [
+      {_id: 'addon-video', amount: 900, name: 'Video edits', billingType: 'one-time'},
+      {_id: 'addon-notes', amount: 500, name: 'Monthly notes', billingType: 'monthly'},
+      {_id: 'addon-plan', amount: 1500, name: 'Plan one', billingType: 'monthly'},
+    ],
+    paymentSchedule: schedule,
+  })
+}
+
+const MIXED_SELECTION = {
+  packageId: 'pkg-landing',
+  addonIds: ['addon-video', 'addon-notes', 'addon-plan'],
+  kickoffDate: null,
+}
+
+test('a missing billing type is one-time, and only the word monthly is monthly', () => {
+  assert.equal(billingTypeOf(undefined), 'one-time')
+  assert.equal(billingTypeOf(null), 'one-time')
+  assert.equal(billingTypeOf(''), 'one-time')
+  assert.equal(billingTypeOf('one-time'), 'one-time')
+  assert.equal(billingTypeOf('yearly'), 'one-time')
+  assert.equal(billingTypeOf(' Monthly '), 'monthly')
+  assert.equal(formatAddOnPrice(500, null), '$500')
+  assert.equal(formatAddOnPrice(500, 'monthly'), '$500 a month')
+})
+
+test('one-time plus monthly on 50/50 keeps monthly out of the total and the deposit', () => {
+  const quote = quoteProposal(mixedBilling(), MIXED_SELECTION, NOW)
+  assert.ok(quote)
+  assert.deepEqual(quote.addOns, [{id: 'addon-video', amountCents: 90_000}])
+  assert.equal(quote.totalCents, 570_000)
+  assert.equal(quote.firstCents, 285_000)
+  assert.deepEqual(
+    quote.steps.map((step) => step.amountCents),
+    [285_000, 285_000],
+  )
+  assert.equal(quote.monthlyCents, 200_000)
+  assert.deepEqual(quote.monthly, [
+    {id: 'addon-notes', name: 'Monthly notes', amountCents: 50_000},
+    {id: 'addon-plan', name: 'Plan one', amountCents: 150_000},
+  ])
+  assert.equal(
+    monthlyBillingSentence(quote.monthly),
+    "Billed monthly: Monthly notes, $500 a month. Plan one, $1,500 a month. Not part of the total or today's payment.",
+  )
+  assert.equal(
+    quote.steps.some((step) => step.amountCents === 50_000),
+    false,
+  )
+  assert.equal(
+    quote.steps.some((step) => step.amountCents === 150_000),
+    false,
+  )
+})
+
+test('the same fixture on 30/40/30 splits only the one-time total', () => {
+  const quote = quoteProposal(mixedBilling(THIRTY_FORTY_THIRTY), MIXED_SELECTION, NOW)
+  assert.ok(quote)
+  assert.equal(quote.totalCents, 570_000)
+  assert.deepEqual(
+    quote.steps.map((step) => step.amountCents),
+    [171_000, 228_000, 171_000],
+  )
+  assert.equal(
+    quote.steps.reduce((sum, step) => sum + step.amountCents, 0),
+    570_000,
+  )
+  assert.equal(quote.monthlyCents, 200_000)
+  assert.equal(
+    quote.steps.some((step) => [50_000, 150_000, 200_000].includes(step.amountCents)),
+    false,
+  )
+})
+
+test('a $10,000 package plus $500 a month deposits half of $10,000', () => {
+  const quote = quoteProposal(
+    proposal({
+      sameDayOffer: {deadline: null},
+      sections: [
+        {_type: 'proposalPackagesSection', enabled: true, sameDayDiscount: {enabled: false}},
+      ],
+      packages: [{_id: 'pkg-ten', amount: 10_000}],
+      addOns: [{_id: 'addon-notes', amount: 500, name: 'Monthly notes', billingType: 'monthly'}],
+      paymentSchedule: FIFTY_FIFTY,
+    }),
+    {packageId: 'pkg-ten', addonIds: ['addon-notes'], kickoffDate: null},
+    NOW,
+  )
+  assert.ok(quote)
+  assert.equal(quote.totalCents, 1_000_000)
+  assert.equal(quote.firstCents, 500_000)
+  assert.equal(quote.monthlyCents, 50_000)
+  assert.deepEqual(quote.addOns, [])
+})
+
+test('a choose-one group keeps the first in proposal order and refuses two on a post', () => {
+  const doc = proposal({
+    addOns: [
+      {_id: 'addon-linkedin-two', amount: 2000, name: 'LinkedIn two', chooseOneGroup: 'linkedin'},
+      {_id: 'addon-linkedin-one', amount: 1500, name: 'LinkedIn one', chooseOneGroup: 'LinkedIn'},
+      {_id: 'addon-notes', amount: 500, name: 'Monthly notes', billingType: 'monthly'},
+    ],
+  })
+  const narrowed = resolveProposalSelection(doc, {
+    package: 'pkg-foundation',
+    addon: ['addon-linkedin-one', 'addon-notes', 'addon-linkedin-two', 'addon-linkedin-one'],
+  })
+  assert.deepEqual(narrowed.addonIds, ['addon-notes', 'addon-linkedin-two'])
+  assert.equal(postedChooseOneError(doc, []), null)
+  assert.equal(postedChooseOneError(doc, ['addon-linkedin-one']), null)
+  assert.equal(postedChooseOneError(doc, ['addon-linkedin-one', 'addon-linkedin-one']), null)
+  assert.equal(
+    postedChooseOneError(doc, ['addon-linkedin-one', 'addon-linkedin-two']),
+    'Choose only one add-on from each group.',
+  )
+  assert.equal(postedChooseOneError(doc, ['addon-unknown', 'addon-also-unknown']), null)
+
+  const source = readFileSync(new URL('../lib/proposal/sign.ts', import.meta.url), 'utf8')
+  const refuseAt = source.indexOf('if (groupError) return {ok: false, error: groupError}')
+  const acceptanceAt = source.indexOf('await latestAcceptanceForProposal')
+  assert.ok(refuseAt > 0)
+  assert.ok(acceptanceAt > refuseAt)
+})
+
+test('a group key used by one add-on does not hide a second add-on', () => {
+  const doc = proposal({
+    addOns: [
+      {_id: 'addon-solo', amount: 100, chooseOneGroup: 'solo'},
+      {_id: 'addon-other', amount: 200, chooseOneGroup: 'other'},
+    ],
+  })
+  const selection = resolveProposalSelection(doc, {
+    addon: ['addon-other', 'addon-solo'],
+  })
+  assert.deepEqual(selection.addonIds, ['addon-other', 'addon-solo'])
+  assert.equal(postedChooseOneError(doc, ['addon-solo', 'addon-other']), null)
+})
+
+const ONE_TIME_AGREED_HASH = '473d87092b24786542353c31eeaabae44d471048f84ee05787795acf033333ee'
+const ONE_TIME_DOCUMENT_HASH = 'a94cb4fc802e9a646c423bc0499b9e43d1f11fcaf0d9de8cbab09ee18c451ec4'
+
+test('a one-time-only fixture keeps the agreed text and document hashes from main', () => {
+  const block = (text: string) => ({
+    _type: 'block',
+    style: 'normal',
+    children: [{_type: 'span', text}],
+  })
+  const pkg = {
+    name: 'Landing page',
+    scope: [block('One landing page.')],
+    includedItems: ['Design', 'Build'],
+  }
+  const addOn = {
+    name: 'Video edits',
+    line: 'One round of edits.',
+    scope: [block('Edit the interviews.')],
+  }
+  const agreed = agreedTextFor(
+    {
+      sections: [{_type: 'proposalSowSection', body: [block('Standing terms.')]}],
+      msa: {version: '1.0', body: [block('Agreement body.')]},
+    },
+    pkg,
+    [addOn],
+  )
+  assert.equal(agreed, ONE_TIME_AGREED_HASH)
+
+  const quote = quoteProposal(
+    proposal({
+      sameDayOffer: {deadline: null},
+      sections: [
+        {_type: 'proposalPackagesSection', enabled: true, sameDayDiscount: {enabled: false}},
+      ],
+      packages: [{_id: 'pkg-landing', amount: 4800}],
+      addOns: [{_id: 'addon-video', amount: 900, name: 'Video edits'}],
+      paymentSchedule: FIFTY_FIFTY,
+    }),
+    {packageId: 'pkg-landing', addonIds: ['addon-video'], kickoffDate: null},
+    NOW,
+  )
+  assert.ok(quote)
+  assert.deepEqual(quote.monthly, [])
+  const fees = feeSectionBlocks(quote)
+  assert.deepEqual(
+    fees.map((item) => item.text),
+    [
+      'Fees and payment steps',
+      'Total fee: $5,700.',
+      'Payment made now: $2,850.',
+      '50% ($2,850) — On signing',
+      '50% ($2,850) — When the work is accepted',
+    ],
+  )
+  assert.equal(
+    fees.some((item) => item.text.includes('Billed monthly')),
+    false,
+  )
+
+  const document = buildFrozenAgreementDocument({
+    signerFullName: 'Preview Signer',
+    signerLegalName: 'Preview Legal',
+    signerAddress: {formatted: '1 Main St, Town, US', lines: ['1 Main St', 'Town', 'US']},
+    signerEmail: 'preview@example.test',
+    acceptedAt: '2026-11-20T00:00:00.000Z',
+    proposalId: 'proposal-one-time',
+    clientName: 'Preview',
+    packageId: 'pkg-landing',
+    packageName: 'Landing page',
+    addonIds: ['addon-video'],
+    addonNames: ['Video edits'],
+    selectionKey: 'pkg-landing|addon-video',
+    selection: {packageId: 'pkg-landing', addonIds: ['addon-video'], kickoffDate: null},
+    quote,
+    contentSha256: agreed,
+    kickoffUrl: null,
+    scheduleName: '50/50',
+    msaId: 'msa-1',
+    msaVersion: '1.0',
+    msaEffectiveDate: '2026-01-01',
+    msaBodyText: 'Agreement body.',
+    msaPdf: {status: 'missing', reason: 'preview'},
+    sowBlocks: fees,
+  })
+  assert.equal('monthly' in document.quote, false)
+  assert.equal(acceptanceDocumentHash(document), ONE_TIME_DOCUMENT_HASH)
 })

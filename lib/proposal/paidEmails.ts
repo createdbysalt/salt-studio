@@ -16,7 +16,7 @@ import {agreedTextFor} from '@/lib/proposal/agreementText'
 import {buildProposalPdf, type PdfBlock} from '@/lib/proposal/documentPdf'
 import {bytesFromBase64, sha256Bytes, type FrozenMsaPdf} from '@/lib/proposal/frozenDocument'
 import {freezeMsaPdf} from '@/lib/proposal/msaPdf'
-import {formatCents} from '@/lib/proposal/quote'
+import {formatCents, monthlyBillingSentence} from '@/lib/proposal/quote'
 import {signerEmailHtml, signerEmailText} from '@/lib/proposal/signedEmailTemplate'
 import {client} from '@/sanity/lib/client'
 import {proposalByIdForLegacyAcceptanceQuery} from '@/sanity/lib/queries'
@@ -269,6 +269,7 @@ function signerMessage(input: {
     addressLines: input.acceptance.signer_address?.lines ?? [],
     sameDayPercent: input.acceptance.same_day_percent ?? null,
     savedLabel: savedLabel(document?.quote),
+    monthlyLabel: monthlyBillingSentence(document?.quote.monthly ?? []),
   }
   return {
     from: input.config.from,
@@ -315,6 +316,7 @@ function studioMessage(input: {
   stripeLink: string | null
   note: string | null
 }) {
+  const monthlyLabel = monthlyBillingSentence(input.acceptance.agreed_document?.quote.monthly ?? [])
   const lines = [
     'A proposal was signed and the first payment is marked paid.',
     '',
@@ -322,6 +324,7 @@ function studioMessage(input: {
     `Acceptance id: ${input.acceptance.id}`,
     `Selection: ${input.acceptance.selection_key}`,
     `Amount: ${formatCents(input.payment.amount_cents)}`,
+    monthlyLabel,
     `Stripe payment: ${input.stripeLink ?? 'Not available'}`,
     input.note ? `Note: ${input.note}` : null,
   ].filter(Boolean)
@@ -330,7 +333,9 @@ function studioMessage(input: {
     input.acceptance.proposal_id,
   )}</li><li>Acceptance id: ${escapeHtml(input.acceptance.id)}</li><li>Selection: ${escapeHtml(
     input.acceptance.selection_key,
-  )}</li><li>Amount: ${escapeHtml(formatCents(input.payment.amount_cents))}</li><li>Stripe payment: ${
+  )}</li><li>Amount: ${escapeHtml(formatCents(input.payment.amount_cents))}</li>${
+    monthlyLabel ? `<li>${escapeHtml(monthlyLabel)}</li>` : ''
+  }<li>Stripe payment: ${
     input.stripeLink
       ? `<a href="${escapeHtml(input.stripeLink)}">${escapeHtml(input.stripeLink)}</a>`
       : 'Not available'
