@@ -198,12 +198,17 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       _id: 'msa-1',
       version: '1.0',
       effectiveDate: '2026-11-01',
-      pdfUrl: null,
+      pdfUrl:
+        'https://cdn.sanity.io/files/jkqf2ng5/production/6f2313cdc7b5ac1add256890c572af39b4d9dc27.pdf',
       pdfFilename: null,
       body: [
         sowBlock(
           'msa-1',
           'This Master Services Agreement is between Salt Studio and Preview. It covers how the work is done, how it is paid for, and who owns it once it is paid for.',
+        ),
+        sowBlock(
+          'msa-attr',
+          'Based on the Common Paper Professional Services Agreement, available at https://commonpaper.com. Licensed under CC BY 4.0. Copyright Common Paper, Inc. License: https://creativecommons.org/licenses/by/4.0/. Cover Page adapted for Salt Studio LLC. The Standard Terms are used unchanged.',
         ),
         sowBlock(
           'msa-2',
