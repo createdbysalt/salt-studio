@@ -18,7 +18,11 @@ mock.module('next/navigation', {
 
 async function loadChoices() {
   const loaded = await import('@/components/ProposalChoices')
-  return loaded.ProposalChoices
+  const selection = await import('@/components/ProposalSelection')
+  return {
+    ProposalChoices: loaded.ProposalChoices,
+    ProposalSelectionProvider: selection.ProposalSelectionProvider,
+  }
 }
 
 function accessibleName(element: Element) {
@@ -58,7 +62,7 @@ function getByRole(root: ParentNode, role: string, options: {name: string}) {
 }
 
 async function choices(grouped: boolean) {
-  const ProposalChoices = await loadChoices()
+  const {ProposalChoices, ProposalSelectionProvider} = await loadChoices()
   const proposal = previewProposal(undefined, {groupAddOns: grouped})
   const packages = (proposal.packages ?? []).flatMap((pkg) => {
     if (!pkg._id || typeof pkg.amount !== 'number') return []
@@ -78,14 +82,13 @@ async function choices(grouped: boolean) {
   })
   const inputs = quoteInputs(proposal)
   const html = renderToStaticMarkup(
-    createElement(ProposalChoices, {
+    createElement(ProposalSelectionProvider, {
       token: 'preview',
       kickoff: null,
-      packages,
-      addOns,
-      packageId: packages[0]?.id ?? null,
-      addonIds: [],
       inputs,
+      packageId: packages[0]?.id ?? null,
+      addonIds: [] as string[],
+      children: createElement(ProposalChoices, {packages, addOns}),
     }),
   )
   return new JSDOM(html).window.document
