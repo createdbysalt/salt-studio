@@ -3,6 +3,7 @@ import {ProposalChoices} from '@/components/ProposalChoices'
 import {ProposalCoverDots} from '@/components/ProposalCoverDots'
 import {ProposalCoverFrame} from '@/components/ProposalCoverFrame'
 import {ProposalLockup} from '@/components/ProposalLockup'
+import {ProposalMsaPanel} from '@/components/ProposalMsaPanel'
 import {ProposalOutcomes, ProposalSwirlField} from '@/components/ProposalOutcomes'
 import {ProposalPackages} from '@/components/ProposalPackages'
 import {ProposalProof} from '@/components/ProposalProof'
@@ -826,7 +827,6 @@ function Investment({
                 label="I agree to the Master Services Agreement and this Statement of Work."
                 clientName={line(view.proposal.clientDisplayName)}
                 version={version}
-                pdfUrl={view.proposal.msa?.pdfUrl ?? null}
                 statement={
                   scope ? (
                     <Statement
@@ -843,7 +843,7 @@ function Investment({
                   ) : null
                 }
                 agreement={
-                  <Agreement
+                  <ProposalMsaPanel
                     body={(view.proposal.msa?.body ?? []) as PortableTextBlock[]}
                     pdfUrl={view.proposal.msa?.pdfUrl ?? null}
                   />
@@ -918,14 +918,12 @@ function AgreementLine({
   agreement,
   clientName,
   version,
-  pdfUrl,
 }: {
   label: string
   statement: ReactNode
   agreement: ReactNode
   clientName: string
   version: string
-  pdfUrl: string | null
 }) {
   return (
     <>
@@ -950,13 +948,8 @@ function AgreementLine({
             closeLabel={
               part.kind === 'msa' ? 'Close the Master Services Agreement' : 'Close scope of work'
             }
-            downloadName={
-              part.kind === 'msa'
-                ? 'Salt-Studio-Master-Services-Agreement.pdf'
-                : 'Salt-Studio-Statement-of-Work.pdf'
-            }
+            downloadName={part.kind === 'sow' ? 'Salt-Studio-Statement-of-Work.pdf' : null}
             downloadNote={note || null}
-            pdfUrl={part.kind === 'msa' ? pdfUrl : null}
           >
             {part.kind === 'msa' ? agreement : statement}
           </ProposalScopePanel>
@@ -987,26 +980,6 @@ function splitAgreement(label: string) {
   }
   if (cursor < label.length) parts.push({kind: 'text', text: label.slice(cursor)})
   return parts
-}
-
-function Agreement({body, pdfUrl}: {body: PortableTextBlock[]; pdfUrl: string | null}) {
-  return (
-    <div className="max-w-[40rem] text-[1.0625rem] leading-relaxed [&_h3]:mt-[1.25rem] [&_h3:first-child]:mt-0 [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]">
-      {body.length > 0 ? <PortableText value={body} /> : null}
-      {pdfUrl ? (
-        <p className={body.length > 0 ? 'mt-4' : ''}>
-          <a
-            href={pdfUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-[3px]"
-          >
-            Open the agreement PDF.
-          </a>
-        </p>
-      ) : null}
-    </div>
-  )
 }
 
 function Statement({
