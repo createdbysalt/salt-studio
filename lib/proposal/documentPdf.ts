@@ -187,22 +187,159 @@ function flow(blocks: PdfBlock[], pages: Page[], startY: number, freshPage: bool
   }
 
   blocks.forEach((block, index) => {
-    const style = STYLES[block.kind]
-    if (block.kind === 'part' && index > 0 && y - style.gapBefore - style.leading * 3 < BOTTOM) {
+    const previous = index > 0 ? (blocks[index - 1]?.kind ?? null) : null
+    // A heading stays with the line under it. The acceptance block stays whole.
+    if (keepTogether(blocks, index, previous, y, pages[pages.length - 1].ops.length > 0)) {
       pages.push({ops: [], logo: false, siteLine: false})
       y = PAGE_H - TOP
     }
-    const width = CONTENT_W - style.indent
-    const lines =
-      block.kind === 'bullet'
-        ? wrap(`${block.marker} ${block.text}`, style.size, width, false)
-        : wrap(block.text, style.size, width, style.font === 'F2')
-    const previous = index > 0 ? blocks[index - 1]?.kind : null
-    const gap = block.kind === 'paragraph' && previous === 'bullet' ? 14 : style.gapBefore
+    const style = STYLES[block.kind]
+    const lines = wrappedLines(block)
+    const gap = blockGap(block, previous)
     lines.forEach((line, lineIndex) => {
       place(line, style, lineIndex === 0 ? gap : 0)
     })
   })
+}
+
+/** The acceptance block moves as one piece. A heading moves with its first line. */
+function keepTogether(
+  blocks: PdfBlock[],
+  index: number,
+  previous: PdfBlock['kind'] | null,
+  y: number,
+  pageHasOps: boolean,
+) {
+  if (!pageHasOps) return false
+  const block = blocks[index]
+  if (!block) return false
+  if (isAcceptanceBlock(block)) {
+    return !sequenceFits(blocks, index, acceptanceEnd(blocks, index), previous, y, true)
+  }
+  if (block.kind === 'part' || block.kind === 'heading') {
+    return !headingFitsWithFirstLine(blocks, index, previous, y)
+  }
+  return false
+}
+
+function isAcceptanceBlock(block: PdfBlock) {
+  return (
+    (block.kind === 'part' || block.kind === 'heading') &&
+    block.text.trim().toLowerCase() === 'acceptance block'
+  )
+}
+
+/** Paragraphs under the acceptance heading, up to the next section. */
+function acceptanceEnd(blocks: PdfBlock[], index: number) {
+  let end = index + 1
+  while (end < blocks.length) {
+    const kind = blocks[end]?.kind
+    if (kind === 'part' || kind === 'heading') break
+    end += 1
+  }
+  return end
+}
+
+type MeasuredLine = {leading: number; gapBefore: number}
+
+function headingFitsWithFirstLine(
+  blocks: PdfBlock[],
+  index: number,
+  previous: PdfBlock['kind'] | null,
+  y: number,
+) {
+  const lines = leadingLines(blocks, index, previous)
+  return sequenceLinesFit(lines, y, true)
+}
+
+function leadingLines(blocks: PdfBlock[], index: number, previous: PdfBlock['kind'] | null) {
+  const lines: MeasuredLine[] = []
+  let cursor = index
+  let prior = previous
+  while (cursor < blocks.length) {
+    const block = blocks[cursor]
+    if (!block) break
+    const heading = block.kind === 'part' || block.kind === 'heading'
+    if (cursor !== index && !heading) break
+    pushMeasured(lines, block, prior)
+    prior = block.kind
+    cursor += 1
+    if (!heading) break
+  }
+  const follower = blocks[cursor]
+  if (follower && (follower.kind === 'paragraph' || follower.kind === 'bullet')) {
+    lines.push({
+      leading: STYLES[follower.kind].leading,
+      gapBefore: blockGap(follower, prior),
+    })
+  }
+  return lines
+}
+
+function sequenceFits(
+  blocks: PdfBlock[],
+  start: number,
+  end: number,
+  previous: PdfBlock['kind'] | null,
+  y: number,
+  pageHasOps: boolean,
+) {
+  const lines: MeasuredLine[] = []
+  let prior = previous
+  for (let index = start; index < end; index += 1) {
+    const block = blocks[index]
+    if (!block) continue
+    pushMeasured(lines, block, prior)
+    prior = block.kind
+  }
+  return sequenceLinesFit(lines, y, pageHasOps)
+}
+
+function sequenceLinesFit(lines: MeasuredLine[], y: number, pageHasOps: boolean) {
+  let cursor = y
+  let hasOps = pageHasOps
+  for (const line of lines) {
+    const step = advance(cursor, hasOps, line.gapBefore, line.leading)
+    if (step.broke) return false
+    cursor = step.y
+    hasOps = true
+  }
+  return true
+}
+
+/** Same vertical step as place(), including a break when the line would pass the footer. */
+function advance(y: number, pageHasOps: boolean, gapBefore: number, leading: number) {
+  const gap = pageHasOps ? gapBefore : 0
+  const step = gap + leading
+  if (y - step < BOTTOM && pageHasOps) {
+    return {y: PAGE_H - TOP - leading, broke: true}
+  }
+  return {y: y - gap - leading, broke: false}
+}
+
+function pushMeasured(lines: MeasuredLine[], block: PdfBlock, previous: PdfBlock['kind'] | null) {
+  const gap = blockGap(block, previous)
+  const count = wrappedLines(block).length
+  for (let lineIndex = 0; lineIndex < count; lineIndex += 1) {
+    lines.push({
+      leading: STYLES[block.kind].leading,
+      gapBefore: lineIndex === 0 ? gap : 0,
+    })
+  }
+}
+
+function wrappedLines(block: PdfBlock) {
+  const style = STYLES[block.kind]
+  const width = CONTENT_W - style.indent
+  if (block.kind === 'bullet') {
+    return wrap(`${block.marker} ${block.text}`, style.size, width, false)
+  }
+  return wrap(block.text, style.size, width, style.font === 'F2')
+}
+
+function blockGap(block: PdfBlock, previous: PdfBlock['kind'] | null) {
+  if (block.kind === 'paragraph' && previous === 'bullet') return 14
+  return STYLES[block.kind].gapBefore
 }
 
 function encodePdf(pages: Page[]): Uint8Array {
