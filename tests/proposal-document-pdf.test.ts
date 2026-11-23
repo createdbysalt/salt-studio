@@ -42,5 +42,132 @@ test('a long statement of work continues onto another page', () => {
 
   const pages = pdf.match(/\/Type \/Page(?!s)/g)
   assert.ok(pages && pages.length > 1)
-  assert.match(pdf, /2 \/ /)
+  assert.match(pdf, /Page 2 of /)
+  assert.match(pdf, /Salt Studio LLC\. Statement of Work\. Page 1 of /)
 })
+
+test('a statement of work keeps the cover, the scope structure, and the acceptance block', () => {
+  const pdf = text(
+    buildProposalPdf([
+      {kind: 'kicker', text: 'Salt Studio'},
+      {kind: 'title', text: 'Signed Statement of Work'},
+      {kind: 'note', text: 'Client legal name: Fixture Organization LLC'},
+      {
+        kind: 'note',
+        text: 'Mailing address: 100 Test Street, Fixture City, Test Region 10000, United States',
+      },
+      {kind: 'note', text: 'Signed date: November 12, 2026'},
+      {kind: 'part', text: 'Landing page'},
+      {kind: 'heading', text: 'What you get'},
+      {kind: 'paragraph', text: 'The page. Structure, design, build, and launch.'},
+      {kind: 'bullet', text: 'A walkthrough. One session so the office can publish.', marker: '•'},
+      {kind: 'part', text: 'Video edits'},
+      {kind: 'heading', text: 'Not included'},
+      {kind: 'bullet', text: 'A new shoot. Filming is not part of this item.', marker: '•'},
+      {kind: 'part', text: 'Acceptance block'},
+      {
+        kind: 'paragraph',
+        text: 'Fixture Organization LLC agreed to the Master Services Agreement and this Statement of Work.',
+      },
+    ]),
+  )
+
+  assert.match(pdf, /Signed Statement of Work/)
+  assert.match(pdf, /Cover Page/)
+  assert.match(pdf, /LEGAL NAME/)
+  assert.match(pdf, /Fixture Organization LLC/)
+  assert.match(pdf, /MAILING ADDRESS/)
+  assert.match(pdf, /100 Test Street/)
+  assert.match(pdf, /SIGNED DATE/)
+  assert.match(pdf, /November 12, 2026/)
+  assert.match(pdf, /What you get/)
+  assert.match(pdf, /Not included/)
+  assert.match(pdf, /A walkthrough/)
+  assert.match(pdf, /Acceptance block/)
+  assert.match(pdf, /createdbysalt.com/)
+  assert.equal(pdf.includes('Salt Studio LLC. createdbysalt.com'), false)
+  const pages = pdf.match(/\/Type \/Page(?!s)/g)
+  assert.equal(pdf.split('Salt Studio LLC').length - 1, pages?.length)
+  assert.match(pdf, /\/F2 17 Tf/)
+  assert.match(pdf, /\/F2 10 Tf/)
+  assert.equal(pdf.includes('Client legal name:'), false)
+})
+
+test('the acceptance block stays on one page, and a heading stays with its first line', () => {
+  const pdf = text(
+    buildProposalPdf([
+      {kind: 'kicker', text: 'Salt Studio'},
+      {kind: 'title', text: 'Signed Statement of Work'},
+      {kind: 'note', text: 'Client legal name: Fixture Organization LLC'},
+      {
+        kind: 'note',
+        text: 'Mailing address: 100 Test Street, Fixture City, Test Region 10000, United States',
+      },
+      {kind: 'note', text: 'Signed date: November 12, 2026'},
+      {kind: 'part', text: 'Landing page'},
+      {kind: 'heading', text: 'What it is'},
+      {kind: 'bullet', text: 'One page. A single landing page, designed and built.', marker: '•'},
+      {kind: 'heading', text: 'What you get'},
+      {kind: 'bullet', text: 'The page. Structure, design, build, and launch.', marker: '•'},
+      {kind: 'part', text: 'Video edits'},
+      {kind: 'heading', text: 'What you get'},
+      {kind: 'bullet', text: 'The edits. Cut, titled, and delivered.', marker: '•'},
+      {kind: 'heading', text: 'Timing'},
+      {kind: 'paragraph', text: 'With the launch. The edits are ready for the launch review.'},
+      {kind: 'part', text: 'Monthly notes'},
+      {kind: 'bullet', text: 'Notes after launch.', marker: '•'},
+      {kind: 'part', text: 'Plan two'},
+      {kind: 'bullet', text: 'The middle monthly plan.', marker: '•'},
+      {
+        kind: 'paragraph',
+        text: 'This statement of work is between Salt Studio and Fixture Organization LLC. The Master Services Agreement governs. This scope names the specific work.',
+      },
+      {kind: 'heading', text: 'What we need from you'},
+      {kind: 'bullet', text: 'One person who can approve the work.', marker: '•'},
+      {kind: 'bullet', text: 'Access to the domain and the current site.', marker: '•'},
+      {kind: 'bullet', text: 'Feedback within five business days of each review.', marker: '•'},
+      {
+        kind: 'paragraph',
+        text: 'Each deliverable has a review window of five business days and one round of revision. Silence after the window counts as acceptance.',
+      },
+      {kind: 'part', text: 'Acceptance block'},
+      {
+        kind: 'paragraph',
+        text: 'Fixture Organization LLC agreed to the Master Services Agreement and this Statement of Work. Both documents were sent as attachments with the confirmation email and together form the agreement.',
+      },
+      {kind: 'paragraph', text: 'Accepted by: Test Signer'},
+      {kind: 'paragraph', text: 'Email: signer.fixture@example.test'},
+    ]),
+  )
+
+  const acceptance = pageBodies(pdf).find((page) => page.includes('Acceptance block'))
+  assert.ok(acceptance)
+  assert.match(acceptance, /Accepted by: Test Signer/)
+  assert.match(acceptance, /Email: signer\.fixture@example\.test/)
+  assert.equal(
+    pageBodies(pdf).filter((page) => page.includes('Email: signer.fixture@example.test')).length,
+    1,
+  )
+
+  const orphan = text(
+    buildProposalPdf([
+      {kind: 'title', text: 'Statement of Work'},
+      ...Array.from({length: 26}, (_, index) => ({
+        kind: 'paragraph' as const,
+        text: `Line ${index + 1}.`,
+      })),
+      {kind: 'heading', text: 'Section heading'},
+      {kind: 'paragraph', text: 'The first line stays with the heading.'},
+    ]),
+  )
+  const headed = pageBodies(orphan).find((page) => page.includes('Section heading'))
+  assert.ok(headed)
+  assert.match(headed, /The first line stays with the heading/)
+  assert.equal(headed.includes('Line 26.'), false)
+})
+
+function pageBodies(pdf: string) {
+  return [...pdf.matchAll(/stream\n([\s\S]*?)\nendstream/g)]
+    .map((match) => match[1] ?? '')
+    .filter((body) => body.includes('Page '))
+}
