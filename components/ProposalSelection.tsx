@@ -15,6 +15,8 @@ type Current = {packageId: string | null; addonIds: string[]}
 type ProposalSelectionContextValue = {
   token: string
   kickoff: string | null
+  /** Dev preview only. Keeps `?groups=1` on the pick-list links. */
+  groups: boolean
   inputs: QuoteInputs
   selection: ProposalSelection
   quote: ReturnType<typeof quoteSelection>
@@ -38,6 +40,7 @@ const ProposalSelectionContext = createContext<ProposalSelectionContextValue | n
 export function ProposalSelectionProvider({
   token,
   kickoff,
+  groups = false,
   inputs,
   packageId,
   addonIds,
@@ -45,6 +48,7 @@ export function ProposalSelectionProvider({
 }: {
   token: string
   kickoff: string | null
+  groups?: boolean
   inputs: QuoteInputs
   packageId: string | null
   addonIds: string[]
@@ -77,7 +81,9 @@ export function ProposalSelectionProvider({
     const next = {packageId: nextPackage, addonIds: nextAddOns}
     selectionRef.current = next
     setCurrent(next)
-    router.replace(proposalChoiceHref(token, nextPackage, nextAddOns, kickoff), {scroll: false})
+    router.replace(proposalChoiceHref(token, nextPackage, nextAddOns, kickoff, groups), {
+      scroll: false,
+    })
   }
 
   function readSelection() {
@@ -86,7 +92,7 @@ export function ProposalSelectionProvider({
 
   return (
     <ProposalSelectionContext.Provider
-      value={{token, kickoff, inputs, selection, quote, choose, readSelection}}
+      value={{token, kickoff, groups, inputs, selection, quote, choose, readSelection}}
     >
       {children}
     </ProposalSelectionContext.Provider>
@@ -104,11 +110,13 @@ export function proposalChoiceHref(
   packageId: string | null,
   addonIds: string[],
   kickoff: string | null,
+  groups = false,
 ) {
   const params = new URLSearchParams()
   if (packageId) params.set('package', packageId)
   for (const id of addonIds) params.append('addon', id)
   if (kickoff) params.set('kickoff', kickoff)
+  if (groups) params.set('groups', '1')
   const query = params.toString()
   return `/p/${encodeURIComponent(token)}${query ? `?${query}` : ''}`
 }

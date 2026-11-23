@@ -88,6 +88,32 @@ test('pay label, statement, and posted add-ons follow the total after the pick-l
   )
 })
 
+test('grouped categories stay on one selection when an add-on in another category is cleared', async () => {
+  const {pay, total, postedAddOns, statement} = await clickSequence(
+    ['Site Care: Growth Plan', 'Testimonial video edits', 'Site Care: Growth Plan'],
+    true,
+  )
+
+  assert.deepEqual(
+    {
+      total,
+      pay,
+      postedAddOns,
+      landing: statement.includes('Landing page'),
+      video: statement.includes('Testimonial video edits'),
+      growth: statement.includes('Growth Plan'),
+    },
+    {
+      total: '$5,700',
+      pay: 'Pay $2,850',
+      postedAddOns: ['addon-video'],
+      landing: true,
+      video: true,
+      growth: false,
+    },
+  )
+})
+
 test('selecting and clearing one add-on still updates the pay label', async () => {
   const {pay, total, postedAddOns, statement} = await clickSequence(['Video edits', 'Video edits'])
 
@@ -98,7 +124,7 @@ test('selecting and clearing one add-on still updates the pay label', async () =
   assert.equal(statement.includes('Video edits'), false)
 })
 
-async function clickSequence(names: string[]) {
+async function clickSequence(names: string[], grouped = false) {
   const {Window} = await import('happy-dom')
   const win = new Window({url: 'http://localhost:4000/p/preview'})
   installDom(win)
@@ -106,6 +132,7 @@ async function clickSequence(names: string[]) {
   const {act, useEffect, useRef, useState} = await import('react')
   const {createRoot} = await import('react-dom/client')
   const {previewProposal} = await import('@/components/proposalPreview')
+  const {addOnCardLabel} = await import('@/lib/proposal/cardName')
   const {quoteInputs} = await import('@/lib/proposal/quote')
   const {ProposalChoices} = await import('@/components/ProposalChoices')
   const {ProposalSignForm} = await import('@/components/ProposalSignForm')
@@ -113,7 +140,7 @@ async function clickSequence(names: string[]) {
   const {ProposalLiveStatement, ProposalSelectionProvider} =
     await import('@/components/ProposalSelection')
 
-  const proposal = previewProposal()
+  const proposal = previewProposal(undefined, {groupAddOns: grouped})
   const inputs = quoteInputs(proposal, NOW)
   const choicePackages = (proposal.packages ?? []).flatMap((pkg) => {
     if (!pkg._id || !pkg.name || typeof pkg.amount !== 'number') return []
@@ -128,7 +155,15 @@ async function clickSequence(names: string[]) {
       (addOn.billingType ?? '').toLowerCase() === 'monthly'
         ? `$${addOn.amount.toLocaleString('en-US')} a month`
         : `$${addOn.amount.toLocaleString('en-US')}`
-    return [{id: addOn._id, name: addOn.name, price, group}]
+    return [
+      {
+        id: addOn._id,
+        name: addOnCardLabel(addOn.cardName, addOn.name),
+        price,
+        group,
+        category: (addOn.category ?? '').trim() || null,
+      },
+    ]
   })
   const statementPackages = (proposal.packages ?? []).flatMap((pkg) => {
     if (!pkg._id || !pkg.name) return []

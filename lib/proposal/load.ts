@@ -27,7 +27,11 @@ export async function isProposalUnlocked(token: string) {
   return verifyProposalGate(token, cookieStore.get(PROPOSAL_GATE_COOKIE)?.value)
 }
 
-export async function loadProposal(token: string, cardCount?: number) {
+export async function loadProposal(
+  token: string,
+  cardCount?: number,
+  previewOptions?: {groupAddOns?: boolean},
+) {
   const {data} = await sanityFetch({
     query: proposalByTokenQuery,
     params: {key: token},
@@ -35,7 +39,7 @@ export async function loadProposal(token: string, cardCount?: number) {
   })
   if (data?._id) return data
   if (isDevPreview(token)) {
-    const preview = previewProposal(cardCount)
+    const preview = previewProposal(cardCount, previewOptions)
     const {data: projects} = await sanityFetch({
       query: previewProofProjectsQuery,
       params: {slugs: previewProofPicks.map((pick) => pick.slug)},

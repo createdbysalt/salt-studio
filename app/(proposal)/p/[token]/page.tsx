@@ -30,6 +30,7 @@ type Props = {
     addon?: string | string[]
     kickoff?: string | string[]
     cards?: string | string[]
+    groups?: string | string[]
   }>
 }
 
@@ -40,6 +41,11 @@ function previewCardCount(value: string | string[] | undefined) {
   const count = Number(raw)
   if (count === 2 || count === 4) return count
   return undefined
+}
+
+function previewGroupAddOns(value: string | string[] | undefined) {
+  const raw = Array.isArray(value) ? value[0] : value
+  return raw === '1'
 }
 
 function gateSearch(query: ProposalQuery) {
@@ -56,6 +62,7 @@ function gateSearch(query: ProposalQuery) {
   add('addon', query.addon)
   add('kickoff', query.kickoff)
   add('cards', query.cards)
+  add('groups', query.groups)
   const search = params.toString()
   return search ? `?${search}` : ''
 }
@@ -116,7 +123,9 @@ export default async function ProposalRoute({params, searchParams}: Props) {
   }
 
   const [proposal, {data: settings}, {data: legalPages}] = await Promise.all([
-    loadProposal(token, previewCardCount(query.cards)),
+    loadProposal(token, previewCardCount(query.cards), {
+      groupAddOns: isDevPreview(token) && previewGroupAddOns(query.groups),
+    }),
     sanityFetch({query: settingsQuery, stega: false}),
     sanityFetch({query: footerLegalPagesQuery, stega: false}),
   ])
@@ -132,6 +141,7 @@ export default async function ProposalRoute({params, searchParams}: Props) {
       payment={payment}
       settings={settings}
       legalPages={legalPages}
+      groups={isDevPreview(token) && previewGroupAddOns(query.groups)}
     />
   )
 }

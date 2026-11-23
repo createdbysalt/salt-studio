@@ -3,6 +3,7 @@ import {ProposalChoices} from '@/components/ProposalChoices'
 import {ProposalCoverDots} from '@/components/ProposalCoverDots'
 import {ProposalCoverFrame} from '@/components/ProposalCoverFrame'
 import {ProposalLockup} from '@/components/ProposalLockup'
+import {ProposalMsaPanel} from '@/components/ProposalMsaPanel'
 import {ProposalOutcomes, ProposalSwirlField} from '@/components/ProposalOutcomes'
 import {ProposalPackages} from '@/components/ProposalPackages'
 import {ProposalProof} from '@/components/ProposalProof'
@@ -18,7 +19,9 @@ import {ProposalSignForm} from '@/components/ProposalSignForm'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import {SiteFooter} from '@/components/SiteFooter'
 import type {PaymentMethod, PaymentStatus} from '@/lib/proposal/acceptances'
+import {addOnCardLabel} from '@/lib/proposal/cardName'
 import {INVESTMENT_INTRO, PACKAGES_INTRO} from '@/lib/proposal/copy'
+import {proposalEyebrowClass} from '@/lib/proposal/eyebrow'
 import {
   chooseOneGroupKey,
   discountedAmount,
@@ -77,6 +80,8 @@ type View = {
   inputs: QuoteInputs
   /** True once a signature is on file, which keeps their terms alive. */
   signed: boolean
+  /** Dev preview only. Keeps the grouped add-on sample on pick-list navigation. */
+  groups: boolean
 }
 
 export function ProposalPage({
@@ -86,6 +91,7 @@ export function ProposalPage({
   payment = null,
   settings = null,
   legalPages = null,
+  groups = false,
 }: {
   token: string
   proposal: ProposalDocument
@@ -93,6 +99,8 @@ export function ProposalPage({
   payment?: ProposalPaymentView | null
   settings?: SettingsQueryResult | null
   legalPages?: FooterLegalPagesQueryResult | null
+  /** Dev preview only. Keeps the grouped add-on sample on pick-list navigation. */
+  groups?: boolean
 }) {
   const now = Date.now()
   // One set of inputs for the whole page. When the offer window closed but
@@ -117,6 +125,7 @@ export function ProposalPage({
     now,
     inputs,
     signed: payment != null && onSignedDeal,
+    groups,
   }
   const slides = (proposal.sections ?? []).flatMap((section) => {
     if (section.enabled === false || !sectionIsShown(section, view)) return []
@@ -415,9 +424,7 @@ function Situation({section}: {section: Extract<Section, {_type: 'proposalSituat
   return (
     <section className="flex min-h-dvh w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-32 md:px-[max(4.5rem,var(--spacing-gutter))] lg:py-40">
       <header>
-        <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-          What we heard
-        </p>
+        <p className={proposalEyebrowClass}>What we heard</p>
         {problem ? (
           <h2 className="mt-3 max-w-[9em] text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
             {problem}
@@ -570,9 +577,11 @@ function Packages({
             {
               id: addOn._id,
               name,
+              cardTitle: addOnCardLabel(addOn.cardName, name),
               line: line(addOn.line),
               scope: (addOn.scope ?? []) as PortableTextBlock[],
               price: formatAddOnPrice(addOn.amount, addOn.billingType),
+              category: line(addOn.category) || null,
             },
           ]
         })
@@ -628,7 +637,7 @@ function AddOns({
                 return [
                   {
                     id: item._id,
-                    name: line(item.name),
+                    name: addOnCardLabel(item.cardName, item.name),
                     line: line(item.line),
                     amount: item.amount,
                     billingType: item.billingType,
@@ -639,7 +648,7 @@ function AddOns({
               ? [
                   {
                     id: addOn._id,
-                    name: line(addOn.name),
+                    name: addOnCardLabel(addOn.cardName, addOn.name),
                     line: line(addOn.line),
                     amount: addOn.amount,
                     billingType: addOn.billingType,
@@ -738,9 +747,7 @@ function Investment({
   return (
     <section className="w-full px-[max(3.5rem,var(--spacing-gutter))] pt-16 pb-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:pt-24 lg:pb-32">
       <header className="mx-auto max-w-[40rem] text-center">
-        <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-          Accept & Sign
-        </p>
+        <p className={proposalEyebrowClass}>Accept & Sign</p>
         <h2 className="mx-auto mt-3 max-w-[9em] text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
           We can't wait to work together.
         </h2>
@@ -754,6 +761,7 @@ function Investment({
       <ProposalSelectionProvider
         token={view.token}
         kickoff={view.selection.kickoffDate}
+        groups={view.groups}
         inputs={inputs}
         packageId={view.selection.packageId}
         addonIds={view.selection.addonIds}
@@ -775,9 +783,10 @@ function Investment({
             return [
               {
                 id: addOn._id,
-                name: line(addOn.name),
+                name: addOnCardLabel(addOn.cardName, addOn.name),
                 price: formatAddOnPrice(addOn.amount, addOn.billingType),
                 group: chooseOneGroupKey(addOn.chooseOneGroup),
+                category: line(addOn.category) || null,
               },
             ]
           })}
@@ -827,7 +836,6 @@ function Investment({
                   label="I agree to the Master Services Agreement and this Statement of Work."
                   clientName={line(view.proposal.clientDisplayName)}
                   version={version}
-                  pdfUrl={view.proposal.msa?.pdfUrl ?? null}
                   statement={
                     scope ? (
                       <ProposalLiveStatement
@@ -838,7 +846,7 @@ function Investment({
                     ) : null
                   }
                   agreement={
-                    <Agreement
+                    <ProposalMsaPanel
                       body={(view.proposal.msa?.body ?? []) as PortableTextBlock[]}
                       pdfUrl={view.proposal.msa?.pdfUrl ?? null}
                     />
@@ -918,14 +926,12 @@ function AgreementLine({
   agreement,
   clientName,
   version,
-  pdfUrl,
 }: {
   label: string
   statement: ReactNode
   agreement: ReactNode
   clientName: string
   version: string
-  pdfUrl: string | null
 }) {
   return (
     <>
@@ -950,13 +956,8 @@ function AgreementLine({
             closeLabel={
               part.kind === 'msa' ? 'Close the Master Services Agreement' : 'Close scope of work'
             }
-            downloadName={
-              part.kind === 'msa'
-                ? 'Salt-Studio-Master-Services-Agreement.pdf'
-                : 'Salt-Studio-Statement-of-Work.pdf'
-            }
+            downloadName={part.kind === 'sow' ? 'Salt-Studio-Statement-of-Work.pdf' : null}
             downloadNote={note || null}
-            pdfUrl={part.kind === 'msa' ? pdfUrl : null}
           >
             {part.kind === 'msa' ? agreement : statement}
           </ProposalScopePanel>
@@ -987,26 +988,6 @@ function splitAgreement(label: string) {
   }
   if (cursor < label.length) parts.push({kind: 'text', text: label.slice(cursor)})
   return parts
-}
-
-function Agreement({body, pdfUrl}: {body: PortableTextBlock[]; pdfUrl: string | null}) {
-  return (
-    <div className="max-w-[40rem] text-[1.0625rem] leading-relaxed [&_h3]:mt-[1.25rem] [&_h3:first-child]:mt-0 [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]">
-      {body.length > 0 ? <PortableText value={body} /> : null}
-      {pdfUrl ? (
-        <p className={body.length > 0 ? 'mt-4' : ''}>
-          <a
-            href={pdfUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-[3px]"
-          >
-            Open the agreement PDF.
-          </a>
-        </p>
-      ) : null}
-    </div>
-  )
 }
 
 function Signed({

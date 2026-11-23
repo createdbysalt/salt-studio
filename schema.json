@@ -5686,6 +5686,13 @@
         },
         "optional": true
       },
+      "cardName": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "line": {
         "type": "objectAttribute",
         "value": {
@@ -5718,6 +5725,13 @@
         "optional": true
       },
       "chooseOneGroup": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
+      "category": {
         "type": "objectAttribute",
         "value": {
           "type": "string"
