@@ -10,7 +10,7 @@ import {
 } from '@/lib/proposal/quote'
 import {useGSAP} from '@gsap/react'
 import {useRouter} from 'next/navigation'
-import {Fragment, useEffect, useRef, useState, type MouseEvent} from 'react'
+import {Fragment, useEffect, useId, useRef, useState, type MouseEvent, type ReactNode} from 'react'
 
 type PackageChoice = {
   id: string
@@ -97,13 +97,13 @@ export function ProposalChoices({
 
   function renderAddOnFieldset(
     block: AddOnChoiceBlock<AddOnChoice>,
-    options?: {omitSelectAny?: boolean},
+    options?: {omitSelectAny?: boolean; labelId?: string},
   ) {
     const key = choiceBlockKey(block)
     const omitSelectAny = options?.omitSelectAny === true
     if (block.kind === 'checks') {
       return (
-        <fieldset key={key}>
+        <fieldset key={key} aria-labelledby={options?.labelId}>
           {omitSelectAny ? null : <legend className={addOnLabelClass}>Select any add-ons</legend>}
           <div className={omitSelectAny ? 'grid gap-3' : 'mt-3 grid gap-3'}>
             {block.items.map((addOn) => {
@@ -245,17 +245,25 @@ export function ProposalChoices({
         ) : null}
 
         {addOnSections.map((section, index) => {
-          const blocks = section.blocks.map((block) =>
-            renderAddOnFieldset(block, {omitSelectAny: section.label != null}),
-          )
-          if (section.label == null) return <Fragment key={`addons-${index}`}>{blocks}</Fragment>
+          if (section.label == null) {
+            return (
+              <Fragment key={`addons-${index}`}>
+                {section.blocks.map((block) => renderAddOnFieldset(block))}
+              </Fragment>
+            )
+          }
           return (
-            <div key={`${section.label}-${index}`} className="grid gap-4">
-              <p className="text-[1.15rem] font-medium tracking-[-0.02em] text-[#08090a]">
-                {section.label}
-              </p>
-              {blocks}
-            </div>
+            <CategoryChoices
+              key={`${section.label}-${index}`}
+              label={section.label}
+              blocks={section.blocks}
+              renderBlock={(block, labelId) =>
+                renderAddOnFieldset(block, {
+                  omitSelectAny: true,
+                  labelId: block.kind === 'checks' ? labelId : undefined,
+                })
+              }
+            />
           )
         })}
       </div>
@@ -289,6 +297,31 @@ export function ProposalChoices({
           ) : null}
         </div>
       </div>
+    </div>
+  )
+}
+
+/**
+ * The category heading stays a paragraph so the type does not move.
+ * The checkbox fieldset takes its accessible name from that paragraph.
+ * A "Choose one" group keeps its own legend.
+ */
+function CategoryChoices({
+  label,
+  blocks,
+  renderBlock,
+}: {
+  label: string
+  blocks: AddOnChoiceBlock<AddOnChoice>[]
+  renderBlock: (block: AddOnChoiceBlock<AddOnChoice>, labelId: string) => ReactNode
+}) {
+  const labelId = useId()
+  return (
+    <div className="grid gap-4">
+      <p id={labelId} className="text-[1.15rem] font-medium tracking-[-0.02em] text-[#08090a]">
+        {label}
+      </p>
+      {blocks.map((block) => renderBlock(block, labelId))}
     </div>
   )
 }
