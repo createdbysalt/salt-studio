@@ -17,14 +17,14 @@ export const MSA_PANEL_SUMMARY = {
 } as const
 
 /**
- * Cover Page label/value list is stubbed.
+ * Cover Page label/value list is omitted.
  *
  * `proposalMsa` stores `version` (string), `effectiveDate` (date), `pdf` (file),
  * and `body` (portable text). Provider, Customer, Effective Date, Governing Law,
  * Chosen Courts, General Cap Amount, and Payment Period are not fields. They
  * only appear inside `body`. The document `effectiveDate` is when that version
  * took effect, not the Cover Page Effective Date. Do not parse `body` to fill
- * this list.
+ * this list, and do not leave a blank slot where the list would have been.
  */
 export const MSA_COVER_PAGE_TERMS = null
 
@@ -83,9 +83,7 @@ export function ProposalMsaPanel({
           ))}
         </div>
       </section>
-      {/* Null until Cover Page terms are real proposalMsa fields. Do not parse body. */}
-      {MSA_COVER_PAGE_TERMS}
-      <details className="mt-8">
+      <details className="mt-5">
         <summary className="cursor-pointer rounded-sm font-medium underline decoration-[#08090a]/50 underline-offset-[3px] hover:decoration-[#08090a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#08090a]">
           Read the full agreement
         </summary>
@@ -94,7 +92,7 @@ export function ProposalMsaPanel({
         </div>
       </details>
       {pdfUrl ? (
-        <p className="mt-8">
+        <p className="mt-6">
           <a
             href={pdfUrl}
             target="_blank"
