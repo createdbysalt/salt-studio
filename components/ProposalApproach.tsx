@@ -1,6 +1,7 @@
 'use client'
 
 import {gsap, prefersReducedMotion, ScrollTrigger} from '@/components/motion/gsap'
+import {proposalEyebrowClass} from '@/lib/proposal/eyebrow'
 import {useEffect, useRef, useState, type CSSProperties} from 'react'
 
 export type ProposalPhaseItem = {
@@ -104,6 +105,8 @@ function PhaseScrub({
    *
    * Making the section scroll longer would not have helped. The cards are all
    * on screen at once, so the squeeze is in height, not in scroll distance.
+   * The extra height below is only the line's scroll: 24dvh for each step
+   * between phases.
    */
   const dense = count >= 5
   /**
@@ -233,7 +236,7 @@ function PhaseScrub({
   return (
     <section
       ref={rootRef}
-      className="relative hidden h-auto motion-reduce:!hidden [@media(pointer:coarse)]:!hidden md:block motion-safe:h-[calc(100dvh+(var(--approach-steps)-1)*48dvh)]"
+      className="relative hidden h-auto motion-reduce:!hidden [@media(pointer:coarse)]:!hidden md:block motion-safe:h-[calc(100dvh+(var(--approach-steps)-1)*24dvh)]"
       style={{'--approach-steps': count} as CSSProperties}
     >
       <div
@@ -241,9 +244,7 @@ function PhaseScrub({
           dense ? 'pb-[4vh] pt-[2.5rem]' : 'pb-[5vh] pt-[5.5rem]'
         }`}
       >
-        <p className="text-center font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-          The timeline
-        </p>
+        <p className={`text-center ${proposalEyebrowClass}`}>The timeline</p>
         <h2
           className={`mx-auto mt-3 max-w-[8em] text-center font-normal leading-[0.92] tracking-[-0.05em] ${headingSize}`}
         >
@@ -366,9 +367,7 @@ function ApproachNotes({title, notes}: {title: string; notes: ProposalApproachQu
       className="px-[max(3.5rem,var(--spacing-gutter))] pb-9 pt-8 md:px-[max(4.5rem,var(--spacing-gutter))]"
     >
       <div className="mx-auto w-full">
-        <p className="text-center font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-          Our approach
-        </p>
+        <p className={`text-center ${proposalEyebrowClass}`}>Our approach</p>
         <h2 className="mx-auto mt-3 max-w-[8em] text-center text-[clamp(3.25rem,6.4vw,5.75rem)] font-normal leading-[0.92] tracking-[-0.05em]">
           {title}
         </h2>
@@ -537,11 +536,9 @@ function PhaseList({
 
   return (
     <div
-      className={`px-[max(3.5rem,var(--spacing-gutter))] pb-5 pt-28 md:px-[max(4.5rem,var(--spacing-gutter))] ${className}`}
+      className={`px-[max(3.5rem,var(--spacing-gutter))] pb-5 pt-12 md:px-[max(4.5rem,var(--spacing-gutter))] md:pt-28 ${className}`}
     >
-      <p className="text-center font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-        The timeline
-      </p>
+      <p className={`text-center ${proposalEyebrowClass}`}>The timeline</p>
       <h2 className="mx-auto mt-3 max-w-[8em] text-center text-[clamp(3.25rem,6.4vw,5.75rem)] font-normal leading-[0.92] tracking-[-0.05em]">
         {heading}
       </h2>
@@ -552,7 +549,7 @@ function PhaseList({
       ) : null}
       {/* Matches the gap the scrubbed version uses, so the two read the same.
           Nothing is competing for height here, so it is a plain margin. */}
-      <div className="relative mt-[5.5rem] md:mt-[6.5rem]">
+      <div className="relative mt-8 md:mt-[6.5rem]">
         <div
           ref={trackRef}
           aria-hidden
@@ -568,7 +565,7 @@ function PhaseList({
           {phases.map((phase, index) => (
             <li
               key={phase.key}
-              className="relative grid grid-cols-[20px_minmax(0,1fr)] gap-4 pb-7 last:pb-0"
+              className="relative grid grid-cols-[20px_minmax(0,1fr)] gap-4 pb-3 last:pb-0 md:pb-7"
             >
               <span
                 data-phase-dot=""

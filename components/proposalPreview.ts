@@ -70,11 +70,18 @@ export function withPreviewProofProjects(
   }
 }
 
-/** Preview only. 2 or 4 swap the sample card count. Anything else stays at 3. */
-export function previewProposal(cardCount?: number): NonNullable<ProposalByTokenQueryResult> {
+/**
+ * Preview only. 2 or 4 swap the sample card count. Anything else stays at 3.
+ * `groupAddOns` is the dev sample at /p/preview?groups=1. Prices stay the ones
+ * already on this sample.
+ */
+export function previewProposal(
+  cardCount?: number,
+  options?: {groupAddOns?: boolean},
+): NonNullable<ProposalByTokenQueryResult> {
   const count = cardCount === 2 || cardCount === 4 ? cardCount : 3
   const situationCards = SITUATION_CARDS.slice(0, count)
-  return {
+  const proposal: NonNullable<ProposalByTokenQueryResult> = {
     _id: 'preview',
     status: 'draft',
     clientDisplayName: 'Preview',
@@ -103,12 +110,64 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
         summary: 'One landing page, designed and built.',
         amount: 4800,
         includedItems: ['Page structure', 'Design', 'Build and launch'],
-        scope: [
-          sowBlock('landing-scope', 'One landing page, designed and built.'),
-          sowBullet('landing-2', 'Page structure.'),
-          sowBullet('landing-3', 'Design.'),
-          sowBullet('landing-4', 'Build and launch.'),
-        ],
+        scope: scopeSections('landing', [
+          {
+            heading: 'What it is',
+            bullets: [
+              ['One page.', 'A single landing page, designed and built.'],
+              ['The office.', 'The people who publish it can change the words.'],
+            ],
+          },
+          {
+            heading: 'What you get',
+            bullets: [
+              ['The page.', 'Structure, design, build, and launch.'],
+              ['A walkthrough.', 'One session so the office can publish after that.'],
+            ],
+          },
+          {
+            heading: 'Not included',
+            bullets: [
+              ['Extra pages.', 'Anything beyond this page is quoted before it starts.'],
+              ['Photography.', 'New photos are not part of this item.'],
+            ],
+          },
+          {
+            heading: 'Timeline',
+            bullets: [
+              ['Three weeks.', 'Design and build, then launch.'],
+              ['Reviews.', 'Feedback within five business days of each review.'],
+            ],
+          },
+          {
+            heading: 'What you provide',
+            bullets: [
+              ['One approver.', 'A person who can say yes to the work.'],
+              ['Access.', 'The domain and the current site.'],
+            ],
+          },
+          {
+            heading: 'Investment',
+            bullets: [
+              ['The price on the card.', 'It covers this item as described.'],
+              ['Two parts.', 'Half on signing, half when the work is accepted.'],
+            ],
+          },
+          {
+            heading: 'Just for this item',
+            bullets: [
+              ['This scope.', 'The lines above apply to this item.'],
+              ['A change.', 'Work outside these lines is quoted before it starts.'],
+            ],
+          },
+          {
+            heading: 'Shared terms',
+            bullets: [
+              ['The agreement.', 'The Master Services Agreement governs how the work is done.'],
+              ['Acceptance.', 'Silence after the review window counts as acceptance.'],
+            ],
+          },
+        ]),
         deliverables: [
           {
             _key: 'd1',
@@ -133,21 +192,82 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       {
         _id: 'addon-video',
         name: 'Video edits',
+        cardName: null,
         line: 'A set of short edits for the launch film.',
         amount: 900,
         billingType: 'one-time',
         chooseOneGroup: null,
-        scope: [sowBlock('video-scope', 'A set of short edits for the launch film.')],
+        category: null,
+        scope: scopeSections('video', [
+          {
+            heading: 'What it is',
+            bullets: [
+              ['Short edits.', 'A set of edits for the launch film.'],
+              ['The film.', 'The footage you already have.'],
+            ],
+          },
+          {
+            heading: 'What you get',
+            bullets: [
+              ['The edits.', 'Cut, titled, and delivered.'],
+              ['The files.', 'A copy you can publish.'],
+            ],
+          },
+          {
+            heading: 'Not included',
+            bullets: [
+              ['A new shoot.', 'Filming is not part of this item.'],
+              ['Extra cuts.', 'More edits than this set are quoted separately.'],
+            ],
+          },
+          {
+            heading: 'Timeline',
+            bullets: [
+              ['With the launch.', 'The edits are ready for the launch review.'],
+              ['Reviews.', 'Feedback within five business days of each review.'],
+            ],
+          },
+          {
+            heading: 'What you provide',
+            bullets: [
+              ['The footage.', 'The film we edit.'],
+              ['One approver.', 'A person who can say yes to the cut.'],
+            ],
+          },
+          {
+            heading: 'Investment',
+            bullets: [
+              ['The price on the card.', 'Charged once, with the project.'],
+              ['This add-on.', 'The amount is the one already listed here.'],
+            ],
+          },
+          {
+            heading: 'Just for this item',
+            bullets: [
+              ['This scope.', 'The lines above apply to this add-on.'],
+              ['A change.', 'Work outside these lines is quoted before it starts.'],
+            ],
+          },
+          {
+            heading: 'Shared terms',
+            bullets: [
+              ['The agreement.', 'The Master Services Agreement governs how the work is done.'],
+              ['Acceptance.', 'Silence after the review window counts as acceptance.'],
+            ],
+          },
+        ]),
         deliverables: [],
         outOfScope: [],
       },
       {
         _id: 'addon-notes',
         name: 'Monthly notes',
+        cardName: null,
         line: 'Notes after launch.',
         amount: 500,
         billingType: 'monthly',
         chooseOneGroup: null,
+        category: null,
         scope: [sowBlock('notes-scope', 'Notes after launch.')],
         deliverables: [],
         outOfScope: [],
@@ -155,10 +275,12 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       {
         _id: 'addon-plan-one',
         name: 'Plan one',
+        cardName: null,
         line: 'The smaller monthly plan.',
         amount: 1500,
         billingType: 'monthly',
         chooseOneGroup: 'plans',
+        category: null,
         scope: [sowBlock('plan-one-scope', 'The smaller monthly plan.')],
         deliverables: [],
         outOfScope: [],
@@ -166,10 +288,12 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       {
         _id: 'addon-plan-two',
         name: 'Plan two',
+        cardName: null,
         line: 'The middle monthly plan.',
         amount: 2000,
         billingType: 'monthly',
         chooseOneGroup: 'plans',
+        category: null,
         scope: [sowBlock('plan-two-scope', 'The middle monthly plan.')],
         deliverables: [],
         outOfScope: [],
@@ -177,10 +301,12 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       {
         _id: 'addon-plan-three',
         name: 'Plan three',
+        cardName: null,
         line: 'The larger monthly plan.',
         amount: 2500,
         billingType: 'monthly',
         chooseOneGroup: 'plans',
+        category: null,
         scope: [sowBlock('plan-three-scope', 'The larger monthly plan.')],
         deliverables: [],
         outOfScope: [],
@@ -397,6 +523,95 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       },
     ],
   }
+  if (!options?.groupAddOns) return proposal
+  return {...proposal, addOns: groupedPreviewAddOns()}
+}
+
+/**
+ * Dev preview only (/p/preview?groups=1). Amounts are the ones already on the
+ * ungrouped sample. One add-on is left without a category so it lists last.
+ */
+function groupedPreviewAddOns(): NonNullable<NonNullable<ProposalByTokenQueryResult>['addOns']> {
+  return [
+    {
+      _id: 'addon-growth',
+      name: 'Growth Plan',
+      cardName: 'Site Care: Growth Plan',
+      line: 'A plan for the website.',
+      amount: 900,
+      billingType: 'one-time',
+      chooseOneGroup: null,
+      category: 'Website add-ons',
+      scope: [sowBlock('growth-scope', 'A plan for the website.')],
+      deliverables: [],
+      outOfScope: [],
+    },
+    {
+      _id: 'addon-video',
+      name: 'Testimonial video edits',
+      cardName: null,
+      line: 'A set of short edits for the launch film.',
+      amount: 900,
+      billingType: 'one-time',
+      chooseOneGroup: null,
+      category: 'Growth add-ons',
+      scope: [sowBlock('video-scope', 'A set of short edits for the launch film.')],
+      deliverables: [],
+      outOfScope: [],
+    },
+    {
+      _id: 'addon-show-up',
+      name: 'Show Up',
+      cardName: null,
+      line: 'The smaller monthly plan.',
+      amount: 1500,
+      billingType: 'monthly',
+      chooseOneGroup: 'plans',
+      category: 'Growth add-ons',
+      scope: [sowBlock('show-up-scope', 'The smaller monthly plan.')],
+      deliverables: [],
+      outOfScope: [],
+    },
+    {
+      _id: 'addon-be-known',
+      name: 'Be Known',
+      cardName: null,
+      line: 'The middle monthly plan.',
+      amount: 2000,
+      billingType: 'monthly',
+      chooseOneGroup: 'plans',
+      category: 'Growth add-ons',
+      scope: [sowBlock('be-known-scope', 'The middle monthly plan.')],
+      deliverables: [],
+      outOfScope: [],
+    },
+    {
+      _id: 'addon-be-the-place',
+      name: 'Be the Place',
+      cardName: null,
+      line: 'The larger monthly plan.',
+      amount: 2500,
+      billingType: 'monthly',
+      chooseOneGroup: 'plans',
+      category: 'Growth add-ons',
+      scope: [sowBlock('be-the-place-scope', 'The larger monthly plan.')],
+      deliverables: [],
+      outOfScope: [],
+    },
+    {
+      _id: 'addon-notes',
+      name: 'Monthly notes',
+      cardName: null,
+      line: 'Notes after launch.',
+      amount: 500,
+      billingType: 'monthly',
+      chooseOneGroup: null,
+      category: null,
+      scope: [sowBlock('notes-scope', 'Notes after launch.')],
+      deliverables: [],
+      outOfScope: [],
+    },
+  ]
 }
 
 function sowBlock(key: string, text: string, style: 'normal' | 'h3' = 'normal') {
@@ -415,4 +630,33 @@ function sowBullet(key: string, text: string) {
     listItem: 'bullet' as const,
     level: 1,
   }
+}
+
+/** Preview only. The lead is a bold span; the rest stays body text. */
+function sowLeadBullet(key: string, lead: string, rest: string) {
+  const gap = lead.endsWith(' ') || rest.startsWith(' ') ? '' : ' '
+  return {
+    _key: key,
+    _type: 'block' as const,
+    style: 'normal' as const,
+    listItem: 'bullet' as const,
+    level: 1,
+    markDefs: null,
+    children: [
+      {_key: `${key}-lead`, _type: 'span' as const, text: lead, marks: ['strong']},
+      {_key: `${key}-rest`, _type: 'span' as const, text: `${gap}${rest}`, marks: [] as string[]},
+    ],
+  }
+}
+
+function scopeSections(
+  id: string,
+  sections: Array<{heading: string; bullets: Array<[lead: string, rest: string]>}>,
+) {
+  return sections.flatMap((section, index) => [
+    sowBlock(`${id}-h${index}`, section.heading, 'h3'),
+    ...section.bullets.map(([lead, rest], bulletIndex) =>
+      sowLeadBullet(`${id}-b${index}-${bulletIndex}`, lead, rest),
+    ),
+  ])
 }
