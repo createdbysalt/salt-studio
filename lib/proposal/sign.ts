@@ -12,6 +12,7 @@ import {feeSectionBlocks} from '@/lib/proposal/feeBlocks'
 import {
   acceptanceDocumentHash,
   buildFrozenAgreementDocument,
+  oneTimeAddOnsFromSelection,
   type FrozenAddress,
   type FrozenAgreementDocument,
   type FrozenMsaPdf,
@@ -379,6 +380,10 @@ export async function prepareSigning(
     packageName: clean(pkg.name) || null,
     addonIds: addOns.flatMap((addOn) => (addOn._id ? [addOn._id] : [])),
     addonNames: addOns.map((addOn) => clean(addOn.name)).filter(Boolean),
+    oneTimeAddOns: oneTimeAddOnsFromSelection(
+      addOns.map((addOn) => ({_id: addOn._id, name: clean(addOn.name)})),
+      quote.addOns,
+    ),
     selectionKey: selectionKey(selection),
     selection,
     quote,

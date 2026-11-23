@@ -17,7 +17,13 @@ import {buildProposalPdf, type PdfBlock} from '@/lib/proposal/documentPdf'
 import {bytesFromBase64, sha256Bytes, type FrozenMsaPdf} from '@/lib/proposal/frozenDocument'
 import {freezeMsaPdf} from '@/lib/proposal/msaPdf'
 import {formatCents, monthlyBillingSentence} from '@/lib/proposal/quote'
-import {signerEmailHtml, signerEmailText} from '@/lib/proposal/signedEmailTemplate'
+import {
+  signerEmailHtml,
+  signerEmailText,
+  studioEmailHtml,
+  studioEmailText,
+  type StudioEmailFields,
+} from '@/lib/proposal/signedEmailTemplate'
 import {client} from '@/sanity/lib/client'
 import {proposalByIdForLegacyAcceptanceQuery} from '@/sanity/lib/queries'
 import {token} from '@/sanity/lib/token'
@@ -163,11 +169,10 @@ function signedDocsAttachments(
   const blocks =
     acceptance.agreed_document?.sow.blocks ??
     preShipSowBlocks(acceptance, payment, paymentReceiptUrl, legacyScopeBlocks)
-  const sowPdf = buildProposalPdf(blocks)
   return [
     {
       filename: 'Salt-Studio-Signed-Statement-of-Work.pdf',
-      content: Buffer.from(sowPdf).toString('base64'),
+      content: sowAttachmentContent(acceptance, blocks),
       contentType: 'application/pdf',
     },
     {
@@ -176,6 +181,18 @@ function signedDocsAttachments(
       contentType: msaPdf.contentType,
     },
   ]
+}
+
+/**
+ * The statement saved at signing, when the bytes still match their hash.
+ * A row from before that column existed, or a pair that does not match,
+ * is rebuilt from the blocks the acceptance already stores.
+ */
+function sowAttachmentContent(acceptance: AcceptanceRow, blocks: PdfBlock[]) {
+  const saved = acceptance.sow_pdf_bytes_base64
+  const hash = acceptance.sow_pdf_sha256
+  if (saved && hash && sha256Bytes(bytesFromBase64(saved)) === hash) return saved
+  return Buffer.from(buildProposalPdf(blocks)).toString('base64')
 }
 
 function preShipSowBlocks(
@@ -235,10 +252,10 @@ function signerMessage(input: {
   payment: PaymentRow
   msaPdf: Extract<FrozenMsaPdf, {status: 'frozen'}>
   paymentReceiptUrl: string
-  legacyScopeBlocks: PdfBlock[] | null
   to: string
   config: EmailConfig
   liveMode: boolean
+  attachments: NonNullable<ProposalEmailSend['attachments']>
 }) {
   const document = input.acceptance.agreed_document
   const fields = {
@@ -279,13 +296,7 @@ function signerMessage(input: {
     text: signerEmailText(fields),
     html: signerEmailHtml(fields),
     idempotencyKey: `signed-docs/${input.payment.id}`,
-    attachments: signedDocsAttachments(
-      input.acceptance,
-      input.payment,
-      input.msaPdf,
-      input.paymentReceiptUrl,
-      input.legacyScopeBlocks,
-    ),
+    attachments: input.attachments,
   }
 }
 
@@ -315,48 +326,111 @@ function studioMessage(input: {
   liveMode: boolean
   stripeLink: string | null
   note: string | null
+  attachments?: ProposalEmailSend['attachments']
 }) {
-  const monthlyLabel = monthlyBillingSentence(input.acceptance.agreed_document?.quote.monthly ?? [])
-  const lines = [
-    'A proposal was signed and the first payment is marked paid.',
-    '',
-    `Proposal id: ${input.acceptance.proposal_id}`,
-    `Acceptance id: ${input.acceptance.id}`,
-    `Selection: ${input.acceptance.selection_key}`,
-    `Amount: ${formatCents(input.payment.amount_cents)}`,
-    monthlyLabel,
-    `Stripe payment: ${input.stripeLink ?? 'Not available'}`,
-    input.note ? `Note: ${input.note}` : null,
-  ].filter(Boolean)
-  const text = lines.join('\n')
-  const html = `<p>A proposal was signed and the first payment is marked paid.</p><ul><li>Proposal id: ${escapeHtml(
-    input.acceptance.proposal_id,
-  )}</li><li>Acceptance id: ${escapeHtml(input.acceptance.id)}</li><li>Selection: ${escapeHtml(
-    input.acceptance.selection_key,
-  )}</li><li>Amount: ${escapeHtml(formatCents(input.payment.amount_cents))}</li>${
-    monthlyLabel ? `<li>${escapeHtml(monthlyLabel)}</li>` : ''
-  }<li>Stripe payment: ${
-    input.stripeLink
-      ? `<a href="${escapeHtml(input.stripeLink)}">${escapeHtml(input.stripeLink)}</a>`
-      : 'Not available'
-  }</li>${input.note ? `<li>Note: ${escapeHtml(input.note)}</li>` : ''}</ul>`
+  const fields = studioFields(input)
   return {
     from: input.config.from,
     to: input.to,
     replyTo: input.config.replyTo,
     subject: subject('Signed and paid proposal', input.liveMode),
-    text,
-    html,
+    text: studioEmailText(fields),
+    html: studioEmailHtml(fields),
     idempotencyKey: `signed-paid-notice/${input.payment.id}`,
+    attachments: input.attachments,
   }
 }
 
-function escapeHtml(value: string) {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
+function studioFields(input: {
+  acceptance: AcceptanceRow
+  payment: PaymentRow
+  stripeLink: string | null
+  note: string | null
+  attachments?: ProposalEmailSend['attachments']
+}): StudioEmailFields {
+  const acceptance = input.acceptance
+  const document = acceptance.agreed_document
+  const quote = document?.quote
+  const [first, ...later] = acceptance.steps ?? []
+  const monthly = quote?.monthly ?? []
+  return {
+    clientLegalName:
+      acceptance.signer_legal_name || document?.signer.legalName || acceptance.client_name || '',
+    signerName: acceptance.signer_name,
+    signerEmail: acceptance.signer_email,
+    packageName: acceptance.package_name || document?.proposal.packageName || 'Package',
+    packagePrice: packagePriceLabel(quote),
+    sameDayLine: sameDayLine(acceptance.same_day_percent, savedLabel(quote)),
+    addOns: oneTimeAddOnLines(acceptance),
+    totalLabel: formatCents(acceptance.total_cents),
+    paidLabel: formatCents(input.payment.amount_cents),
+    paidTrigger: first?.trigger ?? null,
+    laterSteps: later.map((step) => ({
+      percent: step.percent,
+      amount: formatCents(step.amountCents),
+      trigger: step.trigger,
+    })),
+    monthly: monthly.map((item) => ({
+      name: item.name.trim() || 'Add-on',
+      amount: formatCents(item.amountCents),
+    })),
+    kickoffLabel: kickoffDateLabel(acceptance.kickoff_date ?? document?.proposal.kickoffDate),
+    stripeLink: input.stripeLink,
+    proposalId: acceptance.proposal_id,
+    acceptanceId: acceptance.id,
+    note: input.note,
+    documentsAttached: (input.attachments?.length ?? 0) > 0,
+  }
+}
+
+function packagePriceLabel(
+  quote: {packageDueCents?: number; packageAmountCents?: number} | undefined,
+) {
+  if (!quote) return null
+  if (typeof quote.packageDueCents === 'number') return formatCents(quote.packageDueCents)
+  if (typeof quote.packageAmountCents === 'number') return formatCents(quote.packageAmountCents)
+  return null
+}
+
+function sameDayLine(percent: number | null, saved: string | null) {
+  if (percent == null && !saved) return null
+  if (percent != null && saved) return `Same-day saving of ${saved}, ${percent}% off the package.`
+  if (saved) return `Same-day saving of ${saved}.`
+  return `Same-day discount: ${percent}% off the package.`
+}
+
+/**
+ * Frozen one-time prices when the row has them. Older rows keep the names
+ * and leave the price blank. Monthly names are not repeated here.
+ */
+function oneTimeAddOnLines(acceptance: AcceptanceRow) {
+  const document = acceptance.agreed_document
+  const frozen = document?.proposal.addons
+  if (frozen) {
+    return frozen.map((item) => ({
+      name: item.name.trim() || 'Add-on',
+      price: formatCents(item.amountCents),
+    }))
+  }
+  const monthly = new Set(
+    (document?.quote.monthly ?? []).map((item) => item.name.trim()).filter(Boolean),
+  )
+  const names = (document?.proposal.addonNames ?? [])
+    .map((name) => name.trim())
+    .filter((name) => name.length > 0 && !monthly.has(name))
+  if (names.length > 0) return names.map((name) => ({name, price: null}))
+  if (!document) {
+    return acceptance.addon_ids.filter(Boolean).map((name) => ({name, price: null}))
+  }
+  return []
+}
+
+function kickoffDateLabel(value: string | null | undefined) {
+  if (!value) return null
+  const iso = /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00.000Z` : value
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('en-US', {dateStyle: 'long', timeZone: 'UTC'}).format(date)
 }
 
 async function legacyPacket(acceptance: AcceptanceRow): Promise<LegacyPacket> {
@@ -561,17 +635,26 @@ export async function sendPaidProposalEmails(input: {
   }
 
   const results: PaidEmailResult[] = []
+  const attachments = msaPdf
+    ? signedDocsAttachments(
+        input.acceptance,
+        input.payment,
+        msaPdf,
+        paidReceiptUrl ?? '',
+        legacyScope,
+      )
+    : undefined
   const signerMessageReady =
-    msaPdf && paidReceiptUrl && signerTo && config
+    msaPdf && attachments && paidReceiptUrl && signerTo && config
       ? signerMessage({
           acceptance: input.acceptance,
           payment: input.payment,
           msaPdf,
           paymentReceiptUrl: paidReceiptUrl,
-          legacyScopeBlocks: legacyScope,
           to: signerTo,
           config,
           liveMode: input.liveMode,
+          attachments,
         })
       : null
   if (signerMessageReady) {
@@ -633,6 +716,7 @@ export async function sendPaidProposalEmails(input: {
           liveMode: input.liveMode,
           stripeLink,
           note: studioNote,
+          attachments,
         }),
         sender,
       ),

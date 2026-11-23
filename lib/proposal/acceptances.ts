@@ -37,6 +37,8 @@ export type AcceptanceRow = {
   msa_pdf_filename: string | null
   msa_pdf_content_type: string | null
   msa_pdf_missing_reason: string | null
+  sow_pdf_sha256: string | null
+  sow_pdf_bytes_base64: string | null
   agreed_document: FrozenAgreementDocument | null
   agreed_text_sha256: string
   ip: string | null
@@ -114,7 +116,7 @@ export async function latestPaymentForProposal(proposalId: string): Promise<Late
 }
 
 const ACCEPTANCE_COLUMNS =
-  'id,proposal_id,token_hash,signer_name,signer_email,signer_legal_name,signer_address,client_name,package_id,package_name,addon_ids,selection_key,kickoff_date,same_day_percent,total_cents,first_cents,steps,schedule_name,msa_version,msa_pdf_sha256,msa_pdf_bytes_base64,msa_pdf_filename,msa_pdf_content_type,msa_pdf_missing_reason,agreed_document,agreed_text_sha256,ip,user_agent,created_at'
+  'id,proposal_id,token_hash,signer_name,signer_email,signer_legal_name,signer_address,client_name,package_id,package_name,addon_ids,selection_key,kickoff_date,same_day_percent,total_cents,first_cents,steps,schedule_name,msa_version,msa_pdf_sha256,msa_pdf_bytes_base64,msa_pdf_filename,msa_pdf_content_type,msa_pdf_missing_reason,sow_pdf_sha256,sow_pdf_bytes_base64,agreed_document,agreed_text_sha256,ip,user_agent,created_at'
 
 /** The signature already on file for this proposal, if there is one. */
 export async function latestAcceptanceForProposal(proposalId: string) {
