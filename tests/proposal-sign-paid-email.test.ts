@@ -10,8 +10,7 @@ import assert from 'node:assert/strict'
 import {mkdirSync, writeFileSync} from 'node:fs'
 import {mock, test} from 'node:test'
 import {previewProposal} from '@/components/proposalPreview'
-import {buildProposalPdf} from '@/lib/proposal/documentPdf'
-import {bytesFromBase64, sha256Bytes} from '@/lib/proposal/frozenDocument'
+import {buildProposalPdf as realBuildProposalPdf, type PdfBlock} from '../lib/proposal/documentPdf'
 
 process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ??= 'jkqf2ng5'
 process.env.NEXT_PUBLIC_SANITY_DATASET ??= 'production'
@@ -20,12 +19,27 @@ delete process.env.STRIPE_SECRET_KEY
 
 const STORE_ORIGIN = 'https://proposal-store.fixture'
 const MSA_URL = 'https://cdn.sanity.io/files/jkqf2ng5/production/fixture-msa.pdf'
+/**
+ * The paid-email path does not render the agreement. Signing downloads the
+ * uploaded file with freezeMsaPdf, and only from cdn.sanity.io, then the
+ * email attaches those stored bytes. A local stand-in keeps the test off
+ * that network. The statement is the file this suite renders.
+ */
 const MSA_BYTES = Buffer.from(
   '%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 0/Kids[]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n',
 )
 const RECEIPT_URL = 'https://pay.stripe.com/receipts/fixture-harbor'
 
 const proposal = fixtureProposal()
+let sowRebuilds = 0
+mock.module('@/lib/proposal/documentPdf', {
+  namedExports: {
+    buildProposalPdf(blocks: PdfBlock[]) {
+      sowRebuilds += 1
+      return realBuildProposalPdf(blocks)
+    },
+  },
+})
 
 mock.module('server-only', {namedExports: {}})
 mock.module('next/headers', {
@@ -278,6 +292,7 @@ test('signing through the paid emails keeps the saved statement, frozen add-on p
   process.env.CONTACT_EMAIL = 'contact@example.test'
 
   const store = installMemoryStore()
+  const {bytesFromBase64, sha256Bytes} = await import('@/lib/proposal/frozenDocument')
   const {signProposal} = await import('@/app/(proposal)/p/[token]/actions')
   const {updatePayment} = await import('@/lib/proposal/acceptances')
   const {sendPaidProposalEmailsForPayment} = await import('@/lib/proposal/paidEmails')
@@ -314,6 +329,7 @@ test('signing through the paid emails keeps the saved statement, frozen add-on p
     status: 'paid',
     paid_at: '2026-11-23T12:05:00.000Z',
   })
+  sowRebuilds = 0
   const sent = await sendPaidProposalEmailsForPayment({
     paymentId: String(payment.id),
     receiptUrl: RECEIPT_URL,
@@ -328,6 +344,7 @@ test('signing through the paid emails keeps the saved statement, frozen add-on p
   const owner = mailFor(store.sent, `signed-paid-notice/${payment.id}`)
   const signerSow = sowOf(signer)
   const ownerSow = sowOf(owner)
+  assert.equal(sowRebuilds, 0)
   assert.equal(signerSow.content, savedBytes)
   assert.equal(ownerSow.content, savedBytes)
   assert.equal(sha256Bytes(bytesFromBase64(ownerSow.content)), savedHash)
@@ -336,7 +353,7 @@ test('signing through the paid emails keeps the saved statement, frozen add-on p
 
   const oldDocument = JSON.parse(JSON.stringify(saved.agreed_document)) as {
     proposal: {addons?: unknown; addonNames: string[]}
-    sow: {blocks: Parameters<typeof buildProposalPdf>[0]}
+    sow: {blocks: PdfBlock[]}
   }
   delete oldDocument.proposal.addons
   assert.deepEqual(oldDocument.proposal.addonNames, ['Video edits', 'Copy pass'])
@@ -359,15 +376,19 @@ test('signing through the paid emails keeps the saved statement, frozen add-on p
     stripe_checkout_session_id: null,
   })
 
+  assert.equal(oldAcceptance.sow_pdf_bytes_base64, null)
+  assert.equal(oldAcceptance.sow_pdf_sha256, null)
+  sowRebuilds = 0
   const fallbackSent = await sendPaidProposalEmailsForPayment({
     paymentId: 'pay_old',
     liveMode: false,
   })
+  assert.equal(sowRebuilds, 1)
   assert.deepEqual(
     fallbackSent.map((item) => item.status),
     ['sent', 'sent'],
   )
-  const rebuilt = Buffer.from(buildProposalPdf(oldDocument.sow.blocks)).toString('base64')
+  const rebuilt = Buffer.from(realBuildProposalPdf(oldDocument.sow.blocks)).toString('base64')
   const fallbackOwner = mailFor(store.sent, 'signed-paid-notice/pay_old')
   const fallbackSigner = mailFor(store.sent, 'signed-docs/pay_old')
   const fallbackSow = sowOf(fallbackOwner)
