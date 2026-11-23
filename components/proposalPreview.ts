@@ -198,8 +198,7 @@ export function previewProposal(cardCount?: number): NonNullable<ProposalByToken
       _id: 'msa-1',
       version: '1.0',
       effectiveDate: '2026-11-01',
-      pdfUrl:
-        'https://cdn.sanity.io/files/jkqf2ng5/production/6f2313cdc7b5ac1add256890c572af39b4d9dc27.pdf',
+      pdfUrl: '/sample-msa-preview.pdf',
       pdfFilename: null,
       body: [
         sowBlock(

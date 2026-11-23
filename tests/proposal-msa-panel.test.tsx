@@ -8,8 +8,7 @@ import {renderToStaticMarkup} from 'react-dom/server'
 const ATTRIBUTION =
   'Based on the Common Paper Professional Services Agreement, available at https://commonpaper.com. Licensed under CC BY 4.0. Copyright Common Paper, Inc. License: https://creativecommons.org/licenses/by/4.0/. Cover Page adapted for Salt Studio LLC. The Standard Terms are used unchanged.'
 
-const PDF_URL =
-  'https://cdn.sanity.io/files/jkqf2ng5/production/6f2313cdc7b5ac1add256890c572af39b4d9dc27.pdf'
+const PDF_URL = '/sample-msa-preview.pdf'
 
 const SUMMARY_LINES = [
   "This project runs on our Master Services Agreement, which uses Common Paper's standard Professional Services Agreement (Version 1.1).",
