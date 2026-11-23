@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import {readFileSync} from 'node:fs'
 import test from 'node:test'
 import type {AcceptanceRow, PaymentRow, ProposalEmailRow} from '@/lib/proposal/acceptances'
-import {acceptanceDocumentHash} from '@/lib/proposal/frozenDocument'
+import {buildProposalPdf} from '@/lib/proposal/documentPdf'
+import {acceptanceDocumentHash, bytesFromBase64, sha256Bytes} from '@/lib/proposal/frozenDocument'
 import {sendPaidProposalEmails, type ProposalEmailSend} from '@/lib/proposal/paidEmails'
 import {signedSowBlocks} from '@/lib/proposal/signedSow'
 import {validateSigningFields} from '@/lib/proposal/signingFields'
@@ -60,6 +61,8 @@ function acceptance(overrides: Partial<AcceptanceRow> = {}): AcceptanceRow {
     msa_pdf_filename: proposalV3FixturePdf.filename,
     msa_pdf_content_type: proposalV3FixturePdf.contentType,
     msa_pdf_missing_reason: null,
+    sow_pdf_sha256: null,
+    sow_pdf_bytes_base64: null,
     agreed_document: {
       version: 3,
       signer: {
@@ -595,9 +598,220 @@ test('monthly add-ons are listed apart from the total in the signer email and th
   assert.equal(/monthly was charged|charged monthly/i.test(signer.text), false)
   assert.equal(/monthly was charged|charged monthly/i.test(studio.text), false)
   assert.equal(MONTHLY_LINE.includes('charged'), false)
-  assert.ok(studio.text.includes('Amount: $2,850'))
-  assert.ok(studio.text.includes(MONTHLY_LINE))
-  assert.ok(studio.html.includes(MONTHLY_LINE))
+  assert.ok(studio.text.includes('Paid today'))
+  assert.ok(studio.text.includes('$2,850'))
+  assert.ok(studio.text.includes('Monthly notes'))
+  assert.ok(studio.text.includes('$500 a month'))
+  assert.ok(studio.text.includes('Plan two'))
+  assert.ok(studio.text.includes('$2,000 a month'))
+  assert.ok(studio.text.includes("Not part of the total or today's payment."))
+  assert.ok(studio.html.includes('Monthly notes'))
+  assert.ok(studio.html.includes('$500 a month'))
+  assert.ok(studio.html.includes("Not part of the total or today's payment."))
+  assert.equal(studio.subject, '[TEST] Signed and paid proposal')
+  assert.equal(studio.to, 'proposal-test@example.test')
+})
+
+test('the statement pdf migration only adds nullable columns', () => {
+  const migration = readFileSync(
+    new URL(
+      '../supabase/migrations/20261123120000_proposal_acceptance_sow_pdf.sql',
+      import.meta.url,
+    ),
+    'utf8',
+  )
+  assert.match(migration, /add column if not exists sow_pdf_bytes_base64 text/)
+  assert.match(migration, /add column if not exists sow_pdf_sha256 text/)
+  assert.equal(/not null/i.test(migration), false)
+  const actions = readFileSync(
+    new URL('../app/(proposal)/p/[token]/actions.ts', import.meta.url),
+    'utf8',
+  )
+  assert.match(actions, /signedSowPdfColumns\(agreedDocument\.sow\.blocks\)/)
+})
+
+function pricedAcceptance(frozenAddOns: boolean): AcceptanceRow {
+  const base = acceptance()
+  if (!base.agreed_document) throw new Error('fixture document missing')
+  const addonNames = ['Video edits', 'Copy pass', 'Care plan']
+  return acceptance({
+    id: frozenAddOns ? 'acc_priced' : 'acc_legacy_names',
+    signer_legal_name: 'Harbor Legal LLC',
+    signer_name: 'Jordan Hale',
+    signer_email: 'jordan.hale@example.test',
+    client_name: 'Harbor',
+    package_name: 'Brand and website',
+    same_day_percent: 10,
+    total_cents: 547_000,
+    first_cents: 273_500,
+    kickoff_date: '2026-12-08',
+    steps: [
+      {key: 's1', percent: 50, trigger: 'On signing', amountCents: 273_500},
+      {key: 's2', percent: 50, trigger: 'When the work is accepted', amountCents: 273_500},
+    ],
+    agreed_document: {
+      ...base.agreed_document,
+      signer: {
+        ...base.agreed_document.signer,
+        fullName: 'Jordan Hale',
+        legalName: 'Harbor Legal LLC',
+        email: 'jordan.hale@example.test',
+      },
+      proposal: {
+        ...base.agreed_document.proposal,
+        clientName: 'Harbor',
+        packageName: 'Brand and website',
+        addonNames,
+        ...(frozenAddOns
+          ? {
+              addons: [
+                {id: 'addon-video', name: 'Video edits', amountCents: 90_000},
+                {id: 'addon-copy', name: 'Copy pass', amountCents: 25_000},
+              ],
+            }
+          : {}),
+        kickoffDate: '2026-12-08',
+      },
+      quote: {
+        ...base.agreed_document.quote,
+        totalCents: 547_000,
+        firstCents: 273_500,
+        packageAmountCents: 480_000,
+        packageDueCents: 432_000,
+        sameDayPercent: 10,
+        steps: [
+          {key: 's1', percent: 50, trigger: 'On signing', amountCents: 273_500},
+          {key: 's2', percent: 50, trigger: 'When the work is accepted', amountCents: 273_500},
+        ],
+        monthly: [{id: 'addon-care', name: 'Care plan', amountCents: 40_000}],
+      },
+    },
+  })
+}
+
+async function captureEmails(row: AcceptanceRow, paymentId: string, liveMode: boolean) {
+  const sent: ProposalEmailSend[] = []
+  await sendPaidProposalEmails({
+    payment: payment({
+      id: paymentId,
+      acceptance_id: row.id,
+      proposal_id: row.proposal_id,
+      amount_cents: 273_500,
+    }),
+    acceptance: row,
+    liveMode,
+    sender: async (message) => {
+      sent.push(message)
+      return {id: `resend-${sent.length}`}
+    },
+  })
+  const signer = sent.find((message) => message.idempotencyKey.startsWith('signed-docs/'))
+  const studio = sent.find((message) => message.idempotencyKey.startsWith('signed-paid-notice/'))
+  assert.ok(signer && studio)
+  return {signer, studio}
+}
+
+test('the studio email names the deal, prices frozen add-ons, and attaches both documents', async () => {
+  installStore()
+  const row = pricedAcceptance(true)
+  const {signer, studio} = await captureEmails(row, 'pay_priced', false)
+  assert.equal(studio.to, 'proposal-test@example.test')
+  assert.equal(studio.subject, '[TEST] Signed and paid proposal')
+  assert.equal(studio.from, 'Salt Studio <hello@createdbysalt.com>')
+  assert.equal(studio.replyTo, 'hello@createdbysalt.com')
+  for (const body of [studio.html, studio.text]) {
+    assert.ok(body.includes('Harbor Legal LLC'))
+    assert.ok(body.includes('Jordan Hale'))
+    assert.ok(body.includes('jordan.hale@example.test'))
+    assert.ok(body.includes('Brand and website'))
+    assert.ok(body.includes('$4,320'))
+    assert.ok(body.includes('Same-day saving of $480, 10% off the package.'))
+    assert.ok(body.includes('Video edits'))
+    assert.ok(body.includes('$900'))
+    assert.ok(body.includes('Copy pass'))
+    assert.ok(body.includes('$250'))
+    assert.ok(body.includes('$5,470'))
+    assert.ok(body.includes('Paid today'))
+    assert.ok(body.includes('$2,735'))
+    assert.ok(body.includes('Due later'))
+    assert.ok(body.includes('Care plan'))
+    assert.ok(body.includes('$400 a month'))
+    assert.ok(body.includes("Not part of the total or today's payment."))
+    assert.ok(body.includes('December 8, 2026'))
+    assert.ok(body.includes('https://dashboard.stripe.com/test/payments/pi_test_fixture'))
+    assert.ok(body.includes(row.proposal_id))
+    assert.ok(body.includes(row.id))
+    assert.equal(body.includes('\u2014'), false)
+    assert.equal(body.includes('Selection:'), false)
+  }
+  assert.ok(studio.html.includes('50%, when the work is accepted'))
+  assert.equal(studio.html.includes('When the work is accepted'), false)
+  assert.ok(studio.text.includes('When the work is accepted'))
+  assert.equal(studio.attachments?.length, 2)
+  assert.equal(signer.attachments?.length, 2)
+  assert.equal(studio.attachments?.[0]?.content, signer.attachments?.[0]?.content)
+  assert.equal(studio.attachments?.[1]?.content, signer.attachments?.[1]?.content)
+  assert.equal(studio.attachments?.[0]?.filename, 'Salt-Studio-Signed-Statement-of-Work.pdf')
+
+  installStore()
+  const live = await captureEmails(pricedAcceptance(true), 'pay_priced_live', true)
+  assert.equal(live.studio.to, 'contact@example.test')
+  assert.equal(live.studio.subject, 'Signed and paid proposal')
+})
+
+test('an older acceptance lists add-on names without prices', async () => {
+  installStore()
+  const {studio} = await captureEmails(pricedAcceptance(false), 'pay_names_only', false)
+  assert.ok(studio.html.includes('Video edits'))
+  assert.ok(studio.html.includes('Copy pass'))
+  assert.ok(studio.text.includes('Video edits'))
+  assert.ok(studio.text.includes('Copy pass'))
+  assert.equal(studio.html.includes('$900'), false)
+  assert.equal(studio.html.includes('$250'), false)
+  assert.equal(studio.text.includes('$900'), false)
+  assert.equal(studio.text.includes('$250'), false)
+  assert.ok(studio.html.includes('Care plan'))
+  assert.ok(studio.html.includes('$400 a month'))
+  assert.ok(studio.html.includes('$4,320'))
+  assert.ok(studio.text.includes('December 8, 2026'))
+})
+
+test('saved statement bytes are the attachment, and older rows are rebuilt', async () => {
+  const savedBytes = new TextEncoder().encode('%PDF-1.4\n% saved sow fixture\n%%EOF\n')
+  const savedBase64 = Buffer.from(savedBytes).toString('base64')
+  const savedHash = sha256Bytes(savedBytes)
+
+  installStore()
+  const saved = acceptance({
+    sow_pdf_bytes_base64: savedBase64,
+    sow_pdf_sha256: savedHash,
+  })
+  const savedMail = await captureEmails(saved, 'pay_saved_sow', false)
+  for (const message of [savedMail.signer, savedMail.studio]) {
+    const sow = message.attachments?.[0]
+    assert.equal(sow?.content, savedBase64)
+    assert.equal(sha256Bytes(bytesFromBase64(sow?.content ?? '')), savedHash)
+  }
+
+  installStore()
+  const older = acceptance()
+  assert.equal(older.sow_pdf_bytes_base64, null)
+  assert.ok(older.agreed_document)
+  const rebuilt = Buffer.from(buildProposalPdf(older.agreed_document.sow.blocks)).toString('base64')
+  const olderMail = await captureEmails(older, 'pay_rebuilt_sow', false)
+  assert.notEqual(rebuilt, savedBase64)
+  for (const message of [olderMail.signer, olderMail.studio]) {
+    assert.equal(message.attachments?.[0]?.content, rebuilt)
+  }
+
+  installStore()
+  const mismatched = acceptance({
+    sow_pdf_bytes_base64: savedBase64,
+    sow_pdf_sha256: '0'.repeat(64),
+  })
+  const mismatchedMail = await captureEmails(mismatched, 'pay_mismatched_sow', false)
+  assert.equal(mismatchedMail.signer.attachments?.[0]?.content, rebuilt)
+  assert.equal(mismatchedMail.studio.attachments?.[0]?.content, rebuilt)
 })
 
 const SIGNING_INSTANT = '2026-11-23T11:24:00.000Z'

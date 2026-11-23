@@ -1,5 +1,5 @@
 import {createHash} from 'node:crypto'
-import type {PdfBlock} from '@/lib/proposal/documentPdf'
+import {buildProposalPdf, type PdfBlock} from '@/lib/proposal/documentPdf'
 import type {ProposalQuote, ProposalSelection, QuoteStep} from '@/lib/proposal/quote'
 
 export type FrozenAddress = {
@@ -54,6 +54,16 @@ export type FrozenAgreementDocument = {
     packageName: string | null
     addonIds: string[]
     addonNames: string[]
+    /**
+     * One-time add-ons with the price frozen at signing.
+     * Missing on rows signed before this existed. The owner email then
+     * lists the names and leaves the price blank.
+     *
+     * Not part of `acceptanceDocumentHash`. A one-time document that already
+     * has an add-on would hash differently if this key were included, and
+     * the agreed-text hash does not read it either.
+     */
+    addons?: Array<{id: string; name: string; amountCents: number}>
     selectionKey: string
     kickoffDate: string | null
   }
@@ -112,14 +122,50 @@ export function acceptanceDocumentHash(document: FrozenAgreementDocument) {
   const blocks = [...document.sow.blocks]
   const last = blocks.at(-1)
   if (last?.kind === 'paragraph' && last.text.startsWith('Record hash: ')) blocks.pop()
+  // Prices on `proposal.addons` are a copy for the studio email. Leaving
+  // them out keeps the hash of a one-time document on the value it had
+  // before the field existed. Deleting the key is a no-op when it is absent,
+  // so older documents hash exactly as they did.
+  const proposal = {...document.proposal}
+  delete proposal.addons
   return createHash('sha256')
     .update(
       stableJson({
         ...document,
+        proposal,
         sow: {blocks},
       }),
     )
     .digest('hex')
+}
+
+/**
+ * One-time add-ons only, in selection order, with the price from the quote.
+ * Monthly add-ons are absent from `priced`, so they stay off this list.
+ * A blank name is stored as "Add-on" so the row still has a label.
+ */
+export function oneTimeAddOnsFromSelection(
+  addOns: Array<{_id?: string | null; name?: string | null}>,
+  priced: Array<{id: string; amountCents: number}>,
+) {
+  const amounts = new Map(priced.map((item) => [item.id, item.amountCents]))
+  return addOns.flatMap((addOn) => {
+    const id = addOn._id ?? ''
+    if (!id) return []
+    const amountCents = amounts.get(id)
+    if (typeof amountCents !== 'number') return []
+    const name = (addOn.name ?? '').trim() || 'Add-on'
+    return [{id, name, amountCents}]
+  })
+}
+
+/** The signed statement, as stored on the acceptance row. */
+export function signedSowPdfColumns(blocks: PdfBlock[]) {
+  const bytes = buildProposalPdf(blocks)
+  return {
+    sow_pdf_bytes_base64: base64FromBytes(bytes),
+    sow_pdf_sha256: sha256Bytes(bytes),
+  }
 }
 
 export function cleanText(value: string | null | undefined) {
@@ -160,6 +206,21 @@ export function validSignerEmail(value: string | null | undefined) {
   return email
 }
 
+function frozenAddOns(input: {
+  addonIds: string[]
+  addonNames: string[]
+  oneTimeAddOns?: Array<{id: string; name: string; amountCents: number}>
+  quote: ProposalQuote
+}) {
+  const addons =
+    input.oneTimeAddOns ??
+    oneTimeAddOnsFromSelection(
+      input.addonIds.map((id, index) => ({_id: id, name: input.addonNames[index] ?? null})),
+      input.quote.addOns,
+    )
+  return addons.length > 0 ? {addons} : {}
+}
+
 export function buildFrozenAgreementDocument(input: {
   signerFullName: string
   signerLegalName: string
@@ -172,6 +233,12 @@ export function buildFrozenAgreementDocument(input: {
   packageName: string | null
   addonIds: string[]
   addonNames: string[]
+  /**
+   * Pass the list built at signing. When it is omitted, names are paired
+   * with `addonIds` and prices come from `quote.addOns`. An empty list
+   * means there were no one-time add-ons, and the key is left off.
+   */
+  oneTimeAddOns?: Array<{id: string; name: string; amountCents: number}>
   selectionKey: string
   selection: ProposalSelection
   quote: ProposalQuote
@@ -203,6 +270,7 @@ export function buildFrozenAgreementDocument(input: {
       packageName: input.packageName,
       addonIds: input.addonIds,
       addonNames: input.addonNames,
+      ...frozenAddOns(input),
       selectionKey: input.selectionKey,
       kickoffDate: input.selection.kickoffDate,
     },
