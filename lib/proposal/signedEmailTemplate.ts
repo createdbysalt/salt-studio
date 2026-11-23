@@ -244,6 +244,17 @@ function priceRow(name: string, price: string | null, strong = false) {
     </tr>`
 }
 
+/**
+ * The trigger is stored as its own sentence ("When the work is accepted").
+ * This label puts it after a comma, so only the first letter is lowered.
+ * Other uses of the trigger are left as written.
+ */
+function stepAfterPercent(percent: number, trigger: string) {
+  const text = trigger.trim()
+  const lead = text ? text.charAt(0).toLowerCase() + text.slice(1) : text
+  return `${percent}%, ${lead}`
+}
+
 function moneyRow(label: string, amount: string, detail: string | null) {
   return `<tr>
       <td valign="top" style="padding:0 16px 2px 0;font-family:${SANS};font-size:14px;line-height:20px;color:${INK};">${escapeHtml(label)}</td>
@@ -290,7 +301,9 @@ export function studioEmailHtml(input: StudioEmailFields) {
   const later =
     input.laterSteps.length > 0
       ? input.laterSteps
-          .map((step) => moneyRow('Due later', step.amount, `${step.percent}%, ${step.trigger}`))
+          .map((step) =>
+            moneyRow('Due later', step.amount, stepAfterPercent(step.percent, step.trigger)),
+          )
           .join('')
       : `<tr><td colspan="2" style="padding:0 0 10px 0;font-family:${SANS};font-size:14px;line-height:20px;color:${INK};">Nothing else is due on this agreement.</td></tr>`
   const invoiceNote =

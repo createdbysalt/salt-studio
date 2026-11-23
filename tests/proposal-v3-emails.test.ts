@@ -732,7 +732,6 @@ test('the studio email names the deal, prices frozen add-ons, and attaches both 
     assert.ok(body.includes('Paid today'))
     assert.ok(body.includes('$2,735'))
     assert.ok(body.includes('Due later'))
-    assert.ok(body.includes('When the work is accepted'))
     assert.ok(body.includes('Care plan'))
     assert.ok(body.includes('$400 a month'))
     assert.ok(body.includes("Not part of the total or today's payment."))
@@ -743,6 +742,9 @@ test('the studio email names the deal, prices frozen add-ons, and attaches both 
     assert.equal(body.includes('\u2014'), false)
     assert.equal(body.includes('Selection:'), false)
   }
+  assert.ok(studio.html.includes('50%, when the work is accepted'))
+  assert.equal(studio.html.includes('When the work is accepted'), false)
+  assert.ok(studio.text.includes('When the work is accepted'))
   assert.equal(studio.attachments?.length, 2)
   assert.equal(signer.attachments?.length, 2)
   assert.equal(studio.attachments?.[0]?.content, signer.attachments?.[0]?.content)
