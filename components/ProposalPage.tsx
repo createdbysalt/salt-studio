@@ -9,6 +9,12 @@ import {ProposalPackages} from '@/components/ProposalPackages'
 import {ProposalProof} from '@/components/ProposalProof'
 import {ProposalRail, type ProposalRailItem} from '@/components/ProposalRail'
 import {ProposalScopePanel} from '@/components/ProposalScopePanel'
+import {
+  ProposalLiveStatement,
+  ProposalSelectionProvider,
+  type ProposalStatementAddOn,
+  type ProposalStatementPackage,
+} from '@/components/ProposalSelection'
 import {ProposalSignForm} from '@/components/ProposalSignForm'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import {SiteFooter} from '@/components/SiteFooter'
@@ -28,7 +34,6 @@ import {
   quoteInputs,
   quoteSelection,
   selectionKey,
-  type ProposalQuote,
   type ProposalSelection,
   type QuoteInputs,
 } from '@/lib/proposal/quote'
@@ -67,8 +72,6 @@ type View = {
   token: string
   proposal: ProposalDocument
   selection: ProposalSelection
-  selectedPackage: PackageOption | null
-  selectedAddOns: AddOnOption[]
   expired: boolean
   accepted: boolean
   payment: ProposalPaymentView | null
@@ -77,6 +80,8 @@ type View = {
   inputs: QuoteInputs
   /** True once a signature is on file, which keeps their terms alive. */
   signed: boolean
+  /** Dev preview only. Keeps the grouped add-on sample on pick-list navigation. */
+  groups: boolean
 }
 
 export function ProposalPage({
@@ -86,6 +91,7 @@ export function ProposalPage({
   payment = null,
   settings = null,
   legalPages = null,
+  groups = false,
 }: {
   token: string
   proposal: ProposalDocument
@@ -93,12 +99,9 @@ export function ProposalPage({
   payment?: ProposalPaymentView | null
   settings?: SettingsQueryResult | null
   legalPages?: FooterLegalPagesQueryResult | null
+  /** Dev preview only. Keeps the grouped add-on sample on pick-list navigation. */
+  groups?: boolean
 }) {
-  const packages = proposal.packages ?? []
-  const selectedPackage = packages.find((item) => item._id === selection.packageId) ?? null
-  const selectedAddOns = (proposal.addOns ?? []).filter((item) =>
-    selection.addonIds.includes(item._id),
-  )
   const now = Date.now()
   // One set of inputs for the whole page. When the offer window closed but
   // they already signed, their percent is kept, so what is shown here is
@@ -116,14 +119,13 @@ export function ProposalPage({
     token,
     proposal,
     selection,
-    selectedPackage,
-    selectedAddOns,
     expired: proposalIsExpired(proposal, now),
     accepted: proposalIsAccepted(proposal) || payment?.status === 'paid',
     payment,
     now,
     inputs,
     signed: payment != null && onSignedDeal,
+    groups,
   }
   const slides = (proposal.sections ?? []).flatMap((section) => {
     if (section.enabled === false || !sectionIsShown(section, view)) return []
@@ -756,121 +758,138 @@ function Investment({
         ) : null}
       </header>
 
-      <ProposalChoices
+      <ProposalSelectionProvider
         token={view.token}
         kickoff={view.selection.kickoffDate}
+        groups={view.groups}
         inputs={inputs}
         packageId={view.selection.packageId}
         addonIds={view.selection.addonIds}
-        packages={packages.flatMap((pkg) => {
-          if (typeof pkg.amount !== 'number') return []
-          return [
-            {
-              id: pkg._id,
-              name: line(pkg.name),
-              price: formatAmount(pkg.amount),
-              sale: percent != null ? formatAmount(discountedAmount(pkg.amount, percent)) : null,
-            },
-          ]
-        })}
-        addOns={addOns.flatMap((addOn) => {
-          if (typeof addOn.amount !== 'number') return []
-          return [
-            {
-              id: addOn._id,
-              name: addOnCardLabel(addOn.cardName, addOn.name),
-              price: formatAddOnPrice(addOn.amount, addOn.billingType),
-              group: chooseOneGroupKey(addOn.chooseOneGroup),
-              category: line(addOn.category) || null,
-            },
-          ]
-        })}
-      />
+      >
+        <ProposalChoices
+          packages={packages.flatMap((pkg) => {
+            if (typeof pkg.amount !== 'number') return []
+            return [
+              {
+                id: pkg._id,
+                name: line(pkg.name),
+                price: formatAmount(pkg.amount),
+                sale: percent != null ? formatAmount(discountedAmount(pkg.amount, percent)) : null,
+              },
+            ]
+          })}
+          addOns={addOns.flatMap((addOn) => {
+            if (typeof addOn.amount !== 'number') return []
+            return [
+              {
+                id: addOn._id,
+                name: addOnCardLabel(addOn.cardName, addOn.name),
+                price: formatAddOnPrice(addOn.amount, addOn.billingType),
+                group: chooseOneGroupKey(addOn.chooseOneGroup),
+                category: line(addOn.category) || null,
+              },
+            ]
+          })}
+        />
 
-      {accept && !view.accepted ? (
-        <div id="sign" className="mx-auto mt-[4.5rem] w-full max-w-[36rem]">
-          {view.expired && !view.signed ? (
-            <SignCardNote>
-              The price is no longer held. Write back and a new proposal can go out.
-            </SignCardNote>
-          ) : view.payment?.status === 'processing' ? (
-            <SignCardNote title="Your payment is on its way.">
-              Bank payments take a few business days to clear. The signed scope and receipt go to
-              your email the moment it does.
-              <KickoffLink token={view.token} />
-            </SignCardNote>
-          ) : view.payment?.status === 'pending_wire' ? (
-            <SignCardNote title="Wire instructions are on their way.">
-              They go to your email for {formatCents(view.payment.amountCents)}. The scope is yours
-              as soon as the payment lands.
-              <KickoffLink token={view.token} />
-            </SignCardNote>
-          ) : quote ? (
-            <ProposalSignForm
-              token={view.token}
-              selection={view.selection}
-              payLabel={`Pay ${formatCents(quote.firstCents)}`}
-              restLine={restLine(quote.totalCents, quote.steps)}
-              wireAvailable={quote.firstCents >= 1_000_000}
-              resume={resumeFor(view, quote)}
-              defaults={{
-                legalName: line(view.proposal.clientLegalName),
-                email: line(view.proposal.signerEmail),
-              }}
-              note={
-                view.payment?.status === 'failed'
-                  ? 'That payment did not go through, and nothing was charged. Try again below.'
-                  : null
-              }
-            >
-              <AgreementLine
-                label="I agree to the Master Services Agreement and this Statement of Work."
-                clientName={line(view.proposal.clientDisplayName)}
-                version={version}
-                statement={
-                  scope ? (
-                    <Statement
-                      packageName={line(view.selectedPackage?.name)}
-                      packageScope={(view.selectedPackage?.scope ?? []) as PortableTextBlock[]}
-                      packageItems={view.selectedPackage?.includedItems ?? []}
-                      addOns={view.selectedAddOns.map((addOn) => ({
-                        name: line(addOn.name),
-                        scope: (addOn.scope ?? []) as PortableTextBlock[],
-                        line: line(addOn.line),
-                      }))}
-                      standing={(scope.body ?? []) as PortableTextBlock[]}
+        {accept && !view.accepted ? (
+          <div id="sign" className="mx-auto mt-[4.5rem] w-full max-w-[36rem]">
+            {view.expired && !view.signed ? (
+              <SignCardNote>
+                The price is no longer held. Write back and a new proposal can go out.
+              </SignCardNote>
+            ) : view.payment?.status === 'processing' ? (
+              <SignCardNote title="Your payment is on its way.">
+                Bank payments take a few business days to clear. The signed scope and receipt go to
+                your email the moment it does.
+                <KickoffLink token={view.token} />
+              </SignCardNote>
+            ) : view.payment?.status === 'pending_wire' ? (
+              <SignCardNote title="Wire instructions are on their way.">
+                They go to your email for {formatCents(view.payment.amountCents)}. The scope is
+                yours as soon as the payment lands.
+                <KickoffLink token={view.token} />
+              </SignCardNote>
+            ) : quote ? (
+              <ProposalSignForm
+                defaults={{
+                  legalName: line(view.proposal.clientLegalName),
+                  email: line(view.proposal.signerEmail),
+                }}
+                note={
+                  view.payment?.status === 'failed'
+                    ? 'That payment did not go through, and nothing was charged. Try again below.'
+                    : null
+                }
+                payment={
+                  view.payment
+                    ? {
+                        resumable: view.payment.resumable,
+                        signerName: view.payment.signerName,
+                        selectionKey: view.payment.selectionKey,
+                        amountCents: view.payment.amountCents,
+                      }
+                    : null
+                }
+              >
+                <AgreementLine
+                  label="I agree to the Master Services Agreement and this Statement of Work."
+                  clientName={line(view.proposal.clientDisplayName)}
+                  version={version}
+                  statement={
+                    scope ? (
+                      <ProposalLiveStatement
+                        packages={statementPackages(packages)}
+                        addOns={statementAddOns(addOns)}
+                        standing={(scope.body ?? []) as PortableTextBlock[]}
+                      />
+                    ) : null
+                  }
+                  agreement={
+                    <ProposalMsaPanel
+                      body={(view.proposal.msa?.body ?? []) as PortableTextBlock[]}
+                      pdfUrl={view.proposal.msa?.pdfUrl ?? null}
                     />
-                  ) : null
-                }
-                agreement={
-                  <ProposalMsaPanel
-                    body={(view.proposal.msa?.body ?? []) as PortableTextBlock[]}
-                    pdfUrl={view.proposal.msa?.pdfUrl ?? null}
-                  />
-                }
-              />
-              {version ? ` Version ${version}.` : ''}
-            </ProposalSignForm>
-          ) : (
-            <SignCardNote>Choose a package above to sign.</SignCardNote>
-          )}
-        </div>
-      ) : null}
+                  }
+                />
+                {version ? ` Version ${version}.` : ''}
+              </ProposalSignForm>
+            ) : (
+              <SignCardNote>Choose a package above to sign.</SignCardNote>
+            )}
+          </div>
+        ) : null}
+      </ProposalSelectionProvider>
     </section>
   )
 }
 
-/**
- * They signed, went to pay, and came back without finishing. The card then
- * offers to pick that payment up rather than asking them to sign again.
- * Changing the selection moves them off it, because the terms have moved.
- */
-function resumeFor(view: View, quote: ProposalQuote) {
-  const payment = view.payment
-  if (!payment?.resumable || !payment.signerName) return null
-  if (payment.selectionKey !== selectionKey(view.selection)) return null
-  if (payment.amountCents !== quote.firstCents) return null
-  return {signerName: payment.signerName}
+function statementPackages(packages: PackageOption[]): ProposalStatementPackage[] {
+  return packages.flatMap((pkg) => {
+    if (!pkg._id) return []
+    return [
+      {
+        id: pkg._id,
+        name: line(pkg.name),
+        scope: (pkg.scope ?? []) as PortableTextBlock[],
+        items: pkg.includedItems ?? [],
+      },
+    ]
+  })
+}
+
+function statementAddOns(addOns: AddOnOption[]): ProposalStatementAddOn[] {
+  return addOns.flatMap((addOn) => {
+    if (!addOn._id) return []
+    return [
+      {
+        id: addOn._id,
+        name: line(addOn.name),
+        scope: (addOn.scope ?? []) as PortableTextBlock[],
+        line: line(addOn.line),
+      },
+    ]
+  })
 }
 
 function KickoffLink({token}: {token: string}) {
@@ -899,17 +918,6 @@ function SignCardNote({title, children}: {title?: string; children: ReactNode}) 
       </p>
     </div>
   )
-}
-
-/** "The remaining $2,475 is invoiced when the work is accepted." */
-function restLine(totalCents: number, steps: Array<{amountCents: number; trigger: string}>) {
-  if (steps.length < 2) return null
-  const rest = totalCents - (steps[0]?.amountCents ?? 0)
-  if (steps.length === 2) {
-    const trigger = steps[1]?.trigger ?? ''
-    return `The remaining ${formatCents(rest)} is invoiced ${trigger.charAt(0).toLowerCase()}${trigger.slice(1)}.`
-  }
-  return `The remaining ${formatCents(rest)} is invoiced in ${steps.length - 1} later payments.`
 }
 
 function AgreementLine({
@@ -980,51 +988,6 @@ function splitAgreement(label: string) {
   }
   if (cursor < label.length) parts.push({kind: 'text', text: label.slice(cursor)})
   return parts
-}
-
-function Statement({
-  packageName,
-  packageScope,
-  packageItems,
-  addOns,
-  standing,
-}: {
-  packageName: string
-  packageScope: PortableTextBlock[]
-  packageItems: Array<string | null>
-  addOns: Array<{name: string; scope: PortableTextBlock[]; line: string}>
-  standing: PortableTextBlock[]
-}) {
-  return (
-    <div className="max-w-[40rem] text-[1.0625rem] leading-relaxed [&_h3]:mt-[1.25rem] [&_h3:first-child]:mt-0 [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]">
-      {packageName ? <h3 className="mt-0">{packageName}</h3> : null}
-      <ScopeCopy blocks={packageScope} items={packageItems} />
-      {addOns.map((addOn) => (
-        <div key={addOn.name}>
-          {addOn.name ? <h3>{addOn.name}</h3> : null}
-          <ScopeCopy blocks={addOn.scope} items={addOn.line ? [addOn.line] : []} />
-        </div>
-      ))}
-      {standing.length > 0 ? (
-        <div className="mt-[1.25rem]">
-          <PortableText value={standing} />
-        </div>
-      ) : null}
-    </div>
-  )
-}
-
-function ScopeCopy({blocks, items}: {blocks: PortableTextBlock[]; items: Array<string | null>}) {
-  if (blocks.length > 0) return <PortableText value={blocks} />
-  const lines = items.map((item) => line(item)).filter(Boolean)
-  if (lines.length === 0) return null
-  return (
-    <ul>
-      {lines.map((item) => (
-        <li key={item}>{item}</li>
-      ))}
-    </ul>
-  )
 }
 
 function Signed({

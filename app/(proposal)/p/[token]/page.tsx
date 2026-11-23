@@ -141,6 +141,7 @@ export default async function ProposalRoute({params, searchParams}: Props) {
       payment={payment}
       settings={settings}
       legalPages={legalPages}
+      groups={isDevPreview(token) && previewGroupAddOns(query.groups)}
     />
   )
 }
