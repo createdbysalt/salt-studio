@@ -1,5 +1,6 @@
 import {ProposalSwirlField} from '@/components/ProposalOutcomes'
 import {ProposalScopePanel} from '@/components/ProposalScopePanel'
+import {groupByCategory} from '@/lib/proposal/addOnGroups'
 import {PortableText, type PortableTextBlock} from 'next-sanity'
 
 export type ProposalPackageOffer = {
@@ -21,6 +22,7 @@ export type ProposalAddOnOffer = {
   line: string
   scope: PortableTextBlock[]
   price: string
+  category: string | null
 }
 
 /**
@@ -65,7 +67,7 @@ function ScopeLink({
       dismissLabel={`Dismiss ${name} scope`}
       closeLabel={`Close ${name} scope`}
     >
-      <div className="max-w-[40rem] text-[1.0625rem] leading-relaxed [&_h3]:mt-[1.25rem] [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]">
+      <div className="max-w-[40rem] text-[1.0625rem] leading-relaxed [&_h3]:mt-10 [&_h3]:mb-3 [&_h3:first-child]:mt-2 [&_h3]:text-[1.5rem] [&_h3]:font-bold [&_h3]:leading-tight [&_h3]:tracking-[-0.03em] [&_h3+p]:mt-0 [&_h3+ul]:mt-0 [&_h3+ol]:mt-0 [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]">
         {scope.length > 0 ? (
           <PortableText value={scope} />
         ) : items.length > 0 ? (
@@ -236,49 +238,75 @@ export function ProposalPackages({
           </div>
         ))}
 
-        {addOns.length > 0 ? (
-          <div className="pt-4 md:col-span-12">
-            <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-              {addOnHeading}
-            </p>
-            <div className="mt-4 grid grid-cols-1 items-stretch gap-3 md:grid-cols-2">
-              {addOns.map((addOn) => (
-                <article
-                  key={addOn.id}
-                  className="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-white/70 bg-[rgba(228,228,228,0.62)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_18px_40px_rgba(40,30,10,0.1)] backdrop-blur-[42px] md:px-5 md:py-5"
-                >
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.4),transparent_42%)]"
-                  />
-                  <div className="relative flex flex-row items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="text-[1.15rem] font-medium leading-snug tracking-[-0.03em] md:text-[1.5rem]">
-                        {addOn.name}
-                      </p>
-                      {addOn.line ? (
-                        <p className="mt-1.5 text-[0.95rem] font-medium leading-snug text-[#5c5c5c] md:text-[1.05rem]">
-                          {addOn.line}
-                        </p>
-                      ) : null}
-                    </div>
-                    {addOn.price ? (
-                      <p className="shrink-0 text-right text-[1.15rem] font-medium leading-tight tracking-[-0.04em] md:pt-1 md:text-[1.35rem]">
-                        {addOn.price}
-                      </p>
-                    ) : null}
-                  </div>
-                  <ScopeLink
-                    name={addOn.name}
-                    scope={addOn.scope}
-                    items={addOn.line ? [addOn.line] : []}
-                  />
-                </article>
-              ))}
-            </div>
-          </div>
-        ) : null}
+        {addOns.length > 0
+          ? (groupByCategory(addOns, (addOn) => addOn.category, addOnHeading)?.map(
+              (group, index) => (
+                <AddOnGroup
+                  key={`${group.label}-${index}`}
+                  heading={group.label}
+                  addOns={group.items}
+                  className={index === 0 ? 'pt-4 md:col-span-12' : 'pt-10 md:col-span-12'}
+                />
+              ),
+            ) ?? (
+              <AddOnGroup heading={addOnHeading} addOns={addOns} className="pt-4 md:col-span-12" />
+            ))
+          : null}
       </div>
     </section>
+  )
+}
+
+const addOnLabelClass =
+  'font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]'
+
+function AddOnGroup({
+  heading,
+  addOns,
+  className,
+}: {
+  heading: string
+  addOns: ProposalAddOnOffer[]
+  className: string
+}) {
+  return (
+    <div className={className}>
+      <p className={addOnLabelClass}>{heading}</p>
+      <div className="mt-4 grid grid-cols-1 items-stretch gap-3 md:grid-cols-2">
+        {addOns.map((addOn) => (
+          <article
+            key={addOn.id}
+            className="relative flex h-full flex-col overflow-hidden rounded-[20px] border border-white/70 bg-[rgba(228,228,228,0.62)] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_18px_40px_rgba(40,30,10,0.1)] backdrop-blur-[42px] md:px-5 md:py-5"
+          >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.4),transparent_42%)]"
+            />
+            <div className="relative flex flex-row items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[1.15rem] font-medium leading-snug tracking-[-0.03em] md:text-[1.5rem]">
+                  {addOn.name}
+                </p>
+                {addOn.line ? (
+                  <p className="mt-1.5 text-[0.95rem] font-medium leading-snug text-[#5c5c5c] md:text-[1.05rem]">
+                    {addOn.line}
+                  </p>
+                ) : null}
+              </div>
+              {addOn.price ? (
+                <p className="shrink-0 text-right text-[1.15rem] font-medium leading-tight tracking-[-0.04em] md:pt-1 md:text-[1.35rem]">
+                  {addOn.price}
+                </p>
+              ) : null}
+            </div>
+            <ScopeLink
+              name={addOn.name}
+              scope={addOn.scope}
+              items={addOn.line ? [addOn.line] : []}
+            />
+          </article>
+        ))}
+      </div>
+    </div>
   )
 }

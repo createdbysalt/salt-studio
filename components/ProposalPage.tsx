@@ -577,6 +577,7 @@ function Packages({
               line: line(addOn.line),
               scope: (addOn.scope ?? []) as PortableTextBlock[],
               price: formatAddOnPrice(addOn.amount, addOn.billingType),
+              category: line(addOn.category) || null,
             },
           ]
         })
@@ -780,6 +781,7 @@ function Investment({
               name: line(addOn.name),
               price: formatAddOnPrice(addOn.amount, addOn.billingType),
               group: chooseOneGroupKey(addOn.chooseOneGroup),
+              category: line(addOn.category) || null,
             },
           ]
         })}

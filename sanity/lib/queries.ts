@@ -943,6 +943,7 @@ export const proposalByTokenQuery = defineQuery(`
       amount,
       billingType,
       chooseOneGroup,
+      category,
       scope,
       deliverables[]{ _key, name, description, phase, acceptanceCriteria },
       outOfScope[]{ _key, text }

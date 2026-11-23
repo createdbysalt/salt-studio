@@ -76,6 +76,15 @@ export default defineType({
         }),
     }),
     defineField({
+      name: 'category',
+      title: 'Category',
+      type: 'string',
+      group: 'card',
+      description:
+        'Optional. Add-ons with the same category text are shown together under that heading. Leave it blank to list the add-on under Add-ons.',
+      validation: (rule) => rule.max(80).warning('Shorter text fits the heading better'),
+    }),
+    defineField({
       name: 'scope',
       title: 'Scope of work',
       type: 'array',
@@ -124,13 +133,19 @@ export default defineType({
     }),
   ],
   preview: {
-    select: {title: 'name', line: 'line', amount: 'amount', billingType: 'billingType'},
-    prepare({title, line, amount, billingType}) {
+    select: {
+      title: 'name',
+      line: 'line',
+      amount: 'amount',
+      billingType: 'billingType',
+      category: 'category',
+    },
+    prepare({title, line, amount, billingType, category}) {
       const price = typeof amount === 'number' ? `$${amount.toLocaleString('en-US')}` : ''
       const billed = billingType === 'monthly' && price ? `${price} a month` : price
       return {
         title: title || 'Add-on',
-        subtitle: [billed, line].filter(Boolean).join(' · '),
+        subtitle: [category, billed, line].filter(Boolean).join(' · '),
       }
     },
   },

@@ -1,6 +1,7 @@
 'use client'
 
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
+import {groupAddOnChoiceSections, type AddOnChoiceBlock} from '@/lib/proposal/addOnGroups'
 import {
   formatCents,
   monthlyBillingSentence,
@@ -9,7 +10,7 @@ import {
 } from '@/lib/proposal/quote'
 import {useGSAP} from '@gsap/react'
 import {useRouter} from 'next/navigation'
-import {useEffect, useRef, useState, type MouseEvent} from 'react'
+import {Fragment, useEffect, useRef, useState, type MouseEvent} from 'react'
 
 type PackageChoice = {
   id: string
@@ -24,7 +25,11 @@ type AddOnChoice = {
   price: string
   /** Set only when this proposal has two or more add-ons with the same key. */
   group: string | null
+  category: string | null
 }
+
+const addOnLabelClass =
+  'font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]'
 
 const rowClass =
   'flex items-center justify-between gap-4 rounded-[20px] border border-white/70 bg-[rgba(228,228,228,0.72)] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[24px]'
@@ -79,12 +84,89 @@ export function ProposalChoices({
   const totalCents = quote?.totalCents ?? 0
   const firstStep = quote && quote.steps.length > 1 ? quote.steps[0] : null
   const monthlyLine = monthlyBillingSentence(quote?.monthly ?? [])
-  const addOnBlocks = groupAddOnChoices(addOns)
+  const addOnSections = groupAddOnChoiceSections(addOns, (addOn) => addOn.category, 'Add-ons')
 
   function chooseGroup(group: string, nextId: string | null) {
     const members = new Set(addOns.filter((item) => item.group === group).map((item) => item.id))
     const without = selection.current.addonIds.filter((id) => !members.has(id))
     visit(selection.current.packageId, nextId ? [...without, nextId] : without)
+  }
+
+  function renderAddOnFieldset(block: AddOnChoiceBlock<AddOnChoice>) {
+    const key = choiceBlockKey(block)
+    if (block.kind === 'checks') {
+      return (
+        <fieldset key={key}>
+          <legend className={addOnLabelClass}>Select any add-ons</legend>
+          <div className="mt-3 grid gap-3">
+            {block.items.map((addOn) => {
+              const selected = currentAddOns.includes(addOn.id)
+              const next = selected
+                ? currentAddOns.filter((id) => id !== addOn.id)
+                : [...currentAddOns, addOn.id]
+              return (
+                <ChoiceRow
+                  key={addOn.id}
+                  href={choiceHref(token, currentPackage, next, kickoff)}
+                  selected={selected}
+                  shape="check"
+                  name={addOn.name}
+                  price={addOn.price}
+                  onSelect={() => {
+                    const current = selection.current.addonIds
+                    const toggled = current.includes(addOn.id)
+                      ? current.filter((id) => id !== addOn.id)
+                      : [...current, addOn.id]
+                    visit(selection.current.packageId, toggled)
+                  }}
+                />
+              )
+            })}
+          </div>
+        </fieldset>
+      )
+    }
+
+    if (block.kind !== 'radios') {
+      const exhaustive: never = block
+      return exhaustive
+    }
+
+    return (
+      <fieldset key={key} role="radiogroup">
+        <legend className={addOnLabelClass}>Choose one</legend>
+        <div className="mt-3 grid gap-3">
+          <ChoiceRow
+            href={choiceHref(
+              token,
+              currentPackage,
+              currentAddOns.filter((id) => !block.ids.has(id)),
+              kickoff,
+            )}
+            selected={!block.items.some((item) => currentAddOns.includes(item.id))}
+            shape="radio"
+            name="None"
+            price=""
+            onSelect={() => chooseGroup(block.group, null)}
+          />
+          {block.items.map((addOn) => {
+            const selected = currentAddOns.includes(addOn.id)
+            const without = currentAddOns.filter((id) => !block.ids.has(id))
+            return (
+              <ChoiceRow
+                key={addOn.id}
+                href={choiceHref(token, currentPackage, [...without, addOn.id], kickoff)}
+                selected={selected}
+                shape="radio"
+                name={addOn.name}
+                price={addOn.price}
+                onSelect={() => chooseGroup(block.group, addOn.id)}
+              />
+            )
+          })}
+        </div>
+      </fieldset>
+    )
   }
 
   return (
@@ -155,76 +237,16 @@ export function ProposalChoices({
           </fieldset>
         ) : null}
 
-        {addOnBlocks.map((block) =>
-          block.kind === 'checks' ? (
-            <fieldset key={`checks-${block.items[0]?.id ?? 'addons'}`}>
-              <legend className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-                Select any add-ons
-              </legend>
-              <div className="mt-3 grid gap-3">
-                {block.items.map((addOn) => {
-                  const selected = currentAddOns.includes(addOn.id)
-                  const next = selected
-                    ? currentAddOns.filter((id) => id !== addOn.id)
-                    : [...currentAddOns, addOn.id]
-                  return (
-                    <ChoiceRow
-                      key={addOn.id}
-                      href={choiceHref(token, currentPackage, next, kickoff)}
-                      selected={selected}
-                      shape="check"
-                      name={addOn.name}
-                      price={addOn.price}
-                      onSelect={() => {
-                        const current = selection.current.addonIds
-                        const toggled = current.includes(addOn.id)
-                          ? current.filter((id) => id !== addOn.id)
-                          : [...current, addOn.id]
-                        visit(selection.current.packageId, toggled)
-                      }}
-                    />
-                  )
-                })}
-              </div>
-            </fieldset>
-          ) : (
-            <fieldset key={block.group} role="radiogroup">
-              <legend className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-                Choose one
-              </legend>
-              <div className="mt-3 grid gap-3">
-                <ChoiceRow
-                  href={choiceHref(
-                    token,
-                    currentPackage,
-                    currentAddOns.filter((id) => !block.ids.has(id)),
-                    kickoff,
-                  )}
-                  selected={!block.items.some((item) => currentAddOns.includes(item.id))}
-                  shape="radio"
-                  name="None"
-                  price=""
-                  onSelect={() => chooseGroup(block.group, null)}
-                />
-                {block.items.map((addOn) => {
-                  const selected = currentAddOns.includes(addOn.id)
-                  const without = currentAddOns.filter((id) => !block.ids.has(id))
-                  return (
-                    <ChoiceRow
-                      key={addOn.id}
-                      href={choiceHref(token, currentPackage, [...without, addOn.id], kickoff)}
-                      selected={selected}
-                      shape="radio"
-                      name={addOn.name}
-                      price={addOn.price}
-                      onSelect={() => chooseGroup(block.group, addOn.id)}
-                    />
-                  )
-                })}
-              </div>
-            </fieldset>
-          ),
-        )}
+        {addOnSections.map((section, index) => {
+          const blocks = section.blocks.map((block) => renderAddOnFieldset(block))
+          if (section.label == null) return <Fragment key={`addons-${index}`}>{blocks}</Fragment>
+          return (
+            <div key={`${section.label}-${index}`} className="grid gap-4">
+              <p className={addOnLabelClass}>{section.label}</p>
+              {blocks}
+            </div>
+          )
+        })}
       </div>
 
       <div className="flex justify-end pr-5">
@@ -260,44 +282,8 @@ export function ProposalChoices({
   )
 }
 
-type AddOnBlock =
-  | {kind: 'checks'; items: AddOnChoice[]}
-  | {kind: 'radios'; group: string; ids: Set<string>; items: AddOnChoice[]}
-
-/** A group key used by only one add-on stays a checkbox. */
-function groupAddOnChoices(addOns: AddOnChoice[]): AddOnBlock[] {
-  const counts = new Map<string, number>()
-  for (const addOn of addOns) {
-    if (!addOn.group) continue
-    counts.set(addOn.group, (counts.get(addOn.group) ?? 0) + 1)
-  }
-  const seen = new Set<string>()
-  const blocks: AddOnBlock[] = []
-  const checks: AddOnChoice[] = []
-  const flush = () => {
-    if (checks.length === 0) return
-    blocks.push({kind: 'checks', items: [...checks]})
-    checks.length = 0
-  }
-  for (const addOn of addOns) {
-    const count = addOn.group ? (counts.get(addOn.group) ?? 0) : 0
-    if (!addOn.group || count < 2) {
-      checks.push(addOn)
-      continue
-    }
-    flush()
-    if (seen.has(addOn.group)) continue
-    seen.add(addOn.group)
-    const items = addOns.filter((item) => item.group === addOn.group)
-    blocks.push({
-      kind: 'radios',
-      group: addOn.group,
-      ids: new Set(items.map((item) => item.id)),
-      items,
-    })
-  }
-  flush()
-  return blocks
+function choiceBlockKey(block: AddOnChoiceBlock<AddOnChoice>) {
+  return block.kind === 'checks' ? `checks-${block.items[0]?.id ?? 'addons'}` : block.group
 }
 
 function ChoiceRow({
