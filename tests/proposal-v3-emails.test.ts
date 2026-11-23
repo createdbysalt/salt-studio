@@ -5,7 +5,9 @@ import type {AcceptanceRow, PaymentRow, ProposalEmailRow} from '@/lib/proposal/a
 import {buildProposalPdf} from '@/lib/proposal/documentPdf'
 import {acceptanceDocumentHash, bytesFromBase64, sha256Bytes} from '@/lib/proposal/frozenDocument'
 import {sendPaidProposalEmails, type ProposalEmailSend} from '@/lib/proposal/paidEmails'
+import {signedSowBlocks} from '@/lib/proposal/signedSow'
 import {validateSigningFields} from '@/lib/proposal/signingFields'
+import {formatSigningTime} from '@/lib/proposal/signingTime'
 import {
   proposalV3FixtureIds,
   proposalV3FixturePdf,
@@ -810,4 +812,109 @@ test('saved statement bytes are the attachment, and older rows are rebuilt', asy
   const mismatchedMail = await captureEmails(mismatched, 'pay_mismatched_sow', false)
   assert.equal(mismatchedMail.signer.attachments?.[0]?.content, rebuilt)
   assert.equal(mismatchedMail.studio.attachments?.[0]?.content, rebuilt)
+})
+
+const SIGNING_INSTANT = '2026-11-23T11:24:00.000Z'
+const SIGNING_LABEL = 'November 23, 2026 at 3:24 AM PST'
+
+test('a signing instant prints in Pacific time on the email and the statement', async () => {
+  assert.equal(formatSigningTime(SIGNING_INSTANT), SIGNING_LABEL)
+  assert.equal(formatSigningTime('2026-07-23T10:24:00.000Z'), 'July 23, 2026 at 3:24 AM PDT')
+
+  const blocks = signedSowBlocks({
+    proposal: {sections: []},
+    pkg: {name: 'Foundation', scope: [], includedItems: []},
+    addOns: [],
+    selection: {packageId: 'pkg-fixture', addonIds: [], kickoffDate: '2026-12-01'},
+    signerName: proposalV3FixtureSigner.fullName,
+    signerLegalName: proposalV3FixtureSigner.legalName,
+    signerAddress: {
+      formatted: proposalV3FixtureSigner.address,
+      lines: proposalV3FixtureSigner.address.split('\n'),
+    },
+    signerEmail: proposalV3FixtureSigner.email,
+    acceptedAt: SIGNING_INSTANT,
+    quote: {
+      packageId: 'pkg-fixture',
+      packageAmountCents: 100_000,
+      packageDueCents: 100_000,
+      percent: null,
+      addOns: [],
+      monthly: [],
+      monthlyCents: 0,
+      totalCents: 100_000,
+      steps: [{key: 'full', percent: 100, trigger: 'On signing', amountCents: 100_000}],
+      scheduleName: 'Full payment',
+      firstCents: 100_000,
+    },
+    msaVersion: 'fixture-v1',
+    msaPdf: null,
+    agreedHash: null,
+    ip: '203.0.113.10',
+  })
+  const accepted = blocks.find(
+    (block) => block.kind === 'paragraph' && block.text.startsWith('Accepted at:'),
+  )
+  assert.ok(accepted && accepted.kind === 'paragraph')
+  assert.equal(accepted.text, `Accepted at: ${SIGNING_LABEL}`)
+
+  installStore()
+  const sent: ProposalEmailSend[] = []
+  const base = acceptance()
+  assert.ok(base.agreed_document)
+  await sendPaidProposalEmails({
+    payment: payment({id: 'pay_pacific_time', acceptance_id: 'acc_pacific_time'}),
+    acceptance: acceptance({
+      id: 'acc_pacific_time',
+      created_at: SIGNING_INSTANT,
+      agreed_document: {
+        ...base.agreed_document,
+        signer: {...base.agreed_document.signer, acceptedAt: SIGNING_INSTANT},
+      },
+    }),
+    liveMode: false,
+    sender: async (message) => {
+      sent.push(message)
+      return {id: `resend-${sent.length}`}
+    },
+  })
+
+  const signer = sent.find((message) => message.idempotencyKey.startsWith('signed-docs/'))
+  assert.ok(signer)
+  assert.match(signer.text, /Accepted: November 23, 2026 at 3:24 AM PST/)
+  assert.match(signer.html, /November 23, 2026 at 3:24 AM PST/)
+  assert.equal(signer.text.includes('11:24 AM'), false)
+})
+
+test('a stored statement keeps its UTC accepted line when the record hash is checked', () => {
+  const base = acceptance().agreed_document
+  assert.ok(base)
+  const utcLine = 'Accepted at: November 23, 2026 at 11:24 AM'
+  const stored = {
+    ...base,
+    signer: {...base.signer, acceptedAt: SIGNING_INSTANT},
+    sow: {
+      blocks: [
+        ...base.sow.blocks.filter(
+          (block) => !(block.kind === 'paragraph' && block.text.startsWith('Record hash: ')),
+        ),
+        {kind: 'paragraph' as const, text: utcLine},
+      ],
+    },
+  }
+  const hash = acceptanceDocumentHash(stored)
+  assert.equal(
+    stored.sow.blocks.find((block) => block.text.startsWith('Accepted at:'))?.text,
+    utcLine,
+  )
+  assert.equal(acceptanceDocumentHash(stored), hash)
+  const reformatted = {
+    ...stored,
+    sow: {
+      blocks: stored.sow.blocks.map((block) =>
+        block.text === utcLine ? {...block, text: `Accepted at: ${SIGNING_LABEL}`} : block,
+      ),
+    },
+  }
+  assert.notEqual(acceptanceDocumentHash(reformatted), hash)
 })

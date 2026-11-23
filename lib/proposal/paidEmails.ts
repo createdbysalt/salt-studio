@@ -24,6 +24,7 @@ import {
   studioEmailText,
   type StudioEmailFields,
 } from '@/lib/proposal/signedEmailTemplate'
+import {formatSigningTime} from '@/lib/proposal/signingTime'
 import {client} from '@/sanity/lib/client'
 import {proposalByIdForLegacyAcceptanceQuery} from '@/sanity/lib/queries'
 import {token} from '@/sanity/lib/token'
@@ -228,23 +229,13 @@ function preShipSowBlocks(
     {kind: 'heading' as const, text: 'Acceptance block'},
     {kind: 'paragraph' as const, text: `Accepted by: ${acceptance.signer_name}`},
     {kind: 'paragraph' as const, text: `Email: ${acceptance.signer_email}`},
+    // Pre-v3 rows have no frozen statement. This copy prints the stored instant
+    // and the stored content hash. It is not hashed again from a formatted clock.
     {kind: 'paragraph' as const, text: `Accepted at: ${acceptance.created_at}`},
     {kind: 'paragraph' as const, text: `IP address: ${acceptance.ip ?? 'Not recorded'}`},
     {kind: 'paragraph' as const, text: `MSA version: ${acceptance.msa_version ?? 'Not recorded'}`},
     {kind: 'paragraph' as const, text: `Record hash: ${acceptance.agreed_text_sha256}`},
   ]
-}
-
-/** "November 12, 2026 at 2:21 PM", the same way the signed document reads. */
-function acceptedAtLabel(value: string | null | undefined) {
-  if (!value) return 'Not recorded'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'long',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-  }).format(date)
 }
 
 function signerMessage(input: {
@@ -272,7 +263,7 @@ function signerMessage(input: {
       amount: formatCents(step.amountCents),
       trigger: step.trigger,
     })),
-    acceptedAtLabel: acceptedAtLabel(document?.signer.acceptedAt ?? input.acceptance.created_at),
+    acceptedAtLabel: formatSigningTime(document?.signer.acceptedAt ?? input.acceptance.created_at),
     signerEmail: input.acceptance.signer_email,
     signerIp: input.acceptance.ip ?? null,
     msaVersion: input.acceptance.msa_version ?? null,
