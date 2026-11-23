@@ -2,6 +2,7 @@ import type {PdfBlock} from '@/lib/proposal/documentPdf'
 import {feeSectionBlocks} from '@/lib/proposal/feeBlocks'
 import type {FrozenAddress, FrozenMsaPdf} from '@/lib/proposal/frozenDocument'
 import type {ProposalQuote, ProposalSelection} from '@/lib/proposal/quote'
+import {formatSigningDate, formatSigningTime} from '@/lib/proposal/signingTime'
 import {stegaClean} from 'next-sanity'
 
 type SowProposal = {
@@ -29,12 +30,6 @@ type Block = {
   children?: Array<{text?: string}>
   style?: string
   listItem?: string
-}
-
-function dateLabel(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return new Intl.DateTimeFormat('en-US', {dateStyle: 'long', timeZone: 'UTC'}).format(date)
 }
 
 function formatAddress(address: FrozenAddress) {
@@ -80,7 +75,7 @@ export function signedSowBlocks(input: {
     {kind: 'title', text: 'Signed Statement of Work'},
     {kind: 'note', text: `Client legal name: ${input.signerLegalName}`},
     {kind: 'note', text: `Mailing address: ${formatAddress(input.signerAddress)}`},
-    {kind: 'note', text: `Signed date: ${dateLabel(input.acceptedAt)}`},
+    {kind: 'note', text: `Signed date: ${formatSigningDate(input.acceptedAt)}`},
     {kind: 'part', text: 'Parties'},
     {
       kind: 'paragraph',
@@ -123,7 +118,7 @@ export function signedSowBlocks(input: {
     },
     {kind: 'paragraph', text: `Accepted by: ${input.signerName}`},
     {kind: 'paragraph', text: `Email: ${input.signerEmail}`},
-    {kind: 'paragraph', text: `Accepted at: ${dateTimeLabel(input.acceptedAt)}`},
+    {kind: 'paragraph', text: `Accepted at: ${formatSigningTime(input.acceptedAt)}`},
     {kind: 'paragraph', text: `IP address: ${input.ip ?? 'Not recorded'}`},
     {kind: 'paragraph', text: `MSA version: ${input.msaVersion ?? 'Not recorded'}`},
     // Which agreement, provably. Printing the checksum here means the
@@ -149,15 +144,4 @@ export function signedSowBlocks(input: {
   if (input.agreedHash) blocks.push({kind: 'paragraph', text: `Record hash: ${input.agreedHash}`})
 
   return blocks
-}
-
-/** "November 12, 2026 at 2:14 PM UTC", matching the other dates. */
-function dateTimeLabel(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'long',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-  }).format(date)
 }
