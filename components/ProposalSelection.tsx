@@ -1,12 +1,13 @@
 'use client'
 
+import {ProposalSowStatement} from '@/components/ProposalSowStatement'
 import {
   quoteSelection,
   selectionKey,
   type ProposalSelection,
   type QuoteInputs,
 } from '@/lib/proposal/quote'
-import {PortableText, stegaClean, type PortableTextBlock} from 'next-sanity'
+import type {PortableTextBlock} from 'next-sanity'
 import {useRouter} from 'next/navigation'
 import {createContext, useContext, useRef, useState, type ReactNode} from 'react'
 
@@ -149,7 +150,7 @@ export function ProposalLiveStatement({
   const selectedPackage = packages.find((item) => item.id === selection.packageId) ?? null
   const selectedAddOns = addOns.filter((item) => selection.addonIds.includes(item.id))
   return (
-    <Statement
+    <ProposalSowStatement
       packageName={selectedPackage?.name ?? ''}
       packageScope={selectedPackage?.scope ?? []}
       packageItems={selectedPackage?.items ?? []}
@@ -161,53 +162,4 @@ export function ProposalLiveStatement({
       standing={standing}
     />
   )
-}
-
-function Statement({
-  packageName,
-  packageScope,
-  packageItems,
-  addOns,
-  standing,
-}: {
-  packageName: string
-  packageScope: PortableTextBlock[]
-  packageItems: Array<string | null>
-  addOns: Array<{name: string; scope: PortableTextBlock[]; line: string}>
-  standing: PortableTextBlock[]
-}) {
-  return (
-    <div className="max-w-[40rem] text-[1.0625rem] leading-relaxed [&_h3]:mt-[1.25rem] [&_h3:first-child]:mt-0 [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]">
-      {packageName ? <h3 className="mt-0">{packageName}</h3> : null}
-      <ScopeCopy blocks={packageScope} items={packageItems} />
-      {addOns.map((addOn) => (
-        <div key={addOn.name}>
-          {addOn.name ? <h3>{addOn.name}</h3> : null}
-          <ScopeCopy blocks={addOn.scope} items={addOn.line ? [addOn.line] : []} />
-        </div>
-      ))}
-      {standing.length > 0 ? (
-        <div className="mt-[1.25rem]">
-          <PortableText value={standing} />
-        </div>
-      ) : null}
-    </div>
-  )
-}
-
-function ScopeCopy({blocks, items}: {blocks: PortableTextBlock[]; items: Array<string | null>}) {
-  if (blocks.length > 0) return <PortableText value={blocks} />
-  const lines = items.map((item) => line(item)).filter(Boolean)
-  if (lines.length === 0) return null
-  return (
-    <ul>
-      {lines.map((item) => (
-        <li key={item}>{item}</li>
-      ))}
-    </ul>
-  )
-}
-
-function line(value: string | null | undefined) {
-  return stegaClean(value ?? '').trim()
 }

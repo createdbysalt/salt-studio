@@ -43,7 +43,7 @@ import type {
   SettingsQueryResult,
 } from '@/sanity.types'
 import {urlForImage} from '@/sanity/lib/utils'
-import {PortableText, stegaClean, type PortableTextBlock} from 'next-sanity'
+import {stegaClean, type PortableTextBlock} from 'next-sanity'
 import Link from 'next/link'
 import type {ReactNode} from 'react'
 
