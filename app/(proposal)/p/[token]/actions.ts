@@ -12,7 +12,7 @@ import {
   type NewAcceptance,
   type PaymentStatus,
 } from '@/lib/proposal/acceptances'
-import {acceptanceDocumentHash} from '@/lib/proposal/frozenDocument'
+import {acceptanceDocumentHash, signedSowPdfColumns} from '@/lib/proposal/frozenDocument'
 import {
   PROPOSAL_GATE_COOKIE,
   PROPOSAL_GATE_MAX_AGE,
@@ -170,6 +170,10 @@ async function writeAcceptance(token: string, context: SigningContext) {
   if (agreedDocument) {
     agreedDocument.sow.blocks.push({kind: 'paragraph', text: `Record hash: ${agreedHash}`})
   }
+  // The bytes of the statement the client is about to be sent, including the
+  // record-hash line. Older rows leave both columns null and the email
+  // rebuilds the file from the stored blocks.
+  const sowPdf = agreedDocument ? signedSowPdfColumns(agreedDocument.sow.blocks) : null
   const msaPdf = context.msaPdf
   const row: NewAcceptance = {
     proposal_id: proposal._id,
@@ -198,6 +202,8 @@ async function writeAcceptance(token: string, context: SigningContext) {
     msa_pdf_filename: msaPdf?.status === 'frozen' ? msaPdf.filename : null,
     msa_pdf_content_type: msaPdf?.status === 'frozen' ? msaPdf.contentType : null,
     msa_pdf_missing_reason: msaPdf?.status === 'missing' ? msaPdf.reason : null,
+    sow_pdf_sha256: sowPdf?.sow_pdf_sha256 ?? null,
+    sow_pdf_bytes_base64: sowPdf?.sow_pdf_bytes_base64 ?? null,
     agreed_document: agreedDocument,
     agreed_text_sha256: agreedHash,
     ip,

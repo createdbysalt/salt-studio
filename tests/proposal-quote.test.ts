@@ -3,7 +3,11 @@ import {readFileSync} from 'node:fs'
 import test from 'node:test'
 import {agreedTextFor} from '@/lib/proposal/agreementText'
 import {feeSectionBlocks} from '@/lib/proposal/feeBlocks'
-import {acceptanceDocumentHash, buildFrozenAgreementDocument} from '@/lib/proposal/frozenDocument'
+import {
+  acceptanceDocumentHash,
+  buildFrozenAgreementDocument,
+  oneTimeAddOnsFromSelection,
+} from '@/lib/proposal/frozenDocument'
 import {
   billingTypeOf,
   discountedAmount,
@@ -506,7 +510,7 @@ test('a group key used by one add-on does not hide a second add-on', () => {
 const ONE_TIME_AGREED_HASH = '473d87092b24786542353c31eeaabae44d471048f84ee05787795acf033333ee'
 const ONE_TIME_DOCUMENT_HASH = 'a94cb4fc802e9a646c423bc0499b9e43d1f11fcaf0d9de8cbab09ee18c451ec4'
 
-test('a one-time-only fixture keeps the agreed text and document hashes from main', () => {
+test('freezing one-time add-on prices keeps the agreed text and document hash from main', () => {
   const block = (text: string) => ({
     _type: 'block',
     style: 'normal',
@@ -589,5 +593,75 @@ test('a one-time-only fixture keeps the agreed text and document hashes from mai
     sowBlocks: fees,
   })
   assert.equal('monthly' in document.quote, false)
+  assert.deepEqual(document.proposal.addons, [
+    {id: 'addon-video', name: 'Video edits', amountCents: 90_000},
+  ])
   assert.equal(acceptanceDocumentHash(document), ONE_TIME_DOCUMENT_HASH)
+  const withoutPrices = {
+    ...document,
+    proposal: {...document.proposal},
+  }
+  delete withoutPrices.proposal.addons
+  assert.equal(acceptanceDocumentHash(withoutPrices), ONE_TIME_DOCUMENT_HASH)
+  assert.equal(agreed, ONE_TIME_AGREED_HASH)
+})
+
+test('signing freezes one-time add-on prices and leaves monthly add-ons off that list', () => {
+  const source = readFileSync(new URL('../lib/proposal/sign.ts', import.meta.url), 'utf8')
+  assert.match(source, /oneTimeAddOns:\s*oneTimeAddOnsFromSelection\(/)
+  const frozen = oneTimeAddOnsFromSelection(
+    [
+      {_id: 'addon-video', name: 'Video edits'},
+      {_id: 'addon-notes', name: 'Monthly notes'},
+      {_id: 'addon-blank', name: '   '},
+    ],
+    [
+      {id: 'addon-video', amountCents: 90_000},
+      {id: 'addon-blank', amountCents: 10_000},
+    ],
+  )
+  assert.deepEqual(frozen, [
+    {id: 'addon-video', name: 'Video edits', amountCents: 90_000},
+    {id: 'addon-blank', name: 'Add-on', amountCents: 10_000},
+  ])
+
+  const empty = buildFrozenAgreementDocument({
+    signerFullName: 'Preview Signer',
+    signerLegalName: 'Preview Legal',
+    signerAddress: {formatted: '1 Main St, Town, US', lines: ['1 Main St', 'Town', 'US']},
+    signerEmail: 'preview@example.test',
+    acceptedAt: '2026-11-20T00:00:00.000Z',
+    proposalId: 'proposal-monthly-only',
+    clientName: 'Preview',
+    packageId: 'pkg-landing',
+    packageName: 'Landing page',
+    addonIds: ['addon-notes'],
+    addonNames: ['Monthly notes'],
+    oneTimeAddOns: [],
+    selectionKey: 'pkg-landing|addon-notes',
+    selection: {packageId: 'pkg-landing', addonIds: ['addon-notes'], kickoffDate: null},
+    quote: {
+      packageId: 'pkg-landing',
+      packageAmountCents: 480_000,
+      packageDueCents: 480_000,
+      percent: null,
+      addOns: [],
+      monthly: [{id: 'addon-notes', name: 'Monthly notes', amountCents: 50_000}],
+      monthlyCents: 50_000,
+      totalCents: 480_000,
+      steps: [{key: 'full', percent: 100, trigger: 'On signing', amountCents: 480_000}],
+      scheduleName: 'Full',
+      firstCents: 480_000,
+    },
+    contentSha256: 'abc',
+    kickoffUrl: null,
+    scheduleName: 'Full',
+    msaId: null,
+    msaVersion: null,
+    msaEffectiveDate: null,
+    msaBodyText: '',
+    msaPdf: {status: 'missing', reason: 'preview'},
+    sowBlocks: [],
+  })
+  assert.equal('addons' in empty.proposal, false)
 })
