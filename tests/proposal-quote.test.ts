@@ -18,6 +18,7 @@ import {
   splitCents,
   type QuoteProposal,
 } from '@/lib/proposal/quote'
+import {signedSowBlocks} from '@/lib/proposal/signedSow'
 
 const NOW = Date.UTC(2026, 10, 11, 12)
 const HOUR = 3_600_000
@@ -590,4 +591,85 @@ test('a one-time-only fixture keeps the agreed text and document hashes from mai
   })
   assert.equal('monthly' in document.quote, false)
   assert.equal(acceptanceDocumentHash(document), ONE_TIME_DOCUMENT_HASH)
+})
+
+const CONFIRMED = 'Kickoff date: Confirmed at kickoff.'
+
+function sowKickoffLine(kickoffOptions: QuoteProposal['kickoffOptions'], kickoff?: string) {
+  const doc = proposal({kickoffOptions})
+  const selection = resolveProposalSelection(doc, kickoff === undefined ? {} : {kickoff})
+  const quote = quoteProposal(doc, selection, NOW)
+  assert.ok(quote)
+  const blocks = signedSowBlocks({
+    proposal: {sections: []},
+    pkg: {
+      name: 'Foundation',
+      scope: [],
+      includedItems: ['A new site'],
+    },
+    addOns: [],
+    selection,
+    signerName: 'Ruth Adeyemi',
+    signerLegalName: 'Harbor Parish',
+    signerAddress: {formatted: '1 Harbor Lane, Austin, TX 78701, USA', lines: ['1 Harbor Lane']},
+    signerEmail: 'ruth@harborparish.example',
+    acceptedAt: '2026-11-12T14:14:00.000Z',
+    quote,
+    msaVersion: '1.1',
+    msaPdf: null,
+    agreedHash: null,
+    ip: null,
+  })
+  const line = blocks.find(
+    (block) =>
+      block.kind === 'paragraph' &&
+      (block.text.startsWith('Kickoff date:') || block.text.startsWith('Selected kickoff date:')),
+  )
+  assert.ok(line && line.kind === 'paragraph')
+  assert.equal(
+    blocks.some((block) => block.text.includes('Not selected')),
+    false,
+  )
+  return {selection, text: line.text}
+}
+
+test('an option with no date leaves the kickoff unset', () => {
+  assert.equal(
+    resolveProposalSelection(proposal({kickoffOptions: [{date: null}]}), {}).kickoffDate,
+    null,
+  )
+  assert.equal(resolveProposalSelection(proposal({kickoffOptions: [{}]}), {}).kickoffDate, null)
+  assert.equal(
+    resolveProposalSelection(proposal({kickoffOptions: [{date: ''}]}), {}).kickoffDate,
+    null,
+  )
+})
+
+test('the signed statement confirms the kickoff when no date is on the proposal', () => {
+  const states: Array<QuoteProposal['kickoffOptions']> = [[{date: null}], [], undefined]
+  for (const kickoffOptions of states) {
+    const {selection, text} = sowKickoffLine(kickoffOptions)
+    assert.equal(selection.kickoffDate, null)
+    assert.equal(text, CONFIRMED)
+  }
+})
+
+test('a chosen kickoff date is unchanged on the signed statement', () => {
+  const {selection, text} = sowKickoffLine(
+    [{date: '2026-11-17'}, {date: '2026-12-01'}],
+    '2026-12-01',
+  )
+  assert.equal(selection.kickoffDate, '2026-12-01')
+  assert.equal(text, 'Selected kickoff date: 2026-12-01.')
+})
+
+test('a missing kickoff field does not post a date', () => {
+  // The sign form omits the hidden input when the date is null, so the
+  // action reads an empty field and resolves it the same way.
+  const undated = resolveProposalSelection(proposal({kickoffOptions: [{date: null}]}), {
+    kickoff: '',
+  })
+  assert.equal(undated.kickoffDate, null)
+  const dated = resolveProposalSelection(proposal(), {kickoff: ''})
+  assert.equal(dated.kickoffDate, '2026-11-17')
 })

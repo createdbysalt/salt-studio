@@ -167,11 +167,19 @@ export function resolveProposalSelection(
   })
 
   const kickoffs = proposal.kickoffOptions ?? []
-  const requestedKickoff = firstQueryValue(query.kickoff)
-  const kickoffDate =
-    kickoffs.find((item) => item.date === requestedKickoff)?.date ?? kickoffs[0]?.date ?? null
+  const requestedKickoff = firstQueryValue(query.kickoff)?.trim()
+  const matched = requestedKickoff
+    ? kickoffs.find((item) => storedKickoffDate(item.date) === requestedKickoff)
+    : undefined
+  // A blank date is not a date. An unknown request still falls back to the first option.
+  const kickoffDate = storedKickoffDate(matched?.date ?? kickoffs[0]?.date)
 
   return {packageId, addonIds, kickoffDate}
+}
+
+function storedKickoffDate(date: string | null | undefined) {
+  const value = date?.trim()
+  return value ? value : null
 }
 
 /** A stable key for "the same selection", used to reuse an open session. */
