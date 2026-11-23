@@ -300,7 +300,12 @@ function collectBlocks(node: Element, blocks: PdfBlock[]) {
     }
     if (tag === 'H2' || tag === 'H3' || tag === 'H4') {
       const text = visibleText(child)
-      if (text) blocks.push({kind: 'heading', text})
+      if (text) {
+        blocks.push({
+          kind: child.hasAttribute('data-sow-part') ? 'part' : 'heading',
+          text,
+        })
+      }
       continue
     }
     if (child.children.length > 0) collectBlocks(child, blocks)

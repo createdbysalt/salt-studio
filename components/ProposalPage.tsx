@@ -11,6 +11,7 @@ import {ProposalRail, type ProposalRailItem} from '@/components/ProposalRail'
 import {ProposalScopePanel} from '@/components/ProposalScopePanel'
 import {ProposalSignForm} from '@/components/ProposalSignForm'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
+import {ProposalSowStatement} from '@/components/ProposalSowStatement'
 import {SiteFooter} from '@/components/SiteFooter'
 import type {PaymentMethod, PaymentStatus} from '@/lib/proposal/acceptances'
 import {addOnCardLabel} from '@/lib/proposal/cardName'
@@ -38,7 +39,7 @@ import type {
   SettingsQueryResult,
 } from '@/sanity.types'
 import {urlForImage} from '@/sanity/lib/utils'
-import {PortableText, stegaClean, type PortableTextBlock} from 'next-sanity'
+import {stegaClean, type PortableTextBlock} from 'next-sanity'
 import Link from 'next/link'
 import type {ReactNode} from 'react'
 
@@ -829,7 +830,7 @@ function Investment({
                 version={version}
                 statement={
                   scope ? (
-                    <Statement
+                    <ProposalSowStatement
                       packageName={line(view.selectedPackage?.name)}
                       packageScope={(view.selectedPackage?.scope ?? []) as PortableTextBlock[]}
                       packageItems={view.selectedPackage?.includedItems ?? []}
@@ -980,51 +981,6 @@ function splitAgreement(label: string) {
   }
   if (cursor < label.length) parts.push({kind: 'text', text: label.slice(cursor)})
   return parts
-}
-
-function Statement({
-  packageName,
-  packageScope,
-  packageItems,
-  addOns,
-  standing,
-}: {
-  packageName: string
-  packageScope: PortableTextBlock[]
-  packageItems: Array<string | null>
-  addOns: Array<{name: string; scope: PortableTextBlock[]; line: string}>
-  standing: PortableTextBlock[]
-}) {
-  return (
-    <div className="max-w-[40rem] text-[1.0625rem] leading-relaxed [&_h3]:mt-[1.25rem] [&_h3:first-child]:mt-0 [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]">
-      {packageName ? <h3 className="mt-0">{packageName}</h3> : null}
-      <ScopeCopy blocks={packageScope} items={packageItems} />
-      {addOns.map((addOn) => (
-        <div key={addOn.name}>
-          {addOn.name ? <h3>{addOn.name}</h3> : null}
-          <ScopeCopy blocks={addOn.scope} items={addOn.line ? [addOn.line] : []} />
-        </div>
-      ))}
-      {standing.length > 0 ? (
-        <div className="mt-[1.25rem]">
-          <PortableText value={standing} />
-        </div>
-      ) : null}
-    </div>
-  )
-}
-
-function ScopeCopy({blocks, items}: {blocks: PortableTextBlock[]; items: Array<string | null>}) {
-  if (blocks.length > 0) return <PortableText value={blocks} />
-  const lines = items.map((item) => line(item)).filter(Boolean)
-  if (lines.length === 0) return null
-  return (
-    <ul>
-      {lines.map((item) => (
-        <li key={item}>{item}</li>
-      ))}
-    </ul>
-  )
 }
 
 function Signed({
