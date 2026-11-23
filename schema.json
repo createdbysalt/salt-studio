@@ -5686,6 +5686,13 @@
         },
         "optional": true
       },
+      "cardName": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "line": {
         "type": "objectAttribute",
         "value": {

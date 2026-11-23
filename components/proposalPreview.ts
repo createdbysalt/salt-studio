@@ -192,6 +192,7 @@ export function previewProposal(
       {
         _id: 'addon-video',
         name: 'Video edits',
+        cardName: null,
         line: 'A set of short edits for the launch film.',
         amount: 900,
         billingType: 'one-time',
@@ -261,6 +262,7 @@ export function previewProposal(
       {
         _id: 'addon-notes',
         name: 'Monthly notes',
+        cardName: null,
         line: 'Notes after launch.',
         amount: 500,
         billingType: 'monthly',
@@ -273,6 +275,7 @@ export function previewProposal(
       {
         _id: 'addon-plan-one',
         name: 'Plan one',
+        cardName: null,
         line: 'The smaller monthly plan.',
         amount: 1500,
         billingType: 'monthly',
@@ -285,6 +288,7 @@ export function previewProposal(
       {
         _id: 'addon-plan-two',
         name: 'Plan two',
+        cardName: null,
         line: 'The middle monthly plan.',
         amount: 2000,
         billingType: 'monthly',
@@ -297,6 +301,7 @@ export function previewProposal(
       {
         _id: 'addon-plan-three',
         name: 'Plan three',
+        cardName: null,
         line: 'The larger monthly plan.',
         amount: 2500,
         billingType: 'monthly',
@@ -527,6 +532,7 @@ function groupedPreviewAddOns(): NonNullable<NonNullable<ProposalByTokenQueryRes
     {
       _id: 'addon-growth',
       name: 'Growth Plan',
+      cardName: 'Site Care: Growth Plan',
       line: 'A plan for the website.',
       amount: 900,
       billingType: 'one-time',
@@ -539,6 +545,7 @@ function groupedPreviewAddOns(): NonNullable<NonNullable<ProposalByTokenQueryRes
     {
       _id: 'addon-video',
       name: 'Testimonial video edits',
+      cardName: null,
       line: 'A set of short edits for the launch film.',
       amount: 900,
       billingType: 'one-time',
@@ -551,6 +558,7 @@ function groupedPreviewAddOns(): NonNullable<NonNullable<ProposalByTokenQueryRes
     {
       _id: 'addon-show-up',
       name: 'Show Up',
+      cardName: null,
       line: 'The smaller monthly plan.',
       amount: 1500,
       billingType: 'monthly',
@@ -563,6 +571,7 @@ function groupedPreviewAddOns(): NonNullable<NonNullable<ProposalByTokenQueryRes
     {
       _id: 'addon-be-known',
       name: 'Be Known',
+      cardName: null,
       line: 'The middle monthly plan.',
       amount: 2000,
       billingType: 'monthly',
@@ -575,6 +584,7 @@ function groupedPreviewAddOns(): NonNullable<NonNullable<ProposalByTokenQueryRes
     {
       _id: 'addon-be-the-place',
       name: 'Be the Place',
+      cardName: null,
       line: 'The larger monthly plan.',
       amount: 2500,
       billingType: 'monthly',
@@ -587,6 +597,7 @@ function groupedPreviewAddOns(): NonNullable<NonNullable<ProposalByTokenQueryRes
     {
       _id: 'addon-notes',
       name: 'Monthly notes',
+      cardName: null,
       line: 'Notes after launch.',
       amount: 500,
       billingType: 'monthly',

@@ -24,6 +24,13 @@ export default defineType({
       validation: (rule) => rule.required().error('Every add-on needs a name'),
     }),
     defineField({
+      name: 'cardName',
+      title: 'Card name',
+      type: 'string',
+      group: 'card',
+      description: 'Shown on the Investment card and pick list only. Leave empty to use Name.',
+    }),
+    defineField({
       name: 'line',
       title: 'One line',
       type: 'string',

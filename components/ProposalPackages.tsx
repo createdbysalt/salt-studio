@@ -19,7 +19,10 @@ export type ProposalPackageOffer = {
 
 export type ProposalAddOnOffer = {
   id: string
+  /** The add-on name. The scope dialog uses this. */
   name: string
+  /** Investment card heading. Equals `name` when no card name is set. */
+  cardTitle: string
   line: string
   scope: PortableTextBlock[]
   price: string
@@ -285,7 +288,7 @@ function AddOnGroup({
             <div className="relative flex flex-row items-start justify-between gap-3 max-sm:flex-col max-sm:items-stretch">
               <div className="min-w-0">
                 <p className="text-[1.15rem] font-medium leading-snug tracking-[-0.03em] md:text-[1.5rem]">
-                  {addOn.name}
+                  {addOn.cardTitle}
                 </p>
                 {addOn.line ? (
                   <p className="mt-1.5 text-[0.95rem] font-medium leading-snug text-[#5c5c5c] md:text-[1.05rem]">

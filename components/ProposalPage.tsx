@@ -12,6 +12,7 @@ import {ProposalSignForm} from '@/components/ProposalSignForm'
 import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import {SiteFooter} from '@/components/SiteFooter'
 import type {PaymentMethod, PaymentStatus} from '@/lib/proposal/acceptances'
+import {addOnCardLabel} from '@/lib/proposal/cardName'
 import {INVESTMENT_INTRO, PACKAGES_INTRO} from '@/lib/proposal/copy'
 import {proposalEyebrowClass} from '@/lib/proposal/eyebrow'
 import {
@@ -573,6 +574,7 @@ function Packages({
             {
               id: addOn._id,
               name,
+              cardTitle: addOnCardLabel(addOn.cardName, name),
               line: line(addOn.line),
               scope: (addOn.scope ?? []) as PortableTextBlock[],
               price: formatAddOnPrice(addOn.amount, addOn.billingType),
@@ -632,7 +634,7 @@ function AddOns({
                 return [
                   {
                     id: item._id,
-                    name: line(item.name),
+                    name: addOnCardLabel(item.cardName, item.name),
                     line: line(item.line),
                     amount: item.amount,
                     billingType: item.billingType,
@@ -643,7 +645,7 @@ function AddOns({
               ? [
                   {
                     id: addOn._id,
-                    name: line(addOn.name),
+                    name: addOnCardLabel(addOn.cardName, addOn.name),
                     line: line(addOn.line),
                     amount: addOn.amount,
                     billingType: addOn.billingType,
@@ -775,7 +777,7 @@ function Investment({
           return [
             {
               id: addOn._id,
-              name: line(addOn.name),
+              name: addOnCardLabel(addOn.cardName, addOn.name),
               price: formatAddOnPrice(addOn.amount, addOn.billingType),
               group: chooseOneGroupKey(addOn.chooseOneGroup),
               category: line(addOn.category) || null,
