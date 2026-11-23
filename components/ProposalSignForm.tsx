@@ -2,8 +2,14 @@
 
 import {signProposal, type SignActionState} from '@/app/(proposal)/p/[token]/actions'
 import {ProposalPayButton} from '@/components/ProposalPayButton'
+import {useProposalSelection} from '@/components/ProposalSelection'
 import {addressLooksComplete} from '@/lib/proposal/frozenDocument'
-import type {ProposalSelection} from '@/lib/proposal/quote'
+import {
+  formatCents,
+  selectionKey,
+  type ProposalQuote,
+  type ProposalSelection,
+} from '@/lib/proposal/quote'
 import {useRouter} from 'next/navigation'
 import {useActionState, useEffect, useState, type ReactNode} from 'react'
 
@@ -13,35 +19,38 @@ const fieldClass =
 /**
  * The signature and the first payment, inside the glass card.
  *
- * The form posts the selection it was rendered with, as hidden fields, plus
+ * The form posts the selection the total is using, as hidden fields, plus
  * the typed name and the agreement. The server recomputes the amount and
  * answers with a Stripe Checkout URL, and the browser goes there. Stripe's
  * own page collects the payment and returns them to the kickoff page.
  * Nothing on this side decides what is charged.
  */
 export function ProposalSignForm({
-  token,
-  selection,
-  payLabel,
-  restLine,
-  wireAvailable,
-  resume,
   defaults,
   note,
+  payment = null,
   children,
 }: {
-  token: string
-  selection: ProposalSelection
-  payLabel: string
-  restLine: string | null
-  wireAvailable: boolean
-  /** Set when they already signed and a payment of theirs is still open. */
-  resume: {signerName: string} | null
   defaults: {legalName: string; email: string}
   note: string | null
+  /**
+   * The open payment, if there is one. Resume is offered only when it is
+   * still the selection on screen.
+   */
+  payment?: {
+    resumable: boolean
+    signerName: string | null
+    selectionKey: string | null
+    amountCents: number
+  } | null
   children: ReactNode
 }) {
   const router = useRouter()
+  const {token, selection, quote} = useProposalSelection()
+  const payLabel = quote ? `Pay ${formatCents(quote.firstCents)}` : ''
+  const rest = quote ? restLine(quote.totalCents, quote.steps) : null
+  const wireAvailable = (quote?.firstCents ?? 0) >= 1_000_000
+  const resume = quote ? resumeOffer(payment, selection, quote) : null
   const [state, formAction, pending] = useActionState(
     async (previous: SignActionState, formData: FormData) =>
       signProposal(token, previous, formData),
@@ -220,7 +229,7 @@ export function ProposalSignForm({
                 </p>
               ) : null}
               <p className="mt-3 text-center text-[0.95rem] font-medium leading-snug text-[#5c5c5c]">
-                {restLine ?? 'The signed scope and receipt go to your email.'}
+                {rest ?? 'The signed scope and receipt go to your email.'}
               </p>
               {wireAvailable ? (
                 <button
@@ -239,4 +248,36 @@ export function ProposalSignForm({
       </div>
     </form>
   )
+}
+
+/**
+ * They signed, went to pay, and came back without finishing. The card then
+ * offers to pick that payment up rather than asking them to sign again.
+ * Changing the selection moves them off it, because the terms have moved.
+ */
+function resumeOffer(
+  payment: {
+    resumable: boolean
+    signerName: string | null
+    selectionKey: string | null
+    amountCents: number
+  } | null,
+  selection: ProposalSelection,
+  quote: ProposalQuote,
+) {
+  if (!payment?.resumable || !payment.signerName) return null
+  if (payment.selectionKey !== selectionKey(selection)) return null
+  if (payment.amountCents !== quote.firstCents) return null
+  return {signerName: payment.signerName}
+}
+
+/** "The remaining $2,475 is invoiced when the work is accepted." */
+function restLine(totalCents: number, steps: Array<{amountCents: number; trigger: string}>) {
+  if (steps.length < 2) return null
+  const rest = totalCents - (steps[0]?.amountCents ?? 0)
+  if (steps.length === 2) {
+    const trigger = steps[1]?.trigger ?? ''
+    return `The remaining ${formatCents(rest)} is invoiced ${trigger.charAt(0).toLowerCase()}${trigger.slice(1)}.`
+  }
+  return `The remaining ${formatCents(rest)} is invoiced in ${steps.length - 1} later payments.`
 }

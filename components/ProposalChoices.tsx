@@ -1,15 +1,10 @@
 'use client'
 
 import {EASE, gsap, prefersReducedMotion} from '@/components/motion/gsap'
-import {
-  formatCents,
-  monthlyBillingSentence,
-  quoteSelection,
-  type QuoteInputs,
-} from '@/lib/proposal/quote'
+import {proposalChoiceHref, useProposalSelection} from '@/components/ProposalSelection'
+import {formatCents, monthlyBillingSentence} from '@/lib/proposal/quote'
 import {useGSAP} from '@gsap/react'
-import {useRouter} from 'next/navigation'
-import {useEffect, useRef, useState, type MouseEvent} from 'react'
+import {useRef, useState, type MouseEvent} from 'react'
 
 type PackageChoice = {
   id: string
@@ -30,61 +25,29 @@ const rowClass =
   'flex items-center justify-between gap-4 rounded-[20px] border border-white/70 bg-[rgba(228,228,228,0.72)] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[24px]'
 
 /**
- * Package and add-on rows with the running total. The total is
- * `quoteSelection` on the inputs the server resolved, the same function
- * the charge uses, so the two cannot disagree.
+ * Package and add-on rows with the running total. The total is the quote
+ * on the shared selection, the same one the pay label, the statement, and
+ * the posted form use.
  */
 export function ProposalChoices({
-  token,
-  kickoff,
   packages,
   addOns,
-  packageId,
-  addonIds,
-  inputs,
 }: {
-  token: string
-  kickoff: string | null
   packages: PackageChoice[]
   addOns: AddOnChoice[]
-  packageId: string | null
-  addonIds: string[]
-  inputs: QuoteInputs
 }) {
-  const router = useRouter()
-  const [currentPackage, setCurrentPackage] = useState(packageId)
-  const [currentAddOns, setCurrentAddOns] = useState(addonIds)
-  const selection = useRef({packageId, addonIds})
-  const addonKey = addonIds.join('|')
-
-  useEffect(() => {
-    setCurrentPackage(packageId)
-    setCurrentAddOns(addonIds)
-    selection.current = {packageId, addonIds}
-  }, [packageId, addonKey, addonIds])
-
-  function visit(nextPackage: string | null, nextAddOns: string[]) {
-    selection.current = {packageId: nextPackage, addonIds: nextAddOns}
-    setCurrentPackage(nextPackage)
-    setCurrentAddOns(nextAddOns)
-    const params = new URLSearchParams()
-    if (nextPackage) params.set('package', nextPackage)
-    for (const id of nextAddOns) params.append('addon', id)
-    if (kickoff) params.set('kickoff', kickoff)
-    const query = params.toString()
-    router.replace(`/p/${encodeURIComponent(token)}${query ? `?${query}` : ''}`, {scroll: false})
-  }
-
-  const quote = quoteSelection(inputs, {packageId: currentPackage, addonIds: currentAddOns})
+  const {token, kickoff, inputs, selection, quote, choose, readSelection} = useProposalSelection()
+  const {packageId, addonIds} = selection
   const totalCents = quote?.totalCents ?? 0
   const firstStep = quote && quote.steps.length > 1 ? quote.steps[0] : null
   const monthlyLine = monthlyBillingSentence(quote?.monthly ?? [])
   const addOnBlocks = groupAddOnChoices(addOns)
 
   function chooseGroup(group: string, nextId: string | null) {
+    const current = readSelection()
     const members = new Set(addOns.filter((item) => item.group === group).map((item) => item.id))
-    const without = selection.current.addonIds.filter((id) => !members.has(id))
-    visit(selection.current.packageId, nextId ? [...without, nextId] : without)
+    const without = current.addonIds.filter((id) => !members.has(id))
+    choose(current.packageId, nextId ? [...without, nextId] : without)
   }
 
   return (
@@ -106,16 +69,16 @@ export function ProposalChoices({
             </legend>
             <div className="mt-3 grid gap-3">
               {packages.map((pkg) => {
-                const selected = pkg.id === currentPackage
+                const selected = pkg.id === packageId
                 return (
                   <a
                     key={pkg.id}
-                    href={choiceHref(token, pkg.id, currentAddOns, kickoff)}
+                    href={proposalChoiceHref(token, pkg.id, addonIds, kickoff)}
                     aria-current={selected ? 'true' : undefined}
                     onClick={(event) => {
                       if (modifiedClick(event)) return
                       event.preventDefault()
-                      visit(pkg.id, selection.current.addonIds)
+                      choose(pkg.id, readSelection().addonIds)
                     }}
                     className={rowClass}
                   >
@@ -163,24 +126,24 @@ export function ProposalChoices({
               </legend>
               <div className="mt-3 grid gap-3">
                 {block.items.map((addOn) => {
-                  const selected = currentAddOns.includes(addOn.id)
+                  const selected = addonIds.includes(addOn.id)
                   const next = selected
-                    ? currentAddOns.filter((id) => id !== addOn.id)
-                    : [...currentAddOns, addOn.id]
+                    ? addonIds.filter((id) => id !== addOn.id)
+                    : [...addonIds, addOn.id]
                   return (
                     <ChoiceRow
                       key={addOn.id}
-                      href={choiceHref(token, currentPackage, next, kickoff)}
+                      href={proposalChoiceHref(token, packageId, next, kickoff)}
                       selected={selected}
                       shape="check"
                       name={addOn.name}
                       price={addOn.price}
                       onSelect={() => {
-                        const current = selection.current.addonIds
-                        const toggled = current.includes(addOn.id)
-                          ? current.filter((id) => id !== addOn.id)
-                          : [...current, addOn.id]
-                        visit(selection.current.packageId, toggled)
+                        const current = readSelection()
+                        const toggled = current.addonIds.includes(addOn.id)
+                          ? current.addonIds.filter((id) => id !== addOn.id)
+                          : [...current.addonIds, addOn.id]
+                        choose(current.packageId, toggled)
                       }}
                     />
                   )
@@ -194,25 +157,25 @@ export function ProposalChoices({
               </legend>
               <div className="mt-3 grid gap-3">
                 <ChoiceRow
-                  href={choiceHref(
+                  href={proposalChoiceHref(
                     token,
-                    currentPackage,
-                    currentAddOns.filter((id) => !block.ids.has(id)),
+                    packageId,
+                    addonIds.filter((id) => !block.ids.has(id)),
                     kickoff,
                   )}
-                  selected={!block.items.some((item) => currentAddOns.includes(item.id))}
+                  selected={!block.items.some((item) => addonIds.includes(item.id))}
                   shape="radio"
                   name="None"
                   price=""
                   onSelect={() => chooseGroup(block.group, null)}
                 />
                 {block.items.map((addOn) => {
-                  const selected = currentAddOns.includes(addOn.id)
-                  const without = currentAddOns.filter((id) => !block.ids.has(id))
+                  const selected = addonIds.includes(addOn.id)
+                  const without = addonIds.filter((id) => !block.ids.has(id))
                   return (
                     <ChoiceRow
                       key={addOn.id}
-                      href={choiceHref(token, currentPackage, [...without, addOn.id], kickoff)}
+                      href={proposalChoiceHref(token, packageId, [...without, addOn.id], kickoff)}
                       selected={selected}
                       shape="radio"
                       name={addOn.name}
@@ -361,20 +324,6 @@ function formatPercent(percent: number) {
 
 function modifiedClick(event: MouseEvent<HTMLAnchorElement>) {
   return event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0
-}
-
-function choiceHref(
-  token: string,
-  packageId: string | null,
-  addonIds: string[],
-  kickoff: string | null,
-) {
-  const params = new URLSearchParams()
-  if (packageId) params.set('package', packageId)
-  for (const id of addonIds) params.append('addon', id)
-  if (kickoff) params.set('kickoff', kickoff)
-  const query = params.toString()
-  return `/p/${encodeURIComponent(token)}${query ? `?${query}` : ''}`
 }
 
 function FlipTotal({value}: {value: string}) {
