@@ -11,6 +11,8 @@ const ATTRIBUTION =
 const PDF_URL =
   'https://cdn.sanity.io/files/jkqf2ng5/production/6f2313cdc7b5ac1add256890c572af39b4d9dc27.pdf'
 
+const STANDARDS_SENTENCE = `${MSA_PANEL_SUMMARY.standardsBefore}${MSA_PANEL_SUMMARY.standardsUrl}${MSA_PANEL_SUMMARY.standardsAfter}`
+
 function block(
   key: string,
   text: string,
@@ -31,10 +33,79 @@ function sourceText(value: PortableTextBlock) {
   return children.map((child) => child.text ?? '').join('')
 }
 
-function renderedAgreementTexts(html: string) {
+test('the summary points at the agreement pdf and keeps the attribution byte for byte', () => {
+  const body = [
+    block('cover', 'Cover Page', {style: 'h3'}),
+    block('provider', 'Salt Studio LLC, trading as SALT Studio'),
+    block('credit', ATTRIBUTION),
+    block('law', 'The laws of Oregon, United States'),
+  ]
+  const html = renderToStaticMarkup(<ProposalMsaPanel body={body} pdfUrl={PDF_URL} />)
   const document = new JSDOM(html).window.document
-  const root = document.querySelector('[data-msa-full]')
-  assert.ok(root, 'full agreement is rendered')
+
+  assert.equal(document.querySelector('details'), null)
+  assert.equal(document.querySelector('[data-msa-full]'), null)
+  assert.equal(
+    document.body.textContent?.includes('Salt Studio LLC, trading as SALT Studio'),
+    false,
+  )
+  assert.equal(document.body.textContent?.includes('The laws of Oregon, United States'), false)
+
+  assert.equal(document.querySelector('#msa-summary-title')?.textContent, MSA_PANEL_SUMMARY.title)
+  const summary = document.querySelector('#msa-summary-title')?.parentElement
+  const paragraphs = [...(summary?.querySelectorAll('p') ?? [])].map((node) => node.textContent)
+  assert.deepEqual(paragraphs, [
+    MSA_PANEL_SUMMARY.lines[0],
+    MSA_PANEL_SUMMARY.lines[1],
+    STANDARDS_SENTENCE,
+    MSA_PANEL_SUMMARY.lines[2],
+    MSA_PANEL_SUMMARY.closing,
+  ])
+
+  const standards = summary?.querySelector('a')
+  assert.equal(standards?.textContent, MSA_PANEL_SUMMARY.standardsUrl)
+  assert.equal(standards?.getAttribute('href'), MSA_PANEL_SUMMARY.standardsUrl)
+  assert.equal(standards?.getAttribute('target'), '_blank')
+  assert.equal(standards?.getAttribute('rel'), 'noopener noreferrer')
+
+  const pdf = [...document.querySelectorAll('a')].find(
+    (link) => link.textContent === MSA_PANEL_SUMMARY.pdfLabel,
+  )
+  assert.ok(pdf)
+  assert.equal(pdf.getAttribute('href'), PDF_URL)
+  assert.equal(pdf.getAttribute('target'), '_blank')
+  assert.equal(pdf.getAttribute('rel'), 'noopener noreferrer')
+  assert.equal(summary?.contains(pdf), false)
+
+  assert.equal(
+    [...document.querySelectorAll('p')].some((node) => node.textContent === MSA_PANEL_SUMMARY.note),
+    true,
+  )
+
+  const credit = document.querySelector('[data-msa-attribution]')
+  assert.equal(credit?.textContent, ATTRIBUTION)
+  assert.equal(credit?.textContent, sourceText(body[2]))
+})
+
+test('an agreement without a pdf shows the text version and no pdf link', () => {
+  const body = [
+    block('one', 'First paragraph, unchanged.'),
+    block('credit', ATTRIBUTION),
+    block('two', 'Second paragraph, unchanged.'),
+  ]
+  const html = renderToStaticMarkup(<ProposalMsaPanel body={body} pdfUrl={null} />)
+  const document = new JSDOM(html).window.document
+
+  assert.equal(document.querySelector('a[href*="cdn.sanity.io"]'), null)
+  assert.equal(
+    [...document.querySelectorAll('a')].some(
+      (link) => link.textContent === MSA_PANEL_SUMMARY.pdfLabel,
+    ),
+    false,
+  )
+
+  const full = document.querySelector('[data-msa-full]')
+  assert.ok(full)
   const texts: string[] = []
   const walk = (el: Element) => {
     const tag = el.tagName
@@ -44,63 +115,8 @@ function renderedAgreementTexts(html: string) {
     }
     for (const child of el.children) walk(child)
   }
-  for (const child of root.children) walk(child)
-  return {document, root, texts}
-}
-
-test('rendered full agreement text matches the source text exactly', () => {
-  const body = [
-    block('cover', 'Cover Page', {style: 'h3'}),
-    block('provider', 'Salt Studio LLC, trading as SALT Studio'),
-    block('credit', ATTRIBUTION),
-    block('law', 'The laws of Oregon, United States'),
-    block('bullet', 'A listed term that stays byte for byte.', {listItem: 'bullet'}),
-  ]
-  const html = renderToStaticMarkup(<ProposalMsaPanel body={body} pdfUrl={PDF_URL} />)
-  const {document, root, texts} = renderedAgreementTexts(html)
-  const rest = body.filter((item) => sourceText(item) !== ATTRIBUTION)
-  const credit = body.filter((item) => sourceText(item) === ATTRIBUTION)
-  const expected = [...rest, ...credit].map(sourceText)
-
-  assert.deepEqual(texts, expected)
-  assert.equal(texts.join('\n'), expected.join('\n'))
-  assert.equal(texts[texts.length - 1], ATTRIBUTION)
-  assert.equal(texts.slice().sort().join('\n'), body.map(sourceText).slice().sort().join('\n'))
-
-  const full = root.textContent ?? ''
-  assert.equal(full.includes(MSA_PANEL_SUMMARY.title), false)
-  assert.equal(full.includes(MSA_PANEL_SUMMARY.lines[0]), false)
-  assert.equal(full.includes('Download a copy'), false)
-
-  const details = document.querySelector('details')
-  assert.ok(details)
-  assert.equal(details.hasAttribute('open'), false)
-  assert.equal(details.querySelector('summary')?.textContent, 'Read the full agreement')
-  assert.equal(details.contains(root), true)
-
-  const link = document.querySelector('a')
-  assert.ok(link)
-  assert.equal(link.getAttribute('href'), PDF_URL)
-  assert.equal(link.getAttribute('target'), '_blank')
-  assert.equal(link.getAttribute('rel'), 'noreferrer')
-  assert.equal(link.textContent, 'Download a copy')
-  assert.equal(root.contains(link), false)
-  assert.equal(details.contains(link), false)
-
-  const summary = document.querySelector('#msa-summary-title')
-  assert.equal(summary?.textContent, MSA_PANEL_SUMMARY.title)
-  const summaryCopy = summary?.parentElement?.textContent ?? ''
-  for (const line of MSA_PANEL_SUMMARY.lines) assert.equal(summaryCopy.includes(line), true)
-  assert.equal(root.contains(summary), false)
-})
-
-test('an agreement without the attribution line renders the source text in order', () => {
-  const body = [
-    block('one', 'First paragraph, unchanged.'),
-    block('two', 'Second paragraph, unchanged.'),
-  ]
-  const html = renderToStaticMarkup(<ProposalMsaPanel body={body} pdfUrl={null} />)
-  const {texts, document} = renderedAgreementTexts(html)
-  assert.deepEqual(texts, body.map(sourceText))
-  assert.equal(document.querySelector('a'), null)
+  for (const child of full.children) walk(child)
+  assert.deepEqual(texts, ['First paragraph, unchanged.', 'Second paragraph, unchanged.'])
+  assert.equal(full.textContent?.includes(ATTRIBUTION), false)
+  assert.equal(document.querySelector('[data-msa-attribution]')?.textContent, ATTRIBUTION)
 })
