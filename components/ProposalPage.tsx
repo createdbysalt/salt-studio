@@ -13,6 +13,7 @@ import {ProposalSituationIcon} from '@/components/ProposalSituationIcon'
 import {SiteFooter} from '@/components/SiteFooter'
 import type {PaymentMethod, PaymentStatus} from '@/lib/proposal/acceptances'
 import {INVESTMENT_INTRO, PACKAGES_INTRO} from '@/lib/proposal/copy'
+import {proposalEyebrowClass} from '@/lib/proposal/eyebrow'
 import {
   chooseOneGroupKey,
   discountedAmount,
@@ -419,9 +420,7 @@ function Situation({section}: {section: Extract<Section, {_type: 'proposalSituat
   return (
     <section className="flex min-h-dvh w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-32 md:px-[max(4.5rem,var(--spacing-gutter))] lg:py-40">
       <header>
-        <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-          What we heard
-        </p>
+        <p className={proposalEyebrowClass}>What we heard</p>
         {problem ? (
           <h2 className="mt-3 max-w-[9em] text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
             {problem}
@@ -743,9 +742,7 @@ function Investment({
   return (
     <section className="w-full px-[max(3.5rem,var(--spacing-gutter))] pt-16 pb-24 md:px-[max(4.5rem,var(--spacing-gutter))] lg:pt-24 lg:pb-32">
       <header className="mx-auto max-w-[40rem] text-center">
-        <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-          Accept & Sign
-        </p>
+        <p className={proposalEyebrowClass}>Accept & Sign</p>
         <h2 className="mx-auto mt-3 max-w-[9em] text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
           We can't wait to work together.
         </h2>

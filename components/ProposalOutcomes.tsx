@@ -1,5 +1,6 @@
 'use client'
 
+import {proposalEyebrowClass} from '@/lib/proposal/eyebrow'
 import {useEffect, useRef, useState, type CSSProperties} from 'react'
 
 export type ProposalOutcomeItem = {
@@ -445,9 +446,7 @@ function GoalCopy({
 }) {
   return (
     <div>
-      <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-        How Salt comes in
-      </p>
+      <p className={proposalEyebrowClass}>How Salt comes in</p>
       {heading ? (
         <h2 className="mt-3 max-w-[7em] text-[clamp(2.6rem,5.2vw,4.5rem)] font-normal leading-[0.92] tracking-[-0.05em]">
           {heading}

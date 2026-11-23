@@ -34,6 +34,9 @@ const addOnLabelClass =
 const rowClass =
   'flex items-center justify-between gap-4 rounded-[20px] border border-white/70 bg-[rgba(228,228,228,0.72)] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] backdrop-blur-[24px]'
 
+/** Below `sm` the price drops under the name so a long name can wrap in the row. */
+const choiceRowClass = `${rowClass} max-sm:flex-col max-sm:items-stretch max-sm:gap-y-2`
+
 /**
  * Package and add-on rows with the running total. The total is
  * `quoteSelection` on the inputs the server resolved, the same function
@@ -92,13 +95,17 @@ export function ProposalChoices({
     visit(selection.current.packageId, nextId ? [...without, nextId] : without)
   }
 
-  function renderAddOnFieldset(block: AddOnChoiceBlock<AddOnChoice>) {
+  function renderAddOnFieldset(
+    block: AddOnChoiceBlock<AddOnChoice>,
+    options?: {omitSelectAny?: boolean},
+  ) {
     const key = choiceBlockKey(block)
+    const omitSelectAny = options?.omitSelectAny === true
     if (block.kind === 'checks') {
       return (
         <fieldset key={key}>
-          <legend className={addOnLabelClass}>Select any add-ons</legend>
-          <div className="mt-3 grid gap-3">
+          {omitSelectAny ? null : <legend className={addOnLabelClass}>Select any add-ons</legend>}
+          <div className={omitSelectAny ? 'grid gap-3' : 'mt-3 grid gap-3'}>
             {block.items.map((addOn) => {
               const selected = currentAddOns.includes(addOn.id)
               const next = selected
@@ -238,11 +245,15 @@ export function ProposalChoices({
         ) : null}
 
         {addOnSections.map((section, index) => {
-          const blocks = section.blocks.map((block) => renderAddOnFieldset(block))
+          const blocks = section.blocks.map((block) =>
+            renderAddOnFieldset(block, {omitSelectAny: section.label != null}),
+          )
           if (section.label == null) return <Fragment key={`addons-${index}`}>{blocks}</Fragment>
           return (
             <div key={`${section.label}-${index}`} className="grid gap-4">
-              <p className={addOnLabelClass}>{section.label}</p>
+              <p className="text-[1.15rem] font-medium tracking-[-0.02em] text-[#08090a]">
+                {section.label}
+              </p>
               {blocks}
             </div>
           )
@@ -312,7 +323,7 @@ function ChoiceRow({
         event.preventDefault()
         onSelect()
       }}
-      className={rowClass}
+      className={choiceRowClass}
     >
       <span className="flex min-w-0 items-center gap-3">
         <span
@@ -329,9 +340,13 @@ function ChoiceRow({
             {shape === 'check' ? '✓' : null}
           </span>
         </span>
-        <span className="text-[1.15rem] font-medium tracking-[-0.02em]">{name}</span>
+        <span className="min-w-0 text-[1.15rem] font-medium tracking-[-0.02em]">{name}</span>
       </span>
-      {price ? <span className="shrink-0 font-medium tracking-[-0.03em]">{price}</span> : null}
+      {price ? (
+        <span className="shrink-0 font-medium tracking-[-0.03em] whitespace-nowrap max-sm:pl-5">
+          {price}
+        </span>
+      ) : null}
     </a>
   )
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import {EASE, gsap} from '@/components/motion/gsap'
+import {proposalEyebrowClass} from '@/lib/proposal/eyebrow'
 import {isVimeoUrl, vimeoBackgroundSrc} from '@/lib/vimeo'
 import {isYouTubeUrl, youtubeBackgroundSrc} from '@/lib/youtube'
 import {ArrowLeft, ArrowRight} from 'lucide-react'
@@ -37,9 +38,7 @@ export function ProposalProof({
     // moves. Tablet and desktop are unchanged.
     <section className="flex min-h-[94dvh] w-full flex-col justify-center px-[max(3.5rem,var(--spacing-gutter))] py-[4.5rem] md:min-h-[88dvh] md:px-[max(4.5rem,var(--spacing-gutter))] md:py-16 lg:min-h-dvh lg:py-32">
       <header>
-        <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-          {eyebrow}
-        </p>
+        <p className={proposalEyebrowClass}>{eyebrow}</p>
         {line ? (
           <h2 className="mt-3 max-w-[9em] text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
             {line}

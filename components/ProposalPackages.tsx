@@ -1,6 +1,7 @@
 import {ProposalSwirlField} from '@/components/ProposalOutcomes'
 import {ProposalScopePanel} from '@/components/ProposalScopePanel'
 import {groupByCategory} from '@/lib/proposal/addOnGroups'
+import {proposalEyebrowClass} from '@/lib/proposal/eyebrow'
 import {PortableText, type PortableTextBlock} from 'next-sanity'
 
 export type ProposalPackageOffer = {
@@ -140,9 +141,7 @@ export function ProposalPackages({
           under the intro instead, so the whole block reads centered. */}
       <header className="flex flex-nowrap items-start justify-center gap-x-4 md:justify-between md:gap-x-6">
         <div className="w-full min-w-0 text-center md:w-auto md:text-left">
-          <p className="font-mono text-[12px] font-medium uppercase tracking-[0.08em] text-[#8f8f8f]">
-            The work
-          </p>
+          <p className={proposalEyebrowClass}>The work</p>
           <h2 className="mt-3 whitespace-nowrap text-[clamp(2.5rem,6.4vw,6rem)] font-normal leading-[0.95] tracking-[-0.05em]">
             {heading}
           </h2>
