@@ -939,10 +939,12 @@ export const proposalByTokenQuery = defineQuery(`
     addOns[]->{
       _id,
       name,
+      cardName,
       line,
       amount,
       billingType,
       chooseOneGroup,
+      category,
       scope,
       deliverables[]{ _key, name, description, phase, acceptanceCriteria },
       outOfScope[]{ _key, text }
@@ -1038,6 +1040,7 @@ export const proposalByIdForLegacyAcceptanceQuery = defineQuery(`
     addOns[]->{
       _id,
       name,
+      cardName,
       line,
       scope
     },
