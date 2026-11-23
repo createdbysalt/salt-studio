@@ -96,6 +96,41 @@ test('picked add-ons stack in order and leave when they are not picked', () => {
   assert.match(cleared.body.textContent ?? '', /What we need from you/)
 })
 
+test('a one-line scope uses the part title and the scope bullet styling', () => {
+  const document = statement([
+    {
+      name: 'Monthly notes',
+      scope: [block('notes', 'Notes after launch.')],
+      line: 'Notes after launch.',
+    },
+    {
+      name: 'Plan two',
+      scope: [block('plan', 'The middle monthly plan.')],
+      line: '',
+    },
+  ])
+  const packagePart = document.querySelector('[data-sow-part]')
+  const notes = [...document.querySelectorAll('[data-sow-part]')].find(
+    (node) => node.textContent === 'Monthly notes',
+  )
+  const plan = [...document.querySelectorAll('[data-sow-part]')].find(
+    (node) => node.textContent === 'Plan two',
+  )
+  assert.equal(notes?.className, packagePart?.className)
+  assert.equal(plan?.className, packagePart?.className)
+  assert.equal(notes?.closest('div')?.className.includes('text-[1.5rem]'), false)
+  const notesLine = [...document.querySelectorAll('li')].find(
+    (node) => node.textContent === 'Notes after launch.',
+  )
+  const planLine = [...document.querySelectorAll('li')].find(
+    (node) => node.textContent === 'The middle monthly plan.',
+  )
+  assert.equal(notesLine?.closest('div')?.className, proposalScopeCopyClass)
+  assert.equal(planLine?.closest('div')?.className, proposalScopeCopyClass)
+  assert.match(proposalScopeCopyClass, /\[&_ul\+p\]:mt-4/)
+  assert.match(proposalScopeCopyClass, /\[&_h3\]:text-\[1\.5rem\]/)
+})
+
 test('a scope with no portable text falls back to its lines', () => {
   const html = renderToStaticMarkup(
     createElement(ProposalScopeCopy, {blocks: [], items: ['Notes after launch.']}),

@@ -197,8 +197,10 @@ function flow(blocks: PdfBlock[], pages: Page[], startY: number, freshPage: bool
       block.kind === 'bullet'
         ? wrap(`${block.marker} ${block.text}`, style.size, width, false)
         : wrap(block.text, style.size, width, style.font === 'F2')
+    const previous = index > 0 ? blocks[index - 1]?.kind : null
+    const gap = block.kind === 'paragraph' && previous === 'bullet' ? 14 : style.gapBefore
     lines.forEach((line, lineIndex) => {
-      place(line, style, lineIndex === 0 ? style.gapBefore : 0)
+      place(line, style, lineIndex === 0 ? gap : 0)
     })
   })
 }
@@ -246,7 +248,7 @@ function pageStream(page: Page, pageNumber: number, pageCount: number, title: st
   if (page.siteLine) {
     commands.push(
       `${num(MUTED)} g`,
-      `BT /F1 9 Tf 1 0 0 1 ${MARGIN_X} 46 Tm (${pdfEscape('Salt Studio LLC. createdbysalt.com')}) Tj ET`,
+      `BT /F1 9 Tf 1 0 0 1 ${MARGIN_X} 46 Tm (${pdfEscape('createdbysalt.com')}) Tj ET`,
     )
   }
   for (const op of page.ops) {
