@@ -11,7 +11,15 @@ const ATTRIBUTION =
 const PDF_URL =
   'https://cdn.sanity.io/files/jkqf2ng5/production/6f2313cdc7b5ac1add256890c572af39b4d9dc27.pdf'
 
-const STANDARDS_SENTENCE = `${MSA_PANEL_SUMMARY.standardsBefore}${MSA_PANEL_SUMMARY.standardsUrl}${MSA_PANEL_SUMMARY.standardsAfter}`
+const SUMMARY_LINES = [
+  "This project runs on our Master Services Agreement, which uses Common Paper's standard Professional Services Agreement (Version 1.1).",
+  "The Statement of Work in this proposal covers what we'll do, the price, the timeline and payments.",
+  'You accept both together on the acceptance form. The agreement starts the day you accept.',
+  'The full agreement is in the PDF. This summary is just for convenience. The agreement is what counts.',
+]
+
+const NOTE =
+  'Your legal name, address and acceptance date are added to your signed Statement of Work, which we email you after you accept.'
 
 function block(
   key: string,
@@ -28,12 +36,7 @@ function block(
   } as PortableTextBlock
 }
 
-function sourceText(value: PortableTextBlock) {
-  const children = (value as {children?: Array<{text?: string}>}).children ?? []
-  return children.map((child) => child.text ?? '').join('')
-}
-
-test('the summary points at the agreement pdf and keeps the attribution byte for byte', () => {
+test('the summary points at the agreement pdf and leaves the attribution in the file', () => {
   const body = [
     block('cover', 'Cover Page', {style: 'h3'}),
     block('provider', 'Salt Studio LLC, trading as SALT Studio'),
@@ -43,8 +46,15 @@ test('the summary points at the agreement pdf and keeps the attribution byte for
   const html = renderToStaticMarkup(<ProposalMsaPanel body={body} pdfUrl={PDF_URL} />)
   const document = new JSDOM(html).window.document
 
+  assert.equal(MSA_PANEL_SUMMARY.title, "What you're agreeing to")
+  assert.deepEqual([...MSA_PANEL_SUMMARY.lines], SUMMARY_LINES)
+  assert.equal(MSA_PANEL_SUMMARY.pdfLabel, 'Read the full agreement (PDF)')
+  assert.equal(MSA_PANEL_SUMMARY.note, NOTE)
+
   assert.equal(document.querySelector('details'), null)
   assert.equal(document.querySelector('[data-msa-full]'), null)
+  assert.equal(document.querySelector('[data-msa-attribution]'), null)
+  assert.equal(document.body.textContent?.includes(ATTRIBUTION), false)
   assert.equal(
     document.body.textContent?.includes('Salt Studio LLC, trading as SALT Studio'),
     false,
@@ -54,40 +64,24 @@ test('the summary points at the agreement pdf and keeps the attribution byte for
   assert.equal(document.querySelector('#msa-summary-title')?.textContent, MSA_PANEL_SUMMARY.title)
   const summary = document.querySelector('#msa-summary-title')?.parentElement
   const paragraphs = [...(summary?.querySelectorAll('p') ?? [])].map((node) => node.textContent)
-  assert.deepEqual(paragraphs, [
-    MSA_PANEL_SUMMARY.lines[0],
-    MSA_PANEL_SUMMARY.lines[1],
-    STANDARDS_SENTENCE,
-    MSA_PANEL_SUMMARY.lines[2],
-    MSA_PANEL_SUMMARY.closing,
-  ])
-
-  const standards = summary?.querySelector('a')
-  assert.equal(standards?.textContent, MSA_PANEL_SUMMARY.standardsUrl)
-  assert.equal(standards?.getAttribute('href'), MSA_PANEL_SUMMARY.standardsUrl)
-  assert.equal(standards?.getAttribute('target'), '_blank')
-  assert.equal(standards?.getAttribute('rel'), 'noopener noreferrer')
+  assert.deepEqual(paragraphs, SUMMARY_LINES)
+  assert.equal(summary?.querySelector('a'), null)
 
   const pdf = [...document.querySelectorAll('a')].find(
-    (link) => link.textContent === MSA_PANEL_SUMMARY.pdfLabel,
+    (link) => link.textContent === 'Read the full agreement (PDF)',
   )
   assert.ok(pdf)
   assert.equal(pdf.getAttribute('href'), PDF_URL)
   assert.equal(pdf.getAttribute('target'), '_blank')
   assert.equal(pdf.getAttribute('rel'), 'noopener noreferrer')
   assert.equal(summary?.contains(pdf), false)
-
   assert.equal(
-    [...document.querySelectorAll('p')].some((node) => node.textContent === MSA_PANEL_SUMMARY.note),
+    [...document.querySelectorAll('p')].some((node) => node.textContent === NOTE),
     true,
   )
-
-  const credit = document.querySelector('[data-msa-attribution]')
-  assert.equal(credit?.textContent, ATTRIBUTION)
-  assert.equal(credit?.textContent, sourceText(body[2]))
 })
 
-test('an agreement without a pdf shows the text version and no pdf link', () => {
+test('an agreement without a pdf shows the text version and the attribution', () => {
   const body = [
     block('one', 'First paragraph, unchanged.'),
     block('credit', ATTRIBUTION),

@@ -8,19 +8,13 @@ import {PortableText, type PortableTextBlock} from 'next-sanity'
 export const MSA_PANEL_SUMMARY = {
   title: "What you're agreeing to",
   lines: [
-    'This is the Master Services Agreement behind every Salt Studio project: the Common Paper Professional Services Agreement, Version 1.1, with the Standard Terms unchanged.',
-    'The Statement of Work in this proposal sets the specifics for this project: what we do, the fees, the timeline and the payments.',
-    'You accept this agreement and the Statement of Work together on the proposal acceptance form. The Effective Date is the date you accept.',
+    "This project runs on our Master Services Agreement, which uses Common Paper's standard Professional Services Agreement (Version 1.1).",
+    "The Statement of Work in this proposal covers what we'll do, the price, the timeline and payments.",
+    'You accept both together on the acceptance form. The agreement starts the day you accept.',
+    'The full agreement is in the PDF. This summary is just for convenience. The agreement is what counts.',
   ],
-  standardsBefore:
-    'The Cover Page fills in the key terms for this proposal. The Standard Terms are posted by Common Paper at ',
-  standardsUrl: 'https://commonpaper.com/standards/professional-services-agreement/1.1',
-  standardsAfter:
-    ' and are part of this agreement by reference. Both are in the PDF. Where the Cover Page and the Standard Terms differ, the Cover Page controls.',
-  closing:
-    'This summary is for convenience. The agreement itself, the Cover Page together with the Standard Terms, is what governs.',
   pdfLabel: 'Read the full agreement (PDF)',
-  note: 'Your legal name, address, signer and acceptance date come from the acceptance form when you accept. They appear on the Statement of Work cover and in the confirmation email we both receive.',
+  note: 'Your legal name, address and acceptance date are added to your signed Statement of Work, which we email you after you accept.',
 } as const
 
 /**
@@ -54,9 +48,6 @@ function isAttribution(block: PortableTextBlock) {
 const legalTextClass =
   '[&_h3]:mt-[1.25rem] [&_h3:first-child]:mt-0 [&_h3]:text-[1.0625rem] [&_h3]:font-medium [&_li+li]:mt-1.5 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p+p]:mt-4 [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:marker:text-[#8f8f8f]'
 
-const linkFocus =
-  'rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[#08090a]'
-
 /**
  * The agreement inside the proposal panel. Summary first, then the hosted PDF.
  * Signing, the signed statement, and PDF generation do not read this component.
@@ -83,22 +74,11 @@ export function ProposalMsaPanel({
           {MSA_PANEL_SUMMARY.title}
         </h3>
         <div className="mt-4">
-          <p>{MSA_PANEL_SUMMARY.lines[0]}</p>
-          <p className="mt-3">{MSA_PANEL_SUMMARY.lines[1]}</p>
-          <p className="mt-3">
-            {MSA_PANEL_SUMMARY.standardsBefore}
-            <a
-              href={MSA_PANEL_SUMMARY.standardsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`underline decoration-[#08090a]/50 underline-offset-[3px] hover:decoration-[#08090a] ${linkFocus}`}
-            >
-              {MSA_PANEL_SUMMARY.standardsUrl}
-            </a>
-            {MSA_PANEL_SUMMARY.standardsAfter}
-          </p>
-          <p className="mt-3">{MSA_PANEL_SUMMARY.lines[2]}</p>
-          <p className="mt-3">{MSA_PANEL_SUMMARY.closing}</p>
+          {MSA_PANEL_SUMMARY.lines.map((line) => (
+            <p key={line} className="mt-3 first:mt-0">
+              {line}
+            </p>
+          ))}
         </div>
       </section>
       {pdfUrl ? (
@@ -116,15 +96,17 @@ export function ProposalMsaPanel({
         </div>
       ) : null}
       <p className="mt-3 text-[0.95rem] leading-relaxed text-[#5c5c5c]">{MSA_PANEL_SUMMARY.note}</p>
-      {attribution.map((block) => (
-        <p
-          key={block._key}
-          data-msa-attribution
-          className="mt-6 text-[0.875rem] leading-relaxed text-[#5c5c5c]"
-        >
-          {blockText(block)}
-        </p>
-      ))}
+      {pdfUrl
+        ? null
+        : attribution.map((block) => (
+            <p
+              key={block._key}
+              data-msa-attribution
+              className="mt-6 text-[0.875rem] leading-relaxed text-[#5c5c5c]"
+            >
+              {blockText(block)}
+            </p>
+          ))}
     </div>
   )
 }
