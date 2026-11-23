@@ -281,7 +281,8 @@ function AddOnGroup({
               aria-hidden
               className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.4),transparent_42%)]"
             />
-            <div className="relative flex flex-row items-start justify-between gap-3">
+            {/* Below `sm` the price drops under the name, same as a choice row. */}
+            <div className="relative flex flex-row items-start justify-between gap-3 max-sm:flex-col max-sm:items-stretch">
               <div className="min-w-0">
                 <p className="text-[1.15rem] font-medium leading-snug tracking-[-0.03em] md:text-[1.5rem]">
                   {addOn.name}
@@ -293,7 +294,7 @@ function AddOnGroup({
                 ) : null}
               </div>
               {addOn.price ? (
-                <p className="shrink-0 text-right text-[1.15rem] font-medium leading-tight tracking-[-0.04em] md:pt-1 md:text-[1.35rem]">
+                <p className="shrink-0 text-right text-[1.15rem] font-medium leading-tight tracking-[-0.04em] max-sm:text-left max-sm:whitespace-nowrap md:pt-1 md:text-[1.35rem]">
                   {addOn.price}
                 </p>
               ) : null}
