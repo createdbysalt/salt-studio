@@ -2,7 +2,10 @@
 
 import {submitDynamicQuiz, type DynamicQuizSubmissionInput} from '@/app/actions/dynamicQuiz'
 import {DynamicQuizResults} from '@/components/DynamicQuizResults'
+import {GrowthQuizResults} from '@/components/GrowthQuizResults'
 import {trackQuizComplete, trackQuizGate, trackQuizStart, trackQuizStep} from '@/lib/analytics'
+import {GROWTH_QUIZ_SLUG} from '@/lib/growth/config'
+import {growthAsDynamicResult} from '@/lib/growth/scoring'
 import {
   questionAnswerKey,
   scoreDynamicQuiz,
@@ -28,6 +31,8 @@ type DynamicQuizFlowProps = {
 export function DynamicQuizFlow({quiz}: DynamicQuizFlowProps) {
   const quizName = stegaClean(quiz.slug ?? 'quiz')
   const questions = quiz.questions ?? []
+  // The Business Growth Analysis scores by stage and ends on its own results screen.
+  const isGrowth = quizName === GROWTH_QUIZ_SLUG
 
   const [phase, setPhase] = useState<Phase>('intro')
   const [stepIndex, setStepIndex] = useState(0)
@@ -140,7 +145,9 @@ export function DynamicQuizFlow({quiz}: DynamicQuizFlowProps) {
       return
     }
 
-    const computed = scoreDynamicQuiz(quiz, answers)
+    const computed = isGrowth
+      ? growthAsDynamicResult(quiz, answers)
+      : scoreDynamicQuiz(quiz, answers)
     trackQuizComplete({
       quiz_name: quizName,
       track: 'service',
@@ -342,18 +349,20 @@ export function DynamicQuizFlow({quiz}: DynamicQuizFlowProps) {
               placeholder="you@yourbusiness.com"
               className="w-full rounded-lg border border-foreground/15 bg-surface px-4 py-3 text-base text-foreground placeholder:text-foreground/40 focus:border-foreground/40 focus:outline-none"
             />
-            <label className="mt-4 flex cursor-pointer items-start gap-3 text-[0.9375rem] leading-relaxed text-foreground/70">
-              <input
-                type="checkbox"
-                checked={waitlistOptIn}
-                onChange={(e) => setWaitlistOptIn(e.target.checked)}
-                className="mt-1 h-4 w-4 accent-accent"
-              />
-              <span>
-                {quiz.waitlistLabel ||
-                  'Keep me posted on Salt — the tool we’re building that does this work for you.'}
-              </span>
-            </label>
+            {!isGrowth && (
+              <label className="mt-4 flex cursor-pointer items-start gap-3 text-[0.9375rem] leading-relaxed text-foreground/70">
+                <input
+                  type="checkbox"
+                  checked={waitlistOptIn}
+                  onChange={(e) => setWaitlistOptIn(e.target.checked)}
+                  className="mt-1 h-4 w-4 accent-accent"
+                />
+                <span>
+                  {quiz.waitlistLabel ||
+                    'Keep me posted on Salt — the tool we’re building that does this work for you.'}
+                </span>
+              </label>
+            )}
             {gateError && (
               <p className="mt-4 text-sm leading-relaxed text-error" role="alert">
                 {gateError}
@@ -387,7 +396,11 @@ export function DynamicQuizFlow({quiz}: DynamicQuizFlowProps) {
         </div>
       )}
 
-      {phase === 'results' && result && (
+      {phase === 'results' && result && isGrowth && (
+        <GrowthQuizResults quiz={quiz} answers={answers} email={email} source={source.current} />
+      )}
+
+      {phase === 'results' && result && !isGrowth && (
         <DynamicQuizResults
           quiz={quiz}
           result={result}

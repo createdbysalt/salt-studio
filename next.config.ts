@@ -7,6 +7,8 @@ const config: NextConfig = {
       // No public /rentals hub — three rental pages only.
       {source: '/rentals', destination: '/rentals/studio', permanent: false},
       {source: '/table/:slug', destination: '/project/:slug', permanent: false},
+      // Short link for the Black Friday ads and videos. Query strings (UTMs) carry over.
+      {source: '/growth-analysis', destination: '/quiz/growth-analysis', permanent: false},
     ]
   },
   images: {

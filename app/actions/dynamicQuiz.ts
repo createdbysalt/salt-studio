@@ -1,5 +1,7 @@
 'use server'
 
+import {GROWTH_QUIZ_SLUG} from '@/lib/growth/config'
+import {growthAsDynamicResult} from '@/lib/growth/scoring'
 import {answerLabel, questionAnswerKey, scoreDynamicQuiz} from '@/lib/quiz/dynamic'
 import {apiVersion, dataset, projectId} from '@/sanity/lib/api'
 import {quizBySlugQuery} from '@/sanity/lib/queries'
@@ -101,7 +103,11 @@ export async function submitDynamicQuiz(
       }
     }
 
-    const result = scoreDynamicQuiz(quiz, answers)
+    // The Business Growth Analysis scores by stage. Every other quiz adds points up.
+    const result =
+      slug === GROWTH_QUIZ_SLUG
+        ? growthAsDynamicResult(quiz, answers)
+        : scoreDynamicQuiz(quiz, answers)
     const submittedAt = new Date().toISOString()
     const source = sanitizeSource(input.source)
 

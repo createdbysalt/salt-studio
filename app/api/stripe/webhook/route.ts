@@ -1,3 +1,4 @@
+import {handleGrowthCheckoutEvent, isGrowthSession} from '@/lib/growth/fulfillment'
 import {expireOtherSessions} from '@/lib/payments/sessions'
 import {getStripe, stripeIsLive, stripeWebhookSecret} from '@/lib/payments/stripe'
 import {
@@ -12,10 +13,12 @@ import {sendPaidProposalEmailsForPayment} from '@/lib/proposal/paidEmails'
 import {receiptUrlForPayment, receiptUrlForPaymentIntent} from '@/lib/proposal/stripeReceipt'
 import {apiVersion, dataset, projectId} from '@/sanity/lib/api'
 import {createClient} from 'next-sanity'
-import {NextResponse} from 'next/server'
+import {after, NextResponse} from 'next/server'
 import type Stripe from 'stripe'
 
 export const runtime = 'nodejs'
+// Room for a growth report to be written after the response has gone out.
+export const maxDuration = 300
 
 const HANDLED: ReadonlySet<string> = new Set<CheckoutEventKind>([
   'checkout.session.completed',
@@ -85,6 +88,16 @@ export async function POST(request: Request) {
   if (!HANDLED.has(event.type)) return json(200, {ok: true, ignored: event.type})
 
   const session = event.data.object as Stripe.Checkout.Session
+
+  // Business Growth Analysis purchases ($25 report, $1,000 Diagnostic) are
+  // marked by metadata and have their own rows. The slow part, writing the
+  // report, runs after Stripe has its answer.
+  if (isGrowthSession(session)) {
+    const outcome = await handleGrowthCheckoutEvent(event, session, stripeIsLive())
+    if (outcome.followUp) after(outcome.followUp)
+    return json(outcome.status, outcome.body)
+  }
+
   const payment = await findPaymentBySessionId(session.id)
   if (!payment) {
     // Not one of ours. Acknowledge so Stripe stops retrying, and leave a trace.
